@@ -1,10 +1,10 @@
 # Operations
 
-This document explains the operational pieces of the repository: local Docker services, deployment compose files, Forgejo platform setup, release jobs, deploy jobs, and the current secret model.
+This document explains the operational pieces of the repository: local Docker services, deployment compose files, build metadata, and the current manual deploy model.
 
 ## 1. Operational Layers
 
-There are three different operational scopes in the repository:
+There are two operational scopes in the repository:
 
 ### Local development infra
 
@@ -16,6 +16,7 @@ Services:
 
 - PostgreSQL
 - Redis
+- pgAdmin
 
 ### Application deployment stack
 
@@ -33,22 +34,6 @@ Services:
 - Redis
 - backend app container
 - frontend app container
-
-### Self-hosted platform stack
-
-Used to run the repository platform itself:
-
-- `ops/platform/forgejo/docker-compose.yml`
-- `ops/platform/forgejo/.env.example`
-- `ops/platform/forgejo/Caddyfile`
-
-Services:
-
-- Forgejo
-- Forgejo runner
-- PostgreSQL for Forgejo
-- Caddy
-- Docker-in-Docker for runner builds
 
 ## 2. Local Development Infra
 
@@ -69,8 +54,11 @@ This stack is intentionally small. It exists to support:
 - backend environment compatibility
 - Atlas local usage
 - future DB-backed feature development
+- visual database inspection through pgAdmin at `http://localhost:5050`
 
 It is not the same as the deployment compose stack.
+
+PostgreSQL `18+` now expects the primary volume mount at `/var/lib/postgresql`. The compose files in this repository already follow that layout.
 
 ## 3. Backend Database Readiness
 
@@ -138,6 +126,20 @@ Then open:
 
 The same pattern works for `production.env`, only with different ports.
 
+## 4.1 Which Services Have A UI
+
+Not every container is supposed to be opened in a browser.
+
+### Local development stack
+
+- `postgres`
+  No built-in UI.
+- `redis`
+  No built-in UI.
+- `pgadmin`
+  Yes. This is the browser UI for the local development PostgreSQL service.
+  Open `http://localhost:5050`.
+
 ## 5. Docker Image Model
 
 Both backend and frontend have Dockerfiles:
@@ -165,130 +167,44 @@ The Dockerfiles apply OCI labels so deployed images are traceable to:
 - source repository
 - build timestamp
 
-## 6. Forgejo Workflows
+## 6. Validation And Release Boundary
 
-The repository includes these workflow templates:
+This repository keeps validation and release rules in repository-local commands instead of coupling them to one Git platform.
 
-- `.forgejo/workflows/pr-governance.yml`
-- `.forgejo/workflows/ci-check.yml`
-- `.forgejo/workflows/release-main.yml`
-- `.forgejo/workflows/deploy-staging.yml`
-- `.forgejo/workflows/deploy-production.yml`
-- `.forgejo/workflows/github-mirror.yml`
+The canonical preflight is:
 
-### `pr-governance`
+```bash
+npm run ci:check
+```
 
-Runs on pull request events and checks:
+Useful narrower commands:
 
-- PR title format
-- PR body issue reference
-- branch naming
-- changeset requirement
+```bash
+npm run branch:lint
+npm run pr:title:lint
+npm run pr:body:lint
+npm run changeset:check
+npm run release:dry-run
+```
 
-### `ci-check`
+If external CI/CD is attached later, it should call the same commands instead of inventing a second source of truth.
 
-Runs on pull requests and pushes to `main`.
+## 7. Secrets And Runtime Inputs
 
-It executes:
+Current secret categories:
 
-- `npm ci`
-- Node and Go setup
-- `npm run ci:check`
+- deploy host access
+- deploy image registry auth
+- release publishing tokens if a release provider is used later
 
-### `release-main`
+General rule:
 
-Runs on pushes to `main`.
+- secrets belong in the host environment or external CI secret storage, never in the repository
 
-It:
+## 8. Operational Boundaries
 
-- installs dependencies
-- configures git identity
-- runs `npm run release:ci`
-- creates the release commit and tag
-- publishes a Forgejo release record
-
-### `deploy-staging`
-
-Runs on pushes to `main` and can also be triggered manually.
-
-It:
-
-- calculates build metadata
-- logs into the Forgejo registry
-- builds backend and frontend images
-- pushes those images
-- writes a staging env file at runtime
-- deploys through the compose helper
-- runs a healthcheck URL
-
-### `deploy-production`
-
-Runs only by manual dispatch.
-
-It:
-
-- checks out a specific release tag
-- builds versioned images
-- writes a production env file at runtime
-- deploys through the compose helper
-- runs a production healthcheck URL
-
-This is the manual release gate before production rollout.
-
-### `github-mirror`
-
-Mirrors `main` and release tags to GitHub.
-
-The intended operating model is:
-
-- Forgejo is the main engineering system
-- GitHub is a mirror and optional public presence
-
-## 7. Secrets And Configuration
-
-Exact secret names are documented in [Forgejo Governance](./forgejo-governance.md).
-
-They cover:
-
-- Forgejo release publishing
-- registry authentication
-- staging deploy variables
-- production deploy variables
-- GitHub mirror access
-
-Important operational rule:
-
-- secrets belong in Forgejo or host environment, never in the repository
-
-## 8. Forgejo Platform Bootstrap
-
-The platform template is intentionally Docker-based and lightweight.
-
-Basic bootstrap:
-
-1. copy `ops/platform/forgejo/.env.example` to `.env`
-2. start the stack with docker compose
-3. create the initial admin user
-4. register the runner
-5. assign the expected labels, at minimum `docker` and `deploy`
-6. configure branch protection and required checks manually in Forgejo
-
-See [Forgejo Platform](./forgejo-platform.md) for the bootstrap summary and [Forgejo Governance](./forgejo-governance.md) for the required repo settings.
-
-## 9. Recommended Operational Practices
-
-These are not fully automated by the repo, but should be treated as standard:
-
-- back up Forgejo PostgreSQL and repository storage
-- back up deployment env files and host-level secret configuration
-- rotate tokens used for registry and mirror integration
-- monitor staging and production healthcheck endpoints after deployment
-- keep Docker host disk usage under control because image builds and registry use can grow quickly
-
-## 10. Common Mistakes To Avoid
-
-- confusing local dev infra with the real deploy compose stack
-- assuming the deploy workflow manages secrets automatically
-- deploying production from `main` HEAD without an explicit release tag
-- treating GitHub as the primary governance source once Forgejo is adopted
-- forgetting to set runner labels that match workflow expectations
+- `docker-compose.dev.yml` is only for local developer infrastructure.
+- `ops/deploy/docker-compose.yml` is for app deployment topology.
+- repository collaboration tooling is intentionally kept outside this repository.
+- Atlas describes schema intent, but current chat runtime still does not persist messages.
+- A release tag and runtime `APP_VERSION` are the deployment identity, not the application package versions.

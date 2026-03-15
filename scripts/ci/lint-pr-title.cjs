@@ -5,7 +5,7 @@ const { spawnSync } = require('node:child_process');
 const prTitle = process.env.PR_TITLE || readEventPayload()?.pull_request?.title || '';
 
 if (!prTitle) {
-  console.error('Pull request title is required. Set PR_TITLE or run inside Forgejo Actions.');
+  console.error('Pull request title is required. Set PR_TITLE or provide a CI event payload.');
   process.exit(1);
 }
 

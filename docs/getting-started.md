@@ -11,9 +11,9 @@ The repository contains:
 - a shared integration package in `packages/sdk`
 - a release manifest package in `packages/release`
 - optional local infrastructure through Docker
-- optional self-hosted platform templates for Forgejo and deployment
+- optional app deployment templates through Docker Compose
 
-You do not need the entire platform stack to start feature development. For most product work, the minimal requirement is Node, npm, Go, and the two app env files.
+You do not need any self-hosted Git platform stack to start feature development. For most product work, the minimal requirement is Node, npm, Go, and the two app env files.
 
 ## 2. Required Tool Versions
 
@@ -37,15 +37,6 @@ Useful local consistency files already exist:
 ```bash
 npm install
 ```
-
-This installs workspace dependencies for:
-
-- root tooling
-- frontend app
-- SDK package
-- release tooling
-
-Go dependencies are downloaded automatically when you run backend commands such as `go run`, `go build`, or the wrapped npm scripts inside `apps/backend`.
 
 ### Create environment files
 
@@ -73,8 +64,6 @@ The backend validates these values at boot. If an env value is malformed, the pr
 ```bash
 npm run dev
 ```
-
-This uses Turbo to start workspace development processes in parallel.
 
 ### Run a single app
 
@@ -258,24 +247,3 @@ The backend is fail-fast. Common causes:
 - unsupported `APP_ENV`, `LOG_LEVEL`, or `LOG_FORMAT`
 
 Check [Environment Setup](./environment.md) and verify the env files you copied.
-
-### `npm run contract:generate` fails
-
-The command runs the backend OpenAPI exporter, which loads backend config and validates the simulation directory. Make sure:
-
-- backend env files exist
-- the simulation directory path is still valid
-- the backend compiles
-
-### `npm run test` is slow or noisy
-
-The frontend smoke test starts a Next.js dev server and hits localized routes. That is expected for route coverage.
-
-### Docker commands fail
-
-Make sure the Docker daemon is running before using:
-
-- `npm run infra:up`
-- Atlas commands that rely on Docker
-- deployment compose validation
-- image builds

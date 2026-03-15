@@ -49,8 +49,7 @@ This is acceptable as long as those boundaries remain explicit.
 │   ├── deploy                   # compose deploy helper
 │   └── release                  # release and build metadata scripts
 ├── ops
-│   ├── deploy                   # staging and production compose stack
-│   └── platform/forgejo         # self-hosted Forgejo stack
+│   └── deploy                   # staging and production compose stack
 └── docs
 ```
 
@@ -246,7 +245,6 @@ Supporting pieces:
 - issue link check
 - changeset check for release-worthy changes
 - full CI check
-- Forgejo-based runner execution
 - Docker image metadata export
 - compose-based deploy targets
 
@@ -254,7 +252,7 @@ Supporting pieces:
 
 - product data is not yet fully persistent
 - websocket history is not yet stored in PostgreSQL
-- the app deploy stack is ready, but real production operations still require secret management and Forgejo manual configuration
+- the app deploy stack is ready, but real production operations still require secret management and an external CI or release runner
 - `@changesets/changelog-github` still depends on GitHub mirror metadata for richer changelog links
 
 ## 12. What Should Change Next

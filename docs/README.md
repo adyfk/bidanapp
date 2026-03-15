@@ -1,6 +1,6 @@
 # BidanApp Documentation
 
-This directory is the main engineering handbook for the repository. It explains how the monorepo is structured, how frontend and backend align, how local development works, and how the self-hosted release pipeline is expected to operate.
+This directory is the main engineering handbook for the repository. It explains how the monorepo is structured, how frontend and backend align, how local development works, and how validation and deployment are handled without bundling a self-hosted Git platform stack.
 
 ## Recommended Reading Order
 
@@ -31,22 +31,18 @@ If you are new to the repository, read these documents in order:
 - [Development Workflow](./development-workflow.md)
   Issue-first work, branch naming, Conventional Commits, Changesets, PR rules, release flow, and required local checks.
 - [Operations](./operations.md)
-  Docker, local infra, deploy compose, Forgejo platform, registry, release jobs, and deploy jobs.
+  Docker, local infra, deploy compose, release metadata, and deploy jobs.
 - [Important Knowledge](./important-knowledge.md)
   High-signal rules, common mistakes, non-obvious decisions, and future work boundaries.
 
 ### Supporting references
 
 - [Environment Setup](./environment.md)
-  Detailed environment variable reference for frontend and backend.
+  Detailed environment variable reference for frontend, backend, and deploy templates.
 - [API Contract Alignment](./api-contract.md)
   Concise explanation of backend-generated OpenAPI and generated TypeScript types.
 - [Simulation Data Contract](./simulation-data-contract.md)
   Shape and ownership of the simulation JSON dataset shared by frontend and backend.
-- [Forgejo Governance](./forgejo-governance.md)
-  Required repository settings, labels, branch protection, and secrets.
-- [Forgejo Platform](./forgejo-platform.md)
-  Docker bootstrap notes for the self-hosted Forgejo platform stack.
 
 ## Who Should Read What
 
@@ -76,9 +72,7 @@ Start with:
 
 1. [Development Workflow](./development-workflow.md)
 2. [Operations](./operations.md)
-3. [Forgejo Governance](./forgejo-governance.md)
-4. [Forgejo Platform](./forgejo-platform.md)
-5. [Environment Setup](./environment.md)
+3. [Environment Setup](./environment.md)
 
 ## Core Principles In This Repository
 
@@ -87,7 +81,7 @@ Start with:
 - OpenAPI is generated from backend code, never hand-written as the primary source.
 - Websocket handshake belongs in OpenAPI; websocket frame types belong in the SDK.
 - Route building should stay aligned with `@/i18n/routing` and route helpers, not hardcoded localized strings.
-- Release governance is server-side. Local hooks help, but Forgejo checks are the real gate.
+- Local preflight is the default gate. External CI can be attached later, but it should reuse the same repository commands.
 - The current system is intentionally in transition from simulation-backed data toward persistent storage. Documentation should state that clearly instead of pretending the migration is complete.
 
 ## How To Maintain These Docs

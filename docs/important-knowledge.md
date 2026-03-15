@@ -158,16 +158,14 @@ Reasons:
 
 Do not remove or hand-edit them casually.
 
-## 12. Forgejo Is Intended To Be The Main Engineering System
+## 12. Validation Is Local-First And CI-Agnostic
 
-Planned operating model:
+Current operating model:
 
-- issues and PR governance in Forgejo
-- checks executed by Forgejo runners
-- releases published by Forgejo workflows
-- GitHub used only as a mirror
-
-Some current release notes still use GitHub metadata through `@changesets/changelog-github`. That is a temporary compromise, not the long-term governance center.
+- local commands are the source of truth for validation
+- external CI is optional and should reuse those same commands
+- heavy self-hosted Git platform infrastructure is intentionally not bundled in the repo anymore
+- Codex can use `.codex/skills/bidanapp-preflight` to decide which checks are required before commit or PR
 
 ## 13. Quick Checklists
 
@@ -197,7 +195,7 @@ Some current release notes still use GitHub metadata through `@changesets/change
 
 - "If the backend has an endpoint, the data must already come from the database."
 - "If OpenAPI exists, frontend can skip the SDK layer."
-- "If local hooks pass, the PR governance is satisfied."
+- "If local hooks pass, full preflight is complete."
 - "If a package has a version field, it is the product release source of truth."
 - "If Redis is in compose, the application must already depend on it."
 

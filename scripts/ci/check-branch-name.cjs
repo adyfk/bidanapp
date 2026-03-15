@@ -10,7 +10,7 @@ const branchName =
   '';
 
 if (!branchName) {
-  console.error('Branch name is required. Set BRANCH_NAME or run inside Forgejo Actions.');
+  console.error('Branch name is required. Set BRANCH_NAME or provide a CI event payload.');
   process.exit(1);
 }
 

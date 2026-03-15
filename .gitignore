@@ -34,10 +34,6 @@ apps/backend/api
 .vscode
 *.pem
 *.log
-ops/platform/forgejo/data/
-ops/platform/forgejo/postgres/
-ops/platform/forgejo/runner/
-ops/platform/forgejo/caddy/
 
 # debug
 npm-debug.log*

@@ -1,6 +1,6 @@
 # Development Workflow
 
-This document defines the expected engineering workflow for day-to-day changes, PR governance, release behavior, and CI/CD alignment.
+This document defines the expected engineering workflow for day-to-day changes, PR governance, release behavior, and local validation.
 
 ## 1. Workflow Principles
 
@@ -11,18 +11,13 @@ The repository follows these principles:
 - Conventional Commit based PR titles
 - squash-only merge to `main`
 - Changesets for release-worthy change tracking
-- server-side checks in Forgejo as the real gate
+- local preflight checks as the default gate
 
-Local tooling helps, but merge safety depends on the repository checks, not on developer habit alone.
+The repository intentionally stays CI-agnostic. If you attach GitHub, GitLab, Buildkite, or another CI later, it should run the same local commands documented here.
 
 ## 2. Issue-First Workflow
 
 Every meaningful change should be tracked by an issue before the branch is created.
-
-Issue templates already exist for:
-
-- features
-- bugs
 
 The issue should define at least:
 
@@ -45,7 +40,7 @@ Examples:
 - `fix/212-invalid-slug-sanitization`
 - `chore/301-docs-refresh`
 
-Branch names are checked by `npm run branch:lint` and by the Forgejo `branch-name-check` job.
+Branch names are checked by `npm run branch:lint`.
 
 ## 4. Commit Authoring
 
@@ -71,8 +66,8 @@ Current local hooks:
 Important nuance:
 
 - commit messages are validated locally
-- PR title is also validated server-side
-- because the merge strategy is squash-only, the PR title is the most important message for release semantics
+- PR titles should still follow Conventional Commits
+- if your Git host supports squash-only merge, the PR title remains the most important message for release semantics
 
 ## 5. PR Title Rules
 
@@ -106,8 +101,6 @@ The PR title gate runs through:
 npm run pr:title:lint
 ```
 
-and the Forgejo `pr-title-lint` job.
-
 ## 6. PR Body Rules
 
 Every PR body must include an issue reference:
@@ -115,23 +108,11 @@ Every PR body must include an issue reference:
 - `Closes #123`
 - `Refs #123`
 
-The PR template already includes fields for:
-
-- issue reference
-- scope
-- risk level
-- changes
-- release notes
-- test evidence
-- rollout notes
-
 The PR body gate runs through:
 
 ```bash
 npm run pr:body:lint
 ```
-
-and the Forgejo `issue-link-check` job.
 
 ## 7. Changeset Rules
 
@@ -211,35 +192,9 @@ npm run changeset:check
 npm run release:dry-run
 ```
 
-## 10. Forgejo Checks
+If you want Codex to choose the minimum required checks for you, use the repo-local skill at `.codex/skills/bidanapp-preflight`.
 
-The intended required checks on `main` are:
-
-- `branch-name-check`
-- `changeset-check`
-- `pr-title-lint`
-- `issue-link-check`
-- `ci-check`
-
-These are defined through workflows in `.forgejo/workflows`.
-
-Repository admins still need to enforce branch protection and squash-only merge settings manually in Forgejo.
-
-## 11. Release And Deploy Flow
-
-After a PR merges into `main`:
-
-1. CI runs on `main`
-2. release job runs Changesets release automation
-3. the release job commits the release manifest and changelog update
-4. the release job creates tag `vX.Y.Z`
-5. the release job publishes a Forgejo release record
-6. staging deploy builds images and rolls out automatically
-7. production deploy is manual through workflow dispatch with an explicit release tag
-
-GitHub is treated as a mirror, not the main source of issue, PR, or board truth.
-
-## 12. Recommended Day-To-Day Flow
+## 10. Recommended Day-To-Day Flow
 
 1. create or confirm the issue
 2. create a branch that passes branch lint
@@ -249,11 +204,18 @@ GitHub is treated as a mirror, not the main source of issue, PR, or board truth.
 6. open a PR with a valid title and issue reference
 7. merge with squash only
 
-## 13. Common Mistakes To Avoid
+## 11. Release And Deploy Notes
+
+- Changesets remain the release manifest source for this repo.
+- `packages/release/package.json` is still the working manifest that records the next product version.
+- `vX.Y.Z`, `APP_VERSION`, `NEXT_PUBLIC_APP_VERSION`, and image metadata remain the deploy-facing version identity.
+- Actual tagging, publishing, and CI execution are intentionally not locked to a specific Git platform anymore.
+
+## 12. Common Mistakes To Avoid
 
 - opening a release-worthy PR without a changeset
 - using a vague PR title that does not follow Conventional Commits
 - skipping issue linkage in the PR body
 - pushing directly to `main`
 - treating app `package.json` versions as the release source of truth
-- forgetting that server-side checks, not local hooks, are the actual governance gate
+- assuming a pre-commit hook is enough when `npm run ci:check` has not been run

@@ -87,17 +87,17 @@ function extractReleaseNotes(version) {
   return (nextHeader === -1 ? afterStart : afterStart.slice(0, nextHeader)).trim();
 }
 
-async function publishForgejoRelease({ gitHead, notes, tag, version }) {
-  const token = process.env.FORGEJO_TOKEN || process.env.GITHUB_TOKEN;
+async function publishReleaseRecord({ gitHead, notes, tag, version }) {
+  const token = process.env.GITHUB_TOKEN;
   const repository = process.env.GITHUB_REPOSITORY;
-  const serverUrl = process.env.FORGEJO_SERVER_URL || process.env.GITHUB_SERVER_URL;
+  const serverUrl = process.env.GITHUB_SERVER_URL;
 
   if (!token) {
-    throw new Error('FORGEJO_TOKEN or GITHUB_TOKEN is required to publish a release.');
+    throw new Error('GITHUB_TOKEN is required to publish a release.');
   }
 
   if (!repository || !serverUrl) {
-    throw new Error('GITHUB_REPOSITORY and GITHUB_SERVER_URL or FORGEJO_SERVER_URL are required to publish a release.');
+    throw new Error('GITHUB_REPOSITORY and GITHUB_SERVER_URL are required to publish a release.');
   }
 
   const response = await fetch(`${serverUrl.replace(/\/$/, '')}/api/v1/repos/${repository}/releases`, {
@@ -117,7 +117,7 @@ async function publishForgejoRelease({ gitHead, notes, tag, version }) {
   });
 
   if (!response.ok && response.status !== 409) {
-    throw new Error(`Forgejo release publish failed with status ${response.status}: ${await response.text()}`);
+    throw new Error(`Release publish failed with status ${response.status}: ${await response.text()}`);
   }
 
   const url =
@@ -174,7 +174,7 @@ async function main() {
   run(bin('changeset'), ['version'], {
     env: {
       ...process.env,
-      GITHUB_TOKEN: process.env.GITHUB_TOKEN || process.env.FORGEJO_TOKEN || '',
+      GITHUB_TOKEN: process.env.GITHUB_TOKEN || '',
     },
   });
 
@@ -201,7 +201,7 @@ async function main() {
   run('git', ['push', 'origin', tag]);
 
   const gitHead = run('git', ['rev-parse', 'HEAD'], { captureOutput: true }).stdout.trim();
-  const releaseUrl = await publishForgejoRelease({ gitHead, notes, tag, version });
+  const releaseUrl = await publishReleaseRecord({ gitHead, notes, tag, version });
 
   console.log(`Published release ${tag}: ${releaseUrl}`);
 }

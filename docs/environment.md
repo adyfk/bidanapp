@@ -11,7 +11,6 @@ This monorepo uses app-scoped environment files so frontend and backend can evol
 
 - `apps/frontend/.env.local`
 - `apps/backend/.env`
-- `ops/platform/forgejo/.env`
 - `ops/deploy/staging.env`
 - `ops/deploy/production.env`
 
@@ -20,7 +19,6 @@ Start by copying the checked-in examples:
 ```bash
 cp apps/frontend/.env.example apps/frontend/.env.local
 cp apps/backend/.env.example apps/backend/.env
-cp ops/platform/forgejo/.env.example ops/platform/forgejo/.env
 cp ops/deploy/staging.env.example ops/deploy/staging.env
 cp ops/deploy/production.env.example ops/deploy/production.env
 ```
@@ -73,7 +71,7 @@ The repository includes two deployment env templates:
 - `ops/deploy/staging.env.example`
 - `ops/deploy/production.env.example`
 
-These templates are now local-friendly by default so you can copy them and use them for manual Docker deployment smoke tests.
+These templates are local-friendly by default so you can copy them and use them for manual Docker deployment smoke tests.
 
 ### Shared deploy variables
 
@@ -105,34 +103,6 @@ After copying one of the deploy env templates:
 sh ./scripts/deploy/build-images.sh ops/deploy/staging.env
 sh ./scripts/deploy/deploy.sh staging ops/deploy/staging.env
 ```
-
-This flow is local-only and uses Docker images tagged by the env file, not the Forgejo registry.
-
-## Forgejo Platform Template
-
-The Forgejo stack env template lives at:
-
-- `ops/platform/forgejo/.env.example`
-
-### Forgejo platform variables
-
-| Variable | Required | Purpose | Default |
-| --- | --- | --- | --- |
-| `FORGEJO_DOMAIN` | Yes | External domain used by Forgejo and Caddy | `localhost` |
-| `FORGEJO_ROOT_URL` | Yes | Public Forgejo URL, including protocol and optional port | `https://localhost:8443/` |
-| `FORGEJO_PUBLIC_HTTP_PORT` | Yes | Host port mapped to Caddy port `80` | `8088` |
-| `FORGEJO_PUBLIC_HTTPS_PORT` | Yes | Host port mapped to Caddy port `443` | `8443` |
-| `FORGEJO_DB_NAME` | Yes | Forgejo PostgreSQL database name | `forgejo` |
-| `FORGEJO_DB_USER` | Yes | Forgejo PostgreSQL username | `forgejo` |
-| `FORGEJO_DB_PASSWORD` | Yes | Forgejo PostgreSQL password | `change-me` |
-| `FORGEJO_DISABLE_REGISTRATION` | Yes | Whether public user self-registration is disabled | `true` |
-| `FORGEJO_ADMIN_USERNAME` | Yes for bootstrap command | Admin username used in the documented bootstrap command | `admin` |
-| `FORGEJO_ADMIN_PASSWORD` | Yes for bootstrap command | Admin password used in the documented bootstrap command | `change-me-now` |
-| `FORGEJO_ADMIN_EMAIL` | Yes for bootstrap command | Admin email used in the documented bootstrap command | `admin@localhost` |
-| `FORGEJO_RUNNER_NAME` | Yes for bootstrap command | Suggested runner name for manual runner registration | `bidanapp-runner` |
-| `FORGEJO_RUNNER_LABELS` | Yes for bootstrap command | Suggested runner labels for manual registration | `docker,deploy` |
-
-These bootstrap-only variables are safe to keep in the env example because Docker Compose ignores unused keys, while the documented admin and runner commands can still read them.
 
 ## Recommended Workflow
 
