@@ -1,10 +1,10 @@
 import React from 'react';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
-import { COLORS } from '@/lib/constants';
+import { APP_CONFIG } from '@/lib/config';
 
 export const OnboardingScreen = () => (
-  <div className="flex flex-col h-full text-white relative overflow-hidden" style={{ backgroundColor: COLORS.primary }}>
+  <div className="flex flex-col h-full text-white relative overflow-hidden" style={{ backgroundColor: APP_CONFIG.colors.primary }}>
     {/* Dekorasi Background */}
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
       <div className="absolute top-[10%] -left-[20%] w-[140%] h-[40%] bg-white/10 rounded-[100%] rotate-[-10deg]"></div>
@@ -13,10 +13,10 @@ export const OnboardingScreen = () => (
 
     <div className="flex-1 flex flex-col items-center justify-start pt-24 px-8 z-10 text-center relative">
       <h1 className="text-[32px] font-bold leading-[1.2] mb-4 drop-shadow-sm">
-        Easy Consultation With A<br />Doctor In Your Pocket
+        {APP_CONFIG.appName}
       </h1>
       <p className="text-white/80 text-[15px] mb-10 font-medium">
-        Say yes to your good health!
+        {APP_CONFIG.seoDescription}
       </p>
       <Link
         href="/home"
