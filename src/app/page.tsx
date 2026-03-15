@@ -1,7 +1,5 @@
-export default function Home() {
-  return (
-    <main>
-      <div>Hello world!</div>
-    </main>
-  );
+import { OnboardingScreen } from '@/components/screens/OnboardingScreen';
+
+export default function LandingPage() {
+  return <OnboardingScreen />;
 }
