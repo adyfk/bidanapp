@@ -1,9 +1,11 @@
 import React from 'react';
 import { Link } from '@/i18n/routing';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 import { APP_CONFIG } from '@/lib/config';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
+import { SIMULATION_MEDIA } from '@/lib/constants';
 
 export const OnboardingScreen = () => {
   const t = useTranslations('Onboarding');
@@ -36,11 +38,12 @@ export const OnboardingScreen = () => {
       </Link>
     </div>
 
-    <div className="relative h-[55%] flex justify-center items-end z-10">
-      <img
-        src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=1000&auto=format&fit=crop"
-        alt="Doctor"
-        className="h-full object-cover object-top drop-shadow-2xl"
+    <div className="relative h-[55%] flex justify-center items-end z-10 w-full max-w-sm mx-auto">
+      <Image
+        src={SIMULATION_MEDIA.onboardingHeroImage}
+        alt={SIMULATION_MEDIA.onboardingHeroAlt}
+        fill
+        className="object-cover object-top drop-shadow-2xl"
         style={{
           maskImage: 'linear-gradient(to top, rgba(0,0,0,1) 80%, rgba(0,0,0,0) 100%)',
           WebkitMaskImage: 'linear-gradient(to top, rgba(0,0,0,1) 80%, rgba(0,0,0,0) 100%)'

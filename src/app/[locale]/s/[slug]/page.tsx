@@ -1,5 +1,5 @@
 import { APP_CONFIG } from '@/lib/config';
-import { MOCK_SERVICES } from '@/lib/constants';
+import { MOCK_SERVICES, getServiceBySlug } from '@/lib/constants';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ServiceDetailScreen } from '@/components/screens/ServiceDetailScreen';
@@ -20,7 +20,7 @@ export function generateStaticParams() {
 // Generate dynamic metadata for SEO
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
-  const service = MOCK_SERVICES.find((s) => s.slug === params.slug);
+  const service = getServiceBySlug(params.slug);
 
   if (!service) {
     return {
@@ -34,20 +34,20 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     openGraph: {
       title: `${service.name} | ${APP_CONFIG.appName}`,
       description: service.description,
-      images: [APP_CONFIG.ogImage],
+      images: [service.coverImage || service.image || APP_CONFIG.ogImage],
     },
     twitter: {
       card: 'summary_large_image',
       title: `${service.name} | ${APP_CONFIG.appName}`,
       description: service.description,
-      images: [APP_CONFIG.ogImage],
+      images: [service.coverImage || service.image || APP_CONFIG.ogImage],
     }
   };
 }
 
 export default async function ServiceRoute(props: Props) {
   const params = await props.params;
-  const service = MOCK_SERVICES.find((s) => s.slug === params.slug);
+  const service = getServiceBySlug(params.slug);
 
   if (!service) {
     notFound();

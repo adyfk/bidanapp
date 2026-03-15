@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 import { ChevronLeft, Search, ChevronRight, Clock, Tag } from 'lucide-react';
 import { APP_CONFIG } from '@/lib/config';
 import { MOCK_PROFESSIONALS, MOCK_CATEGORIES, MOCK_SERVICES } from '@/lib/constants';
@@ -141,12 +142,17 @@ export const ServicesScreen = () => {
                 onClick={() => router.push(`/explore?category=${svc.categoryId}&q=${encodeURIComponent(svc.name)}`)}
                 className="bg-white rounded-[24px] p-5 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-all active:scale-[0.98]"
               >
-                <div className="flex justify-between items-start mb-2">
-                   <div>
+                <div className="flex justify-between items-start mb-3 gap-3">
+                   <div className="flex gap-3 flex-1">
+                     <div className="relative w-14 h-14 rounded-[16px] overflow-hidden bg-gray-100 flex-shrink-0">
+                       <Image src={svc.image} alt={svc.name} fill className="object-cover" />
+                     </div>
+                     <div>
                      <h3 className="font-bold text-[16px] text-gray-900 mb-0.5">{svc.name}</h3>
                      <p className="text-[11px] font-bold uppercase tracking-wide" style={{ color: APP_CONFIG.colors.primary }}>
-                       {svc.categoryName}
+                       {svc.badge}
                      </p>
+                     </div>
                    </div>
                    <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center">
                      <ChevronRight className="w-4 h-4 text-gray-400" />
@@ -154,8 +160,16 @@ export const ServicesScreen = () => {
                 </div>
                 
                 <p className="text-[13px] text-gray-600 mb-4 line-clamp-2">
-                   {svc.description}
+                   {svc.shortDescription}
                 </p>
+
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {svc.tags.slice(0, 3).map((tag) => (
+                    <span key={tag} className="px-2.5 py-1 rounded-full text-[11px] font-medium bg-gray-50 text-gray-500 border border-gray-100">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
                 
                 <div className="pt-3 border-t border-gray-50 flex items-center gap-4 text-[13px] text-gray-600 font-medium">
                    <div className="flex items-center">
@@ -165,6 +179,9 @@ export const ServicesScreen = () => {
                    <div className="flex items-center font-bold" style={{ color: APP_CONFIG.colors.primary }}>
                      <Tag className="w-4 h-4 mr-1.5 opacity-50" />
                      {formatPriceRange(svc.providers.map(p => p.price))}
+                   </div>
+                   <div className="ml-auto text-[12px] font-semibold text-gray-500">
+                     {svc.categoryName}
                    </div>
                 </div>
               </div>

@@ -1,0 +1,295 @@
+{
+  "appSections": {
+    "homeCategoryIds": ["newborn", "postpartum", "konsultasi", "stroke", "pijat-cape", "sunnah"],
+    "featuredProfessionalIds": ["6", "1", "4", "3"]
+  },
+  "currentUsers": [
+    {
+      "index": 1,
+      "id": "guest-primary",
+      "name": "Guest User",
+      "phone": "+62 812 3456 7890",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=150&auto=format&fit=crop"
+    },
+    {
+      "index": 2,
+      "id": "ibu-nadia",
+      "name": "Nadia Prameswari",
+      "phone": "+62 811 9021 456",
+      "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop"
+    },
+    {
+      "index": 3,
+      "id": "mr-hendra",
+      "name": "Hendra Saputra",
+      "phone": "+62 878 1200 9087",
+      "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=150&auto=format&fit=crop"
+    }
+  ],
+  "sharedContexts": [
+    {
+      "index": 1,
+      "id": "canada-ontario",
+      "currentArea": "Canada, Ontario",
+      "onlineStatusLabel": "Online"
+    },
+    {
+      "index": 2,
+      "id": "jakarta-selatan",
+      "currentArea": "Jakarta Selatan",
+      "onlineStatusLabel": "Tersedia"
+    },
+    {
+      "index": 3,
+      "id": "bandung-remote",
+      "currentArea": "Bandung Barat",
+      "onlineStatusLabel": "Sedang aktif"
+    }
+  ],
+  "homeScenarios": [
+    {
+      "index": 1,
+      "id": "default-family-care",
+      "title": "Featured appointment with mixed nearby professionals",
+      "currentUserId": "guest-primary",
+      "sharedContextId": "canada-ontario",
+      "featuredAppointment": {
+        "dateLabel": "Sunday, 28 February 2025",
+        "timeLabel": "09.00 - 10.00 AM",
+        "professionalId": "1"
+      },
+      "popularServiceIds": ["s1", "s5", "s7", "s8"],
+      "nearbyProfessionalIds": ["6", "1", "4", "2"]
+    },
+    {
+      "index": 2,
+      "id": "recovery-focus",
+      "title": "Rehabilitation-focused home state",
+      "currentUserId": "mr-hendra",
+      "sharedContextId": "bandung-remote",
+      "featuredAppointment": {
+        "dateLabel": "Tuesday, 16 March 2026",
+        "timeLabel": "13.00 - 14.00 WIB",
+        "professionalId": "3"
+      },
+      "popularServiceIds": ["s6", "s3", "s9", "s4"],
+      "nearbyProfessionalIds": ["3", "2", "5", "6"]
+    },
+    {
+      "index": 3,
+      "id": "empty-schedule",
+      "title": "No upcoming appointment state",
+      "currentUserId": "ibu-nadia",
+      "sharedContextId": "jakarta-selatan",
+      "popularServiceIds": ["s5", "s10", "s7", "s11"],
+      "nearbyProfessionalIds": ["4", "6", "1", "5"]
+    }
+  ],
+  "mediaPresets": [
+    {
+      "index": 1,
+      "id": "default",
+      "label": "Default health hero",
+      "onboardingHeroImage": "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=1000&auto=format&fit=crop",
+      "onboardingHeroAlt": "Doctor",
+      "serviceDetailCoverImage": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=600&auto=format&fit=crop",
+      "professionalMapBackgroundImage": "https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=600&auto=format&fit=crop"
+    },
+    {
+      "index": 2,
+      "id": "mother-care",
+      "label": "Mother and baby care hero",
+      "onboardingHeroImage": "https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?q=80&w=1000&auto=format&fit=crop",
+      "onboardingHeroAlt": "Mother and baby care",
+      "serviceDetailCoverImage": "https://images.unsplash.com/photo-1515377905703-c4788e51af15?q=80&w=600&auto=format&fit=crop",
+      "professionalMapBackgroundImage": "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?q=80&w=600&auto=format&fit=crop"
+    }
+  ],
+  "professionalDetailScenarios": [
+    {
+      "index": 1,
+      "id": "urban-default",
+      "label": "Urban nearby practice",
+      "distance": "5.23 km",
+      "travelTime": "8 min",
+      "addressLine1": "42 Ontario, Newbridge NSW 822",
+      "addressLine2": "Duo Place, New Mall M83"
+    },
+    {
+      "index": 2,
+      "id": "suburban-homecare",
+      "label": "Suburban homecare route",
+      "distance": "12.8 km",
+      "travelTime": "25 min",
+      "addressLine1": "Jl. Wijaya Timur No. 18",
+      "addressLine2": "Cluster Taman Mawar Blok C2"
+    },
+    {
+      "index": 3,
+      "id": "remote-service",
+      "label": "Remote care route",
+      "distance": "27.4 km",
+      "travelTime": "51 min",
+      "addressLine1": "Jl. Soreang Raya Km 12",
+      "addressLine2": "Area perbukitan layanan mobile"
+    }
+  ],
+  "messagePresets": [
+    {
+      "index": 1,
+      "id": "default",
+      "label": "Default consumer tone",
+      "booking": {
+        "visit": "Booking Visit: Request persetujuan bidan dikirim.",
+        "consultation": "Mulai Konsultasi: Bypass persetujuan bidan, langsung menuju Pembayaran."
+      },
+      "chatAutoReply": "Baik, pesan Anda sudah saya terima.",
+      "paymentSuccessAlert": "Simulasi Pembayaran Berhasil",
+      "chatSentAlert": "Pesan terkirim dalam mode demo",
+      "appointmentDetailTitle": "Detail Aktivitas",
+      "appointmentNotFoundMessage": "Aktivitas tidak ditemukan.",
+      "appointmentBackLabel": "Kembali",
+      "appointmentWelcomeTemplate": "Halo, ada yang bisa saya bantu terkait reservasi {serviceName}?",
+      "appointmentChatDayLabel": "HARI INI",
+      "appointmentChatInputPlaceholder": "Tulis pesan...",
+      "appointmentFieldLabels": {
+        "status": "Status",
+        "time": "Jadwal",
+        "location": "Lokasi",
+        "service": "Layanan",
+        "totalPayment": "Total Pembayaran"
+      },
+      "appointmentActionLabels": {
+        "detail": "Detail",
+        "cancel": "Batalkan",
+        "payNow": "Bayar Sekarang"
+      },
+      "appointmentStatusBanners": {
+        "requested": "Bidan sedang meninjau permintaan Anda. Kami akan memberitahu Anda segera setelah disetujui.",
+        "paid": "Pembayaran berhasil. Bidan akan segera berangkat ke lokasi Anda sesuai jadwal.",
+        "confirmed": "Jadwal Anda sudah dikonfirmasi. Mohon siapkan lokasi dan kebutuhan yang relevan sebelum sesi dimulai.",
+        "in_service": "Sesi sedang berjalan. Anda tetap bisa mengirim pesan bila ada kebutuhan tambahan.",
+        "cancelled": "Reservasi ini sudah dibatalkan. Anda bisa membuat jadwal baru kapan saja.",
+        "rejected": "Permintaan ini ditolak. Coba pilih slot lain atau profesional lain yang masih tersedia.",
+        "expired": "Permintaan ini kedaluwarsa karena pembayaran tidak selesai dalam batas waktu."
+      },
+      "homeEmptyStateTitle": "Belum ada jadwal aktif",
+      "homeEmptyStateDescription": "Gunakan katalog layanan untuk mulai simulasi flow baru dari pencarian sampai booking.",
+      "homeEmptyStateAction": "Cari layanan",
+      "serviceHighlightsTitle": "Highlights",
+      "professionalProfile": {
+        "storiesTitle": "Story aktivitas",
+        "portfolioStatsTitle": "Jejak praktik",
+        "portfolioEntriesTitle": "Portofolio tindakan",
+        "galleryTitle": "Galeri praktik",
+        "testimonialsTitle": "Testimoni keluarga",
+        "feedbackTitle": "Feedback klien",
+        "credentialsTitle": "Sertifikasi dan legalitas",
+        "recentActivityTitle": "Aktivitas terbaru",
+        "serviceSectionTitle": "Pilih layanan",
+        "availabilityLabel": "Ketersediaan",
+        "responseTimeLabel": "Respon",
+        "languagesLabel": "Bahasa",
+        "totalReviewsLabel": "total feedback",
+        "recommendationLabel": "Merekomendasikan",
+        "repeatClientsLabel": "Klien kembali"
+      },
+      "exploreSortOptions": ["Recommended", "Nearest Distance", "Highest Rating", "Lowest Price"],
+      "exploreGenderOptions": ["Any", "Female", "Male"],
+      "review": {
+        "title": "Beri Ulasan",
+        "titleTemplate": "Bagaimana sesi Anda dengan {professionalName}?",
+        "helperText": "Ulasan Anda membantu kami meningkatkan kualitas layanan BidanCare.",
+        "photoLabel": "Tambahkan Foto (Opsional)",
+        "photoButtonLabel": "Tambah",
+        "reviewLabel": "Ceritakan pengalaman Anda",
+        "reviewPlaceholder": "Pelayanan sangat ramah dan profesional...",
+        "submitLabel": "Kirim Ulasan",
+        "uploadAlert": "Simulasi Upload Foto",
+        "successAlert": "Ulasan berhasil dikirim! Terima kasih atas feedback Anda."
+      }
+    },
+    {
+      "index": 2,
+      "id": "formal",
+      "label": "Operational and more formal tone",
+      "booking": {
+        "visit": "Permintaan kunjungan berhasil dibuat dan menunggu konfirmasi profesional.",
+        "consultation": "Sesi konsultasi dapat dilanjutkan ke pembayaran tanpa persetujuan manual."
+      },
+      "chatAutoReply": "Pesan sudah kami teruskan. Mohon tunggu balasan berikutnya.",
+      "paymentSuccessAlert": "Pembayaran simulasi tercatat berhasil",
+      "chatSentAlert": "Pesan simulasi berhasil dikirim",
+      "appointmentDetailTitle": "Detail Reservasi",
+      "appointmentNotFoundMessage": "Reservasi tidak ditemukan.",
+      "appointmentBackLabel": "Kembali",
+      "appointmentWelcomeTemplate": "Silakan sampaikan kebutuhan Anda untuk reservasi {serviceName}.",
+      "appointmentChatDayLabel": "SESI AKTIF",
+      "appointmentChatInputPlaceholder": "Ketik pesan...",
+      "appointmentFieldLabels": {
+        "status": "Status",
+        "time": "Jadwal",
+        "location": "Lokasi",
+        "service": "Layanan",
+        "totalPayment": "Total Pembayaran"
+      },
+      "appointmentActionLabels": {
+        "detail": "Detail",
+        "cancel": "Batalkan",
+        "payNow": "Bayar Sekarang"
+      },
+      "appointmentStatusBanners": {
+        "requested": "Permintaan reservasi sedang direview oleh profesional terkait.",
+        "paid": "Pembayaran tervalidasi. Profesional akan mengikuti jadwal yang tertera.",
+        "confirmed": "Reservasi telah dikonfirmasi dan siap dijalankan.",
+        "in_service": "Layanan sedang berlangsung.",
+        "cancelled": "Reservasi telah dibatalkan.",
+        "rejected": "Reservasi tidak dapat diproses untuk saat ini.",
+        "expired": "Reservasi berakhir otomatis karena melewati tenggat pembayaran."
+      },
+      "homeEmptyStateTitle": "Tidak ada reservasi mendatang",
+      "homeEmptyStateDescription": "Pilih salah satu skenario layanan untuk menguji alur booking, pembayaran, dan chat.",
+      "homeEmptyStateAction": "Buka katalog",
+      "serviceHighlightsTitle": "Highlights",
+      "professionalProfile": {
+        "storiesTitle": "Dokumentasi aktivitas",
+        "portfolioStatsTitle": "Ringkasan praktik",
+        "portfolioEntriesTitle": "Portofolio layanan",
+        "galleryTitle": "Galeri dokumentasi",
+        "testimonialsTitle": "Testimoni pasien",
+        "feedbackTitle": "Umpan balik klien",
+        "credentialsTitle": "Sertifikasi dan kepatuhan",
+        "recentActivityTitle": "Log aktivitas terbaru",
+        "serviceSectionTitle": "Pilih layanan",
+        "availabilityLabel": "Ketersediaan",
+        "responseTimeLabel": "Waktu respon",
+        "languagesLabel": "Bahasa",
+        "totalReviewsLabel": "total ulasan",
+        "recommendationLabel": "Rekomendasi",
+        "repeatClientsLabel": "Klien berulang"
+      },
+      "exploreSortOptions": ["Recommended", "Nearest Distance", "Highest Rating", "Lowest Price"],
+      "exploreGenderOptions": ["Any", "Female", "Male"],
+      "review": {
+        "title": "Tinjau Sesi",
+        "titleTemplate": "Bagaimana pengalaman Anda bersama {professionalName}?",
+        "helperText": "Masukan Anda digunakan untuk evaluasi kualitas layanan.",
+        "photoLabel": "Unggah Foto (Opsional)",
+        "photoButtonLabel": "Unggah",
+        "reviewLabel": "Deskripsikan pengalaman Anda",
+        "reviewPlaceholder": "Tuliskan catatan singkat mengenai sesi Anda...",
+        "submitLabel": "Kirim Penilaian",
+        "uploadAlert": "Simulasi unggah foto",
+        "successAlert": "Penilaian simulasi berhasil dikirim"
+      }
+    }
+  ],
+  "active": {
+    "currentUserId": "guest-primary",
+    "sharedContextId": "canada-ontario",
+    "homeScenarioId": "default-family-care",
+    "mediaPresetId": "default",
+    "professionalDetailScenarioId": "urban-default",
+    "messagePresetId": "default"
+  }
+}

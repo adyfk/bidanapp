@@ -14,8 +14,8 @@
   "Navigation": {
     "home": "Beranda",
     "search": "Cari",
-    "experts": "Ahli",
-    "messages": "Pesan"
+    "experts": "Pakar",
+    "activity": "Aktivitas"
   },
   "Onboarding": {
     "getStarted": "Mulai Sekarang"
@@ -25,7 +25,8 @@
     "distance": "Jarak",
     "time": "Waktu",
     "rating": "Penilaian",
-    "makeAppointment": "Buat Janji",
+    "makeAppointment": "Booking Request",
+    "inquiryChat": "Tanya {professional}",
     "experience": "Tahun Pengalaman"
   },
   "Explore": {
@@ -53,6 +54,22 @@
     "noMessages": "Tidak ada pesan",
     "trySearching": "Coba cari dengan kata kunci lain."
   },
+  "Appointments": {
+    "title": "Aktivitas",
+    "searchPlaceholder": "Cari jadwal...",
+    "active": "Aktif",
+    "history": "Riwayat",
+    "noAppointments": "Tidak ada jadwal aktif",
+    "trySearching": "Coba cari atau pesan layanan baru.",
+    "status": {
+      "requested": "Menunggu Persetujuan",
+      "approved_waiting_payment": "Menunggu Pembayaran",
+      "paid": "Dibayar",
+      "confirmed": "Dikonfirmasi",
+      "in_service": "Sedang Berlangsung",
+      "completed": "Selesai"
+    }
+  },
   "Services": {
     "globalTitle": "{service} Global",
     "searchPlaceholder": "Cari {service}...",
@@ -65,7 +82,9 @@
     "about": "Tentang {service} ini",
     "available": "{professional} Tersedia",
     "expertsCount": "{count} Ahli",
-    "noProfessionals": "Belum ada profesional yang menyediakan layanan ini."
+    "noProfessionals": "Belum ada profesional yang menyediakan layanan ini.",
+    "makeAppointment": "Booking Request",
+    "inquiryChat": "Tanya Bidan"
   },
   "UI": {
     "seeAll": "Lihat Semua"

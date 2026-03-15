@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Search, MapPin, Loader2, SlidersHorizontal, Star, Clock, X } from 'lucide-react';
 import { APP_CONFIG } from '@/lib/config';
-import { MOCK_PROFESSIONALS, MOCK_CATEGORIES } from '@/lib/constants';
+import { MOCK_PROFESSIONALS, MOCK_CATEGORIES, SIMULATION_MESSAGES, SIMULATION_SHARED } from '@/lib/constants';
 import { ProfessionalCard } from '@/components/ui/ProfessionalCard';
 
 // Extract the core component into a separate function to wrap it with Suspense
@@ -43,7 +43,7 @@ const ExploreContent = () => {
         <h1 className="text-[22px] font-bold text-gray-900 mb-1">{t('title', { professional: APP_CONFIG.terms.professional })}</h1>
         <div className="flex items-center text-sm font-medium" style={{ color: APP_CONFIG.colors.textMuted }}>
           <MapPin className="w-4 h-4 mr-1" style={{ color: APP_CONFIG.colors.primary }} />
-          Canada, Ontario <span className="ml-2 text-xs opacity-70">({t('yourLocation')})</span>
+          {SIMULATION_SHARED.currentArea} <span className="ml-2 text-xs opacity-70">({t('yourLocation')})</span>
         </div>
       </div>
 
@@ -155,11 +155,11 @@ const ExploreContent = () => {
               <div className="space-y-4">
                 <h3 className="font-bold text-gray-900 text-[15px]">{t('sortBy')}</h3>
                 <div className="space-y-3">
-                  {['Recommended', 'Nearest Distance', 'Highest Rating', 'Lowest Price'].map((sortType) => (
+                  {SIMULATION_MESSAGES.exploreSortOptions.map((sortType) => (
                     <label key={sortType} className="flex items-center justify-between cursor-pointer group">
                       <span className="text-[14px] text-gray-700 font-medium group-hover:text-gray-900">{sortType}</span>
                       <div className="w-5 h-5 rounded-full border border-gray-300 flex items-center justify-center">
-                        {sortType === 'Recommended' && <div className="w-3 h-3 rounded-full" style={{ backgroundColor: APP_CONFIG.colors.primary }}></div>}
+                        {sortType === SIMULATION_MESSAGES.exploreSortOptions[0] && <div className="w-3 h-3 rounded-full" style={{ backgroundColor: APP_CONFIG.colors.primary }}></div>}
                       </div>
                     </label>
                   ))}
@@ -170,13 +170,13 @@ const ExploreContent = () => {
               <div className="space-y-4">
                 <h3 className="font-bold text-gray-900 text-[15px]">{t('genderPreference')}</h3>
                 <div className="flex gap-3">
-                  {['Any', 'Female', 'Male'].map((gender) => (
+                  {SIMULATION_MESSAGES.exploreGenderOptions.map((gender) => (
                     <button 
                       key={gender}
                       className={`flex-1 py-3 rounded-xl text-[13px] font-bold border transition-all ${
-                        gender === 'Any' ? 'bg-gray-50 border-gray-200 text-gray-900' : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
+                        gender === SIMULATION_MESSAGES.exploreGenderOptions[0] ? 'bg-gray-50 border-gray-200 text-gray-900' : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
                       }`}
-                      style={gender === 'Any' ? { borderColor: APP_CONFIG.colors.primary, color: APP_CONFIG.colors.primary, backgroundColor: APP_CONFIG.colors.primaryLight } : {}}
+                      style={gender === SIMULATION_MESSAGES.exploreGenderOptions[0] ? { borderColor: APP_CONFIG.colors.primary, color: APP_CONFIG.colors.primary, backgroundColor: APP_CONFIG.colors.primaryLight } : {}}
                     >
                       {gender}
                     </button>

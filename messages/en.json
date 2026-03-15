@@ -15,7 +15,7 @@
     "home": "Home",
     "search": "Search",
     "experts": "Experts",
-    "messages": "Messages"
+    "activity": "Activity"
   },
   "Onboarding": {
     "getStarted": "Get Started"
@@ -25,7 +25,8 @@
     "distance": "Distance",
     "time": "Time",
     "rating": "Rating",
-    "makeAppointment": "Make Appointment",
+    "makeAppointment": "Booking Request",
+    "inquiryChat": "Tanya {professional}",
     "experience": "Years Exp."
   },
   "Explore": {
@@ -44,14 +45,21 @@
     "reset": "Reset",
     "applyFilters": "Apply Filters"
   },
-  "Messages": {
-    "title": "Messages",
-    "searchPlaceholder": "Search messages...",
-    "all": "All",
-    "unread": "Unread",
-    "archived": "Archived",
-    "noMessages": "No messages found",
-    "trySearching": "Try searching with a different keyword."
+  "Appointments": {
+    "title": "Activity",
+    "searchPlaceholder": "Search appointments...",
+    "active": "Active",
+    "history": "History",
+    "noAppointments": "No active appointments",
+    "trySearching": "Try searching or book a new service.",
+    "status": {
+      "requested": "Waiting for Approval",
+      "approved_waiting_payment": "Waiting for Payment",
+      "paid": "Paid",
+      "confirmed": "Confirmed",
+      "in_service": "In Service",
+      "completed": "Completed"
+    }
   },
   "Services": {
     "globalTitle": "Global {service}s",
@@ -65,7 +73,9 @@
     "about": "About this {service}",
     "available": "Available {professional}s",
     "expertsCount": "{count} {count, plural, =1 {Expert} other {Experts}}",
-    "noProfessionals": "No professionals currently provide this service."
+    "noProfessionals": "No professionals currently provide this service.",
+    "makeAppointment": "Booking Request",
+    "inquiryChat": "Tanya Bidan"
   },
   "UI": {
     "seeAll": "See All"

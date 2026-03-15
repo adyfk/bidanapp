@@ -3,7 +3,7 @@
 import React from 'react';
 import { Link, usePathname } from '@/i18n/routing';
 import { useTranslations } from 'next-intl';
-import { Home as HomeIcon, Search, MessageSquare, Users } from 'lucide-react';
+import { Home as HomeIcon, Search, Activity, Users } from 'lucide-react';
 import { APP_CONFIG } from '@/lib/config';
 
 export const BottomNavBar = () => {
@@ -16,7 +16,7 @@ export const BottomNavBar = () => {
     { id: '/home', icon: <HomeIcon className="w-[22px] h-[22px]" />, label: t('home') },
     { id: '/services', icon: <Search className="w-[22px] h-[22px]" />, label: t('search') },
     { id: '/explore', icon: <Users className="w-[22px] h-[22px]" />, label: t('experts') },
-    { id: '/messages', icon: <MessageSquare className="w-[22px] h-[22px]" />, label: t('messages') }
+    { id: '/appointments', icon: <Activity className="w-[22px] h-[22px]" />, label: t('activity') }
   ];
 
   return (

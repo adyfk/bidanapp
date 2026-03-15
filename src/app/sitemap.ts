@@ -13,7 +13,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/home',
     '/explore',
     '/services',
-    '/messages',
+    '/appointments',
     '/profile'
   ];
 
