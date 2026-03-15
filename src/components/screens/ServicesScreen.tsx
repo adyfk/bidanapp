@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { ChevronLeft, Search, ChevronRight, Clock, Tag } from 'lucide-react';
 import { APP_CONFIG } from '@/lib/config';
 import { MOCK_PROFESSIONALS, MOCK_CATEGORIES, MOCK_SERVICES } from '@/lib/constants';
@@ -11,6 +12,7 @@ export const ServicesScreen = () => {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>('All');
+  const t = useTranslations('Services');
 
   // Helper functions for ranges
   const parseDuration = (d?: string) => {
@@ -79,7 +81,7 @@ export const ServicesScreen = () => {
       {/* Top Navigation */}
       <div className="flex items-center justify-between px-4 pt-14 pb-4 bg-white sticky top-0 z-20 shadow-sm">
         <IconButton icon={<ChevronLeft className="w-6 h-6 text-gray-800" />} onClick={() => router.back()} />
-        <h1 className="text-[16px] font-bold text-gray-900 tracking-wide">Global {APP_CONFIG.terms.service}s</h1>
+        <h1 className="text-[16px] font-bold text-gray-900 tracking-wide">{t('globalTitle', { service: APP_CONFIG.terms.service })}</h1>
         <div className="w-10" /> {/* Spacer for centering */}
       </div>
 
@@ -90,7 +92,7 @@ export const ServicesScreen = () => {
           <Search className="w-5 h-5 text-gray-400 mr-2" />
           <input 
             type="text" 
-            placeholder={`Search ${APP_CONFIG.terms.service.toLowerCase()}...`}
+            placeholder={t('searchPlaceholder', { service: APP_CONFIG.terms.service.toLowerCase() })}
             className="bg-transparent border-none outline-none text-sm w-full text-gray-700 placeholder:text-gray-400"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -108,7 +110,7 @@ export const ServicesScreen = () => {
             }`}
             style={{ backgroundColor: activeCategory === 'All' ? APP_CONFIG.colors.primary : undefined }}
           >
-            All Services
+            {t('allServices')}
           </button>
           {MOCK_CATEGORIES.map((cat) => (
             <button 
@@ -129,7 +131,7 @@ export const ServicesScreen = () => {
         {/* Global Catalog List */}
         <div>
           <h2 className="text-[16px] font-bold text-gray-900 mb-4">
-            {filteredServices.length} {filteredServices.length === 1 ? 'Service' : 'Services'} Catalog
+            {t('catalogTitle', { count: filteredServices.length })}
           </h2>
           
           <div className="space-y-4">
@@ -173,8 +175,8 @@ export const ServicesScreen = () => {
                 <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4 text-gray-400">
                   <Search className="w-8 h-8" />
                 </div>
-                <p className="text-gray-900 font-bold">No services found</p>
-                <p className="text-sm text-gray-500 mt-1">Try another search term.</p>
+                <p className="text-gray-900 font-bold">{t('noServices')}</p>
+                <p className="text-sm text-gray-500 mt-1">{t('trySearchTerm')}</p>
               </div>
             )}
           </div>

@@ -1,8 +1,8 @@
 'use client';
 import React from 'react';
-import { useRouter } from 'next/navigation';
 import { MapPin, Bell, Calendar, Clock, Navigation, MessageSquare, ChevronRight } from 'lucide-react';
-import Link from 'next/link';
+import { Link, useRouter } from '@/i18n/routing';
+import { useTranslations } from 'next-intl';
 import { APP_CONFIG } from '@/lib/config';
 import { MOCK_PROFESSIONALS, MOCK_CATEGORIES, MOCK_SERVICES } from '@/lib/constants';
 import { Search } from 'lucide-react';
@@ -12,6 +12,7 @@ import { ProfessionalCard } from '@/components/ui/ProfessionalCard';
 
 export const HomeScreen = () => {
   const router = useRouter();
+  const t = useTranslations('Home');
 
   return (
   <div className="flex flex-col h-full relative pb-24 overflow-y-auto custom-scrollbar" style={{ backgroundColor: APP_CONFIG.colors.bgLight }}>
@@ -21,7 +22,7 @@ export const HomeScreen = () => {
         <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=150&auto=format&fit=crop" alt="User" className="w-full h-full object-cover" />
       </button>
       <div className="flex flex-col items-center">
-        <span className="text-[11px] text-gray-400 font-medium tracking-wide">Location</span>
+        <span className="text-[11px] text-gray-400 font-medium tracking-wide">{t('location')}</span>
         <div className="flex items-center text-gray-900 font-bold text-[14px]">
           <MapPin className="w-4 h-4 mr-1" style={{ color: APP_CONFIG.colors.primary }} />
           Canada, Ontario
@@ -37,14 +38,14 @@ export const HomeScreen = () => {
     <div className="px-6 mb-7">
       <Link href="/services" className="bg-white rounded-full flex items-center px-4 py-3.5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
         <Search className="w-5 h-5 text-gray-400 mr-2" />
-        <span className="text-sm text-gray-400 font-medium">Search {APP_CONFIG.terms.service.toLowerCase()} or {APP_CONFIG.terms.category.toLowerCase()}...</span>
+        <span className="text-sm text-gray-400 font-medium">{t('searchPlaceholder', { service: APP_CONFIG.terms.service.toLowerCase(), category: APP_CONFIG.terms.category.toLowerCase() })}</span>
       </Link>
     </div>
 
     <div className="px-6 space-y-7">
       {/* Section: Appointment */}
       <div>
-        <SectionHeader title="Appointment" onSeeAll={() => router.push('/explore')} />
+        <SectionHeader title={t('appointment')} onSeeAll={() => router.push('/explore')} />
         <div
           className="rounded-[28px] p-5 text-white relative shadow-[0_10px_30px_rgba(233,30,140,0.25)]"
           style={{ background: `linear-gradient(135deg, ${APP_CONFIG.colors.primary} 0%, ${APP_CONFIG.colors.secondary} 100%)` }}
@@ -85,7 +86,7 @@ export const HomeScreen = () => {
 
       {/* Section: Popular Services */}
       <div>
-        <SectionHeader title={`Popular ${APP_CONFIG.terms.service}s`} onSeeAll={() => router.push('/services')} />
+        <SectionHeader title={t('popularServices', { service: APP_CONFIG.terms.service })} onSeeAll={() => router.push('/services')} />
         <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar -mx-6 px-6">
           {MOCK_SERVICES.slice(0, 4).map((svc, idx) => {
             const catName = MOCK_CATEGORIES.find(cat => cat.id === svc.categoryId)?.name || '';
@@ -109,7 +110,7 @@ export const HomeScreen = () => {
                   <div className="mt-auto pt-2 flex items-center justify-between text-[12px] font-medium text-gray-500">
                     <span>{catName}</span>
                     <span className="flex items-center opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" style={{ color: APP_CONFIG.colors.primary }}>
-                      Explore <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
+                      {t('explore')} <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
                     </span>
                   </div>
                 </div>
@@ -121,7 +122,7 @@ export const HomeScreen = () => {
 
       {/* Section: Categories */}
       <div>
-        <SectionHeader title={APP_CONFIG.terms.category} onSeeAll={() => router.push('/explore')} />
+        <SectionHeader title={APP_CONFIG.terms.category || t('categories')} onSeeAll={() => router.push('/explore')} />
         <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar -mx-6 px-6">
           {MOCK_CATEGORIES.map((cat, idx) => (
             <div key={idx} className="flex flex-col items-center gap-2 cursor-pointer group flex-shrink-0 w-[72px]" onClick={() => router.push('/explore')}>
@@ -136,7 +137,7 @@ export const HomeScreen = () => {
 
       {/* Section: Professionals Near You */}
       <div className="pb-4">
-        <SectionHeader title={`${APP_CONFIG.terms.professional} near you`} onSeeAll={() => router.push('/explore')} />
+        <SectionHeader title={t('professionalsNearYou', { professional: APP_CONFIG.terms.professional })} onSeeAll={() => router.push('/explore')} />
         <div className="space-y-4">
           {MOCK_PROFESSIONALS.map((prof) => (
             <ProfessionalCard key={prof.id} professional={prof} href={`/p/${prof.slug}`} />

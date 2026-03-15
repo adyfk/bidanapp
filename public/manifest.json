@@ -1,0 +1,21 @@
+{
+  "name": "BidanApp",
+  "short_name": "BidanApp",
+  "description": "Your trusted healthcare companion",
+  "start_url": "/id",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#E91E8C",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

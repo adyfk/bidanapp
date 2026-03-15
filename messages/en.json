@@ -1,0 +1,80 @@
+{
+  "Index": {
+    "title": "Welcome to BidanApp"
+  },
+  "Home": {
+    "location": "Location",
+    "searchPlaceholder": "Search {service} or {category}...",
+    "appointment": "Appointment",
+    "popularServices": "Popular {service}s",
+    "explore": "Explore",
+    "categories": "Categories",
+    "professionalsNearYou": "{professional} near you"
+  },
+  "Navigation": {
+    "home": "Home",
+    "search": "Search",
+    "experts": "Experts",
+    "messages": "Messages"
+  },
+  "Onboarding": {
+    "getStarted": "Get Started"
+  },
+  "Professional": {
+    "about": "About {professional}",
+    "distance": "Distance",
+    "time": "Time",
+    "rating": "Rating",
+    "makeAppointment": "Make Appointment",
+    "experience": "Years Exp."
+  },
+  "Explore": {
+    "title": "{professional}s",
+    "yourLocation": "Your Location",
+    "searchPlaceholder": "Find {professional} by name or city...",
+    "allExperts": "All Experts",
+    "topRated": "Top Rated",
+    "availableToday": "Available Today",
+    "resultsFound": "{count} {count, plural, =1 {Result} other {Results}} Found",
+    "noResults": "No results found",
+    "tryAdjusting": "Try adjusting your filters or search term.",
+    "filterTitle": "Filter {professional}s",
+    "sortBy": "Sort By",
+    "genderPreference": "Gender Preference",
+    "reset": "Reset",
+    "applyFilters": "Apply Filters"
+  },
+  "Messages": {
+    "title": "Messages",
+    "searchPlaceholder": "Search messages...",
+    "all": "All",
+    "unread": "Unread",
+    "archived": "Archived",
+    "noMessages": "No messages found",
+    "trySearching": "Try searching with a different keyword."
+  },
+  "Services": {
+    "globalTitle": "Global {service}s",
+    "searchPlaceholder": "Search {service}...",
+    "allServices": "All Services",
+    "catalogTitle": "{count} {count, plural, =1 {Service} other {Services}} Catalog",
+    "noServices": "No services found",
+    "trySearchTerm": "Try another search term."
+  },
+  "ServiceDetail": {
+    "about": "About this {service}",
+    "available": "Available {professional}s",
+    "expertsCount": "{count} {count, plural, =1 {Expert} other {Experts}}",
+    "noProfessionals": "No professionals currently provide this service."
+  },
+  "UI": {
+    "seeAll": "See All"
+  },
+  "Profile": {
+    "title": "Profile",
+    "language": "Language",
+    "account": "Account Settings",
+    "aboutApp": "About BidanApp",
+    "logout": "Log Out"
+  }
+}

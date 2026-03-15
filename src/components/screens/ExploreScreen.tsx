@@ -2,7 +2,8 @@
 
 import React, { useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Search, MapPin, Loader2, SlidersHorizontal, Star, Clock } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { Search, MapPin, Loader2, SlidersHorizontal, Star, Clock, X } from 'lucide-react';
 import { APP_CONFIG } from '@/lib/config';
 import { MOCK_PROFESSIONALS, MOCK_CATEGORIES } from '@/lib/constants';
 import { ProfessionalCard } from '@/components/ui/ProfessionalCard';
@@ -13,6 +14,8 @@ const ExploreContent = () => {
   const initialSearch = searchParams.get('q') ? decodeURIComponent(searchParams.get('q')!) : '';
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [activeFilter, setActiveFilter] = useState<string>('all');
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const t = useTranslations('Explore');
 
   // Filter professionals based on search query and active filter
   const filteredProfessionals = MOCK_PROFESSIONALS.filter(prof => {
@@ -32,14 +35,15 @@ const ExploreContent = () => {
   });
 
   return (
-    <div className="flex flex-col h-full relative pb-24 overflow-y-auto custom-scrollbar" style={{ backgroundColor: APP_CONFIG.colors.bgLight }}>
+    <>
+      <div className="flex flex-col h-full relative pb-24 overflow-y-auto custom-scrollbar" style={{ backgroundColor: APP_CONFIG.colors.bgLight }}>
 
       {/* Header Sticky */}
       <div className="px-6 pt-14 pb-4 sticky top-0 z-20" style={{ backgroundColor: APP_CONFIG.colors.bgLight }}>
-        <h1 className="text-[22px] font-bold text-gray-900 mb-1">{APP_CONFIG.terms.professional}s</h1>
+        <h1 className="text-[22px] font-bold text-gray-900 mb-1">{t('title', { professional: APP_CONFIG.terms.professional })}</h1>
         <div className="flex items-center text-sm font-medium" style={{ color: APP_CONFIG.colors.textMuted }}>
           <MapPin className="w-4 h-4 mr-1" style={{ color: APP_CONFIG.colors.primary }} />
-          Canada, Ontario <span className="ml-2 text-xs opacity-70">(Your Location)</span>
+          Canada, Ontario <span className="ml-2 text-xs opacity-70">({t('yourLocation')})</span>
         </div>
       </div>
 
@@ -51,13 +55,17 @@ const ExploreContent = () => {
             <Search className="w-5 h-5 text-gray-400 mr-2" />
             <input
               type="text"
-              placeholder={`Find ${APP_CONFIG.terms.professional.toLowerCase()} by name or city...`}
+              placeholder={t('searchPlaceholder', { professional: APP_CONFIG.terms.professional.toLowerCase() })}
               className="bg-transparent border-none outline-none text-sm w-full text-gray-700 placeholder:text-gray-400"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <button className="w-12 h-12 rounded-full bg-white shadow-sm border border-gray-100 flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-transform" style={{ color: APP_CONFIG.colors.primary }}>
+          <button 
+            onClick={() => setIsFilterModalOpen(true)}
+            className="w-12 h-12 rounded-full bg-white shadow-sm border border-gray-100 flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-transform" 
+            style={{ color: APP_CONFIG.colors.primary }}
+          >
             <SlidersHorizontal className="w-5 h-5" />
           </button>
         </div>
@@ -66,31 +74,37 @@ const ExploreContent = () => {
         <div className="flex gap-3 overflow-x-auto pb-2 custom-scrollbar -mx-6 px-6">
           <button
             onClick={() => setActiveFilter('all')}
-            className={`flex items-center px-4 py-2 rounded-full text-[13px] font-bold whitespace-nowrap transition-all border ${activeFilter === 'all' ? 'text-white border-transparent shadow-md' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+            className={`flex items-center justify-center px-5 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-all border ${
+              activeFilter === 'all' ? 'text-white border-transparent shadow-md' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+            }`}
             style={{ backgroundColor: activeFilter === 'all' ? APP_CONFIG.colors.primary : undefined }}
           >
-            All
+            {t('allExperts')}
           </button>
           <button
             onClick={() => setActiveFilter('top_rated')}
-            className={`flex items-center px-4 py-2 rounded-full text-[13px] font-bold whitespace-nowrap transition-all border ${activeFilter === 'top_rated' ? 'text-white border-transparent shadow-md' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+            className={`flex items-center justify-center px-5 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-all border ${
+              activeFilter === 'top_rated' ? 'text-white border-transparent shadow-md' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+            }`}
             style={{ backgroundColor: activeFilter === 'top_rated' ? APP_CONFIG.colors.primary : undefined }}
           >
-            <Star className="w-3.5 h-3.5 mr-1.5" /> Top Rated
+            <Star className="w-4 h-4 mr-2" /> {t('topRated')}
           </button>
           <button
             onClick={() => setActiveFilter('available')}
-            className={`flex items-center px-4 py-2 rounded-full text-[13px] font-bold whitespace-nowrap transition-all border ${activeFilter === 'available' ? 'text-white border-transparent shadow-md' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+            className={`flex items-center justify-center px-5 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-all border ${
+              activeFilter === 'available' ? 'text-white border-transparent shadow-md' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+            }`}
             style={{ backgroundColor: activeFilter === 'available' ? APP_CONFIG.colors.primary : undefined }}
           >
-            <Clock className="w-3.5 h-3.5 mr-1.5" /> Available Today
+            <Clock className="w-4 h-4 mr-2" /> {t('availableToday')}
           </button>
         </div>
 
         {/* Professional List */}
         <div>
           <h2 className="text-[16px] font-bold text-gray-900 mb-4">
-            {filteredProfessionals.length} {filteredProfessionals.length === 1 ? 'Result' : 'Results'} Found
+            {t('resultsFound', { count: filteredProfessionals.length })}
           </h2>
 
           {filteredProfessionals.length > 0 ? (
@@ -104,13 +118,92 @@ const ExploreContent = () => {
               <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4 text-gray-400">
                 <Search className="w-8 h-8" />
               </div>
-              <p className="text-gray-900 font-bold">No results found</p>
-              <p className="text-sm text-gray-500 mt-1">Try adjusting your filters or search term.</p>
+              <p className="text-gray-900 font-bold">{t('noResults')}</p>
+              <p className="text-sm text-gray-500 mt-1">{t('tryAdjusting')}</p>
             </div>
           )}
         </div>
       </div>
     </div>
+
+      {/* Advanced Filter Modal Bottom Sheet */}
+      {isFilterModalOpen && (
+        <div className="absolute inset-0 z-50 flex items-end sm:items-center justify-center overflow-hidden">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
+            onClick={() => setIsFilterModalOpen(false)}
+          ></div>
+
+          {/* Sheet */}
+          <div className="bg-white w-full max-w-md rounded-t-[32px] sm:rounded-[32px] relative z-10 flex flex-col max-h-[90vh] shadow-2xl animate-in slide-in-from-bottom-full duration-300">
+            {/* Handle for mobile */}
+            <div className="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mt-4 mb-2 sm:hidden"></div>
+
+            <div className="flex items-center justify-between px-6 pb-4 pt-2 border-b border-gray-100">
+              <h2 className="text-xl font-bold text-gray-900">{t('filterTitle', { professional: APP_CONFIG.terms.professional })}</h2>
+              <button 
+                onClick={() => setIsFilterModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 active:scale-95 transition-all"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="px-6 py-6 overflow-y-auto space-y-8 flex-1">
+              {/* Sort By Section */}
+              <div className="space-y-4">
+                <h3 className="font-bold text-gray-900 text-[15px]">{t('sortBy')}</h3>
+                <div className="space-y-3">
+                  {['Recommended', 'Nearest Distance', 'Highest Rating', 'Lowest Price'].map((sortType) => (
+                    <label key={sortType} className="flex items-center justify-between cursor-pointer group">
+                      <span className="text-[14px] text-gray-700 font-medium group-hover:text-gray-900">{sortType}</span>
+                      <div className="w-5 h-5 rounded-full border border-gray-300 flex items-center justify-center">
+                        {sortType === 'Recommended' && <div className="w-3 h-3 rounded-full" style={{ backgroundColor: APP_CONFIG.colors.primary }}></div>}
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Gender Preference */}
+              <div className="space-y-4">
+                <h3 className="font-bold text-gray-900 text-[15px]">{t('genderPreference')}</h3>
+                <div className="flex gap-3">
+                  {['Any', 'Female', 'Male'].map((gender) => (
+                    <button 
+                      key={gender}
+                      className={`flex-1 py-3 rounded-xl text-[13px] font-bold border transition-all ${
+                        gender === 'Any' ? 'bg-gray-50 border-gray-200 text-gray-900' : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
+                      }`}
+                      style={gender === 'Any' ? { borderColor: APP_CONFIG.colors.primary, color: APP_CONFIG.colors.primary, backgroundColor: APP_CONFIG.colors.primaryLight } : {}}
+                    >
+                      {gender}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 border-t border-gray-100 bg-white rounded-b-[32px] flex gap-3">
+              <button 
+                onClick={() => { setActiveFilter('all'); setIsFilterModalOpen(false); }}
+                className="px-6 py-4 rounded-full font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 active:scale-95 transition-all w-1/3"
+              >
+                {t('reset')}
+              </button>
+              <button 
+                onClick={() => setIsFilterModalOpen(false)}
+                className="flex-1 py-4 rounded-full font-bold text-white shadow-lg shadow-pink-500/30 hover:opacity-90 active:scale-95 transition-all text-center"
+                style={{ background: `linear-gradient(to right, ${APP_CONFIG.colors.primary}, ${APP_CONFIG.colors.secondary})` }}
+              >
+                {t('applyFilters')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

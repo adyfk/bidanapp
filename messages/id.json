@@ -1,0 +1,80 @@
+{
+  "Index": {
+    "title": "Selamat datang di BidanApp"
+  },
+  "Home": {
+    "location": "Lokasi",
+    "searchPlaceholder": "Cari {service} atau {category}...",
+    "appointment": "Jadwal Temu",
+    "popularServices": "{service} Populer",
+    "explore": "Eksplor",
+    "categories": "Kategori",
+    "professionalsNearYou": "{professional} di sekitar Anda"
+  },
+  "Navigation": {
+    "home": "Beranda",
+    "search": "Cari",
+    "experts": "Ahli",
+    "messages": "Pesan"
+  },
+  "Onboarding": {
+    "getStarted": "Mulai Sekarang"
+  },
+  "Professional": {
+    "about": "Tentang {professional}",
+    "distance": "Jarak",
+    "time": "Waktu",
+    "rating": "Penilaian",
+    "makeAppointment": "Buat Janji",
+    "experience": "Tahun Pengalaman"
+  },
+  "Explore": {
+    "title": "{professional}",
+    "yourLocation": "Lokasi Anda",
+    "searchPlaceholder": "Cari {professional} berdasarkan nama atau kota...",
+    "allExperts": "Semua Ahli",
+    "topRated": "Rating Teratas",
+    "availableToday": "Tersedia Hari Ini",
+    "resultsFound": "{count} Hasil Ditemukan",
+    "noResults": "Hasil tidak ditemukan",
+    "tryAdjusting": "Coba ubah filter atau kata kunci pencarian Anda.",
+    "filterTitle": "Saring {professional}",
+    "sortBy": "Urutkan Berdasarkan",
+    "genderPreference": "Preferensi Gender",
+    "reset": "Atur Ulang",
+    "applyFilters": "Terapkan Filter"
+  },
+  "Messages": {
+    "title": "Pesan",
+    "searchPlaceholder": "Cari pesan...",
+    "all": "Semua",
+    "unread": "Belum dibaca",
+    "archived": "Diarsipkan",
+    "noMessages": "Tidak ada pesan",
+    "trySearching": "Coba cari dengan kata kunci lain."
+  },
+  "Services": {
+    "globalTitle": "{service} Global",
+    "searchPlaceholder": "Cari {service}...",
+    "allServices": "Semua Layanan",
+    "catalogTitle": "Katalog {count} Layanan",
+    "noServices": "Tidak ada layanan ditemukan",
+    "trySearchTerm": "Coba kata pencarian lain."
+  },
+  "ServiceDetail": {
+    "about": "Tentang {service} ini",
+    "available": "{professional} Tersedia",
+    "expertsCount": "{count} Ahli",
+    "noProfessionals": "Belum ada profesional yang menyediakan layanan ini."
+  },
+  "UI": {
+    "seeAll": "Lihat Semua"
+  },
+  "Profile": {
+    "title": "Profil",
+    "language": "Bahasa",
+    "account": "Pengaturan Akun",
+    "aboutApp": "Tentang BidanApp",
+    "logout": "Keluar"
+  }
+}

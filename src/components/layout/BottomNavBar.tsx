@@ -1,21 +1,22 @@
 'use client';
 
 import React from 'react';
-import { usePathname } from 'next/navigation';
-import Link from 'next/link';
+import { Link, usePathname } from '@/i18n/routing';
+import { useTranslations } from 'next-intl';
 import { Home as HomeIcon, Search, MessageSquare, Users } from 'lucide-react';
 import { APP_CONFIG } from '@/lib/config';
 
 export const BottomNavBar = () => {
   const pathname = usePathname();
+  const t = useTranslations('Navigation');
 
-  if (pathname === '/' || pathname.startsWith('/p')) return null;
+  if (pathname === '/' || pathname.startsWith('/p') || pathname.startsWith('/messages/')) return null;
 
   const navItems = [
-    { id: '/home', icon: <HomeIcon className="w-[22px] h-[22px]" />, label: 'Home' },
-    { id: '/services', icon: <Search className="w-[22px] h-[22px]" />, label: 'Search' },
-    { id: '/explore', icon: <Users className="w-[22px] h-[22px]" />, label: 'Experts' },
-    { id: '/messages', icon: <MessageSquare className="w-[22px] h-[22px]" />, label: 'Messages' }
+    { id: '/home', icon: <HomeIcon className="w-[22px] h-[22px]" />, label: t('home') },
+    { id: '/services', icon: <Search className="w-[22px] h-[22px]" />, label: t('search') },
+    { id: '/explore', icon: <Users className="w-[22px] h-[22px]" />, label: t('experts') },
+    { id: '/messages', icon: <MessageSquare className="w-[22px] h-[22px]" />, label: t('messages') }
   ];
 
   return (
@@ -27,9 +28,8 @@ export const BottomNavBar = () => {
             <Link
               key={item.id}
               href={item.id}
-              className={`flex items-center justify-center rounded-full transition-all duration-300 ${
-                isActive ? 'px-5 py-3 text-white' : 'w-12 h-12 text-gray-400 hover:text-white'
-              }`}
+              className={`flex items-center justify-center rounded-full transition-all duration-300 ${isActive ? 'px-5 py-3 text-white' : 'w-12 h-12 text-gray-400 hover:text-white'
+                }`}
               style={{ backgroundColor: isActive ? APP_CONFIG.colors.primary : 'transparent' }}
             >
               {item.icon}

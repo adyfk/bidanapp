@@ -1,5 +1,6 @@
 import React from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/routing';
+import { useTranslations } from 'next-intl';
 import { Star, Heart } from 'lucide-react';
 import { APP_CONFIG } from '@/lib/config';
 import { MOCK_CATEGORIES } from '@/lib/constants';
@@ -10,27 +11,31 @@ interface ProfessionalCardProps {
   href: string;
 }
 
-export const ProfessionalCard = ({ professional, href }: ProfessionalCardProps) => (
-  <Link href={href} className="bg-white rounded-[24px] p-4 flex gap-4 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-all active:scale-[0.98] block">
-    <div className="w-[85px] h-[100px] bg-[#F5F5F5] rounded-[18px] overflow-hidden flex-shrink-0 relative">
-      <img src={professional.image} alt={professional.name} className="w-full h-full object-cover object-top" />
-    </div>
-    <div className="flex-1 flex flex-col justify-center">
-      <div className="flex justify-between items-start">
-        <h3 className="font-bold text-[16px] text-gray-900 leading-tight">{professional.name}</h3>
-        <button onClick={(e) => { e.preventDefault(); }} style={{ color: APP_CONFIG.colors.primary }}>
-          <Heart className="w-5 h-5" />
-        </button>
+export const ProfessionalCard = ({ professional, href }: ProfessionalCardProps) => {
+  const t = useTranslations('Professional');
+  
+  return (
+    <Link href={href} className="bg-white rounded-[24px] p-4 flex gap-4 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-all active:scale-[0.98] block">
+      <div className="w-[85px] h-[100px] bg-[#F5F5F5] rounded-[18px] overflow-hidden flex-shrink-0 relative">
+        <img src={professional.image} alt={professional.name} className="w-full h-full object-cover object-top" />
       </div>
-      <p className="text-[13px] mt-1 mb-2 font-medium" style={{ color: APP_CONFIG.colors.primary }}>
-        {MOCK_CATEGORIES.find(c => c.id === professional.categoryId)?.name || 'Professional'} <span className="text-gray-400 font-normal">- {professional.location}</span>
-      </p>
-      <div className="flex items-center gap-3 text-[12px] text-gray-500 font-medium">
-        <div className="flex items-center" style={{ color: APP_CONFIG.colors.warning }}>
-          <Star className="w-4 h-4 mr-1 fill-current" /> {professional.rating.toFixed(1)}
+      <div className="flex-1 flex flex-col justify-center">
+        <div className="flex justify-between items-start">
+          <h3 className="font-bold text-[16px] text-gray-900 leading-tight">{professional.name}</h3>
+          <button onClick={(e) => { e.preventDefault(); }} style={{ color: APP_CONFIG.colors.primary }}>
+            <Heart className="w-5 h-5" />
+          </button>
         </div>
-        <span>{professional.experience} {APP_CONFIG.terms.experience}</span>
+        <p className="text-[13px] mt-1 mb-2 font-medium" style={{ color: APP_CONFIG.colors.primary }}>
+          {MOCK_CATEGORIES.find(c => c.id === professional.categoryId)?.name || 'Professional'} <span className="text-gray-400 font-normal">- {professional.location}</span>
+        </p>
+        <div className="flex items-center gap-3 text-[12px] text-gray-500 font-medium">
+          <div className="flex items-center" style={{ color: APP_CONFIG.colors.warning }}>
+            <Star className="w-4 h-4 mr-1 fill-current" /> {professional.rating.toFixed(1)}
+          </div>
+          <span>{professional.experience} {t('experience')}</span>
+        </div>
       </div>
-    </div>
-  </Link>
-);
+    </Link>
+  );
+};

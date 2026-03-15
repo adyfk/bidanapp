@@ -1,14 +1,24 @@
 import React from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/routing';
+import { useTranslations } from 'next-intl';
 import { ArrowRight } from 'lucide-react';
 import { APP_CONFIG } from '@/lib/config';
+import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 
-export const OnboardingScreen = () => (
+export const OnboardingScreen = () => {
+  const t = useTranslations('Onboarding');
+  
+  return (
   <div className="flex flex-col h-full text-white relative overflow-hidden" style={{ backgroundColor: APP_CONFIG.colors.primary }}>
     {/* Dekorasi Background */}
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
       <div className="absolute top-[10%] -left-[20%] w-[140%] h-[40%] bg-white/10 rounded-[100%] rotate-[-10deg]"></div>
       <div className="absolute top-[40%] -left-[20%] w-[140%] h-[40%] bg-white/10 rounded-[100%] rotate-[10deg]"></div>
+    </div>
+
+    {/* Header / Top Bar */}
+    <div className="absolute top-0 w-full flex justify-end p-6 z-20">
+      <LanguageSwitcher variant="dark" />
     </div>
 
     <div className="flex-1 flex flex-col items-center justify-start pt-24 px-8 z-10 text-center relative">
@@ -22,7 +32,7 @@ export const OnboardingScreen = () => (
         href="/home"
         className="flex items-center gap-2 bg-black/20 hover:bg-black/30 transition-colors backdrop-blur-md px-8 py-4 rounded-full text-white font-semibold border border-white/10 active:scale-95"
       >
-        Get Started <ArrowRight className="w-5 h-5 ml-1" />
+        {t('getStarted')} <ArrowRight className="w-5 h-5 ml-1" />
       </Link>
     </div>
 
@@ -38,4 +48,5 @@ export const OnboardingScreen = () => (
       />
     </div>
   </div>
-);
+  );
+};

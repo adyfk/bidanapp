@@ -1,18 +1,21 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/routing';
+import { useTranslations } from 'next-intl';
 import { Share2, Heart, User, Star, Navigation, MessageSquare } from 'lucide-react';
 import { APP_CONFIG } from '@/lib/config';
 import { MOCK_PROFESSIONALS, MOCK_CATEGORIES, MOCK_SERVICES } from '@/lib/constants';
 import { IconButton } from '@/components/ui/IconButton';
 import { ServiceOption } from '@/components/ui/ServiceOption';
 
-export const ProfessionalDetailScreen = () => {
-  const professional = MOCK_PROFESSIONALS[0];
+export const ProfessionalDetailScreen = ({ professionalSlug }: { professionalSlug?: string }) => {
+  const professional = MOCK_PROFESSIONALS.find(p => p.slug === professionalSlug) || MOCK_PROFESSIONALS[0];
   const [selectedService, setSelectedService] = useState<string>(
     professional.services && professional.services.length > 0 ? professional.services[0].serviceId : ''
   );
+  
+  const t = useTranslations('Professional');
   
   const profCategory = MOCK_CATEGORIES.find(c => c.id === professional.categoryId)?.name || 'Professional';
 
@@ -65,7 +68,7 @@ export const ProfessionalDetailScreen = () => {
               <div className="flex items-center text-gray-900 font-bold mb-1.5 text-[15px]">
                 <Star className="w-4 h-4 mr-1.5 fill-current" style={{ color: APP_CONFIG.colors.warning }} /> {professional.rating.toFixed(1)}
               </div>
-              <span className="text-[11px] text-gray-400 font-medium">Rating</span>
+              <span className="text-[11px] text-gray-400 font-medium">{t('rating')}</span>
             </div>
           </div>
         </div>
@@ -90,11 +93,11 @@ export const ProfessionalDetailScreen = () => {
           <div className="flex justify-between items-end mb-4 text-sm px-2">
             <div className="flex gap-8">
               <div>
-                <span className="text-gray-400 block text-[11px] mb-1">Distance</span>
+                <span className="text-gray-400 block text-[11px] mb-1">{t('distance')}</span>
                 <span className="font-bold text-gray-900">5.23 km</span>
               </div>
               <div>
-                <span className="text-gray-400 block text-[11px] mb-1">Time</span>
+                <span className="text-gray-400 block text-[11px] mb-1">{t('time')}</span>
                 <span className="font-bold text-gray-900">8 min</span>
               </div>
             </div>
@@ -111,7 +114,7 @@ export const ProfessionalDetailScreen = () => {
 
         {/* Bagian About */}
         <div className="pb-32 px-2">
-          <h3 className="font-bold text-[17px] text-gray-900 mb-2">About {APP_CONFIG.terms.professional}</h3>
+          <h3 className="font-bold text-[17px] text-gray-900 mb-2">{t('about', { professional: APP_CONFIG.terms.professional })}</h3>
           <p className="text-[13px] text-gray-500 leading-relaxed font-medium">
             {professional.about}
           </p>
@@ -142,7 +145,7 @@ export const ProfessionalDetailScreen = () => {
             className="flex-1 text-white font-bold py-4 rounded-full transition-transform active:scale-[0.98] shadow-[0_8px_20px_rgba(123,97,255,0.3)] text-[15px]"
             style={{ backgroundColor: APP_CONFIG.colors.primary }}
           >
-            Make Appointment
+            {t('makeAppointment')}
           </button>
           <button className="w-[56px] h-[56px] border-[1.5px] border-gray-200 rounded-[20px] flex items-center justify-center hover:bg-gray-50 transition-colors active:scale-95 text-gray-600">
             <MessageSquare className="w-6 h-6" />

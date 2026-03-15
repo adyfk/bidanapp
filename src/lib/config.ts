@@ -4,6 +4,8 @@ export const APP_CONFIG = {
   // --- Global Branding ---
   appName: "BidanCare",
   seoDescription: "Temukan profesional independen terpercaya untuk kebutuhan Anda.",
+  baseUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://bidanapp.com",
+  ogImage: "/icon-512x512.png", // Default OG Image for Social Media
 
   // --- Nomenclature / White Label Config ---
   terms: {

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { ChevronLeft, Clock, Heart, Share2, MapPin } from 'lucide-react';
 import { APP_CONFIG } from '@/lib/config';
 import { MOCK_PROFESSIONALS, MOCK_CATEGORIES, MOCK_SERVICES } from '@/lib/constants';
@@ -9,6 +10,7 @@ import { IconButton } from '@/components/ui/IconButton';
 
 export const ServiceDetailScreen = ({ serviceId }: { serviceId: string }) => {
   const router = useRouter();
+  const t = useTranslations('ServiceDetail');
   
   const service = MOCK_SERVICES.find(s => s.id === serviceId);
   if (!service) return null;
@@ -64,7 +66,7 @@ export const ServiceDetailScreen = ({ serviceId }: { serviceId: string }) => {
       <div className="px-6 py-6 space-y-8">
         {/* Description Section */}
         <div>
-          <h2 className="text-[18px] font-bold text-gray-900 mb-3">About this {APP_CONFIG.terms.service}</h2>
+          <h2 className="text-[18px] font-bold text-gray-900 mb-3">{t('about', { service: APP_CONFIG.terms.service })}</h2>
           <p className="text-gray-600 text-[14px] leading-relaxed">
             {service.description}
           </p>
@@ -73,9 +75,9 @@ export const ServiceDetailScreen = ({ serviceId }: { serviceId: string }) => {
         {/* Providers Section */}
         <div>
           <div className="flex items-center justify-between mb-4">
-             <h2 className="text-[18px] font-bold text-gray-900">Available {APP_CONFIG.terms.professional}s</h2>
+             <h2 className="text-[18px] font-bold text-gray-900">{t('available', { professional: APP_CONFIG.terms.professional })}</h2>
              <span className="text-[13px] font-medium px-3 py-1 bg-gray-100 text-gray-600 rounded-full">
-               {providers.length} {providers.length === 1 ? 'Expert' : 'Experts'}
+               {t('expertsCount', { count: providers.length })}
              </span>
           </div>
           
@@ -116,7 +118,7 @@ export const ServiceDetailScreen = ({ serviceId }: { serviceId: string }) => {
             ))}
             
             {providers.length === 0 && (
-              <p className="text-gray-500 text-sm py-4 text-center">No professionals currently provide this service.</p>
+              <p className="text-gray-500 text-sm py-4 text-center">{t('noProfessionals')}</p>
             )}
           </div>
         </div>
