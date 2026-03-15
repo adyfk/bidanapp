@@ -1,6 +1,6 @@
 {
   "name": "@bidanapp/sdk",
-  "version": "0.1.0",
+  "version": "0.0.0-private",
   "private": true,
   "type": "module",
   "main": "./src/index.ts",
@@ -16,6 +16,7 @@
     "generate": "npm run export:spec && npm run generate:types",
     "export:spec": "cd ../../apps/backend && go run ./cmd/openapi-export -json ../../packages/sdk/openapi.json",
     "generate:types": "openapi-typescript ./openapi.json -o ./src/generated/types.ts",
+    "lint": "biome ci .",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

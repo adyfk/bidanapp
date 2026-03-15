@@ -1,7 +1,5 @@
 'use client';
 
-import React from 'react';
-import { APP_CONFIG } from '@/lib/config';
 import { InlineFeedbackNotice } from '@/components/ui/InlineFeedbackNotice';
 import { AppointmentChatSheet } from '@/features/appointments/components/AppointmentChatSheet';
 import { AppointmentDetailSheet } from '@/features/appointments/components/AppointmentDetailSheet';
@@ -10,6 +8,7 @@ import { AppointmentsHeader } from '@/features/appointments/components/Appointme
 import { AppointmentsList } from '@/features/appointments/components/AppointmentsList';
 import { AppointmentsTabs } from '@/features/appointments/components/AppointmentsTabs';
 import { useAppointmentFlow } from '@/features/appointments/hooks/useAppointmentFlow';
+import { APP_CONFIG } from '@/lib/config';
 
 export const AppointmentsScreen = () => {
   const {

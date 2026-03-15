@@ -17,6 +17,7 @@
 /.next/
 /out/
 .turbo
+.artifacts
 apps/*/.turbo/
 apps/*/.next/
 apps/*/out/
@@ -33,6 +34,10 @@ apps/backend/api
 .vscode
 *.pem
 *.log
+ops/platform/forgejo/data/
+ops/platform/forgejo/postgres/
+ops/platform/forgejo/runner/
+ops/platform/forgejo/caddy/
 
 # debug
 npm-debug.log*

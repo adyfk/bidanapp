@@ -1,12 +1,9 @@
 'use client';
 
-import React from 'react';
 import { House, Stethoscope, Video } from 'lucide-react';
-import { APP_CONFIG } from '@/lib/config';
-import {
-  ProfessionalSectionTitle,
-} from '@/features/professional-detail/components/ProfessionalSectionTitle';
+import { ProfessionalSectionTitle } from '@/features/professional-detail/components/ProfessionalSectionTitle';
 import type { ProfessionalServiceEntry } from '@/features/professional-detail/hooks/useProfessionalDetail';
+import { APP_CONFIG } from '@/lib/config';
 
 interface ProfessionalServicesSectionProps {
   offeredServices: ProfessionalServiceEntry[];
@@ -33,6 +30,7 @@ export const ProfessionalServicesSection = ({
 
           return (
             <button
+              type="button"
               key={serviceMapping.serviceId}
               onClick={() => onSelectService(serviceMapping.serviceId)}
               className={`w-full rounded-[24px] border p-4 text-left transition-all ${

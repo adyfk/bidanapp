@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
-import Image from 'next/image';
 import { ChevronLeft, Navigation } from 'lucide-react';
+import Image from 'next/image';
+import { useEffect, useRef } from 'react';
+import type { AppointmentChatSession } from '@/features/appointments/hooks/useAppointmentFlow';
 import { APP_CONFIG } from '@/lib/config';
 import { SIMULATION_SHARED } from '@/lib/constants';
 import type { Appointment } from '@/types/appointments';
-import type { AppointmentChatSession } from '@/features/appointments/hooks/useAppointmentFlow';
 
 interface AppointmentChatSheetProps {
   appointment: Appointment;
@@ -29,17 +29,22 @@ export const AppointmentChatSheet = ({
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [chatSession.messages.length]);
+  }, []);
 
   return (
     <div className="fixed inset-y-0 left-1/2 z-[70] flex w-full max-w-md -translate-x-1/2 flex-col bg-gray-50 animate-in fade-in slide-in-from-bottom-4 duration-300">
       <div className="sticky top-0 z-10 flex items-center border-b border-gray-100 bg-white p-4 shadow-sm">
-        <button onClick={onClose} className="mr-2 -ml-2 rounded-full p-2 hover:bg-gray-100">
+        <button type="button" onClick={onClose} className="mr-2 -ml-2 rounded-full p-2 hover:bg-gray-100">
           <ChevronLeft className="h-6 w-6 text-gray-800" />
         </button>
         <div className="flex items-center gap-3">
           <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-full bg-gray-100">
-            <Image src={appointment.professional.image} alt={appointment.professional.name} fill className="object-cover" />
+            <Image
+              src={appointment.professional.image}
+              alt={appointment.professional.name}
+              fill
+              className="object-cover"
+            />
           </div>
           <div>
             <h2 className="text-[15px] font-bold leading-tight text-gray-900">{appointment.professional.name}</h2>
@@ -60,9 +65,7 @@ export const AppointmentChatSheet = ({
             <div key={message.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
               <div
                 className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-sm ${
-                  isUser
-                    ? 'rounded-br-sm text-white'
-                    : 'rounded-bl-sm border border-gray-100 bg-white text-gray-800'
+                  isUser ? 'rounded-br-sm text-white' : 'rounded-bl-sm border border-gray-100 bg-white text-gray-800'
                 }`}
                 style={
                   isUser

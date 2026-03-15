@@ -1,8 +1,7 @@
 'use client';
 
-import React from 'react';
-import Image from 'next/image';
 import { ChevronLeft, Heart, Share2 } from 'lucide-react';
+import Image from 'next/image';
 import { IconButton } from '@/components/ui/IconButton';
 import { SIMULATION_MEDIA } from '@/lib/constants';
 import type { GlobalService } from '@/types/catalog';
@@ -13,11 +12,7 @@ interface ServiceDetailHeroSectionProps {
   service: GlobalService;
 }
 
-export const ServiceDetailHeroSection = ({
-  categoryName,
-  onBack,
-  service,
-}: ServiceDetailHeroSectionProps) => {
+export const ServiceDetailHeroSection = ({ categoryName, onBack, service }: ServiceDetailHeroSectionProps) => {
   return (
     <div className="relative h-64 w-full bg-gray-200">
       <Image

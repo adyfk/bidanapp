@@ -1,6 +1,6 @@
 {
   "name": "bidanapp-monorepo",
-  "version": "0.1.0",
+  "version": "0.0.0-private",
   "private": true,
   "packageManager": "npm@11.6.2",
   "engines": {
@@ -12,11 +12,27 @@
     "packages/*"
   ],
   "scripts": {
+    "biome:check": "biome ci .",
+    "biome:write": "biome check --write .",
+    "branch:lint": "node ./scripts/ci/check-branch-name.cjs",
+    "changeset": "changeset",
+    "changeset:check": "node ./scripts/ci/check-changeset.cjs",
+    "changeset:status": "changeset status --verbose",
+    "changeset:version": "changeset version",
+    "ci:check": "npm run contract:generate && npm run generated:check && npm run lint && npm run typecheck && npm run test && npm run build",
+    "commit": "commit",
     "dev": "turbo run dev --parallel",
     "dev:frontend": "npm run dev --workspace @bidanapp/frontend",
     "dev:backend": "npm run dev --workspace @bidanapp/backend",
+    "format": "biome format --write .",
+    "generated:check": "node ./scripts/ci/check-generated-clean.cjs",
     "build": "turbo run build",
-    "lint": "turbo run lint",
+    "lint": "npm run biome:check && turbo run lint --filter=@bidanapp/backend",
+    "prepare": "lefthook install",
+    "pr:body:lint": "node ./scripts/ci/check-pr-body.cjs",
+    "pr:title:lint": "node ./scripts/ci/lint-pr-title.cjs",
+    "release:ci": "node ./scripts/release/run-changeset-release.cjs",
+    "release:dry-run": "node ./scripts/release/run-changeset-release.cjs --dry-run",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",
     "contract:generate": "npm run generate --workspace @bidanapp/sdk",
@@ -29,6 +45,13 @@
     "start:backend": "npm run start --workspace @bidanapp/backend"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.4.7",
+    "@changesets/changelog-github": "^0.6.0",
+    "@changesets/cli": "^2.30.0",
+    "@commitlint/cli": "^20.5.0",
+    "@commitlint/config-conventional": "^20.5.0",
+    "@commitlint/prompt-cli": "^20.5.0",
+    "lefthook": "^2.1.4",
     "turbo": "^2.5.6"
   }
 }

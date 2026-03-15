@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { Search } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { APP_CONFIG } from '@/lib/config';

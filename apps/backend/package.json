@@ -1,6 +1,6 @@
 {
   "name": "@bidanapp/backend",
-  "version": "0.1.0",
+  "version": "0.0.0-private",
   "private": true,
   "scripts": {
     "dev": "go run ./cmd/api",

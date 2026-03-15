@@ -1,8 +1,8 @@
-import { APP_CONFIG } from '@/lib/config';
-import { MOCK_SERVICES, getServiceBySlug } from '@/lib/constants';
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ServiceDetailScreen } from '@/components/screens/ServiceDetailScreen';
+import { APP_CONFIG } from '@/lib/config';
+import { getServiceBySlug, MOCK_SERVICES } from '@/lib/constants';
 
 interface Props {
   params: Promise<{
@@ -41,7 +41,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       title: `${service.name} | ${APP_CONFIG.appName}`,
       description: service.description,
       images: [service.coverImage || service.image || APP_CONFIG.ogImage],
-    }
+    },
   };
 }
 

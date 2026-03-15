@@ -1,4 +1,4 @@
-import { createChatWebSocketUrl, type ChatSocketParams } from '@bidanapp/sdk';
+import { type ChatSocketParams, createChatWebSocketUrl } from '@bidanapp/sdk';
 import { PUBLIC_ENV } from '@/lib/env';
 
 export function getBackendApiBaseUrl() {

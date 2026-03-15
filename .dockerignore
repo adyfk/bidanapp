@@ -1,0 +1,17 @@
+.git
+.github
+.forgejo
+.next
+.turbo
+node_modules
+apps/*/.next
+apps/*/.turbo
+apps/backend/bin
+coverage
+dist
+.artifacts
+ops/deploy/*.env
+ops/platform/forgejo/data
+ops/platform/forgejo/postgres
+ops/platform/forgejo/runner
+*.log

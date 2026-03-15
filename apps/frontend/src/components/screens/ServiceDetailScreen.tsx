@@ -1,13 +1,12 @@
 'use client';
 
-import React from 'react';
-import { useRouter } from '@/i18n/routing';
-import { APP_CONFIG } from '@/lib/config';
 import { InlineFeedbackNotice } from '@/components/ui/InlineFeedbackNotice';
 import { ServiceDetailHeroSection } from '@/features/service-detail/components/ServiceDetailHeroSection';
 import { ServiceDetailOverviewSection } from '@/features/service-detail/components/ServiceDetailOverviewSection';
 import { ServiceDetailProvidersSection } from '@/features/service-detail/components/ServiceDetailProvidersSection';
 import { useServiceDetail } from '@/features/service-detail/hooks/useServiceDetail';
+import { useRouter } from '@/i18n/routing';
+import { APP_CONFIG } from '@/lib/config';
 
 export const ServiceDetailScreen = ({ serviceId }: { serviceId: string }) => {
   const router = useRouter();

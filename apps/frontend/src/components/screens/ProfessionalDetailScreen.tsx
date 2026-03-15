@@ -1,9 +1,7 @@
 'use client';
 
-import React from 'react';
 import { BadgeCheck, Clock3, Languages } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { SIMULATION_MESSAGES } from '@/lib/constants';
 import { ProfessionalBookingBar } from '@/features/professional-detail/components/ProfessionalBookingBar';
 import { ProfessionalHeroSection } from '@/features/professional-detail/components/ProfessionalHeroSection';
 import { ProfessionalPortfolioSections } from '@/features/professional-detail/components/ProfessionalPortfolioSections';
@@ -11,6 +9,7 @@ import { ProfessionalPracticeSections } from '@/features/professional-detail/com
 import { ProfessionalServicesSection } from '@/features/professional-detail/components/ProfessionalServicesSection';
 import { ProfessionalTrustSections } from '@/features/professional-detail/components/ProfessionalTrustSections';
 import { useProfessionalDetail } from '@/features/professional-detail/hooks/useProfessionalDetail';
+import { SIMULATION_MESSAGES } from '@/lib/constants';
 
 export const ProfessionalDetailScreen = ({ professionalSlug }: { professionalSlug?: string }) => {
   const t = useTranslations('Professional');

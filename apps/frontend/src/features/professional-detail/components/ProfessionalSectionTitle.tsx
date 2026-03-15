@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import type React from 'react';
 import { APP_CONFIG } from '@/lib/config';
 
 export const professionalSectionClassName =
@@ -11,10 +11,7 @@ interface ProfessionalSectionTitleProps {
   title: string;
 }
 
-export const ProfessionalSectionTitle = ({
-  icon,
-  title,
-}: ProfessionalSectionTitleProps) => (
+export const ProfessionalSectionTitle = ({ icon, title }: ProfessionalSectionTitleProps) => (
   <div className="mb-5 flex items-center gap-3">
     <span
       className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white shadow-sm"

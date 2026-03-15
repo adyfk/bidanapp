@@ -21,8 +21,9 @@ export async function fetchBackendIntegrationSnapshot(client: BidanappApiClient)
   const appointmentThreads = chatResult.data?.data.appointmentThreads ?? [];
 
   return {
-    healthSummary: `${healthResult.data?.data.status ?? 'unknown'} · ${healthResult.data?.data.service ?? 'api'} · ${healthResult.data?.data.version ?? 'n/a'
-      }`,
+    healthSummary: `${healthResult.data?.data.status ?? 'unknown'} · ${healthResult.data?.data.service ?? 'api'} · ${
+      healthResult.data?.data.version ?? 'n/a'
+    }`,
     professionalsCount: professionalsResult.data?.data?.length ?? 0,
     chatThreadCount: directThreads.length + appointmentThreads.length,
   };

@@ -1,9 +1,8 @@
 'use client';
 
-import React from 'react';
-import { APP_CONFIG } from '@/lib/config';
 import { InlineFeedbackNotice } from '@/components/ui/InlineFeedbackNotice';
 import type { ProfessionalServiceEntry } from '@/features/professional-detail/hooks/useProfessionalDetail';
+import { APP_CONFIG } from '@/lib/config';
 
 interface ProfessionalBookingBarProps {
   ctaLabel: string;
@@ -29,14 +28,19 @@ export const ProfessionalBookingBar = ({
           <div className="rounded-[20px] px-4 py-3" style={{ backgroundColor: APP_CONFIG.colors.primaryLight }}>
             <div className="mb-2 flex items-center justify-between gap-3">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: APP_CONFIG.colors.primary }}>
+                <p
+                  className="text-[11px] font-semibold uppercase tracking-wide"
+                  style={{ color: APP_CONFIG.colors.primary }}
+                >
                   {selectedServiceEntry.catalogService.badge}
                 </p>
                 <p className="mt-1 text-[14px] font-bold text-gray-900">{selectedServiceEntry.catalogService.name}</p>
               </div>
               <div className="text-right">
                 <p className="text-[15px] font-bold text-gray-900">{selectedServiceEntry.serviceMapping.price}</p>
-                <p className="mt-1 text-[11px] font-medium text-gray-500">{selectedServiceEntry.serviceMapping.duration}</p>
+                <p className="mt-1 text-[11px] font-medium text-gray-500">
+                  {selectedServiceEntry.serviceMapping.duration}
+                </p>
               </div>
             </div>
             <p className="text-[13px] leading-relaxed text-gray-600">
@@ -47,6 +51,7 @@ export const ProfessionalBookingBar = ({
       </div>
 
       <button
+        type="button"
         className="w-full rounded-full py-4 text-[15px] font-bold text-white transition-transform active:scale-[0.98]"
         style={{
           backgroundColor: APP_CONFIG.colors.primary,

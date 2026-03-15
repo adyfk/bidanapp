@@ -93,6 +93,7 @@
     "description": "This page demonstrates REST access through the shared SDK generated from the backend OpenAPI document, plus realtime chat over WebSocket.",
     "restSection": "REST Contract",
     "health": "Health",
+    "frontendVersion": "Frontend Version",
     "professionals": "Professionals",
     "threads": "Chat Threads",
     "openapiLink": "OpenAPI from backend",

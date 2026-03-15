@@ -1,12 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import {
-  MOCK_CATEGORIES,
-  MOCK_PROFESSIONALS,
-  MOCK_SERVICES,
-  getBookingMessage,
-} from '@/lib/constants';
+import { getBookingMessage, MOCK_CATEGORIES, MOCK_PROFESSIONALS, MOCK_SERVICES } from '@/lib/constants';
 
 export interface ServiceProviderSummary {
   availabilityLabel: string;
@@ -29,10 +24,10 @@ export const useServiceDetail = (serviceId: string) => {
     : '';
   const providers: ServiceProviderSummary[] = service
     ? MOCK_PROFESSIONALS.filter((professional) =>
-        professional.services.some((professionalService) => professionalService.serviceId === service.id)
+        professional.services.some((professionalService) => professionalService.serviceId === service.id),
       ).map((professional) => {
         const professionalService = professional.services.find(
-          (serviceMapping) => serviceMapping.serviceId === service.id
+          (serviceMapping) => serviceMapping.serviceId === service.id,
         );
 
         return {
@@ -58,7 +53,7 @@ export const useServiceDetail = (serviceId: string) => {
     setNotice(
       providerName
         ? `${getBookingMessage(service.type)} Profesional terpilih: ${providerName}.`
-        : getBookingMessage(service.type)
+        : getBookingMessage(service.type),
     );
   };
 

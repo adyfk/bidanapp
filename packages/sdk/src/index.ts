@@ -1,11 +1,14 @@
 export {
-  createBidanappApiClient,
+  fetchBackendIntegrationSnapshot,
+  type IntegrationSnapshot,
+} from './adapters/integration';
+export {
   type BidanappApiClient,
   type BidanappComponents,
   type BidanappOperations,
   type BidanappPaths,
+  createBidanappApiClient,
 } from './client';
-
 export type {
   ChatClientMessage,
   ChatLiveMessage,
@@ -13,7 +16,3 @@ export type {
   ChatSocketParams,
 } from './realtime';
 export { createChatWebSocketUrl } from './realtime';
-export {
-  fetchBackendIntegrationSnapshot,
-  type IntegrationSnapshot,
-} from './adapters/integration';

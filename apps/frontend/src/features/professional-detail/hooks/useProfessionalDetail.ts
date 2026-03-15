@@ -1,13 +1,8 @@
 'use client';
 
-import React from 'react';
+import type React from 'react';
 import { useState } from 'react';
-import {
-  MOCK_CATEGORIES,
-  MOCK_PROFESSIONALS,
-  MOCK_SERVICES,
-  getBookingMessage,
-} from '@/lib/constants';
+import { getBookingMessage, MOCK_CATEGORIES, MOCK_PROFESSIONALS, MOCK_SERVICES } from '@/lib/constants';
 import type { Professional } from '@/types/catalog';
 
 export interface ProfessionalTrustIndicator {
@@ -21,9 +16,7 @@ export interface ProfessionalServiceEntry {
   serviceMapping: Professional['services'][number];
 }
 
-export const useProfessionalDetail = (
-  professionalSlug: string | undefined
-) => {
+export const useProfessionalDetail = (professionalSlug: string | undefined) => {
   const [notice, setNotice] = useState<string | null>(null);
   const professional = MOCK_PROFESSIONALS.find((item) => item.slug === professionalSlug) || null;
   const profCategory = professional
@@ -37,7 +30,7 @@ export const useProfessionalDetail = (
       })
     : [];
   const [selectedService, setSelectedService] = useState<string>(
-    offeredServices.length > 0 ? offeredServices[0].serviceMapping.serviceId : ''
+    offeredServices.length > 0 ? offeredServices[0].serviceMapping.serviceId : '',
   );
   const selectedServiceEntry =
     offeredServices.find(({ serviceMapping }) => serviceMapping.serviceId === selectedService) || null;
@@ -48,7 +41,7 @@ export const useProfessionalDetail = (
     }
 
     setNotice(
-      `${getBookingMessage(selectedServiceEntry.catalogService.type)} Layanan terpilih: ${selectedServiceEntry.catalogService.name}.`
+      `${getBookingMessage(selectedServiceEntry.catalogService.type)} Layanan terpilih: ${selectedServiceEntry.catalogService.name}.`,
     );
   };
 

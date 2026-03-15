@@ -1,15 +1,15 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { ACTIVE_APPOINTMENT_STATUSES, HISTORY_APPOINTMENT_STATUSES } from '@/features/appointments/lib/status';
 import {
+  fillSimulationTemplate,
+  getAppointmentChatThread,
   MOCK_APPOINTMENTS,
   SIMULATION_MESSAGES,
-  getAppointmentChatThread,
-  fillSimulationTemplate,
 } from '@/lib/constants';
 import type { Appointment, AppointmentStatus } from '@/types/appointments';
 import type { ChatMessage } from '@/types/chat';
-import { ACTIVE_APPOINTMENT_STATUSES, HISTORY_APPOINTMENT_STATUSES } from '@/features/appointments/lib/status';
 
 type AppointmentTab = 'active' | 'history';
 
@@ -59,7 +59,7 @@ const buildInitialChatState = () =>
             }
           : createFallbackChatSession(appointment),
       ] as const;
-    })
+    }),
   ) as Record<string, AppointmentChatSession>;
 
 export const useAppointmentFlow = (initialSelectedAppointmentId: string | null = null) => {
@@ -81,7 +81,9 @@ export const useAppointmentFlow = (initialSelectedAppointmentId: string | null =
     const timeoutIds = timeoutIdsRef.current;
 
     return () => {
-      timeoutIds.forEach((timeoutId) => window.clearTimeout(timeoutId));
+      timeoutIds.forEach((timeoutId) => {
+        window.clearTimeout(timeoutId);
+      });
     };
   }, []);
 
@@ -91,7 +93,7 @@ export const useAppointmentFlow = (initialSelectedAppointmentId: string | null =
         ...appointment,
         status: statusOverrides[appointment.id] ?? appointment.status,
       })),
-    [statusOverrides]
+    [statusOverrides],
   );
 
   const filteredAppointments = appointments
@@ -107,8 +109,7 @@ export const useAppointmentFlow = (initialSelectedAppointmentId: string | null =
       );
     })
     .filter((appointment) => {
-      const allowedStatuses =
-        activeTab === 'active' ? ACTIVE_APPOINTMENT_STATUSES : HISTORY_APPOINTMENT_STATUSES;
+      const allowedStatuses = activeTab === 'active' ? ACTIVE_APPOINTMENT_STATUSES : HISTORY_APPOINTMENT_STATUSES;
 
       return allowedStatuses.includes(appointment.status);
     });
@@ -119,7 +120,9 @@ export const useAppointmentFlow = (initialSelectedAppointmentId: string | null =
       : appointments.find((appointment) => appointment.id === selectedAppointmentId) || null;
 
   const selectedChatSession =
-    selectedAppointment === null ? null : chatSessions[selectedAppointment.id] || createFallbackChatSession(selectedAppointment);
+    selectedAppointment === null
+      ? null
+      : chatSessions[selectedAppointment.id] || createFallbackChatSession(selectedAppointment);
 
   const selectAppointment = (appointmentId: string) => {
     setSelectedAppointmentId(appointmentId);
@@ -232,7 +235,7 @@ export const useAppointmentFlow = (initialSelectedAppointmentId: string | null =
     setNotice(
       reviewPhotoName
         ? `${SIMULATION_MESSAGES.review.successAlert} Foto: ${reviewPhotoName}.`
-        : SIMULATION_MESSAGES.review.successAlert
+        : SIMULATION_MESSAGES.review.successAlert,
     );
     setIsReviewOpen(false);
     setReviewText('');

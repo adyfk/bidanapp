@@ -10,11 +10,7 @@
       "iconImage": "https://images.unsplash.com/photo-1544126592-807ade215a0b?q=80&w=200&auto=format&fit=crop",
       "coverImage": "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=1200&auto=format&fit=crop",
       "accentColor": "#FDE7F3",
-      "overviewPoints": [
-        "Pijat dan stimulasi bayi",
-        "Edukasi perawatan awal newborn",
-        "Konsultasi laktasi dan bonding"
-      ]
+      "overviewPoints": ["Pijat dan stimulasi bayi", "Edukasi perawatan awal newborn", "Konsultasi laktasi dan bonding"]
     },
     {
       "index": 2,
@@ -26,11 +22,7 @@
       "iconImage": "https://images.unsplash.com/photo-1493894473891-10fc1e5dbd22?q=80&w=200&auto=format&fit=crop",
       "coverImage": "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=1200&auto=format&fit=crop",
       "accentColor": "#FFF1E6",
-      "overviewPoints": [
-        "Monitoring pemulihan ibu",
-        "Pendampingan masa nifas",
-        "Konseling emosional awal"
-      ]
+      "overviewPoints": ["Monitoring pemulihan ibu", "Pendampingan masa nifas", "Konseling emosional awal"]
     },
     {
       "index": 3,
@@ -58,11 +50,7 @@
       "iconImage": "https://images.unsplash.com/photo-1550831107-1553da8c8464?q=80&w=200&auto=format&fit=crop",
       "coverImage": "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?q=80&w=1200&auto=format&fit=crop",
       "accentColor": "#EEF2FF",
-      "overviewPoints": [
-        "Latihan gerak terstruktur",
-        "Pendampingan terapi di rumah",
-        "Pemantauan progres mingguan"
-      ]
+      "overviewPoints": ["Latihan gerak terstruktur", "Pendampingan terapi di rumah", "Pemantauan progres mingguan"]
     },
     {
       "index": 5,
@@ -74,11 +62,7 @@
       "iconImage": "https://images.unsplash.com/photo-1515377905703-c4788e51af15?q=80&w=200&auto=format&fit=crop",
       "coverImage": "https://images.unsplash.com/photo-1519823551278-64ac92734fb1?q=80&w=1200&auto=format&fit=crop",
       "accentColor": "#ECFDF5",
-      "overviewPoints": [
-        "Relaksasi rumah dan mobile",
-        "Tekanan pijat bisa disesuaikan",
-        "Cocok untuk pemulihan ringan"
-      ]
+      "overviewPoints": ["Relaksasi rumah dan mobile", "Tekanan pijat bisa disesuaikan", "Cocok untuk pemulihan ringan"]
     },
     {
       "index": 6,
@@ -90,11 +74,7 @@
       "iconImage": "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=200&auto=format&fit=crop",
       "coverImage": "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?q=80&w=1200&auto=format&fit=crop",
       "accentColor": "#FEF3C7",
-      "overviewPoints": [
-        "Terapi bekam steril",
-        "Sesi kebugaran preventif",
-        "Paket tindak lanjut berkala"
-      ]
+      "overviewPoints": ["Terapi bekam steril", "Sesi kebugaran preventif", "Paket tindak lanjut berkala"]
     }
   ],
   "services": [
@@ -130,11 +110,7 @@
       "coverImage": "https://images.unsplash.com/photo-1584515933487-779824d29309?q=80&w=1200&auto=format&fit=crop",
       "badge": "Online Care",
       "tags": ["Video Call", "Laktasi", "ASI"],
-      "highlights": [
-        "Bisa dilakukan jarak jauh",
-        "Cocok untuk follow up mingguan",
-        "Membantu evaluasi pumping plan"
-      ]
+      "highlights": ["Bisa dilakukan jarak jauh", "Cocok untuk follow up mingguan", "Membantu evaluasi pumping plan"]
     },
     {
       "index": 3,
@@ -206,11 +182,7 @@
       "coverImage": "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=1200&auto=format&fit=crop",
       "badge": "Sterile Setup",
       "tags": ["Sunnah", "Detox", "Wellness"],
-      "highlights": [
-        "Peralatan steril sekali pakai",
-        "Bisa untuk kebugaran rutin",
-        "Tersedia opsi home visit"
-      ]
+      "highlights": ["Peralatan steril sekali pakai", "Bisa untuk kebugaran rutin", "Tersedia opsi home visit"]
     },
     {
       "index": 7,
@@ -412,7 +384,11 @@
           "serviceId": "s5",
           "periodLabel": "Maret 2026",
           "summary": "Pendampingan ibu dengan nyeri puting dan supply tidak stabil melalui tiga sesi video plus chat tindak lanjut.",
-          "outcomes": ["Nyeri menurun hari ke-4", "Frekuensi pumping lebih stabil", "Checklist menyusui dibagikan ke keluarga"],
+          "outcomes": [
+            "Nyeri menurun hari ke-4",
+            "Frekuensi pumping lebih stabil",
+            "Checklist menyusui dibagikan ke keluarga"
+          ],
           "image": "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=800&auto=format&fit=crop"
         },
         {
@@ -663,7 +639,11 @@
           "serviceId": "s1",
           "periodLabel": "Maret 2026",
           "summary": "Rangkaian pijat bayi usia satu sampai dua bulan dengan target menenangkan bayi dan memperbaiki rutinitas tidur sore.",
-          "outcomes": ["Ritual tidur lebih konsisten", "Orang tua ikut praktik langsung", "Checklist sentuhan aman dibagikan"],
+          "outcomes": [
+            "Ritual tidur lebih konsisten",
+            "Orang tua ikut praktik langsung",
+            "Checklist sentuhan aman dibagikan"
+          ],
           "image": "https://images.unsplash.com/photo-1544126592-807ade215a0b?q=80&w=800&auto=format&fit=crop"
         },
         {
@@ -672,7 +652,11 @@
           "serviceId": "s2",
           "periodLabel": "Februari 2026",
           "summary": "Layanan grooming awal bayi dengan SOP kebersihan alat, briefing keluarga, dan dokumentasi before-after.",
-          "outcomes": ["Durasi singkat di bawah tiga puluh menit", "Bayi tenang selama tindakan", "Alat steril dibuka di depan keluarga"],
+          "outcomes": [
+            "Durasi singkat di bawah tiga puluh menit",
+            "Bayi tenang selama tindakan",
+            "Alat steril dibuka di depan keluarga"
+          ],
           "image": "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?q=80&w=800&auto=format&fit=crop"
         },
         {
@@ -1189,7 +1173,11 @@
           "title": "Audit keselamatan ruang latihan",
           "periodLabel": "Januari 2026",
           "summary": "Assesment tata letak rumah agar pasien lebih aman saat latihan dan aktivitas harian dasar.",
-          "outcomes": ["Titik risiko jatuh teridentifikasi", "Jalur latihan dibersihkan", "Keluarga paham alat bantu minimal"],
+          "outcomes": [
+            "Titik risiko jatuh teridentifikasi",
+            "Jalur latihan dibersihkan",
+            "Keluarga paham alat bantu minimal"
+          ],
           "image": "https://images.unsplash.com/photo-1576671081837-49000212a370?q=80&w=800&auto=format&fit=crop"
         }
       ],
@@ -1415,7 +1403,11 @@
           "serviceId": "s4",
           "periodLabel": "Maret 2026",
           "summary": "Program bekam berkala untuk klien dengan ritme kerja tinggi yang membutuhkan reset fisik ringan dan after-care jelas.",
-          "outcomes": ["Checklist after-care dibagikan", "Repeat booking terjadwal", "Area tindakan steril terdokumentasi"],
+          "outcomes": [
+            "Checklist after-care dibagikan",
+            "Repeat booking terjadwal",
+            "Area tindakan steril terdokumentasi"
+          ],
           "image": "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?q=80&w=800&auto=format&fit=crop"
         },
         {
@@ -1433,7 +1425,11 @@
           "serviceId": "s9",
           "periodLabel": "Januari 2026",
           "summary": "Sesi singkat untuk klien sibuk yang butuh pemulihan cepat tanpa durasi panjang di rumah.",
-          "outcomes": ["Durasi efisien empat puluh lima menit", "Fokus titik pegal dominan", "After-care sederhana dan praktis"],
+          "outcomes": [
+            "Durasi efisien empat puluh lima menit",
+            "Fokus titik pegal dominan",
+            "After-care sederhana dan praktis"
+          ],
           "image": "https://images.unsplash.com/photo-1519823551278-64ac92734fb1?q=80&w=800&auto=format&fit=crop"
         }
       ],
@@ -1683,7 +1679,11 @@
           "title": "Paket relaksasi malam mingguan",
           "periodLabel": "Januari 2026",
           "summary": "Pendampingan empat minggu untuk klien pekerja kantoran yang ingin menjaga ritme recovery rutin di rumah.",
-          "outcomes": ["Jadwal malam lebih terstruktur", "Keluhan bahu menurun", "Repeat session konsisten setiap minggu"],
+          "outcomes": [
+            "Jadwal malam lebih terstruktur",
+            "Keluhan bahu menurun",
+            "Repeat session konsisten setiap minggu"
+          ],
           "image": "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?q=80&w=800&auto=format&fit=crop"
         }
       ],

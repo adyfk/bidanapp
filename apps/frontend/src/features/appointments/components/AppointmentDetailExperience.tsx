@@ -1,24 +1,20 @@
 'use client';
 
-import React from 'react';
 import { ChevronLeft } from 'lucide-react';
-import { APP_CONFIG } from '@/lib/config';
-import { SIMULATION_MESSAGES } from '@/lib/constants';
+import { InlineFeedbackNotice } from '@/components/ui/InlineFeedbackNotice';
 import { AppointmentChatSheet } from '@/features/appointments/components/AppointmentChatSheet';
 import { AppointmentDetailSheet } from '@/features/appointments/components/AppointmentDetailSheet';
 import { AppointmentReviewSheet } from '@/features/appointments/components/AppointmentReviewSheet';
 import { useAppointmentFlow } from '@/features/appointments/hooks/useAppointmentFlow';
-import { InlineFeedbackNotice } from '@/components/ui/InlineFeedbackNotice';
+import { APP_CONFIG } from '@/lib/config';
+import { SIMULATION_MESSAGES } from '@/lib/constants';
 
 interface AppointmentDetailExperienceProps {
   appointmentId: string;
   onBack: () => void;
 }
 
-export const AppointmentDetailExperience = ({
-  appointmentId,
-  onBack,
-}: AppointmentDetailExperienceProps) => {
+export const AppointmentDetailExperience = ({ appointmentId, onBack }: AppointmentDetailExperienceProps) => {
   const {
     chatInput,
     closeChat,
@@ -50,13 +46,13 @@ export const AppointmentDetailExperience = ({
         style={{ backgroundColor: APP_CONFIG.colors.bgLight }}
       >
         <div className="absolute top-0 z-10 flex w-full items-center border-b border-gray-100 bg-white px-4 py-4">
-          <button onClick={onBack} className="mr-2 -ml-2 rounded-full p-2 hover:bg-gray-100">
+          <button type="button" onClick={onBack} className="mr-2 -ml-2 rounded-full p-2 hover:bg-gray-100">
             <ChevronLeft className="h-6 w-6 text-gray-800" />
           </button>
           <h2 className="text-[17px] font-bold text-gray-900">{SIMULATION_MESSAGES.appointmentDetailTitle}</h2>
         </div>
         <p className="mt-20 text-gray-500">{SIMULATION_MESSAGES.appointmentNotFoundMessage}</p>
-        <button onClick={onBack} className="mt-4 rounded-full bg-gray-200 px-6 py-2 font-medium">
+        <button type="button" onClick={onBack} className="mt-4 rounded-full bg-gray-200 px-6 py-2 font-medium">
           {SIMULATION_MESSAGES.appointmentBackLabel}
         </button>
       </div>

@@ -1,9 +1,8 @@
 'use client';
 
-import React from 'react';
-import { Link, usePathname } from '@/i18n/routing';
+import { Activity, Home as HomeIcon, Search, Users } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { Home as HomeIcon, Search, Activity, Users } from 'lucide-react';
+import { Link, usePathname } from '@/i18n/routing';
 import { APP_CONFIG } from '@/lib/config';
 import { APP_ROUTES } from '@/lib/routes';
 
@@ -17,20 +16,24 @@ export const BottomNavBar = () => {
     { id: APP_ROUTES.home, icon: <HomeIcon className="w-[22px] h-[22px]" />, label: t('home') },
     { id: APP_ROUTES.services, icon: <Search className="w-[22px] h-[22px]" />, label: t('search') },
     { id: APP_ROUTES.explore, icon: <Users className="w-[22px] h-[22px]" />, label: t('experts') },
-    { id: APP_ROUTES.appointments, icon: <Activity className="w-[22px] h-[22px]" />, label: t('activity') }
+    { id: APP_ROUTES.appointments, icon: <Activity className="w-[22px] h-[22px]" />, label: t('activity') },
   ];
 
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-[400px] px-6">
-      <div className="rounded-full p-2 flex items-center justify-between shadow-2xl" style={{ backgroundColor: APP_CONFIG.colors.darkNav }}>
+      <div
+        className="rounded-full p-2 flex items-center justify-between shadow-2xl"
+        style={{ backgroundColor: APP_CONFIG.colors.darkNav }}
+      >
         {navItems.map((item) => {
           const isActive = pathname === item.id;
           return (
             <Link
               key={item.id}
               href={item.id}
-              className={`flex items-center justify-center rounded-full transition-all duration-300 ${isActive ? 'px-5 py-3 text-white' : 'w-12 h-12 text-gray-400 hover:text-white'
-                }`}
+              className={`flex items-center justify-center rounded-full transition-all duration-300 ${
+                isActive ? 'px-5 py-3 text-white' : 'w-12 h-12 text-gray-400 hover:text-white'
+              }`}
               style={{ backgroundColor: isActive ? APP_CONFIG.colors.primary : 'transparent' }}
             >
               {item.icon}

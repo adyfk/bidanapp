@@ -1,18 +1,18 @@
 'use client';
 
-import React, { startTransition, useEffect, useEffectEvent, useRef, useState } from 'react';
-import { Activity, Database, MessagesSquare, RefreshCcw, Send, Wifi, WifiOff } from 'lucide-react';
-import { useTranslations } from 'next-intl';
 import {
-  createBidanappApiClient,
-  fetchBackendIntegrationSnapshot,
   type ChatClientMessage,
   type ChatLiveMessage,
   type ChatServerEvent,
+  createBidanappApiClient,
+  fetchBackendIntegrationSnapshot,
   type IntegrationSnapshot,
 } from '@bidanapp/sdk';
-import { APP_CONFIG } from '@/lib/config';
+import { Activity, Database, MessagesSquare, RefreshCcw, Send, Wifi, WifiOff } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { startTransition, useEffect, useEffectEvent, useRef, useState } from 'react';
 import { getBackendApiBaseUrl, getBackendChatWebSocketUrl } from '@/lib/backend';
+import { APP_CONFIG } from '@/lib/config';
 
 type ConnectionState = 'idle' | 'connecting' | 'connected' | 'error';
 
@@ -117,7 +117,7 @@ export const BackendIntegrationExampleScreen = () => {
       socketRef.current?.close();
       socketRef.current = null;
     };
-  }, [apiBaseUrl, websocketUrl]);
+  }, []);
 
   const sendMessage = () => {
     const nextMessage = inputMessage.trim();
@@ -141,7 +141,10 @@ export const BackendIntegrationExampleScreen = () => {
       style={{ backgroundColor: APP_CONFIG.colors.bgLight }}
     >
       <div className="space-y-2">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.22em]" style={{ color: APP_CONFIG.colors.primary }}>
+        <p
+          className="text-[11px] font-semibold uppercase tracking-[0.22em]"
+          style={{ color: APP_CONFIG.colors.primary }}
+        >
           {t('eyebrow')}
         </p>
         <h1 className="text-[28px] font-bold tracking-tight text-gray-900">{t('title')}</h1>
@@ -161,6 +164,10 @@ export const BackendIntegrationExampleScreen = () => {
               <p className="mt-2 text-[13px] font-semibold text-gray-900">{healthSummary || '...'}</p>
             </div>
             <div className="rounded-[20px] bg-gray-50 p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">{t('frontendVersion')}</p>
+              <p className="mt-2 text-[22px] font-bold text-gray-900">{APP_CONFIG.appVersion}</p>
+            </div>
+            <div className="rounded-[20px] bg-gray-50 p-4">
               <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">{t('professionals')}</p>
               <p className="mt-2 text-[22px] font-bold text-gray-900">{professionalsCount}</p>
             </div>
@@ -171,7 +178,12 @@ export const BackendIntegrationExampleScreen = () => {
           </div>
 
           <div className="mt-4 flex flex-wrap items-center gap-3 text-[12px] text-gray-500">
-            <a href={openapiUrl} target="_blank" rel="noreferrer" className="font-semibold underline underline-offset-4">
+            <a
+              href={openapiUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="font-semibold underline underline-offset-4"
+            >
               {t('openapiLink')}
             </a>
             <span>{apiBaseUrl}</span>

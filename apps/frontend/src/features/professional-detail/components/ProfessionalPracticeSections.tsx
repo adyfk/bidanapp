@@ -1,15 +1,14 @@
 'use client';
 
-import React from 'react';
-import Image from 'next/image';
 import { BadgeCheck, CalendarDays, User } from 'lucide-react';
+import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import { APP_CONFIG } from '@/lib/config';
-import type { Professional } from '@/types/catalog';
 import {
   ProfessionalSectionTitle,
   professionalSectionClassName,
 } from '@/features/professional-detail/components/ProfessionalSectionTitle';
+import { APP_CONFIG } from '@/lib/config';
+import type { Professional } from '@/types/catalog';
 
 interface ProfessionalPracticeSectionsProps {
   profCategory: string;

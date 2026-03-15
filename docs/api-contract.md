@@ -1,5 +1,10 @@
 # API Contract Alignment
 
+For the full handbook, also read:
+
+- [Architecture](./architecture.md)
+- [SDK And API Contract](./sdk.md)
+
 This repo now uses a backend-generated contract flow with a single integration package so FE and BE stay aligned from one source of truth.
 
 ## Source Of Truth

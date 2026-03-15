@@ -1,8 +1,7 @@
 'use client';
 
-import React from 'react';
-import Image from 'next/image';
 import { Activity, History } from 'lucide-react';
+import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { APP_CONFIG } from '@/lib/config';
 import { SIMULATION_MESSAGES } from '@/lib/constants';
@@ -32,9 +31,17 @@ export const AppointmentsList = ({ activeTab, appointments, onSelect }: Appointm
             <div
               key={appointment.id}
               onClick={() => onSelect(appointment.id)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  onSelect(appointment.id);
+                }
+              }}
               className={`flex cursor-pointer flex-col p-4 transition-colors active:bg-gray-100 hover:bg-gray-50 sm:p-5 ${
                 index !== appointments.length - 1 ? 'border-b border-gray-50' : ''
               }`}
+              role="button"
+              tabIndex={0}
             >
               <div className="mb-3 flex items-start justify-between">
                 <div className="flex items-center gap-3">

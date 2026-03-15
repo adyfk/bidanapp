@@ -14,7 +14,7 @@ import (
 
 const (
 	defaultAppName        = "bidanapp-backend"
-	defaultAppVersion     = "0.1.0"
+	defaultAppVersion     = "dev"
 	defaultEnvironment    = "development"
 	defaultFrontendOrigin = "http://localhost:3000"
 )

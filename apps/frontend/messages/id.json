@@ -102,6 +102,7 @@
     "description": "Halaman ini menunjukkan akses REST melalui SDK bersama yang digenerate dari dokumen OpenAPI backend, plus chat realtime lewat WebSocket.",
     "restSection": "Kontrak REST",
     "health": "Health",
+    "frontendVersion": "Versi Frontend",
     "professionals": "Profesional",
     "threads": "Thread Chat",
     "openapiLink": "OpenAPI dari backend",

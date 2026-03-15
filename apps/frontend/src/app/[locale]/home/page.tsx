@@ -1,5 +1,5 @@
+import type { Metadata } from 'next';
 import { HomeScreen } from '@/components/screens/HomeScreen';
-import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Home - BidanApp',

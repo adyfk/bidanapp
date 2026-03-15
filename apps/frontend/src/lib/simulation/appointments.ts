@@ -1,25 +1,21 @@
 import appointmentData from '@/data/simulation/appointments.json';
 import { getProfessionalById, getServiceById } from '@/lib/simulation/catalog';
 import { getRequiredItem } from '@/lib/simulation/utils';
-import type {
-  Appointment,
-  AppointmentSeed,
-  AppointmentSimulationFile,
-  AppointmentStatus,
-} from '@/types/appointments';
+import type { Appointment, AppointmentSeed, AppointmentSimulationFile, AppointmentStatus } from '@/types/appointments';
 
 const data = appointmentData as AppointmentSimulationFile;
-const sortByIndex = <T extends { index: number }>(items: T[]) => [...items].sort((left, right) => left.index - right.index);
+const sortByIndex = <T extends { index: number }>(items: T[]) =>
+  [...items].sort((left, right) => left.index - right.index);
 
 const hydrateAppointment = (appointment: AppointmentSeed): Appointment => ({
   id: appointment.id,
   professional: getRequiredItem(
     getProfessionalById(appointment.professionalId),
-    `appointments.${appointment.id}.professionalId -> ${appointment.professionalId}`
+    `appointments.${appointment.id}.professionalId -> ${appointment.professionalId}`,
   ),
   service: getRequiredItem(
     getServiceById(appointment.serviceId),
-    `appointments.${appointment.id}.serviceId -> ${appointment.serviceId}`
+    `appointments.${appointment.id}.serviceId -> ${appointment.serviceId}`,
   ),
   time: appointment.time,
   status: appointment.status,
@@ -47,7 +43,7 @@ export const APPOINTMENTS_BY_STATUS = MOCK_APPOINTMENTS.reduce<Record<Appointmen
     cancelled: [],
     rejected: [],
     expired: [],
-  }
+  },
 );
 
 export const ACTIVE_APPOINTMENT_CASES = [

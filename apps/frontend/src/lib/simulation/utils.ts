@@ -1,4 +1,4 @@
-export const getRequiredItem = <T,>(item: T | undefined, reference: string): T => {
+export const getRequiredItem = <T>(item: T | undefined, reference: string): T => {
   if (!item) {
     throw new Error(`Simulation contract error: missing reference "${reference}" in simulation data files`);
   }

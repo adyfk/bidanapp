@@ -1,0 +1,26 @@
+name: github-mirror
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  github-mirror:
+    runs-on: docker
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - run: |
+          git remote add mirror "https://x-access-token:${{ secrets.GITHUB_MIRROR_TOKEN }}@github.com/${{ secrets.GITHUB_MIRROR_REPOSITORY }}.git"
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            git push mirror "refs/tags/${GITHUB_REF_NAME}"
+          else
+            git push mirror "HEAD:${GITHUB_REF_NAME}"
+            git push mirror --tags
+          fi

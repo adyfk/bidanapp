@@ -1,0 +1,75 @@
+services:
+  postgres:
+    image: postgres:18.1
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${FORGEJO_DB_NAME}
+      POSTGRES_PASSWORD: ${FORGEJO_DB_PASSWORD}
+      POSTGRES_USER: ${FORGEJO_DB_USER}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${FORGEJO_DB_USER} -d ${FORGEJO_DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+
+  forgejo:
+    image: codeberg.org/forgejo/forgejo:14.0.3-rootless
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      FORGEJO__actions__ENABLED: "true"
+      FORGEJO__database__DB_TYPE: postgres
+      FORGEJO__database__HOST: postgres:5432
+      FORGEJO__database__NAME: ${FORGEJO_DB_NAME}
+      FORGEJO__database__PASSWD: ${FORGEJO_DB_PASSWORD}
+      FORGEJO__database__SSL_MODE: disable
+      FORGEJO__database__USER: ${FORGEJO_DB_USER}
+      FORGEJO__packages__ENABLED: "true"
+      FORGEJO__packages__LIMIT_TOTAL_OWNER_COUNT: "-1"
+      FORGEJO__security__INSTALL_LOCK: "true"
+      FORGEJO__server__DOMAIN: ${FORGEJO_DOMAIN}
+      FORGEJO__server__HTTP_PORT: "3000"
+      FORGEJO__server__PROTOCOL: http
+      FORGEJO__server__ROOT_URL: ${FORGEJO_ROOT_URL}
+      FORGEJO__service__DISABLE_REGISTRATION: ${FORGEJO_DISABLE_REGISTRATION:-true}
+    restart: unless-stopped
+    volumes:
+      - ./data:/data
+
+  docker-dind:
+    image: docker:28.5.1-dind
+    privileged: true
+    restart: unless-stopped
+    environment:
+      DOCKER_TLS_CERTDIR: ""
+    command: ["dockerd", "--host=tcp://0.0.0.0:2375"]
+    volumes:
+      - ./runner/docker:/var/lib/docker
+
+  runner:
+    image: data.forgejo.org/forgejo/runner:12.7.2
+    depends_on:
+      - forgejo
+      - docker-dind
+    environment:
+      DOCKER_HOST: tcp://docker-dind:2375
+    restart: unless-stopped
+    volumes:
+      - ./runner/data:/data
+    command: ["forgejo-runner", "daemon"]
+
+  caddy:
+    image: caddy:2.10.2
+    depends_on:
+      - forgejo
+    ports:
+      - "${FORGEJO_PUBLIC_HTTP_PORT:-80}:80"
+      - "${FORGEJO_PUBLIC_HTTPS_PORT:-443}:443"
+    restart: unless-stopped
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddy/data:/data
+      - ./caddy/config:/config

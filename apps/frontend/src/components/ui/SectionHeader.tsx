@@ -1,5 +1,4 @@
 'use client';
-import React from 'react';
 import { useTranslations } from 'next-intl';
 import { APP_CONFIG } from '@/lib/config';
 
@@ -13,7 +12,12 @@ export const SectionHeader = ({ title, onSeeAll }: SectionHeaderProps) => {
   return (
     <div className="flex justify-between items-center mb-4">
       <h2 className="text-[17px] font-bold text-gray-900">{title}</h2>
-      <button onClick={onSeeAll} className="text-xs font-semibold" style={{ color: APP_CONFIG.colors.primary }}>
+      <button
+        type="button"
+        onClick={onSeeAll}
+        className="text-xs font-semibold"
+        style={{ color: APP_CONFIG.colors.primary }}
+      >
         {t('seeAll')}
       </button>
     </div>

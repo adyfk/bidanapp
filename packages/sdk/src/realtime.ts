@@ -34,7 +34,7 @@ export type ChatServerEvent =
     };
 
 export function createChatWebSocketUrl(apiBaseUrl: string, params: ChatSocketParams = {}) {
-  const url = new URL(apiBaseUrl.replace(/^http/, 'ws') + '/ws/chat');
+  const url = new URL(`${apiBaseUrl.replace(/^http/, 'ws')}/ws/chat`);
 
   if (params.threadId) {
     url.searchParams.set('thread_id', params.threadId);

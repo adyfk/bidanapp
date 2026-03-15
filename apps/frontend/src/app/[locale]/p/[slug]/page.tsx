@@ -1,8 +1,8 @@
-import { ProfessionalDetailScreen } from '@/components/screens/ProfessionalDetailScreen';
-import { getCategoryById, getProfessionalBySlug } from '@/lib/constants';
-import { APP_CONFIG } from '@/lib/config';
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { ProfessionalDetailScreen } from '@/components/screens/ProfessionalDetailScreen';
+import { APP_CONFIG } from '@/lib/config';
+import { getCategoryById, getProfessionalBySlug } from '@/lib/constants';
 
 interface Props {
   params: Promise<{
@@ -35,7 +35,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       title: `${professional.name} | ${APP_CONFIG.appName}`,
       description: professional.about,
       images: [professional.coverImage || professional.image || APP_CONFIG.ogImage],
-    }
+    },
   };
 }
 

@@ -1,11 +1,11 @@
-import type { Route } from "next";
+import type { Route } from 'next';
 
 export const APP_ROUTES = {
-  home: "/home" as Route,
-  services: "/services" as Route,
-  explore: "/explore" as Route,
-  profile: "/profile" as Route,
-  appointments: "/appointments" as Route,
+  home: '/home' as Route,
+  services: '/services' as Route,
+  explore: '/explore' as Route,
+  profile: '/profile' as Route,
+  appointments: '/appointments' as Route,
 } as const;
 
 export function professionalRoute(slug: string): Route {
@@ -28,11 +28,11 @@ export function exploreRoute(params: { category?: string; q?: string } = {}): Ro
   const query = new URLSearchParams();
 
   if (params.category) {
-    query.set("category", params.category);
+    query.set('category', params.category);
   }
 
   if (params.q) {
-    query.set("q", params.q);
+    query.set('q', params.q);
   }
 
   const queryString = query.toString();

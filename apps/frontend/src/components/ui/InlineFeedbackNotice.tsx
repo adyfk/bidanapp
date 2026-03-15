@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { CircleCheckBig, X } from 'lucide-react';
 
 interface InlineFeedbackNoticeProps {

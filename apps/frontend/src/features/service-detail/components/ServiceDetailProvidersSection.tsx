@@ -1,23 +1,19 @@
 'use client';
 
-import React from 'react';
-import Image from 'next/image';
 import { Clock, Heart, MapPin } from 'lucide-react';
+import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import { APP_CONFIG } from '@/lib/config';
-import { professionalRoute } from '@/lib/routes';
 import type { ServiceProviderSummary } from '@/features/service-detail/hooks/useServiceDetail';
 import { useRouter } from '@/i18n/routing';
+import { APP_CONFIG } from '@/lib/config';
+import { professionalRoute } from '@/lib/routes';
 
 interface ServiceDetailProvidersSectionProps {
   onRequestBooking: (providerName: string) => void;
   providers: ServiceProviderSummary[];
 }
 
-export const ServiceDetailProvidersSection = ({
-  onRequestBooking,
-  providers,
-}: ServiceDetailProvidersSectionProps) => {
+export const ServiceDetailProvidersSection = ({ onRequestBooking, providers }: ServiceDetailProvidersSectionProps) => {
   const router = useRouter();
   const t = useTranslations('ServiceDetail');
 
@@ -38,6 +34,14 @@ export const ServiceDetailProvidersSection = ({
             key={provider.id}
             onClick={() => router.push(professionalRoute(provider.slug))}
             className="cursor-pointer rounded-[24px] border border-gray-100 bg-white p-4 shadow-sm transition-all active:scale-[0.98] hover:shadow-md"
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                router.push(professionalRoute(provider.slug));
+              }
+            }}
+            role="button"
+            tabIndex={0}
           >
             <div className="flex gap-4">
               <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-[16px] bg-gray-100">
@@ -49,7 +53,10 @@ export const ServiceDetailProvidersSection = ({
               </div>
               <div className="flex flex-1 flex-col justify-center">
                 <h3 className="mb-1 text-[15px] font-bold text-gray-900">{provider.name}</h3>
-                <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide" style={{ color: APP_CONFIG.colors.primary }}>
+                <p
+                  className="mb-1 text-[11px] font-semibold uppercase tracking-wide"
+                  style={{ color: APP_CONFIG.colors.primary }}
+                >
                   {provider.badgeLabel}
                 </p>
                 <p className="flex items-center text-[12px] font-medium text-gray-500">

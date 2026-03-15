@@ -1,9 +1,8 @@
 'use client';
 
-import React from 'react';
 import { useParams } from 'next/navigation';
-import { useRouter } from '@/i18n/routing';
 import { AppointmentDetailExperience } from '@/features/appointments/components/AppointmentDetailExperience';
+import { useRouter } from '@/i18n/routing';
 
 export default function ActivityDetailPage() {
   const params = useParams();

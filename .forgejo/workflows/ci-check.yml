@@ -1,0 +1,24 @@
+name: ci-check
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  ci-check:
+    runs-on: docker
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          cache: npm
+          node-version: 24.12.0
+      - uses: actions/setup-go@v5
+        with:
+          go-version: 1.26.0
+      - run: npm ci
+      - run: npm run ci:check

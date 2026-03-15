@@ -1,13 +1,12 @@
 'use client';
 
-import React from 'react';
-import Image from 'next/image';
 import { CalendarDays, Heart, Share2, Star, Users } from 'lucide-react';
+import Image from 'next/image';
+import { IconButton } from '@/components/ui/IconButton';
+import type { ProfessionalTrustIndicator } from '@/features/professional-detail/hooks/useProfessionalDetail';
 import { Link } from '@/i18n/routing';
 import { APP_CONFIG } from '@/lib/config';
-import { IconButton } from '@/components/ui/IconButton';
 import { APP_ROUTES } from '@/lib/routes';
-import type { ProfessionalTrustIndicator } from '@/features/professional-detail/hooks/useProfessionalDetail';
 import type { Professional } from '@/types/catalog';
 
 interface ProfessionalHeroSectionProps {
@@ -50,8 +49,7 @@ export const ProfessionalHeroSection = ({
         <div
           className="absolute inset-0"
           style={{
-            background:
-              'radial-gradient(circle at top right, rgba(255,255,255,0.26) 0%, rgba(255,255,255,0) 42%)',
+            background: 'radial-gradient(circle at top right, rgba(255,255,255,0.26) 0%, rgba(255,255,255,0) 42%)',
           }}
         />
         <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-b from-transparent to-[#FFF7FB]" />
@@ -83,7 +81,10 @@ export const ProfessionalHeroSection = ({
             </div>
 
             <div className="flex flex-1 flex-col justify-center">
-              <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.22em]" style={{ color: APP_CONFIG.colors.primary }}>
+              <p
+                className="mb-1 text-[11px] font-semibold uppercase tracking-[0.22em]"
+                style={{ color: APP_CONFIG.colors.primary }}
+              >
                 {professional.badgeLabel}
               </p>
               <h2 className="text-[22px] font-bold leading-tight text-gray-900">{professional.name}</h2>
@@ -130,7 +131,10 @@ export const ProfessionalHeroSection = ({
 
           <div className="mt-4 grid grid-cols-1 gap-3">
             {trustIndicators.map((item) => (
-              <div key={item.label} className="flex items-start gap-3 rounded-[20px] bg-[#FCFCFC] px-4 py-3 shadow-[0_14px_28px_-24px_rgba(17,24,39,0.35)]">
+              <div
+                key={item.label}
+                className="flex items-start gap-3 rounded-[20px] bg-[#FCFCFC] px-4 py-3 shadow-[0_14px_28px_-24px_rgba(17,24,39,0.35)]"
+              >
                 <span
                   className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full"
                   style={{ backgroundColor: APP_CONFIG.colors.primaryLight, color: APP_CONFIG.colors.primary }}

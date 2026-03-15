@@ -1,13 +1,12 @@
 'use client';
 
-import React from 'react';
-import Image from 'next/image';
 import { BadgeCheck, MapPin, Star } from 'lucide-react';
-import { APP_CONFIG } from '@/lib/config';
+import Image from 'next/image';
 import {
   ProfessionalSectionTitle,
   professionalSectionClassName,
 } from '@/features/professional-detail/components/ProfessionalSectionTitle';
+import { APP_CONFIG } from '@/lib/config';
 import type { Professional } from '@/types/catalog';
 
 interface ProfessionalPortfolioSectionsProps {
@@ -34,13 +33,19 @@ export const ProfessionalPortfolioSections = ({
             const serviceName = getServiceName(entry.serviceId);
 
             return (
-              <article key={entry.title} className="overflow-hidden rounded-[24px] bg-white shadow-[0_18px_34px_-24px_rgba(17,24,39,0.32)]">
+              <article
+                key={entry.title}
+                className="overflow-hidden rounded-[24px] bg-white shadow-[0_18px_34px_-24px_rgba(17,24,39,0.32)]"
+              >
                 <div className="relative h-[180px]">
                   <Image src={entry.image} alt={entry.title} fill className="object-cover" />
                   <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/65 to-transparent p-4">
                     <div className="flex flex-wrap items-center gap-2">
                       {serviceName ? (
-                        <span className="rounded-full bg-white/90 px-3 py-1 text-[11px] font-semibold" style={{ color: APP_CONFIG.colors.primary }}>
+                        <span
+                          className="rounded-full bg-white/90 px-3 py-1 text-[11px] font-semibold"
+                          style={{ color: APP_CONFIG.colors.primary }}
+                        >
                           {serviceName}
                         </span>
                       ) : null}
@@ -55,7 +60,10 @@ export const ProfessionalPortfolioSections = ({
                   <p className="mt-2 text-[13px] leading-relaxed text-gray-500">{entry.summary}</p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {entry.outcomes.map((outcome) => (
-                      <span key={outcome} className="rounded-full bg-gray-50 px-3 py-1 text-[11px] font-semibold text-gray-600">
+                      <span
+                        key={outcome}
+                        className="rounded-full bg-gray-50 px-3 py-1 text-[11px] font-semibold text-gray-600"
+                      >
                         {outcome}
                       </span>
                     ))}

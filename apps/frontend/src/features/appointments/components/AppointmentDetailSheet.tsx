@@ -1,12 +1,11 @@
 'use client';
 
-import React from 'react';
-import Image from 'next/image';
 import { ChevronLeft, MessageCircle } from 'lucide-react';
+import Image from 'next/image';
 import { useTranslations } from 'next-intl';
+import { getStatusBannerClasses } from '@/features/appointments/lib/status';
 import { APP_CONFIG } from '@/lib/config';
 import { SIMULATION_MESSAGES, SIMULATION_SHARED } from '@/lib/constants';
-import { getStatusBannerClasses } from '@/features/appointments/lib/status';
 import type { Appointment } from '@/types/appointments';
 
 interface AppointmentDetailSheetProps {
@@ -37,7 +36,7 @@ export const AppointmentDetailSheet = ({
   return (
     <div className="fixed inset-y-0 left-1/2 z-[60] flex w-full max-w-md -translate-x-1/2 flex-col bg-gray-50 animate-in fade-in slide-in-from-bottom-4 duration-300">
       <div className="sticky top-0 z-10 flex items-center border-b border-gray-100 bg-white px-4 py-4">
-        <button onClick={onClose} className="mr-2 -ml-2 rounded-full p-2 hover:bg-gray-100">
+        <button type="button" onClick={onClose} className="mr-2 -ml-2 rounded-full p-2 hover:bg-gray-100">
           <ChevronLeft className="h-6 w-6 text-gray-800" />
         </button>
         <h2 className="text-[17px] font-bold text-gray-900">{SIMULATION_MESSAGES.appointmentDetailTitle}</h2>
@@ -47,7 +46,12 @@ export const AppointmentDetailSheet = ({
         <div className="mb-4 flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
           <div className="flex items-center gap-4">
             <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-full bg-gray-100">
-              <Image src={appointment.professional.image} alt={appointment.professional.name} fill className="object-cover" />
+              <Image
+                src={appointment.professional.image}
+                alt={appointment.professional.name}
+                fill
+                className="object-cover"
+              />
             </div>
             <div>
               <h3 className="text-[15px] font-bold text-gray-900">{appointment.professional.name}</h3>
@@ -56,6 +60,7 @@ export const AppointmentDetailSheet = ({
           </div>
           {appointment.status !== 'completed' ? (
             <button
+              type="button"
               onClick={onOpenChat}
               className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 text-gray-600 transition-colors active:scale-95 hover:bg-gray-50"
             >
@@ -70,7 +75,9 @@ export const AppointmentDetailSheet = ({
               <p className="mb-1.5 text-[11px] font-bold uppercase tracking-widest text-gray-400">
                 {SIMULATION_MESSAGES.appointmentFieldLabels.status}
               </p>
-              <span className={`rounded-[8px] px-2.5 py-1 text-[12px] font-bold uppercase tracking-wider ${getStatusChipClassName(appointment.status)}`}>
+              <span
+                className={`rounded-[8px] px-2.5 py-1 text-[12px] font-bold uppercase tracking-wider ${getStatusChipClassName(appointment.status)}`}
+              >
                 {t(`status.${appointment.status}`)}
               </span>
             </div>
@@ -107,12 +114,14 @@ export const AppointmentDetailSheet = ({
         {appointment.status === 'approved_waiting_payment' ? (
           <div className="flex gap-3">
             <button
+              type="button"
               onClick={onClose}
               className="flex-1 rounded-xl bg-gray-100 py-3.5 text-[14px] font-bold text-gray-700 transition-colors hover:bg-gray-200"
             >
               {SIMULATION_MESSAGES.appointmentActionLabels.cancel}
             </button>
             <button
+              type="button"
               onClick={onPayNow}
               className="flex-1 rounded-xl py-3.5 text-[14px] font-bold text-white shadow-md shadow-pink-500/20 transition-transform active:scale-95"
               style={{ backgroundColor: APP_CONFIG.colors.primary }}
@@ -124,6 +133,7 @@ export const AppointmentDetailSheet = ({
 
         {appointment.status === 'completed' ? (
           <button
+            type="button"
             onClick={onOpenReview}
             className="w-full rounded-xl bg-gray-100 py-3.5 text-[14px] font-bold text-gray-700 transition-colors hover:bg-gray-200"
           >
@@ -131,9 +141,7 @@ export const AppointmentDetailSheet = ({
           </button>
         ) : null}
 
-        {appointment.status !== 'approved_waiting_payment' &&
-        appointment.status !== 'completed' &&
-        statusBanner ? (
+        {appointment.status !== 'approved_waiting_payment' && appointment.status !== 'completed' && statusBanner ? (
           <div className={`rounded-xl border p-4 ${getStatusBannerClasses(appointment.status)}`}>
             <p className="text-[13px] font-medium leading-relaxed">{statusBanner}</p>
           </div>

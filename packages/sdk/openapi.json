@@ -1203,7 +1203,7 @@
   "info": {
     "description": "Backend-generated OpenAPI contract for BidanApp.",
     "title": "bidanapp-backend",
-    "version": "0.1.0"
+    "version": "dev"
   },
   "openapi": "3.1.0",
   "paths": {
