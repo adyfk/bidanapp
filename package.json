@@ -1,29 +1,32 @@
 {
-  "name": "bidanapp",
+  "name": "bidanapp-monorepo",
   "version": "0.1.0",
   "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
+  "packageManager": "npm@11.6.2",
+  "engines": {
+    "node": ">=24.12.0",
+    "npm": ">=11.6.2"
   },
-  "dependencies": {
-    "@ducanh2912/next-pwa": "^10.2.9",
-    "lucide-react": "^0.577.0",
-    "next": "16.1.6",
-    "next-intl": "^4.8.3",
-    "react": "19.2.3",
-    "react-dom": "19.2.3"
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev --parallel",
+    "dev:frontend": "npm run dev --workspace @bidanapp/frontend",
+    "dev:backend": "npm run dev --workspace @bidanapp/backend",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "check": "npm run lint && npm run typecheck && npm run test && npm run build",
+    "doctor": "node --version && npm --version && go version",
+    "clean": "rm -rf .turbo apps/*/.turbo apps/frontend/.next apps/frontend/out apps/backend/bin apps/backend/api",
+    "infra:up": "docker compose -f docker-compose.dev.yml up -d",
+    "infra:down": "docker compose -f docker-compose.dev.yml down",
+    "start:frontend": "npm run start --workspace @bidanapp/frontend",
+    "start:backend": "npm run start --workspace @bidanapp/backend"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.1.6",
-    "tailwindcss": "^4",
-    "typescript": "^5"
+    "turbo": "^2.5.6"
   }
 }

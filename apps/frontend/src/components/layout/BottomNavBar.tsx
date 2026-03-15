@@ -5,6 +5,7 @@ import { Link, usePathname } from '@/i18n/routing';
 import { useTranslations } from 'next-intl';
 import { Home as HomeIcon, Search, Activity, Users } from 'lucide-react';
 import { APP_CONFIG } from '@/lib/config';
+import { APP_ROUTES } from '@/lib/routes';
 
 export const BottomNavBar = () => {
   const pathname = usePathname();
@@ -13,10 +14,10 @@ export const BottomNavBar = () => {
   if (pathname === '/' || pathname.startsWith('/p') || pathname.startsWith('/messages/')) return null;
 
   const navItems = [
-    { id: '/home', icon: <HomeIcon className="w-[22px] h-[22px]" />, label: t('home') },
-    { id: '/services', icon: <Search className="w-[22px] h-[22px]" />, label: t('search') },
-    { id: '/explore', icon: <Users className="w-[22px] h-[22px]" />, label: t('experts') },
-    { id: '/appointments', icon: <Activity className="w-[22px] h-[22px]" />, label: t('activity') }
+    { id: APP_ROUTES.home, icon: <HomeIcon className="w-[22px] h-[22px]" />, label: t('home') },
+    { id: APP_ROUTES.services, icon: <Search className="w-[22px] h-[22px]" />, label: t('search') },
+    { id: APP_ROUTES.explore, icon: <Users className="w-[22px] h-[22px]" />, label: t('experts') },
+    { id: APP_ROUTES.appointments, icon: <Activity className="w-[22px] h-[22px]" />, label: t('activity') }
   ];
 
   return (

@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { Search, MapPin, Loader2, SlidersHorizontal, Star, Clock, X } from 'lucide-react';
 import { APP_CONFIG } from '@/lib/config';
 import { MOCK_PROFESSIONALS, MOCK_CATEGORIES, SIMULATION_MESSAGES, SIMULATION_SHARED } from '@/lib/constants';
+import { professionalRoute } from '@/lib/routes';
 import { ProfessionalCard } from '@/components/ui/ProfessionalCard';
 
 // Extract the core component into a separate function to wrap it with Suspense
@@ -110,7 +111,7 @@ const ExploreContent = () => {
           {filteredProfessionals.length > 0 ? (
             <div className="space-y-4">
               {filteredProfessionals.map((prof) => (
-                <ProfessionalCard key={prof.id} professional={prof} href={`/p/${prof.slug}`} />
+                <ProfessionalCard key={prof.id} professional={prof} href={professionalRoute(prof.slug)} />
               ))}
             </div>
           ) : (

@@ -14,6 +14,7 @@ import {
   SIMULATION_MESSAGES,
   getBookingMessage,
 } from '@/lib/constants';
+import { professionalRoute } from '@/lib/routes';
 import { IconButton } from '@/components/ui/IconButton';
 
 export const ServiceDetailScreen = ({ serviceId }: { serviceId: string }) => {
@@ -113,7 +114,7 @@ export const ServiceDetailScreen = ({ serviceId }: { serviceId: string }) => {
             {providers.map((prof) => (
               <div 
                 key={prof.id}
-                onClick={() => router.push(`/p/${prof.slug}`)}
+                onClick={() => router.push(professionalRoute(prof.slug))}
                 className="bg-white rounded-[24px] p-4 flex flex-col gap-4 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-all active:scale-[0.98]"
               >
                 {/* Embedded Professional Card-like info */}

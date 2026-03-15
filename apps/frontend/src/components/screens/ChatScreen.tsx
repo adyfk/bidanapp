@@ -11,6 +11,7 @@ import {
   SIMULATION_SHARED,
   getChatThreadByProfessionalSlug,
 } from '@/lib/constants';
+import { professionalRoute } from '@/lib/routes';
 import { IconButton } from '@/components/ui/IconButton';
 import type { ChatMessage } from '@/types/chat';
 
@@ -69,7 +70,7 @@ export const ChatScreen = ({ professionalId }: { professionalId: string }) => {
           <IconButton icon={<ChevronLeft className="w-6 h-6 text-gray-800" />} onClick={() => router.back()} />
           <div
             className="flex items-center gap-3 cursor-pointer p-1.5 rounded-xl hover:bg-gray-50 transition-colors ml-1"
-            onClick={() => router.push(`/p/${professional.slug}`)}
+            onClick={() => router.push(professionalRoute(professional.slug))}
           >
             <div className="relative flex-shrink-0">
               <div className="w-10 h-10 relative rounded-full overflow-hidden bg-gray-100 border border-gray-100">

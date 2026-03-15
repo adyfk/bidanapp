@@ -6,6 +6,7 @@ import { Link, useRouter } from '@/i18n/routing';
 import { useTranslations } from 'next-intl';
 import { APP_CONFIG } from '@/lib/config';
 import { MOCK_CATEGORIES, SIMULATION_APP_SECTIONS, SIMULATION_HOME, SIMULATION_MESSAGES } from '@/lib/constants';
+import { APP_ROUTES, exploreRoute, professionalRoute } from '@/lib/routes';
 import { Search } from 'lucide-react';
 import { IconButton } from '@/components/ui/IconButton';
 import { SectionHeader } from '@/components/ui/SectionHeader';
@@ -27,7 +28,7 @@ export const HomeScreen = () => {
   <div className="flex flex-col h-full relative pb-24 overflow-y-auto custom-scrollbar" style={{ backgroundColor: APP_CONFIG.colors.bgLight }}>
     {/* Header */}
     <div className="flex items-center justify-between px-6 pt-14 pb-6 sticky top-0 z-20" style={{ backgroundColor: APP_CONFIG.colors.bgLight }}>
-      <button onClick={() => router.push('/profile')} className="w-11 h-11 relative rounded-full bg-gray-200 overflow-hidden border-2 border-white shadow-sm hover:opacity-80 transition-opacity active:scale-95">
+      <button onClick={() => router.push(APP_ROUTES.profile)} className="w-11 h-11 relative rounded-full bg-gray-200 overflow-hidden border-2 border-white shadow-sm hover:opacity-80 transition-opacity active:scale-95">
         <Image src={SIMULATION_HOME.currentUser.avatar} alt={SIMULATION_HOME.currentUser.name} fill className="object-cover" />
       </button>
       <div className="flex flex-col items-center">
@@ -45,7 +46,7 @@ export const HomeScreen = () => {
 
     {/* Search Bar - Global Services Entry Point */}
     <div className="px-6 mb-7">
-      <Link href="/services" className="bg-white rounded-full flex items-center px-4 py-3.5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+      <Link href={APP_ROUTES.services} className="bg-white rounded-full flex items-center px-4 py-3.5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
         <Search className="w-5 h-5 text-gray-400 mr-2" />
         <span className="text-sm text-gray-400 font-medium">{t('searchPlaceholder', { service: APP_CONFIG.terms.service.toLowerCase(), category: APP_CONFIG.terms.category.toLowerCase() })}</span>
       </Link>
@@ -54,7 +55,7 @@ export const HomeScreen = () => {
     <div className="px-6 space-y-7">
       {/* Section: Appointment */}
       <div>
-        <SectionHeader title={t('appointment')} onSeeAll={() => router.push('/explore')} />
+        <SectionHeader title={t('appointment')} onSeeAll={() => router.push(APP_ROUTES.explore)} />
         {SIMULATION_HOME.featuredAppointment && featuredProfessional ? (
           <div
             className="rounded-[28px] p-5 text-white relative shadow-[0_10px_30px_rgba(233,30,140,0.25)]"
@@ -99,7 +100,7 @@ export const HomeScreen = () => {
             <h3 className="text-[18px] font-bold text-gray-900 mb-2">{SIMULATION_MESSAGES.homeEmptyStateTitle}</h3>
             <p className="text-[14px] text-gray-500 leading-relaxed mb-4">{SIMULATION_MESSAGES.homeEmptyStateDescription}</p>
             <button
-              onClick={() => router.push('/services')}
+              onClick={() => router.push(APP_ROUTES.services)}
               className="px-5 py-3 rounded-full text-white font-bold text-[14px]"
               style={{ backgroundColor: APP_CONFIG.colors.primary }}
             >
@@ -111,7 +112,7 @@ export const HomeScreen = () => {
 
       {/* Section: Popular Services */}
       <div>
-        <SectionHeader title={t('popularServices', { service: APP_CONFIG.terms.service })} onSeeAll={() => router.push('/services')} />
+        <SectionHeader title={t('popularServices', { service: APP_CONFIG.terms.service })} onSeeAll={() => router.push(APP_ROUTES.services)} />
         <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar -mx-6 px-6">
           {SIMULATION_HOME.popularServices.map((svc, idx) => {
             const catName = MOCK_CATEGORIES.find(cat => cat.id === svc.categoryId)?.name || '';
@@ -119,7 +120,7 @@ export const HomeScreen = () => {
               <div 
                 key={idx} 
                 className="relative overflow-hidden min-w-[200px] p-5 rounded-[24px] cursor-pointer group flex-shrink-0 border border-gray-100 shadow-sm hover:shadow-md hover:border-gray-200 transition-all active:scale-[0.98]" 
-                onClick={() => router.push(`/explore?category=${svc.categoryId}&q=${encodeURIComponent(svc.name)}`)}
+                onClick={() => router.push(exploreRoute({ category: svc.categoryId, q: svc.name }))}
                 style={{ backgroundColor: APP_CONFIG.colors.bgLight }}
               >
                 <div className="absolute inset-0 bg-white z-0"></div>
@@ -148,10 +149,10 @@ export const HomeScreen = () => {
 
       {/* Section: Categories */}
       <div>
-        <SectionHeader title={APP_CONFIG.terms.category || t('categories')} onSeeAll={() => router.push('/explore')} />
+        <SectionHeader title={APP_CONFIG.terms.category || t('categories')} onSeeAll={() => router.push(APP_ROUTES.explore)} />
         <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar -mx-6 px-6">
           {homeCategories.map((cat) => (
-            <div key={cat.id} className="flex flex-col items-center gap-2 cursor-pointer group flex-shrink-0 w-[84px]" onClick={() => router.push(`/explore?category=${cat.id}`)}>
+            <div key={cat.id} className="flex flex-col items-center gap-2 cursor-pointer group flex-shrink-0 w-[84px]" onClick={() => router.push(exploreRoute({ category: cat.id }))}>
               <div className="w-[72px] h-[72px] rounded-[22px] shadow-sm overflow-hidden relative group-hover:scale-105 transition-all">
                 <Image src={cat.iconImage || cat.image} alt={cat.name} fill className="object-cover" />
                 <div className="absolute inset-0 bg-black/10" />
@@ -167,10 +168,10 @@ export const HomeScreen = () => {
 
       {/* Section: Professionals Near You */}
       <div className="pb-4">
-        <SectionHeader title={t('professionalsNearYou', { professional: APP_CONFIG.terms.professional })} onSeeAll={() => router.push('/explore')} />
+        <SectionHeader title={t('professionalsNearYou', { professional: APP_CONFIG.terms.professional })} onSeeAll={() => router.push(APP_ROUTES.explore)} />
         <div className="space-y-4">
           {SIMULATION_HOME.nearbyProfessionals.map((prof) => (
-            <ProfessionalCard key={prof.id} professional={prof} href={`/p/${prof.slug}`} />
+            <ProfessionalCard key={prof.id} professional={prof} href={professionalRoute(prof.slug)} />
           ))}
         </div>
       </div>

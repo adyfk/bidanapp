@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from '@/i18n/routing';
 import Image from 'next/image';
+import type { Route } from 'next';
 import { useTranslations } from 'next-intl';
 import { Star, Heart } from 'lucide-react';
 import { APP_CONFIG } from '@/lib/config';
@@ -9,7 +10,7 @@ import type { Professional } from '@/types/catalog';
 
 interface ProfessionalCardProps {
   professional: Professional;
-  href: string;
+  href: Route;
 }
 
 export const ProfessionalCard = ({ professional, href }: ProfessionalCardProps) => {

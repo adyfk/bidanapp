@@ -2,19 +2,19 @@
 
 This app now uses domain-split simulation files instead of one giant fixture:
 
-- `src/data/simulation/settings.json`
-- `src/data/simulation/catalog.json`
-- `src/data/simulation/appointments.json`
-- `src/data/simulation/chat.json`
-- `src/data/simulation/ui.json`
+- `apps/frontend/src/data/simulation/settings.json`
+- `apps/frontend/src/data/simulation/catalog.json`
+- `apps/frontend/src/data/simulation/appointments.json`
+- `apps/frontend/src/data/simulation/chat.json`
+- `apps/frontend/src/data/simulation/ui.json`
 
 The adapter layer is also split by domain:
 
-- `src/lib/simulation/catalog.ts`
-- `src/lib/simulation/appointments.ts`
-- `src/lib/simulation/chat.ts`
-- `src/lib/simulation/ui.ts`
-- `src/lib/constants.ts` only re-exports for compatibility
+- `apps/frontend/src/lib/simulation/catalog.ts`
+- `apps/frontend/src/lib/simulation/appointments.ts`
+- `apps/frontend/src/lib/simulation/chat.ts`
+- `apps/frontend/src/lib/simulation/ui.ts`
+- `apps/frontend/src/lib/constants.ts` only re-exports for compatibility
 
 ## Backend-Mappable Sections
 
@@ -67,10 +67,10 @@ That means you can move the raw JSON to an API later without rewriting the curre
 
 These files are still frontend-owned even though most content now comes from JSON:
 
-- `src/lib/config.ts`
-  Thin adapter that reads `src/data/simulation/settings.json`
-- `messages/en.json`
-- `messages/id.json`
+- `apps/frontend/src/lib/config.ts`
+  Thin adapter that reads `apps/frontend/src/data/simulation/settings.json`
+- `apps/frontend/messages/en.json`
+- `apps/frontend/messages/id.json`
   Translation strings
 
 ## Suggested Backend Endpoints

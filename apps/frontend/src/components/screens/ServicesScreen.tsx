@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { ChevronLeft, Search, ChevronRight, Clock, Tag } from 'lucide-react';
 import { APP_CONFIG } from '@/lib/config';
 import { MOCK_PROFESSIONALS, MOCK_CATEGORIES, MOCK_SERVICES } from '@/lib/constants';
+import { exploreRoute } from '@/lib/routes';
 import { IconButton } from '@/components/ui/IconButton';
 
 export const ServicesScreen = () => {
@@ -139,7 +140,7 @@ export const ServicesScreen = () => {
             {filteredServices.map((svc) => (
               <div 
                 key={svc.id}
-                onClick={() => router.push(`/explore?category=${svc.categoryId}&q=${encodeURIComponent(svc.name)}`)}
+                onClick={() => router.push(exploreRoute({ category: svc.categoryId, q: svc.name }))}
                 className="bg-white rounded-[24px] p-5 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-all active:scale-[0.98]"
               >
                 <div className="flex justify-between items-start mb-3 gap-3">
