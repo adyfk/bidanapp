@@ -86,5 +86,32 @@
     "account": "Account Settings",
     "aboutApp": "About BidanApp",
     "logout": "Log Out"
+  },
+  "Integration": {
+    "eyebrow": "Backend Integration",
+    "title": "Backend Contract + Realtime Example",
+    "description": "This page demonstrates REST access through the shared SDK generated from the backend OpenAPI document, plus realtime chat over WebSocket.",
+    "restSection": "REST Contract",
+    "health": "Health",
+    "professionals": "Professionals",
+    "threads": "Chat Threads",
+    "openapiLink": "OpenAPI from backend",
+    "refresh": "Refresh",
+    "restError": "Failed to load backend data. Make sure the backend is running on localhost:8080.",
+    "socketSection": "Realtime Chat",
+    "socketUrl": "WebSocket URL",
+    "emptyMessages": "No live messages yet. Send one message to verify the websocket flow.",
+    "messagePlaceholder": "Send a live message to the backend demo thread...",
+    "socketError": "WebSocket connection failed. Verify the backend websocket endpoint and allowed origin.",
+    "socketState": {
+      "idle": "Idle",
+      "connecting": "Connecting",
+      "connected": "Connected",
+      "error": "Error"
+    },
+    "notesSection": "Architecture Notes",
+    "noteContract": "The OpenAPI document is exported from backend route registration, not hand-maintained in frontend.",
+    "noteSdk": "Frontend integration uses the shared SDK package so fetch usage stays typed at development time.",
+    "noteWebsocket": "Realtime chat is intentionally separated from OpenAPI because websocket transport needs its own event contract."
   }
 }

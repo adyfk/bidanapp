@@ -20,7 +20,8 @@
       "outputs": [
         ".next/**",
         "dist/**",
-        "bin/**"
+        "bin/**",
+        "src/generated/**"
       ]
     },
     "lint": {

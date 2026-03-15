@@ -8,7 +8,8 @@
     "npm": ">=11.6.2"
   },
   "workspaces": [
-    "apps/*"
+    "apps/*",
+    "packages/*"
   ],
   "scripts": {
     "dev": "turbo run dev --parallel",
@@ -18,6 +19,7 @@
     "lint": "turbo run lint",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",
+    "contract:generate": "npm run generate --workspace @bidanapp/sdk",
     "check": "npm run lint && npm run typecheck && npm run test && npm run build",
     "doctor": "node --version && npm --version && go version",
     "clean": "rm -rf .turbo apps/*/.turbo apps/frontend/.next apps/frontend/out apps/backend/bin apps/backend/api",

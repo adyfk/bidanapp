@@ -6,6 +6,13 @@
     "dev": "go run ./cmd/api",
     "build": "mkdir -p ./bin && go build -o ./bin/api ./cmd/api",
     "start": "./bin/api",
+    "db:up": "docker compose -f ../../docker-compose.dev.yml up -d postgres",
+    "db:down": "docker compose -f ../../docker-compose.dev.yml stop postgres",
+    "atlas": "./scripts/atlas.sh",
+    "atlas:migrate:hash": "./scripts/atlas.sh migrate hash --dir file://db/migrations",
+    "atlas:status": "./scripts/atlas.sh migrate status --env local",
+    "atlas:apply": "./scripts/atlas.sh migrate apply --env local",
+    "atlas:schema:inspect": "./scripts/atlas.sh schema inspect --url postgres://postgres:postgres@host.docker.internal:5432/bidanapp?sslmode=disable",
     "lint": "go vet ./...",
     "test": "go test ./...",
     "typecheck": "go test ./..."

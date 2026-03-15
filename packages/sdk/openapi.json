@@ -1,0 +1,1561 @@
+{
+  "components": {
+    "schemas": {
+      "APIError": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/APIError.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "error": {
+            "$ref": "#/components/schemas/ErrorPayload"
+          }
+        },
+        "required": [
+          "error"
+        ],
+        "type": "object"
+      },
+      "AppBranding": {
+        "additionalProperties": false,
+        "properties": {
+          "appName": {
+            "type": "string"
+          },
+          "baseUrl": {
+            "type": "string"
+          },
+          "ogImage": {
+            "type": "string"
+          },
+          "seoDescription": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "appName",
+          "seoDescription",
+          "baseUrl",
+          "ogImage"
+        ],
+        "type": "object"
+      },
+      "AppColors": {
+        "additionalProperties": false,
+        "properties": {
+          "accent": {
+            "type": "string"
+          },
+          "bgLight": {
+            "type": "string"
+          },
+          "danger": {
+            "type": "string"
+          },
+          "darkNav": {
+            "type": "string"
+          },
+          "primary": {
+            "type": "string"
+          },
+          "primaryDark": {
+            "type": "string"
+          },
+          "primaryLight": {
+            "type": "string"
+          },
+          "secondary": {
+            "type": "string"
+          },
+          "success": {
+            "type": "string"
+          },
+          "textMain": {
+            "type": "string"
+          },
+          "textMuted": {
+            "type": "string"
+          },
+          "warning": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "primary",
+          "primaryDark",
+          "primaryLight",
+          "secondary",
+          "accent",
+          "success",
+          "warning",
+          "danger",
+          "darkNav",
+          "textMain",
+          "textMuted",
+          "bgLight"
+        ],
+        "type": "object"
+      },
+      "AppSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "branding": {
+            "$ref": "#/components/schemas/AppBranding"
+          },
+          "colors": {
+            "$ref": "#/components/schemas/AppColors"
+          },
+          "terms": {
+            "$ref": "#/components/schemas/AppTerms"
+          }
+        },
+        "required": [
+          "branding",
+          "terms",
+          "colors"
+        ],
+        "type": "object"
+      },
+      "AppTerms": {
+        "additionalProperties": false,
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "experience": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "patients": {
+            "type": "string"
+          },
+          "professional": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "professional",
+          "category",
+          "service",
+          "location",
+          "experience",
+          "patients"
+        ],
+        "type": "object"
+      },
+      "AppointmentData": {
+        "additionalProperties": false,
+        "properties": {
+          "appointments": {
+            "items": {
+              "$ref": "#/components/schemas/AppointmentSeed"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "appointments"
+        ],
+        "type": "object"
+      },
+      "AppointmentSeed": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "index": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "professionalId": {
+            "type": "string"
+          },
+          "serviceId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "time": {
+            "type": "string"
+          },
+          "totalPrice": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "index",
+          "id",
+          "professionalId",
+          "serviceId",
+          "time",
+          "status",
+          "totalPrice"
+        ],
+        "type": "object"
+      },
+      "AppointmentsResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/AppointmentsResponseBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AppointmentData"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "CatalogData": {
+        "additionalProperties": false,
+        "properties": {
+          "categories": {
+            "items": {
+              "$ref": "#/components/schemas/Category"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "professionals": {
+            "items": {
+              "$ref": "#/components/schemas/Professional"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "services": {
+            "items": {
+              "$ref": "#/components/schemas/GlobalService"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "categories",
+          "services",
+          "professionals"
+        ],
+        "type": "object"
+      },
+      "CatalogResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/CatalogResponseBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/CatalogData"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "Category": {
+        "additionalProperties": false,
+        "properties": {
+          "accentColor": {
+            "type": "string"
+          },
+          "coverImage": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "iconImage": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string"
+          },
+          "index": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "overviewPoints": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "shortLabel": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "index",
+          "id",
+          "name",
+          "shortLabel",
+          "image",
+          "iconImage",
+          "accentColor",
+          "overviewPoints"
+        ],
+        "type": "object"
+      },
+      "ChatData": {
+        "additionalProperties": false,
+        "properties": {
+          "appointmentThreads": {
+            "items": {
+              "$ref": "#/components/schemas/ChatThread"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "directThreads": {
+            "items": {
+              "$ref": "#/components/schemas/ChatThread"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "directThreads",
+          "appointmentThreads"
+        ],
+        "type": "object"
+      },
+      "ChatMessage": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "isRead": {
+            "type": "boolean"
+          },
+          "sender": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "time": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "text",
+          "sender",
+          "time",
+          "isRead"
+        ],
+        "type": "object"
+      },
+      "ChatResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ChatResponseBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ChatData"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "ChatThread": {
+        "additionalProperties": false,
+        "properties": {
+          "appointmentId": {
+            "type": "string"
+          },
+          "autoReplyText": {
+            "type": "string"
+          },
+          "dayLabel": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "index": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "inputPlaceholder": {
+            "type": "string"
+          },
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/ChatMessage"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "professionalSlug": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "index",
+          "id",
+          "professionalSlug",
+          "dayLabel",
+          "inputPlaceholder",
+          "messages"
+        ],
+        "type": "object"
+      },
+      "ErrorPayload": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "type": "object"
+      },
+      "GlobalService": {
+        "additionalProperties": false,
+        "properties": {
+          "badge": {
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "string"
+          },
+          "coverImage": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "highlights": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "id": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string"
+          },
+          "index": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "shortDescription": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "index",
+          "id",
+          "slug",
+          "name",
+          "categoryId",
+          "description",
+          "shortDescription",
+          "type",
+          "image",
+          "coverImage",
+          "badge",
+          "tags",
+          "highlights"
+        ],
+        "type": "object"
+      },
+      "HealthInfo": {
+        "additionalProperties": false,
+        "properties": {
+          "environment": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "service",
+          "version",
+          "environment"
+        ],
+        "type": "object"
+      },
+      "HealthResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/HealthResponseBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/HealthInfo"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "Professional": {
+        "additionalProperties": false,
+        "properties": {
+          "about": {
+            "type": "string"
+          },
+          "activityStories": {
+            "items": {
+              "$ref": "#/components/schemas/ProfessionalStory"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "addressLines": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "availabilityLabel": {
+            "type": "string"
+          },
+          "badgeLabel": {
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "string"
+          },
+          "clientsServed": {
+            "type": "string"
+          },
+          "coverImage": {
+            "type": "string"
+          },
+          "credentials": {
+            "items": {
+              "$ref": "#/components/schemas/ProfessionalCredential"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "experience": {
+            "type": "string"
+          },
+          "feedbackBreakdown": {
+            "items": {
+              "$ref": "#/components/schemas/ProfessionalFeedbackBreakdown"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "feedbackMetrics": {
+            "items": {
+              "$ref": "#/components/schemas/ProfessionalFeedbackMetric"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "feedbackSummary": {
+            "$ref": "#/components/schemas/ProfessionalFeedbackSummary"
+          },
+          "gallery": {
+            "items": {
+              "$ref": "#/components/schemas/ProfessionalGalleryItem"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "id": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string"
+          },
+          "index": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "languages": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "location": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "portfolioEntries": {
+            "items": {
+              "$ref": "#/components/schemas/ProfessionalPortfolioEntry"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "portfolioStats": {
+            "items": {
+              "$ref": "#/components/schemas/ProfessionalPortfolioStat"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "rating": {
+            "format": "double",
+            "type": "number"
+          },
+          "recentActivities": {
+            "items": {
+              "$ref": "#/components/schemas/ProfessionalRecentActivity"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "responseTime": {
+            "type": "string"
+          },
+          "reviews": {
+            "type": "string"
+          },
+          "services": {
+            "items": {
+              "$ref": "#/components/schemas/ProfessionalService"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "slug": {
+            "type": "string"
+          },
+          "specialties": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "testimonials": {
+            "items": {
+              "$ref": "#/components/schemas/ProfessionalTestimonial"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "index",
+          "id",
+          "slug",
+          "name",
+          "title",
+          "categoryId",
+          "location",
+          "rating",
+          "reviews",
+          "experience",
+          "clientsServed",
+          "image",
+          "badgeLabel",
+          "availabilityLabel",
+          "responseTime",
+          "specialties",
+          "languages",
+          "addressLines",
+          "about",
+          "portfolioStats",
+          "credentials",
+          "activityStories",
+          "portfolioEntries",
+          "gallery",
+          "testimonials",
+          "feedbackSummary",
+          "feedbackMetrics",
+          "feedbackBreakdown",
+          "recentActivities",
+          "services"
+        ],
+        "type": "object"
+      },
+      "ProfessionalCredential": {
+        "additionalProperties": false,
+        "properties": {
+          "index": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "issuer": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "year": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "index",
+          "title",
+          "issuer",
+          "year",
+          "note"
+        ],
+        "type": "object"
+      },
+      "ProfessionalFeedbackBreakdown": {
+        "additionalProperties": false,
+        "properties": {
+          "index": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "label": {
+            "type": "string"
+          },
+          "percentage": {
+            "format": "double",
+            "type": "number"
+          },
+          "total": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "index",
+          "label",
+          "total",
+          "percentage"
+        ],
+        "type": "object"
+      },
+      "ProfessionalFeedbackMetric": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "type": "string"
+          },
+          "index": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "index",
+          "label",
+          "value",
+          "detail"
+        ],
+        "type": "object"
+      },
+      "ProfessionalFeedbackSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "recommendationRate": {
+            "type": "string"
+          },
+          "repeatClientRate": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "recommendationRate",
+          "repeatClientRate"
+        ],
+        "type": "object"
+      },
+      "ProfessionalGalleryItem": {
+        "additionalProperties": false,
+        "properties": {
+          "alt": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string"
+          },
+          "index": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "index",
+          "image",
+          "alt",
+          "label"
+        ],
+        "type": "object"
+      },
+      "ProfessionalPortfolioEntry": {
+        "additionalProperties": false,
+        "properties": {
+          "image": {
+            "type": "string"
+          },
+          "index": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "outcomes": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "periodLabel": {
+            "type": "string"
+          },
+          "serviceId": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "index",
+          "title",
+          "periodLabel",
+          "summary",
+          "outcomes",
+          "image"
+        ],
+        "type": "object"
+      },
+      "ProfessionalPortfolioStat": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "type": "string"
+          },
+          "index": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "index",
+          "label",
+          "value",
+          "detail"
+        ],
+        "type": "object"
+      },
+      "ProfessionalRecentActivity": {
+        "additionalProperties": false,
+        "properties": {
+          "channel": {
+            "type": "string"
+          },
+          "dateLabel": {
+            "type": "string"
+          },
+          "index": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "index",
+          "dateLabel",
+          "title",
+          "channel",
+          "summary"
+        ],
+        "type": "object"
+      },
+      "ProfessionalResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ProfessionalResponseBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/Professional"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "ProfessionalService": {
+        "additionalProperties": false,
+        "properties": {
+          "duration": {
+            "type": "string"
+          },
+          "index": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "price": {
+            "type": "string"
+          },
+          "serviceId": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "index",
+          "serviceId",
+          "duration",
+          "price"
+        ],
+        "type": "object"
+      },
+      "ProfessionalStory": {
+        "additionalProperties": false,
+        "properties": {
+          "capturedAt": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string"
+          },
+          "index": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "location": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "index",
+          "title",
+          "image",
+          "capturedAt",
+          "location",
+          "note"
+        ],
+        "type": "object"
+      },
+      "ProfessionalTestimonial": {
+        "additionalProperties": false,
+        "properties": {
+          "author": {
+            "type": "string"
+          },
+          "dateLabel": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string"
+          },
+          "index": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "quote": {
+            "type": "string"
+          },
+          "rating": {
+            "format": "double",
+            "type": "number"
+          },
+          "role": {
+            "type": "string"
+          },
+          "serviceId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "index",
+          "author",
+          "role",
+          "rating",
+          "dateLabel",
+          "quote",
+          "image"
+        ],
+        "type": "object"
+      },
+      "ProfessionalsResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ProfessionalsResponseBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/Professional"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "SettingsResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/SettingsResponseBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AppSettings"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Backend-generated OpenAPI contract for BidanApp.",
+    "title": "bidanapp-backend",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/appointments": {
+      "get": {
+        "operationId": "get-appointments",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppointmentsResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Get normalized appointment simulation payload",
+        "tags": [
+          "Simulation"
+        ]
+      }
+    },
+    "/catalog": {
+      "get": {
+        "operationId": "get-catalog",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Get categories, services, and professionals",
+        "tags": [
+          "Simulation"
+        ]
+      }
+    },
+    "/chat": {
+      "get": {
+        "operationId": "get-chat",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Get direct and appointment chat threads",
+        "tags": [
+          "Simulation"
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "get-health",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get health status",
+        "tags": [
+          "Health"
+        ]
+      }
+    },
+    "/professionals": {
+      "get": {
+        "operationId": "list-professionals",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfessionalsResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "List professionals",
+        "tags": [
+          "Simulation"
+        ]
+      }
+    },
+    "/professionals/{slug}": {
+      "get": {
+        "operationId": "get-professional",
+        "parameters": [
+          {
+            "description": "Professional slug",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Professional slug",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfessionalResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Get professional by slug",
+        "tags": [
+          "Simulation"
+        ]
+      }
+    },
+    "/settings": {
+      "get": {
+        "operationId": "get-settings",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Get app settings payload",
+        "tags": [
+          "Simulation"
+        ]
+      }
+    },
+    "/ws/chat": {
+      "get": {
+        "description": "WebSocket handshake endpoint for live chat. The HTTP handshake is documented here; realtime event payloads are defined in the SDK package and project docs.",
+        "operationId": "connect-chat-websocket",
+        "parameters": [
+          {
+            "description": "Chat thread identifier. Defaults to demo-thread when omitted.",
+            "example": "integration-demo",
+            "in": "query",
+            "name": "thread_id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Unique client identifier. Defaults to web-client when omitted.",
+            "example": "frontend-demo",
+            "in": "query",
+            "name": "client_id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Display name used as the sender fallback for outbound messages.",
+            "example": "Frontend Demo",
+            "in": "query",
+            "name": "sender",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "101": {
+            "description": "WebSocket handshake accepted."
+          },
+          "403": {
+            "description": "Origin is not authorized for this WebSocket endpoint."
+          }
+        },
+        "summary": "Upgrade chat connection to WebSocket",
+        "tags": [
+          "Realtime"
+        ],
+        "x-bidanapp-realtime-events": {
+          "incoming": [
+            {
+              "shape": {
+                "sender": "Frontend Demo",
+                "text": "Halo dari frontend",
+                "type": "message"
+              },
+              "type": "message"
+            }
+          ],
+          "outgoing": [
+            {
+              "shape": {
+                "clientId": "frontend-demo",
+                "messages": [],
+                "threadId": "integration-demo",
+                "timestamp": "2026-03-15T09:00:00Z",
+                "type": "connected"
+              },
+              "type": "connected"
+            },
+            {
+              "shape": {
+                "message": {
+                  "id": "20260315090000-1",
+                  "sender": "Frontend Demo",
+                  "sentAt": "2026-03-15T09:00:00Z",
+                  "text": "Halo dari frontend",
+                  "threadId": "integration-demo"
+                },
+                "threadId": "integration-demo",
+                "timestamp": "2026-03-15T09:00:00Z",
+                "type": "message"
+              },
+              "type": "message"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "/api/v1"
+    }
+  ]
+}

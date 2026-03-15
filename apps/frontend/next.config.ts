@@ -22,6 +22,7 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   compress: true,
   typedRoutes: true,
+  transpilePackages: ["@bidanapp/sdk"],
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [

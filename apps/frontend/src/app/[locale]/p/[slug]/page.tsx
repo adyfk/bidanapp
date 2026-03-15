@@ -1,7 +1,8 @@
 import { ProfessionalDetailScreen } from '@/components/screens/ProfessionalDetailScreen';
-import { MOCK_PROFESSIONALS, getCategoryById, getProfessionalBySlug } from '@/lib/constants';
+import { getCategoryById, getProfessionalBySlug } from '@/lib/constants';
 import { APP_CONFIG } from '@/lib/config';
 import { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 
 interface Props {
   params: Promise<{
@@ -11,7 +12,14 @@ interface Props {
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
-  const professional = getProfessionalBySlug(params.slug) || MOCK_PROFESSIONALS[0];
+  const professional = getProfessionalBySlug(params.slug);
+
+  if (!professional) {
+    return {
+      title: `Professional Not Found | ${APP_CONFIG.appName}`,
+    };
+  }
+
   const profCategory = getCategoryById(professional.categoryId)?.name || 'Professional';
 
   return {
@@ -33,5 +41,11 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
 export default async function ProfessionalDetailRoute(props: Props) {
   const params = await props.params;
+  const professional = getProfessionalBySlug(params.slug);
+
+  if (!professional) {
+    notFound();
+  }
+
   return <ProfessionalDetailScreen professionalSlug={params.slug} />;
 }

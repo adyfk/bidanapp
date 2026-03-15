@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/routing';
 import Image from 'next/image';
 import { ChevronLeft, MoreVertical, Phone, Video, Send, Plus, Image as ImageIcon, CheckCheck, Smile } from 'lucide-react';
 import { APP_CONFIG } from '@/lib/config';

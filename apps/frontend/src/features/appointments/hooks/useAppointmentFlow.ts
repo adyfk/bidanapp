@@ -1,0 +1,273 @@
+'use client';
+
+import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  MOCK_APPOINTMENTS,
+  SIMULATION_MESSAGES,
+  getAppointmentChatThread,
+  fillSimulationTemplate,
+} from '@/lib/constants';
+import type { Appointment, AppointmentStatus } from '@/types/appointments';
+import type { ChatMessage } from '@/types/chat';
+import { ACTIVE_APPOINTMENT_STATUSES, HISTORY_APPOINTMENT_STATUSES } from '@/features/appointments/lib/status';
+
+type AppointmentTab = 'active' | 'history';
+
+export interface AppointmentChatSession {
+  dayLabel: string;
+  inputPlaceholder: string;
+  autoReplyText: string;
+  messages: ChatMessage[];
+}
+
+const formatMessageTime = () =>
+  new Date().toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
+const createFallbackChatSession = (appointment: Appointment): AppointmentChatSession => ({
+  dayLabel: SIMULATION_MESSAGES.appointmentChatDayLabel,
+  inputPlaceholder: SIMULATION_MESSAGES.appointmentChatInputPlaceholder,
+  autoReplyText: SIMULATION_MESSAGES.chatAutoReply,
+  messages: [
+    {
+      id: Number(`${Date.now()}${appointment.id.slice(-2).padStart(2, '0')}`),
+      text: fillSimulationTemplate(SIMULATION_MESSAGES.appointmentWelcomeTemplate, {
+        serviceName: appointment.service.name,
+      }),
+      sender: 'professional',
+      time: '10:41',
+      isRead: true,
+    },
+  ],
+});
+
+const buildInitialChatState = () =>
+  Object.fromEntries(
+    MOCK_APPOINTMENTS.map((appointment) => {
+      const existingThread = getAppointmentChatThread(appointment.id);
+
+      return [
+        appointment.id,
+        existingThread
+          ? {
+              dayLabel: existingThread.dayLabel,
+              inputPlaceholder: existingThread.inputPlaceholder,
+              autoReplyText: existingThread.autoReplyText || SIMULATION_MESSAGES.chatAutoReply,
+              messages: existingThread.messages,
+            }
+          : createFallbackChatSession(appointment),
+      ] as const;
+    })
+  ) as Record<string, AppointmentChatSession>;
+
+export const useAppointmentFlow = (initialSelectedAppointmentId: string | null = null) => {
+  const [activeTab, setActiveTab] = useState<AppointmentTab>('active');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | null>(initialSelectedAppointmentId);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatInput, setChatInput] = useState('');
+  const [isReviewOpen, setIsReviewOpen] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [reviewText, setReviewText] = useState('');
+  const [reviewPhotoName, setReviewPhotoName] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [statusOverrides, setStatusOverrides] = useState<Record<string, AppointmentStatus>>({});
+  const [chatSessions, setChatSessions] = useState<Record<string, AppointmentChatSession>>(buildInitialChatState);
+  const timeoutIdsRef = useRef<number[]>([]);
+
+  useEffect(() => {
+    const timeoutIds = timeoutIdsRef.current;
+
+    return () => {
+      timeoutIds.forEach((timeoutId) => window.clearTimeout(timeoutId));
+    };
+  }, []);
+
+  const appointments = useMemo(
+    () =>
+      MOCK_APPOINTMENTS.map((appointment) => ({
+        ...appointment,
+        status: statusOverrides[appointment.id] ?? appointment.status,
+      })),
+    [statusOverrides]
+  );
+
+  const filteredAppointments = appointments
+    .filter((appointment) => {
+      const query = searchQuery.trim().toLowerCase();
+      if (!query) {
+        return true;
+      }
+
+      return (
+        appointment.professional.name.toLowerCase().includes(query) ||
+        appointment.service.name.toLowerCase().includes(query)
+      );
+    })
+    .filter((appointment) => {
+      const allowedStatuses =
+        activeTab === 'active' ? ACTIVE_APPOINTMENT_STATUSES : HISTORY_APPOINTMENT_STATUSES;
+
+      return allowedStatuses.includes(appointment.status);
+    });
+
+  const selectedAppointment =
+    selectedAppointmentId === null
+      ? null
+      : appointments.find((appointment) => appointment.id === selectedAppointmentId) || null;
+
+  const selectedChatSession =
+    selectedAppointment === null ? null : chatSessions[selectedAppointment.id] || createFallbackChatSession(selectedAppointment);
+
+  const selectAppointment = (appointmentId: string) => {
+    setSelectedAppointmentId(appointmentId);
+    setIsChatOpen(false);
+    setIsReviewOpen(false);
+  };
+
+  const closeAppointment = () => {
+    setSelectedAppointmentId(null);
+    setIsChatOpen(false);
+    setIsReviewOpen(false);
+    setChatInput('');
+  };
+
+  const closeChat = () => {
+    setIsChatOpen(false);
+    setChatInput('');
+  };
+
+  const openChat = () => {
+    setIsChatOpen(true);
+  };
+
+  const openReview = () => {
+    setIsReviewOpen(true);
+  };
+
+  const closeReview = () => {
+    setIsReviewOpen(false);
+  };
+
+  const markPaid = () => {
+    if (!selectedAppointment) {
+      return;
+    }
+
+    setStatusOverrides((current) => ({
+      ...current,
+      [selectedAppointment.id]: 'paid',
+    }));
+    setNotice(SIMULATION_MESSAGES.paymentSuccessAlert);
+  };
+
+  const selectReviewPhoto = (fileName: string | null) => {
+    setReviewPhotoName(fileName);
+
+    if (fileName) {
+      setNotice(`Foto review siap diunggah: ${fileName}`);
+    }
+  };
+
+  const submitChatMessage = () => {
+    if (!selectedAppointment || !selectedChatSession || !chatInput.trim()) {
+      return;
+    }
+
+    const trimmedMessage = chatInput.trim();
+    const sentMessage: ChatMessage = {
+      id: Date.now(),
+      text: trimmedMessage,
+      sender: 'user',
+      time: formatMessageTime(),
+      isRead: false,
+    };
+
+    setChatSessions((current) => ({
+      ...current,
+      [selectedAppointment.id]: {
+        ...selectedChatSession,
+        messages: [...selectedChatSession.messages, sentMessage],
+      },
+    }));
+    setChatInput('');
+    setNotice(SIMULATION_MESSAGES.chatSentAlert);
+
+    const timeoutId = window.setTimeout(() => {
+      setChatSessions((current) => {
+        const nextSession = current[selectedAppointment.id];
+
+        if (!nextSession) {
+          return current;
+        }
+
+        const replyMessage: ChatMessage = {
+          id: Date.now() + 1,
+          text: nextSession.autoReplyText,
+          sender: 'professional',
+          time: formatMessageTime(),
+          isRead: true,
+        };
+
+        return {
+          ...current,
+          [selectedAppointment.id]: {
+            ...nextSession,
+            messages: [...nextSession.messages, replyMessage],
+          },
+        };
+      });
+    }, 900);
+
+    timeoutIdsRef.current.push(timeoutId);
+  };
+
+  const submitReview = () => {
+    if (!selectedAppointment || rating === 0) {
+      return;
+    }
+
+    setNotice(
+      reviewPhotoName
+        ? `${SIMULATION_MESSAGES.review.successAlert} Foto: ${reviewPhotoName}.`
+        : SIMULATION_MESSAGES.review.successAlert
+    );
+    setIsReviewOpen(false);
+    setReviewText('');
+    setRating(0);
+    setReviewPhotoName(null);
+  };
+
+  return {
+    activeTab,
+    chatInput,
+    closeAppointment,
+    closeChat,
+    closeReview,
+    filteredAppointments,
+    isChatOpen,
+    isReviewOpen,
+    markPaid,
+    notice,
+    openChat,
+    openReview,
+    rating,
+    reviewPhotoName,
+    reviewText,
+    searchQuery,
+    selectAppointment,
+    selectReviewPhoto,
+    selectedAppointment,
+    selectedChatSession,
+    setActiveTab,
+    setChatInput,
+    setNotice,
+    setRating,
+    setReviewText,
+    setSearchQuery,
+    submitChatMessage,
+    submitReview,
+  };
+};

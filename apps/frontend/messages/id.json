@@ -95,5 +95,32 @@
     "account": "Pengaturan Akun",
     "aboutApp": "Tentang BidanApp",
     "logout": "Keluar"
+  },
+  "Integration": {
+    "eyebrow": "Integrasi Backend",
+    "title": "Contoh Kontrak Backend + Realtime",
+    "description": "Halaman ini menunjukkan akses REST melalui SDK bersama yang digenerate dari dokumen OpenAPI backend, plus chat realtime lewat WebSocket.",
+    "restSection": "Kontrak REST",
+    "health": "Health",
+    "professionals": "Profesional",
+    "threads": "Thread Chat",
+    "openapiLink": "OpenAPI dari backend",
+    "refresh": "Muat ulang",
+    "restError": "Gagal memuat data backend. Pastikan backend berjalan di localhost:8080.",
+    "socketSection": "Chat Realtime",
+    "socketUrl": "URL WebSocket",
+    "emptyMessages": "Belum ada pesan live. Kirim satu pesan untuk memverifikasi alur websocket.",
+    "messagePlaceholder": "Kirim pesan live ke thread demo backend...",
+    "socketError": "Koneksi WebSocket gagal. Periksa endpoint websocket backend dan origin yang diizinkan.",
+    "socketState": {
+      "idle": "Idle",
+      "connecting": "Menghubungkan",
+      "connected": "Terhubung",
+      "error": "Error"
+    },
+    "notesSection": "Catatan Arsitektur",
+    "noteContract": "Dokumen OpenAPI diekspor dari registrasi route backend, bukan dipelihara manual di frontend.",
+    "noteSdk": "Integrasi frontend memakai package SDK bersama agar penggunaan fetch tetap typed saat development.",
+    "noteWebsocket": "Chat realtime dipisahkan dari OpenAPI karena transport websocket membutuhkan kontrak event tersendiri."
   }
 }

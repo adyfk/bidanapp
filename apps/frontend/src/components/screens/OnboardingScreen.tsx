@@ -6,6 +6,7 @@ import { ArrowRight } from 'lucide-react';
 import { APP_CONFIG } from '@/lib/config';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { SIMULATION_MEDIA } from '@/lib/constants';
+import { APP_ROUTES } from '@/lib/routes';
 
 export const OnboardingScreen = () => {
   const t = useTranslations('Onboarding');
@@ -31,7 +32,7 @@ export const OnboardingScreen = () => {
         {APP_CONFIG.seoDescription}
       </p>
       <Link
-        href="/home"
+        href={APP_ROUTES.home}
         className="flex items-center gap-2 bg-black/20 hover:bg-black/30 transition-colors backdrop-blur-md px-8 py-4 rounded-full text-white font-semibold border border-white/10 active:scale-95"
       >
         {t('getStarted')} <ArrowRight className="w-5 h-5 ml-1" />
