@@ -3,6 +3,7 @@
 import { Activity, History } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
+import { getAppointmentStatusChipClassName } from '@/features/appointments/lib/status';
 import { APP_CONFIG } from '@/lib/config';
 import { useUiText } from '@/lib/ui-text';
 import type { Appointment } from '@/types/appointments';
@@ -12,13 +13,6 @@ interface AppointmentsListProps {
   appointments: Appointment[];
   onSelect: (appointmentId: string) => void;
 }
-
-const getStatusChipClassName = (status: Appointment['status']) => {
-  if (status === 'completed') return 'bg-green-100 text-green-700';
-  if (status === 'requested') return 'bg-orange-100 text-orange-700';
-  if (status === 'approved_waiting_payment') return 'bg-blue-100 text-blue-700';
-  return 'bg-gray-100 text-gray-600';
-};
 
 export const AppointmentsList = ({ activeTab, appointments, onSelect }: AppointmentsListProps) => {
   const t = useTranslations('Appointments');
@@ -62,7 +56,7 @@ export const AppointmentsList = ({ activeTab, appointments, onSelect }: Appointm
                   </div>
                 </div>
                 <span
-                  className={`rounded-[8px] px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider ${getStatusChipClassName(appointment.status)}`}
+                  className={`rounded-[8px] px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider ${getAppointmentStatusChipClassName(appointment.status)}`}
                 >
                   {t(`status.${appointment.status}`)}
                 </span>

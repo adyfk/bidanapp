@@ -9,7 +9,11 @@
     "popularServices": "Popular {service}s",
     "explore": "Explore",
     "categories": "Categories",
-    "professionalsNearYou": "{professional} near you"
+    "professionalsNearYou": "{professional} near you",
+    "visitorActivityTitle": "Sign in to view your activity",
+    "visitorActivityDescription": "Activity history, chat with providers, payments, and reviews are only available to signed-in customers.",
+    "visitorActivityPrimaryCta": "Sign In / Register Customer",
+    "visitorActivitySecondaryCta": "I am a Midwife"
   },
   "Navigation": {
     "home": "Home",
@@ -18,7 +22,98 @@
     "activity": "Activity"
   },
   "Onboarding": {
-    "getStarted": "Get Started"
+    "getStarted": "Get Started",
+    "visitorTitle": "Continue as visitor",
+    "visitorDescription": "Explore services and professionals without signing in.",
+    "customerTitle": "Sign in / register customer",
+    "customerDescription": "Save activity, bookings, and family follow-up.",
+    "bidanTitle": "I am a midwife",
+    "bidanDescription": "Use a separate path so the customer flow stays focused."
+  },
+  "CustomerAccess": {
+    "navTitle": "Customer Access",
+    "eyebrow": "Customer Access",
+    "demoBadge": "Frontend Demo",
+    "alreadyCustomer": "You are already in customer mode. Continue to the page you need.",
+    "tabs": {
+      "login": "Sign In",
+      "register": "Register"
+    },
+    "intent": {
+      "general": {
+        "title": "Sign in as a customer to continue",
+        "description": "Customer access is used for activity, bookings, family preferences, and care follow-up."
+      },
+      "activity": {
+        "title": "Your activity requires a customer account",
+        "description": "Activity history, payments, chat, and reviews only appear after you sign in as a customer."
+      },
+      "profile": {
+        "title": "Customer profile is separate from visitor mode",
+        "description": "Account details, family preferences, and account security are only available for signed-in customers."
+      },
+      "booking": {
+        "title": "Booking is only for signed-in customers",
+        "description": "Sign in as a customer so schedules, payments, and care follow-up can be stored properly."
+      }
+    },
+    "benefits": {
+      "savedHistory": "Activity and care status stay saved",
+      "familyContext": "Chat and family context stay connected",
+      "followUp": "Bookings and follow-up feel consistent"
+    },
+    "fields": {
+      "phone": "WhatsApp number",
+      "password": "Password",
+      "fullName": "Full name",
+      "city": "Home city"
+    },
+    "placeholders": {
+      "phone": "Example: +62 812 3456 7890",
+      "password": "Enter a demo password",
+      "fullName": "Your name",
+      "city": "Example: Depok"
+    },
+    "errors": {
+      "loginPhoneRequired": "WhatsApp number is required for the login simulation.",
+      "loginPasswordRequired": "Password is required for the login simulation.",
+      "registerNameRequired": "Full name is required for the registration simulation.",
+      "registerPhoneRequired": "WhatsApp number is required for the registration simulation."
+    },
+    "actions": {
+      "login": "Sign in and continue",
+      "register": "Register and continue",
+      "continueVisitor": "Continue as visitor"
+    },
+    "registerHelper": "This form is still a frontend-only simulation. After submitting, the app will switch to customer mode without backend auth.",
+    "visitorEyebrow": "Visitor mode",
+    "visitorDescription": "Visitors can still explore services and professionals, but activity, booking, and customer profile are gated to this page.",
+    "bidan": {
+      "eyebrow": "Midwife Path",
+      "title": "Midwife access is separated from the customer app",
+      "description": "We separate the midwife flow so customer navigation stays focused on discovery, booking, and family activity.",
+      "cta": "Open midwife path"
+    }
+  },
+  "BidanGateway": {
+    "navTitle": "Midwife Path",
+    "eyebrow": "Midwife Area",
+    "title": "The midwife portal is separated from the customer app",
+    "description": "In this frontend simulation, the midwife flow is intentionally not merged into the customer app so operational needs and family needs stay distinct.",
+    "capabilities": {
+      "dashboardTitle": "Operational dashboard for midwives",
+      "dashboardDescription": "This area is better suited for practice schedules, service performance, and professional activity summaries.",
+      "queueTitle": "Request queue and visit schedule",
+      "queueDescription": "Incoming requests, approvals, and home-visit scheduling are better handled in a dedicated midwife portal.",
+      "separationTitle": "Clear role separation",
+      "separationDescription": "Customers focus on finding care and follow-up. Midwives focus on operations, capacity, and SLA."
+    },
+    "nextStepLabel": "Route people by role",
+    "nextStepDescription": "If you are a customer, go back to the customer path. If you only want to browse the catalog, continue as a visitor.",
+    "actions": {
+      "customer": "I am a customer",
+      "visitor": "Back as visitor"
+    }
   },
   "Professional": {
     "about": "About {professional}",
@@ -48,8 +143,11 @@
     "serviceResultsCount": "{count} matching services",
     "serviceListTitle": "All services from this professional",
     "serviceSelected": "Selected",
+    "filterLabel": "Filter",
     "allCategories": "All categories",
     "allModes": "All modes",
+    "categoryFilterLabel": "Category",
+    "modeFilterLabel": "Mode",
     "resetServiceFilters": "Reset filters",
     "bookingFlowLabel": "Flow",
     "bookingFlowInstant": "Instant",
@@ -67,6 +165,8 @@
     "slotBooked": "Booked",
     "noFilteredServices": "No services match the current filters.",
     "noFilteredServicesHint": "Try another search term or reset the filters to see more services.",
+    "showServiceDetails": "View service details",
+    "hideServiceDetails": "Hide details",
     "makeAppointment": "Booking Request",
     "inquiryChat": "Tanya {professional}",
     "experience": "Years Exp."
@@ -74,24 +174,52 @@
   "Explore": {
     "title": "{professional}s",
     "yourLocation": "Your Location",
+    "changeLocation": "Change location",
     "searchPlaceholder": "Find {professional} by name or city...",
     "allExperts": "All Experts",
+    "allCategories": "All Categories",
     "topRated": "Top Rated",
     "availableToday": "Available Today",
+    "myFavorites": "My Favorites",
     "resultsFound": "{count} {count, plural, =1 {Result} other {Results}} Found",
     "noResults": "No results found",
     "tryAdjusting": "Try adjusting your filters or search term.",
     "filterTitle": "Filter {professional}s",
-    "sortBy": "Sort By",
+    "locationSection": "Point-Based Location",
+    "locationPointOnly": "Point based",
+    "locationPointHint": "Enter coordinates or use your current location. The nearest area will be derived from this coordinate point.",
+    "useCurrentLocation": "Use My Current Location",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "nearestArea": "Nearest area",
+    "city": "City / Regency",
+    "district": "District",
+    "province": "Province",
+    "postalCode": "Postal Code",
+    "country": "Country",
+    "formattedAddress": "Formatted address",
+    "invalidCoordinates": "Invalid coordinates. Use latitude -90..90 and longitude -180..180.",
+    "locationBrowserUnsupported": "This browser does not support location detection.",
+    "locationPermissionDenied": "Location permission was denied. Enable it in your browser.",
+    "locationUnavailable": "Location is currently unavailable from this device.",
+    "locationTimeout": "Location detection timed out.",
+    "locationFetchFailed": "Failed to detect the current location.",
+    "locationResolveFailed": "Failed to map coordinates to mock location details.",
+    "locationDummyHint": "Location detail is currently mocked in the frontend. It can be replaced by a reverse geocoding API later without changing the UI.",
+    "categorySection": "Category",
+    "availabilitySection": "Availability",
     "genderPreference": "Gender Preference",
+    "favoritesSection": "My Preferences",
     "reset": "Reset",
-    "applyFilters": "Apply Filters"
+    "applyFilters": "Apply Filters",
+    "resolvingLocation": "Resolving location..."
   },
   "Appointments": {
     "title": "Activity",
     "searchPlaceholder": "Search appointments...",
     "active": "Active",
     "history": "History",
+    "allStatuses": "All Statuses",
     "noAppointments": "No active appointments",
     "trySearching": "Try searching or book a new service.",
     "status": {
@@ -128,9 +256,122 @@
   "Profile": {
     "title": "Profile",
     "language": "Language",
-    "account": "Account Settings",
-    "aboutApp": "About BidanApp",
-    "logout": "Log Out"
+    "account": "Account Details",
+    "security": "Account Security",
+    "aboutApp": "About {appName}",
+    "logout": "Log Out",
+    "buttons": {
+      "close": "Close",
+      "editProfile": "Edit"
+    },
+    "careHub": {
+      "eyebrow": "Active Care",
+      "title": "Your family profile and care preferences",
+      "description": "Manage account details, family support, and follow-up rhythms so care feels more personal, organized, and safe.",
+      "areaLabel": "Active area",
+      "focusLabel": "Care focus",
+      "focusFallback": "No special focus has been saved yet.",
+      "supportLabel": "Family support",
+      "supportFallback": "Not added yet",
+      "activeFlowLabel": "Care flow",
+      "activeAppointment": "{service} with {professional} is currently part of your follow-up flow.",
+      "noActiveAppointment": "There is no active session yet. You can still prepare your preferences so the next session feels faster and more tailored.",
+      "activityStatus": "Care status"
+    },
+    "quickActions": {
+      "activityTitle": "Activity",
+      "activityDescription": "Review active sessions, progress, and family follow-up.",
+      "exploreTitle": "Find care",
+      "exploreDescription": "Discover midwives and follow-up services that fit home needs."
+    },
+    "bidanCard": {
+      "title": "Midwife Path Stays Separate",
+      "description": "If you are a midwife, use this CTA to reach a dedicated area so the customer flow does not get mixed."
+    },
+    "menu": {
+      "languageDescription": "Switch between Bahasa Indonesia and English anytime.",
+      "accountDescription": "Primary contact, care focus, and family support.",
+      "securityDescription": "New password and account privacy controls."
+    },
+    "preferences": {
+      "title": "Care Preferences",
+      "description": "Align services with family communication, visit modes, and after-care reminders.",
+      "familyUpdatesLabel": "Share updates with family support",
+      "familyUpdatesEnabled": "Schedule summaries and follow-ups are shared.",
+      "familyUpdatesDisabled": "Updates stay with the primary account only.",
+      "remindersLabel": "Recovery and check-in reminders",
+      "remindersEnabled": "Follow-up reminders stay active for the family.",
+      "remindersDisabled": "No extra reminders are enabled.",
+      "privacyLabel": "Sensitive notes stay private",
+      "privacyEnabled": "Sensitive information is limited to the main account.",
+      "privacyDisabled": "Sensitive notes may appear in the family summary.",
+      "editButton": "Edit preferences"
+    },
+    "accountSheet": {
+      "title": "Account Details",
+      "description": "Complete your identity, care focus, and family contact so follow-up stays aligned.",
+      "identityTitle": "Primary info",
+      "nameLabel": "Full name",
+      "phoneLabel": "WhatsApp number",
+      "focusLabel": "Care focus",
+      "focusPlaceholder": "Example: home care, family education, routine follow-up",
+      "supportTitle": "Family support contact",
+      "supportDescription": "Add the one contact who is most relevant when care coordination is needed.",
+      "supportNameLabel": "Support contact name",
+      "supportRelationLabel": "Relationship",
+      "supportPhoneLabel": "Support contact number",
+      "supportPlaceholder": "Partner / parent / caregiver",
+      "modeTitle": "Preferred care modes",
+      "familyUpdatesToggle": "Share schedule updates with family support",
+      "remindersToggle": "Enable after-care and check-in reminders",
+      "privacyToggle": "Keep sensitive notes for the main account only",
+      "save": "Save details",
+      "success": "Profile details updated successfully.",
+      "errors": {
+        "nameRequired": "Full name is required.",
+        "phoneRequired": "WhatsApp number is required.",
+        "supportContactIncomplete": "Complete the family support name, relationship, and phone number."
+      }
+    },
+    "securitySheet": {
+      "title": "Change Password",
+      "description": "Account security matters to keep family data and care history private.",
+      "currentPasswordLabel": "Current password",
+      "newPasswordLabel": "New password",
+      "confirmPasswordLabel": "Confirm new password",
+      "helperTitle": "Security checklist",
+      "helperDescription": "Use a password that you can remember while still keeping access protected.",
+      "ruleMinLength": "At least 8 characters",
+      "ruleUppercase": "Includes 1 uppercase letter",
+      "ruleNumber": "Includes 1 number",
+      "ruleMatch": "Confirmation matches",
+      "save": "Update password",
+      "success": "Password updated successfully.",
+      "errors": {
+        "currentRequired": "Enter your current password first.",
+        "newPasswordWeak": "The new password does not meet the security rules.",
+        "confirmMismatch": "The password confirmation does not match."
+      }
+    },
+    "about": {
+      "eyebrow": "Product Vision",
+      "title": "{appName} is built for care that feels close, safe, and continuous.",
+      "description": "The profile page is more than an identity screen. It becomes the family control center for care preferences, caregiver support, and secure access.",
+      "continuityTitle": "Continuity of care",
+      "continuityDescription": "Brings home care, online follow-up, and service activity together so mothers and families do not start from zero in every session.",
+      "familyTitle": "Family-centered support",
+      "familyDescription": "Creates room for a support contact, shared updates, and realistic check-in rhythms at home.",
+      "trustTitle": "Trust and privacy",
+      "trustDescription": "Builds trust through stronger passwords, control over sensitive information, and a transparent experience.",
+      "researchTitle": "Research basis:",
+      "researchLabel": "this direction follows principles of continuous postnatal care, individualized care, and family support.",
+      "versionLabel": "Version {version}"
+    },
+    "modeLabels": {
+      "online": "Online",
+      "home_visit": "Home care",
+      "onsite": "Visit provider"
+    }
   },
   "UiText": {
     "terms": {
@@ -153,6 +394,7 @@
       "chatAutoReply": "Okay, I received your message.",
       "paymentSuccess": "Payment simulation successful",
       "chatSent": "Message sent in demo mode",
+      "chatUnavailable": "Chat is only available for active activities.",
       "reviewPhotoReady": "Review photo ready to upload: {fileName}",
       "reviewSuccessWithPhoto": "{successMessage} Photo: {fileName}."
     },
@@ -195,7 +437,6 @@
     },
     "professionalProfile": {
       "storiesTitle": "Activity stories",
-      "portfolioStatsTitle": "Practice footprint",
       "portfolioEntriesTitle": "Service portfolio",
       "galleryTitle": "Practice gallery",
       "testimonialsTitle": "Family testimonials",
@@ -210,13 +451,11 @@
       "recommendationLabel": "Recommends",
       "repeatClientsLabel": "Returning clients"
     },
+    "professionalGender": {
+      "female": "Female",
+      "male": "Male"
+    },
     "explore": {
-      "sortOptions": {
-        "recommended": "Recommended",
-        "nearestDistance": "Nearest Distance",
-        "highestRating": "Highest Rating",
-        "lowestPrice": "Lowest Price"
-      },
       "genderOptions": {
         "any": "Any",
         "female": "Female",

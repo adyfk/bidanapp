@@ -15,8 +15,9 @@ import {
   getProfessionalCoverageStatus,
   getProfessionalServiceModes,
 } from '@/lib/mock-db/catalog';
-import { ACTIVE_MEDIA_PRESET, ACTIVE_USER_CONTEXT } from '@/lib/mock-db/runtime';
+import { ACTIVE_MEDIA_PRESET } from '@/lib/mock-db/runtime';
 import { useUiText } from '@/lib/ui-text';
+import { useProfessionalUserPreferences } from '@/lib/use-professional-user-preferences';
 import type { Professional } from '@/types/catalog';
 
 interface ProfessionalTrustSectionsProps {
@@ -37,11 +38,8 @@ export const ProfessionalTrustSections = ({ profileCopy, professional }: Profess
   const t = useTranslations('Professional');
   const uiText = useUiText();
   const [feedbackPage, setFeedbackPage] = useState(1);
-  const coverageStatus = getProfessionalCoverageStatus(
-    professional,
-    ACTIVE_USER_CONTEXT.userLocation,
-    ACTIVE_USER_CONTEXT.area.id,
-  );
+  const { selectedArea, userLocation } = useProfessionalUserPreferences();
+  const coverageStatus = getProfessionalCoverageStatus(professional, userLocation, selectedArea.id);
   const enabledModes = getEnabledServiceModes(getProfessionalServiceModes(professional));
   const hasHomeVisit = enabledModes.includes('home_visit');
   const practiceCoordinates = professional.practiceLocation?.coordinates || professional.coverage.center;
@@ -68,8 +66,8 @@ export const ProfessionalTrustSections = ({ profileCopy, professional }: Profess
     feedbackPage * feedbackPageSize,
   );
   const radiusPx = hasHomeVisit ? Math.max(28, Math.min(56, professional.coverage.homeVisitRadiusKm * 4.25)) : 24;
-  const latitudeOffset = (ACTIVE_USER_CONTEXT.userLocation.latitude - professional.coverage.center.latitude) * 5200;
-  const longitudeOffset = (ACTIVE_USER_CONTEXT.userLocation.longitude - professional.coverage.center.longitude) * 5200;
+  const latitudeOffset = (userLocation.latitude - professional.coverage.center.latitude) * 5200;
+  const longitudeOffset = (userLocation.longitude - professional.coverage.center.longitude) * 5200;
   const userX = Math.max(38, Math.min(292, mapCenterX + longitudeOffset));
   const userY = Math.max(28, Math.min(160, mapCenterY - latitudeOffset));
 
@@ -197,7 +195,7 @@ export const ProfessionalTrustSections = ({ profileCopy, professional }: Profess
           </svg>
 
           <div className="absolute left-4 top-4 rounded-full bg-white/88 px-3 py-2 text-[11px] font-semibold text-gray-700 shadow-sm">
-            {t('selectedArea')}: {coverageStatus.selectedArea?.label || ACTIVE_USER_CONTEXT.currentArea}
+            {t('selectedArea')}: {coverageStatus.selectedArea?.label || selectedArea.label}
           </div>
           <div className="absolute bottom-4 right-4 rounded-full bg-white/92 px-3 py-2 text-[11px] font-semibold text-gray-700 shadow-sm">
             {professional.practiceLocation?.label || professional.location}
@@ -237,11 +235,10 @@ export const ProfessionalTrustSections = ({ profileCopy, professional }: Profess
           <div className="rounded-[22px] bg-[#FCFCFC] p-4 shadow-[0_14px_26px_-24px_rgba(17,24,39,0.34)]">
             <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">{t('selectedArea')}</p>
             <p className="mt-1 text-[14px] font-bold text-gray-900">
-              {coverageStatus.selectedArea?.label || ACTIVE_USER_CONTEXT.currentArea}
+              {coverageStatus.selectedArea?.label || selectedArea.label}
             </p>
             <p className="mt-2 text-[12px] text-gray-500">
-              {t('coordinates')}: {formatCoordinate(ACTIVE_USER_CONTEXT.userLocation.latitude)},{' '}
-              {formatCoordinate(ACTIVE_USER_CONTEXT.userLocation.longitude)}
+              {t('coordinates')}: {formatCoordinate(userLocation.latitude)}, {formatCoordinate(userLocation.longitude)}
             </p>
           </div>
 

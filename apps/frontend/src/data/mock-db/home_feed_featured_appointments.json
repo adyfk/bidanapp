@@ -3,16 +3,18 @@
     "id": "home-feed-featured-default-family-care",
     "index": 1,
     "homeFeedId": "default-family-care",
-    "dateLabel": "Sunday, 28 February 2025",
-    "timeLabel": "09.00 - 10.00 AM",
+    "appointmentId": "apt-003",
+    "dateLabel": "Hari ini",
+    "timeLabel": "19:30 WIB",
     "professionalId": "1"
   },
   {
     "id": "home-feed-featured-recovery-focus",
     "index": 1,
     "homeFeedId": "recovery-focus",
-    "dateLabel": "Tuesday, 16 March 2026",
-    "timeLabel": "13.00 - 14.00 WIB",
+    "appointmentId": "apt-005",
+    "dateLabel": "Sedang berjalan",
+    "timeLabel": "mulai 13:00 WIB",
     "professionalId": "3"
   }
 ]

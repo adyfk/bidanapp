@@ -22,3 +22,6 @@ const hydrateAppointment = (appointmentRow: AppointmentRow): Appointment => ({
 });
 
 export const MOCK_APPOINTMENTS: Appointment[] = appointmentRows.map(hydrateAppointment);
+const appointmentsById = new Map(MOCK_APPOINTMENTS.map((appointment) => [appointment.id, appointment]));
+
+export const getAppointmentById = (appointmentId: string) => appointmentsById.get(appointmentId);

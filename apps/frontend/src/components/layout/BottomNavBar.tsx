@@ -4,19 +4,38 @@ import { Activity, Home as HomeIcon, Search, Users } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/routing';
 import { APP_CONFIG } from '@/lib/config';
-import { APP_ROUTES } from '@/lib/routes';
+import { APP_ROUTES, customerAccessRoute } from '@/lib/routes';
+import { useViewerSession } from '@/lib/use-viewer-session';
 
 export const BottomNavBar = () => {
   const pathname = usePathname();
   const t = useTranslations('Navigation');
+  const { isCustomer } = useViewerSession();
 
-  if (pathname === '/' || pathname.startsWith('/p') || pathname.startsWith('/messages/')) return null;
+  if (
+    pathname === '/' ||
+    pathname.startsWith('/auth') ||
+    pathname.startsWith('/for-bidan') ||
+    pathname.startsWith('/p') ||
+    pathname.startsWith('/messages/')
+  )
+    return null;
+
+  if (!isCustomer && (pathname === APP_ROUTES.appointments || pathname === APP_ROUTES.profile)) {
+    return null;
+  }
 
   const navItems = [
     { id: APP_ROUTES.home, icon: <HomeIcon className="w-[22px] h-[22px]" />, label: t('home') },
     { id: APP_ROUTES.services, icon: <Search className="w-[22px] h-[22px]" />, label: t('search') },
     { id: APP_ROUTES.explore, icon: <Users className="w-[22px] h-[22px]" />, label: t('experts') },
-    { id: APP_ROUTES.appointments, icon: <Activity className="w-[22px] h-[22px]" />, label: t('activity') },
+    {
+      id: isCustomer
+        ? APP_ROUTES.appointments
+        : customerAccessRoute({ intent: 'activity', next: APP_ROUTES.appointments }),
+      icon: <Activity className="w-[22px] h-[22px]" />,
+      label: t('activity'),
+    },
   ];
 
   return (

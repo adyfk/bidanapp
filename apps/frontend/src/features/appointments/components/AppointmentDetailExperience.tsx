@@ -17,6 +17,7 @@ interface AppointmentDetailExperienceProps {
 export const AppointmentDetailExperience = ({ appointmentId, onBack }: AppointmentDetailExperienceProps) => {
   const uiText = useUiText();
   const {
+    canChatSelectedAppointment,
     chatInput,
     closeChat,
     closeReview,
@@ -38,7 +39,7 @@ export const AppointmentDetailExperience = ({ appointmentId, onBack }: Appointme
     submitChatMessage,
     submitReview,
     selectReviewPhoto,
-  } = useAppointmentFlow(appointmentId);
+  } = useAppointmentFlow({ initialSelectedAppointmentId: appointmentId });
 
   if (!selectedAppointment) {
     return (
@@ -79,7 +80,7 @@ export const AppointmentDetailExperience = ({ appointmentId, onBack }: Appointme
         onPayNow={markPaid}
       />
 
-      {isChatOpen && selectedChatSession ? (
+      {canChatSelectedAppointment && isChatOpen && selectedChatSession ? (
         <AppointmentChatSheet
           appointment={selectedAppointment}
           chatInput={chatInput}

@@ -1,6 +1,7 @@
 export type ServiceDeliveryMode = 'online' | 'home_visit' | 'onsite';
 export type BookingFlow = 'instant' | 'request';
 export type TimeSlotStatus = 'available' | 'limited' | 'booked';
+export type ProfessionalGender = 'female' | 'male';
 
 export interface GeoPoint {
   latitude: number;
@@ -16,6 +17,20 @@ export interface Area {
   label: string;
   latitude: number;
   longitude: number;
+}
+
+export interface ResolvedLocation {
+  point: GeoPoint;
+  areaId: string;
+  areaLabel: string;
+  city: string;
+  district: string;
+  province: string;
+  postalCode: string;
+  country: string;
+  formattedAddress: string;
+  source: 'mock';
+  precision: 'district';
 }
 
 export interface ServiceModeFlags {
@@ -79,13 +94,6 @@ export interface ProfessionalServiceScheduleDay {
   label: string;
   dateIso: string;
   slots: ProfessionalServiceTimeSlot[];
-}
-
-export interface ProfessionalPortfolioStat {
-  index: number;
-  label: string;
-  value: string;
-  detail: string;
 }
 
 export interface ProfessionalCredential {
@@ -183,6 +191,7 @@ export interface Professional {
   slug: string;
   name: string;
   title: string;
+  gender: ProfessionalGender;
   location: string;
   rating: number;
   reviews: string;
@@ -198,7 +207,6 @@ export interface Professional {
   practiceLocation?: ProfessionalPracticeLocation;
   coverage: ProfessionalCoverage;
   about: string;
-  portfolioStats: ProfessionalPortfolioStat[];
   credentials: ProfessionalCredential[];
   activityStories: ProfessionalStory[];
   portfolioEntries: ProfessionalPortfolioEntry[];

@@ -5,23 +5,32 @@ import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { APP_CONFIG } from '@/lib/config';
 import { getProfessionalCategoryLabel, getProfessionalCoverageStatus } from '@/lib/mock-db/catalog';
-import { ACTIVE_USER_CONTEXT } from '@/lib/mock-db/runtime';
-import type { Professional } from '@/types/catalog';
+import { useUiText } from '@/lib/ui-text';
+import type { GeoPoint, Professional } from '@/types/catalog';
 
 interface ProfessionalCardProps {
   professional: Professional;
   href: Route;
+  isFavorite: boolean;
+  onToggleFavorite: (professionalId: string) => void;
+  selectedAreaId: string;
+  userLocation: GeoPoint;
 }
 
-export const ProfessionalCard = ({ professional, href }: ProfessionalCardProps) => {
+export const ProfessionalCard = ({
+  professional,
+  href,
+  isFavorite,
+  onToggleFavorite,
+  selectedAreaId,
+  userLocation,
+}: ProfessionalCardProps) => {
   const t = useTranslations('Professional');
+  const uiText = useUiText();
   const categoryLabel = getProfessionalCategoryLabel(professional) || 'Professional';
-  const coverageStatus = getProfessionalCoverageStatus(
-    professional,
-    ACTIVE_USER_CONTEXT.userLocation,
-    ACTIVE_USER_CONTEXT.area.id,
-  );
+  const coverageStatus = getProfessionalCoverageStatus(professional, userLocation, selectedAreaId);
   const hasHomeVisit = professional.services.some((service) => service.serviceModes.homeVisit);
+  const genderLabel = uiText.getProfessionalGenderLabel(professional.gender);
 
   return (
     <Link
@@ -40,16 +49,29 @@ export const ProfessionalCard = ({ professional, href }: ProfessionalCardProps) 
             type="button"
             onClick={(e) => {
               e.preventDefault();
+              onToggleFavorite(professional.id);
             }}
+            className="rounded-full p-1 transition-transform hover:scale-105"
+            aria-label={
+              isFavorite ? `Remove ${professional.name} from favorites` : `Add ${professional.name} to favorites`
+            }
             style={{ color: APP_CONFIG.colors.primary }}
           >
-            <Heart className="w-5 h-5" />
+            <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
           </button>
         </div>
         <p className="text-[13px] mt-1 mb-2 font-medium" style={{ color: APP_CONFIG.colors.primary }}>
           {categoryLabel} <span className="text-gray-400 font-normal">- {professional.location}</span>
         </p>
         <p className="text-[12px] text-gray-500 mb-2 line-clamp-1">{professional.specialties.join(' • ')}</p>
+        <div className="mb-2 flex flex-wrap gap-2">
+          <span
+            className="rounded-full px-2.5 py-1 text-[10px] font-semibold"
+            style={{ backgroundColor: APP_CONFIG.colors.primaryLight, color: APP_CONFIG.colors.primary }}
+          >
+            {genderLabel}
+          </span>
+        </div>
         <div className="flex items-center gap-3 text-[12px] text-gray-500 font-medium">
           <div className="flex items-center" style={{ color: APP_CONFIG.colors.warning }}>
             <Star className="w-4 h-4 mr-1 fill-current" /> {professional.rating.toFixed(1)}

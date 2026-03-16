@@ -9,7 +9,11 @@
     "popularServices": "{service} Populer",
     "explore": "Eksplor",
     "categories": "Kategori",
-    "professionalsNearYou": "{professional} di sekitar Anda"
+    "professionalsNearYou": "{professional} di sekitar Anda",
+    "visitorActivityTitle": "Masuk untuk melihat aktivitas Anda",
+    "visitorActivityDescription": "Riwayat aktivitas, chat dengan bidan, pembayaran, dan review hanya tersedia untuk customer yang sudah masuk.",
+    "visitorActivityPrimaryCta": "Masuk / Daftar Customer",
+    "visitorActivitySecondaryCta": "Saya Bidan"
   },
   "Navigation": {
     "home": "Beranda",
@@ -18,7 +22,98 @@
     "activity": "Aktivitas"
   },
   "Onboarding": {
-    "getStarted": "Mulai Sekarang"
+    "getStarted": "Mulai Sekarang",
+    "visitorTitle": "Lanjut sebagai visitor",
+    "visitorDescription": "Jelajahi layanan dan profesional tanpa login.",
+    "customerTitle": "Masuk / daftar customer",
+    "customerDescription": "Simpan aktivitas, booking, dan follow-up keluarga.",
+    "bidanTitle": "Saya bidan",
+    "bidanDescription": "Masuk ke jalur terpisah agar flow customer tidak tercampur."
+  },
+  "CustomerAccess": {
+    "navTitle": "Akses Customer",
+    "eyebrow": "Customer Access",
+    "demoBadge": "Simulasi FE",
+    "alreadyCustomer": "Anda sudah berada di mode customer. Lanjutkan ke halaman yang dibutuhkan.",
+    "tabs": {
+      "login": "Masuk",
+      "register": "Daftar"
+    },
+    "intent": {
+      "general": {
+        "title": "Masuk sebagai customer untuk melanjutkan",
+        "description": "Akses customer dipakai untuk aktivitas, booking, preferensi keluarga, dan tindak lanjut layanan."
+      },
+      "activity": {
+        "title": "Aktivitas Anda butuh akun customer",
+        "description": "Riwayat aktivitas, pembayaran, chat, dan review hanya muncul setelah Anda masuk sebagai customer."
+      },
+      "profile": {
+        "title": "Profil customer dipisahkan dari visitor",
+        "description": "Detail akun, preferensi keluarga, dan keamanan akun hanya tersedia untuk customer yang sudah masuk."
+      },
+      "booking": {
+        "title": "Booking hanya untuk customer yang sudah masuk",
+        "description": "Masuk sebagai customer agar jadwal, pembayaran, dan tindak lanjut layanan dapat tersimpan dengan rapi."
+      }
+    },
+    "benefits": {
+      "savedHistory": "Aktivitas dan status layanan tersimpan",
+      "familyContext": "Chat dan konteks keluarga lebih terhubung",
+      "followUp": "Booking dan follow-up terasa konsisten"
+    },
+    "fields": {
+      "phone": "Nomor WhatsApp",
+      "password": "Password",
+      "fullName": "Nama lengkap",
+      "city": "Kota domisili"
+    },
+    "placeholders": {
+      "phone": "Contoh: +62 812 3456 7890",
+      "password": "Masukkan password demo",
+      "fullName": "Nama Anda",
+      "city": "Contoh: Depok"
+    },
+    "errors": {
+      "loginPhoneRequired": "Nomor WhatsApp wajib diisi untuk simulasi login.",
+      "loginPasswordRequired": "Password wajib diisi untuk simulasi login.",
+      "registerNameRequired": "Nama lengkap wajib diisi untuk simulasi pendaftaran.",
+      "registerPhoneRequired": "Nomor WhatsApp wajib diisi untuk simulasi pendaftaran."
+    },
+    "actions": {
+      "login": "Masuk dan lanjut",
+      "register": "Daftar dan lanjut",
+      "continueVisitor": "Lanjut sebagai visitor"
+    },
+    "registerHelper": "Form ini masih simulasi FE. Setelah submit, aplikasi akan berpindah ke mode customer tanpa backend auth.",
+    "visitorEyebrow": "Mode visitor",
+    "visitorDescription": "Visitor tetap bisa eksplor layanan dan profesional, tetapi aktivitas, booking, dan profil customer akan digate ke halaman ini.",
+    "bidan": {
+      "eyebrow": "Jalur Bidan",
+      "title": "Masuk sebagai bidan dipisah dari customer app",
+      "description": "Kami pisahkan flow bidan supaya navigasi customer tetap fokus pada pencarian layanan, booking, dan aktivitas keluarga.",
+      "cta": "Buka jalur bidan"
+    }
+  },
+  "BidanGateway": {
+    "navTitle": "Jalur Bidan",
+    "eyebrow": "Bidan Area",
+    "title": "Portal bidan dipisahkan dari aplikasi customer",
+    "description": "Untuk simulasi FE ini, flow bidan tidak digabung ke aplikasi customer agar kebutuhan operasional bidan dan kebutuhan keluarga tidak saling bercampur.",
+    "capabilities": {
+      "dashboardTitle": "Dashboard operasional bidan",
+      "dashboardDescription": "Area ini ideal untuk jadwal praktik, performa layanan, dan ringkasan aktivitas profesional.",
+      "queueTitle": "Antrian request dan jadwal visit",
+      "queueDescription": "Request masuk, approval, dan pengelolaan jadwal home visit lebih tepat bila ditaruh di portal bidan tersendiri.",
+      "separationTitle": "Pemisahan role yang jelas",
+      "separationDescription": "Customer fokus cari layanan dan follow-up. Bidan fokus operasional, kapasitas, dan SLA."
+    },
+    "nextStepLabel": "Arahkan user sesuai peran",
+    "nextStepDescription": "Kalau Anda customer, kembali ke jalur customer. Kalau hanya ingin melihat katalog, lanjut sebagai visitor.",
+    "actions": {
+      "customer": "Saya customer",
+      "visitor": "Kembali sebagai visitor"
+    }
   },
   "Professional": {
     "about": "Tentang {professional}",
@@ -48,8 +143,11 @@
     "serviceResultsCount": "{count} layanan cocok",
     "serviceListTitle": "Semua layanan profesional ini",
     "serviceSelected": "Dipilih",
+    "filterLabel": "Filter",
     "allCategories": "Semua kategori",
     "allModes": "Semua mode",
+    "categoryFilterLabel": "Kategori",
+    "modeFilterLabel": "Mode",
     "resetServiceFilters": "Reset filter",
     "bookingFlowLabel": "Flow",
     "bookingFlowInstant": "Instan",
@@ -67,6 +165,8 @@
     "slotBooked": "Penuh",
     "noFilteredServices": "Tidak ada layanan yang cocok dengan filter saat ini.",
     "noFilteredServicesHint": "Coba ubah pencarian atau reset filter untuk melihat layanan lain.",
+    "showServiceDetails": "Lihat detail layanan",
+    "hideServiceDetails": "Sembunyikan detail",
     "makeAppointment": "Booking Request",
     "inquiryChat": "Tanya {professional}",
     "experience": "Tahun Pengalaman"
@@ -74,18 +174,45 @@
   "Explore": {
     "title": "{professional}",
     "yourLocation": "Lokasi Anda",
+    "changeLocation": "Ubah lokasi",
     "searchPlaceholder": "Cari {professional} berdasarkan nama atau kota...",
     "allExperts": "Semua Ahli",
+    "allCategories": "Semua Kategori",
     "topRated": "Rating Teratas",
     "availableToday": "Tersedia Hari Ini",
+    "myFavorites": "Favorit Saya",
     "resultsFound": "{count} Hasil Ditemukan",
     "noResults": "Hasil tidak ditemukan",
     "tryAdjusting": "Coba ubah filter atau kata kunci pencarian Anda.",
     "filterTitle": "Saring {professional}",
-    "sortBy": "Urutkan Berdasarkan",
+    "locationSection": "Lokasi Berdasarkan Titik",
+    "locationPointOnly": "Berbasis titik",
+    "locationPointHint": "Masukkan koordinat atau gunakan lokasi saat ini. Area terdekat akan ditentukan dari titik koordinat ini.",
+    "useCurrentLocation": "Gunakan Lokasi Saya",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "nearestArea": "Area terdekat",
+    "city": "Kota / Kabupaten",
+    "district": "Kecamatan",
+    "province": "Provinsi",
+    "postalCode": "Kode Pos",
+    "country": "Negara",
+    "formattedAddress": "Alamat terformat",
+    "invalidCoordinates": "Koordinat tidak valid. Gunakan latitude -90..90 dan longitude -180..180.",
+    "locationBrowserUnsupported": "Browser ini tidak mendukung deteksi lokasi.",
+    "locationPermissionDenied": "Izin lokasi ditolak. Aktifkan izin lokasi di browser Anda.",
+    "locationUnavailable": "Lokasi tidak tersedia dari perangkat saat ini.",
+    "locationTimeout": "Deteksi lokasi melebihi batas waktu.",
+    "locationFetchFailed": "Gagal mendeteksi lokasi saat ini.",
+    "locationResolveFailed": "Gagal memetakan koordinat ke detail lokasi dummy.",
+    "locationDummyHint": "Saat ini detail lokasi masih dummy di FE. Nanti bisa diganti ke API reverse geocoding tanpa ubah UI.",
+    "categorySection": "Kategori",
+    "availabilitySection": "Ketersediaan",
     "genderPreference": "Preferensi Gender",
+    "favoritesSection": "Preferensi Saya",
     "reset": "Atur Ulang",
-    "applyFilters": "Terapkan Filter"
+    "applyFilters": "Terapkan Filter",
+    "resolvingLocation": "Memetakan lokasi..."
   },
   "Messages": {
     "title": "Pesan",
@@ -101,6 +228,7 @@
     "searchPlaceholder": "Cari jadwal...",
     "active": "Aktif",
     "history": "Riwayat",
+    "allStatuses": "Semua Status",
     "noAppointments": "Tidak ada jadwal aktif",
     "trySearching": "Coba cari atau pesan layanan baru.",
     "status": {
@@ -137,9 +265,122 @@
   "Profile": {
     "title": "Profil",
     "language": "Bahasa",
-    "account": "Pengaturan Akun",
-    "aboutApp": "Tentang BidanApp",
-    "logout": "Keluar"
+    "account": "Detail Akun",
+    "security": "Keamanan Akun",
+    "aboutApp": "Tentang {appName}",
+    "logout": "Keluar",
+    "buttons": {
+      "close": "Tutup",
+      "editProfile": "Edit"
+    },
+    "careHub": {
+      "eyebrow": "Pendampingan Aktif",
+      "title": "Profil keluarga dan preferensi layanan Anda",
+      "description": "Kelola detail akun, dukungan keluarga, dan ritme follow-up agar layanan terasa personal, rapi, dan aman.",
+      "areaLabel": "Area aktif",
+      "focusLabel": "Fokus pendampingan",
+      "focusFallback": "Belum ada fokus khusus yang disimpan.",
+      "supportLabel": "Pendamping keluarga",
+      "supportFallback": "Belum ditambahkan",
+      "activeFlowLabel": "Flow layanan",
+      "activeAppointment": "{service} bersama {professional} sedang menjadi fokus tindak lanjut Anda.",
+      "noActiveAppointment": "Belum ada sesi aktif. Anda tetap bisa menyiapkan preferensi agar sesi berikutnya lebih cepat.",
+      "activityStatus": "Status layanan"
+    },
+    "quickActions": {
+      "activityTitle": "Aktivitas",
+      "activityDescription": "Lihat sesi aktif, progress, dan tindak lanjut keluarga.",
+      "exploreTitle": "Cari layanan",
+      "exploreDescription": "Temukan bidan dan layanan lanjutan sesuai kebutuhan rumah."
+    },
+    "bidanCard": {
+      "title": "Jalur Bidan Dipisah",
+      "description": "Jika Anda bidan, gunakan CTA ini ke area terpisah agar flow customer tidak tercampur."
+    },
+    "menu": {
+      "languageDescription": "Pakai Bahasa Indonesia atau English kapan saja.",
+      "accountDescription": "Kontak utama, fokus layanan, dan dukungan keluarga.",
+      "securityDescription": "Password baru dan kontrol privasi akun."
+    },
+    "preferences": {
+      "title": "Preferensi Pendampingan",
+      "description": "Selaraskan layanan dengan pola komunikasi keluarga, mode kunjungan, dan pengingat after-care.",
+      "familyUpdatesLabel": "Update ke pendamping keluarga",
+      "familyUpdatesEnabled": "Ringkasan jadwal dan follow-up ikut dibagikan.",
+      "familyUpdatesDisabled": "Update hanya masuk ke akun utama.",
+      "remindersLabel": "Reminder recovery dan check-in",
+      "remindersEnabled": "Pengingat lanjutan aktif untuk keluarga.",
+      "remindersDisabled": "Tidak ada reminder tambahan.",
+      "privacyLabel": "Catatan sensitif tetap privat",
+      "privacyEnabled": "Akses informasi sensitif dibatasi di akun utama.",
+      "privacyDisabled": "Catatan sensitif dapat muncul di ringkasan keluarga.",
+      "editButton": "Ubah preferensi"
+    },
+    "accountSheet": {
+      "title": "Detail Akun",
+      "description": "Lengkapi identitas, fokus pendampingan, dan kontak keluarga agar follow-up lebih terarah.",
+      "identityTitle": "Info utama",
+      "nameLabel": "Nama lengkap",
+      "phoneLabel": "Nomor WhatsApp",
+      "focusLabel": "Fokus pendampingan",
+      "focusPlaceholder": "Contoh: home care, edukasi keluarga, follow-up rutin",
+      "supportTitle": "Kontak pendamping keluarga",
+      "supportDescription": "Tambahkan satu kontak yang paling relevan bila keluarga perlu koordinasi layanan.",
+      "supportNameLabel": "Nama pendamping",
+      "supportRelationLabel": "Hubungan",
+      "supportPhoneLabel": "Nomor pendamping",
+      "supportPlaceholder": "Pasangan / orang tua / caregiver",
+      "modeTitle": "Mode layanan yang disukai",
+      "familyUpdatesToggle": "Bagikan update jadwal ke pendamping keluarga",
+      "remindersToggle": "Aktifkan reminder after-care dan check-in",
+      "privacyToggle": "Simpan catatan sensitif hanya untuk akun utama",
+      "save": "Simpan detail",
+      "success": "Detail profil berhasil diperbarui.",
+      "errors": {
+        "nameRequired": "Nama lengkap wajib diisi.",
+        "phoneRequired": "Nomor WhatsApp wajib diisi.",
+        "supportContactIncomplete": "Lengkapi nama, hubungan, dan nomor pendamping keluarga."
+      }
+    },
+    "securitySheet": {
+      "title": "Ubah Password",
+      "description": "Keamanan akun penting untuk menjaga data keluarga dan riwayat layanan tetap privat.",
+      "currentPasswordLabel": "Password saat ini",
+      "newPasswordLabel": "Password baru",
+      "confirmPasswordLabel": "Konfirmasi password baru",
+      "helperTitle": "Checklist keamanan",
+      "helperDescription": "Gunakan password yang mudah Anda ingat tetapi tetap kuat untuk melindungi akses akun.",
+      "ruleMinLength": "Minimal 8 karakter",
+      "ruleUppercase": "Memiliki 1 huruf besar",
+      "ruleNumber": "Memiliki 1 angka",
+      "ruleMatch": "Konfirmasi password sesuai",
+      "save": "Perbarui password",
+      "success": "Password berhasil diperbarui.",
+      "errors": {
+        "currentRequired": "Masukkan password saat ini terlebih dahulu.",
+        "newPasswordWeak": "Password baru belum memenuhi syarat keamanan.",
+        "confirmMismatch": "Konfirmasi password belum sesuai."
+      }
+    },
+    "about": {
+      "eyebrow": "Visi Produk",
+      "title": "{appName} dibangun untuk pendampingan yang terasa dekat, aman, dan berkelanjutan.",
+      "description": "Halaman profile bukan hanya tempat identitas akun. Ini adalah pusat kontrol keluarga untuk preferensi layanan, dukungan caregiver, dan keamanan akses.",
+      "continuityTitle": "Continuity of care",
+      "continuityDescription": "Menyatukan home care, follow-up online, dan aktivitas layanan agar ibu dan keluarga tidak mulai dari nol di setiap sesi.",
+      "familyTitle": "Family-centered support",
+      "familyDescription": "Memberi ruang untuk pendamping keluarga, pembagian update, dan ritme check-in yang realistis di rumah.",
+      "trustTitle": "Trust and privacy",
+      "trustDescription": "Menjaga kepercayaan lewat password yang kuat, kontrol informasi sensitif, dan pengalaman yang transparan.",
+      "researchTitle": "Dasar riset:",
+      "researchLabel": "arah ini mengikuti prinsip postnatal care yang berkelanjutan, individualized care, dan dukungan keluarga.",
+      "versionLabel": "Versi {version}"
+    },
+    "modeLabels": {
+      "online": "Online",
+      "home_visit": "Home care",
+      "onsite": "Datang ke lokasi"
+    }
   },
   "UiText": {
     "terms": {
@@ -162,6 +403,7 @@
       "chatAutoReply": "Baik, pesan Anda sudah saya terima.",
       "paymentSuccess": "Simulasi pembayaran berhasil",
       "chatSent": "Pesan terkirim dalam mode demo",
+      "chatUnavailable": "Chat hanya tersedia untuk aktivitas yang masih aktif.",
       "reviewPhotoReady": "Foto review siap diunggah: {fileName}",
       "reviewSuccessWithPhoto": "{successMessage} Foto: {fileName}."
     },
@@ -204,7 +446,6 @@
     },
     "professionalProfile": {
       "storiesTitle": "Story aktivitas",
-      "portfolioStatsTitle": "Jejak praktik",
       "portfolioEntriesTitle": "Portofolio tindakan",
       "galleryTitle": "Galeri praktik",
       "testimonialsTitle": "Testimoni keluarga",
@@ -219,17 +460,15 @@
       "recommendationLabel": "Merekomendasikan",
       "repeatClientsLabel": "Klien kembali"
     },
+    "professionalGender": {
+      "female": "Perempuan",
+      "male": "Laki-laki"
+    },
     "explore": {
-      "sortOptions": {
-        "recommended": "Recommended",
-        "nearestDistance": "Nearest Distance",
-        "highestRating": "Highest Rating",
-        "lowestPrice": "Lowest Price"
-      },
       "genderOptions": {
-        "any": "Any",
-        "female": "Female",
-        "male": "Male"
+        "any": "Semua",
+        "female": "Perempuan",
+        "male": "Laki-laki"
       }
     },
     "review": {

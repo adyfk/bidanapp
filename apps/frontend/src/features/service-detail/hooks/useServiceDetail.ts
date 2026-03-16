@@ -9,8 +9,8 @@ import {
   MOCK_PROFESSIONALS,
   MOCK_SERVICES,
 } from '@/lib/mock-db/catalog';
-import { ACTIVE_USER_CONTEXT } from '@/lib/mock-db/runtime';
 import { useUiText } from '@/lib/ui-text';
+import { useProfessionalUserPreferences } from '@/lib/use-professional-user-preferences';
 import type { ProfessionalService, ServiceDeliveryMode, ServiceModeFlags } from '@/types/catalog';
 
 export interface ServiceProviderSummary {
@@ -36,6 +36,7 @@ export interface ServiceProviderSummary {
 export const useServiceDetail = (serviceId: string) => {
   const uiText = useUiText();
   const [notice, setNotice] = useState<string | null>(null);
+  const { selectedAreaId, userLocation } = useProfessionalUserPreferences();
   const service = MOCK_SERVICES.find((item) => item.id === serviceId) || null;
   const categoryName = service
     ? MOCK_CATEGORIES.find((category) => category.id === service.categoryId)?.name || ''
@@ -47,11 +48,7 @@ export const useServiceDetail = (serviceId: string) => {
         const professionalService = professional.services.find(
           (serviceMapping) => serviceMapping.serviceId === service.id,
         );
-        const coverageStatus = getProfessionalCoverageStatus(
-          professional,
-          ACTIVE_USER_CONTEXT.userLocation,
-          ACTIVE_USER_CONTEXT.area.id,
-        );
+        const coverageStatus = getProfessionalCoverageStatus(professional, userLocation, selectedAreaId);
         const accessibleModes = professionalService
           ? getAccessibleServiceModes(
               professionalService.serviceModes,

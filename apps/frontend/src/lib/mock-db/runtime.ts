@@ -7,6 +7,7 @@ import homeFeedPopularServicesData from '@/data/mock-db/home_feed_popular_servic
 import homeFeedSnapshotsData from '@/data/mock-db/home_feed_snapshots.json';
 import mediaPresetsData from '@/data/mock-db/media_presets.json';
 import userContextsData from '@/data/mock-db/user_contexts.json';
+import { getAppointmentById } from '@/lib/mock-db/appointments';
 import { getAreaById, getProfessionalById, getServiceById } from '@/lib/mock-db/catalog';
 import type { ConsumerProfile, HomeFeedSnapshot, MediaPreset, UserContext } from '@/types/app-state';
 import type {
@@ -100,6 +101,10 @@ const hydratedHomeFeedsById = new Map(
         ),
         featuredAppointment: featuredAppointmentRow
           ? {
+              appointment: getRequiredItem(
+                getAppointmentById(featuredAppointmentRow.appointmentId),
+                `home_feed_featured_appointments.${featuredAppointmentRow.id}.appointmentId -> ${featuredAppointmentRow.appointmentId}`,
+              ),
               dateLabel: featuredAppointmentRow.dateLabel,
               timeLabel: featuredAppointmentRow.timeLabel,
               professional: getRequiredItem(

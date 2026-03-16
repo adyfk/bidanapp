@@ -9,11 +9,19 @@ import { ProfessionalPracticeSections } from '@/features/professional-detail/com
 import { ProfessionalServicesSection } from '@/features/professional-detail/components/ProfessionalServicesSection';
 import { ProfessionalTrustSections } from '@/features/professional-detail/components/ProfessionalTrustSections';
 import { useProfessionalDetail } from '@/features/professional-detail/hooks/useProfessionalDetail';
+import { usePathname, useRouter } from '@/i18n/routing';
+import { customerAccessRoute } from '@/lib/routes';
 import { useUiText } from '@/lib/ui-text';
+import { useProfessionalUserPreferences } from '@/lib/use-professional-user-preferences';
+import { useViewerSession } from '@/lib/use-viewer-session';
 
 export const ProfessionalDetailScreen = ({ professionalSlug }: { professionalSlug?: string }) => {
   const t = useTranslations('Professional');
   const uiText = useUiText();
+  const router = useRouter();
+  const pathname = usePathname();
+  const { isCustomer } = useViewerSession();
+  const { isFavorite, toggleFavorite } = useProfessionalUserPreferences();
   const profileCopy = uiText.professionalProfile;
   const trustIndicators = [
     {
@@ -83,6 +91,9 @@ export const ProfessionalDetailScreen = ({ professionalSlug }: { professionalSlu
       style={{ background: 'linear-gradient(180deg, #FFF7FB 0%, #FFFFFF 20%, #F9FAFB 100%)' }}
     >
       <ProfessionalHeroSection
+        genderLabel={uiText.getProfessionalGenderLabel(professional.gender)}
+        isFavorite={isFavorite(professional.id)}
+        onToggleFavorite={() => toggleFavorite(professional.id)}
         profCategory={profCategory}
         professional={professional}
         ratingLabel={t('rating')}
@@ -124,7 +135,14 @@ export const ProfessionalDetailScreen = ({ professionalSlug }: { professionalSlu
         ctaLabel={t('makeAppointment')}
         notice={notice}
         onDismissNotice={() => setNotice(null)}
-        onRequestBooking={requestBooking}
+        onRequestBooking={() => {
+          if (!isCustomer) {
+            router.push(customerAccessRoute({ intent: 'booking', next: pathname }));
+            return;
+          }
+
+          requestBooking();
+        }}
         canRequestBooking={canRequestBooking}
         requiresOfflineScheduleSelection={requiresOfflineScheduleSelection}
         selectedBookingMode={selectedBookingMode}

@@ -9,7 +9,6 @@ import professionalFeedbackSummariesData from '@/data/mock-db/professional_feedb
 import professionalGalleryItemsData from '@/data/mock-db/professional_gallery_items.json';
 import professionalLanguagesData from '@/data/mock-db/professional_languages.json';
 import professionalPortfolioEntriesData from '@/data/mock-db/professional_portfolio_entries.json';
-import professionalPortfolioStatsData from '@/data/mock-db/professional_portfolio_stats.json';
 import professionalPracticeLocationsData from '@/data/mock-db/professional_practice_locations.json';
 import professionalRecentActivitiesData from '@/data/mock-db/professional_recent_activities.json';
 import professionalServiceOfferingsData from '@/data/mock-db/professional_service_offerings.json';
@@ -44,7 +43,6 @@ import type {
   ProfessionalGalleryItemRow,
   ProfessionalLabelRow,
   ProfessionalPortfolioEntryRow,
-  ProfessionalPortfolioStatRow,
   ProfessionalPracticeLocationRow,
   ProfessionalRecentActivityRow,
   ProfessionalRow,
@@ -83,7 +81,6 @@ const professionalPracticeLocations = sortByIndex(
 );
 const professionalCoveragePolicies = sortByIndex(professionalCoveragePoliciesData as ProfessionalCoveragePolicyRow[]);
 const professionalCoverageAreas = sortByIndex(professionalCoverageAreasData as ProfessionalCoverageAreaRow[]);
-const professionalPortfolioStats = sortByIndex(professionalPortfolioStatsData as ProfessionalPortfolioStatRow[]);
 const professionalCredentials = sortByIndex(professionalCredentialsData as ProfessionalCredentialRow[]);
 const professionalActivityStories = sortByIndex(professionalActivityStoriesData as ProfessionalActivityStoryRow[]);
 const professionalPortfolioEntries = sortByIndex(professionalPortfolioEntriesData as ProfessionalPortfolioEntryRow[]);
@@ -108,7 +105,6 @@ const languageRowsByProfessionalId = groupBy(professionalLanguages, (row) => row
 const practiceLocationByProfessionalId = new Map(professionalPracticeLocations.map((row) => [row.professionalId, row]));
 const coveragePolicyByProfessionalId = new Map(professionalCoveragePolicies.map((row) => [row.professionalId, row]));
 const coverageAreaRowsByProfessionalId = groupBy(professionalCoverageAreas, (row) => row.professionalId);
-const portfolioStatRowsByProfessionalId = groupBy(professionalPortfolioStats, (row) => row.professionalId);
 const credentialRowsByProfessionalId = groupBy(professionalCredentials, (row) => row.professionalId);
 const activityStoryRowsByProfessionalId = groupBy(professionalActivityStories, (row) => row.professionalId);
 const portfolioEntryRowsByProfessionalId = groupBy(professionalPortfolioEntries, (row) => row.professionalId);
@@ -194,6 +190,7 @@ export const MOCK_PROFESSIONALS: Professional[] = professionals.map((professiona
     slug: professionalRow.slug,
     name: professionalRow.name,
     title: professionalRow.title,
+    gender: professionalRow.gender,
     location: professionalRow.location,
     rating: professionalRow.rating,
     reviews: professionalRow.reviews,
@@ -228,12 +225,6 @@ export const MOCK_PROFESSIONALS: Professional[] = professionals.map((professiona
       },
     },
     about: professionalRow.about,
-    portfolioStats: sortByIndex(portfolioStatRowsByProfessionalId.get(professionalRow.id) || []).map((row) => ({
-      index: row.index,
-      label: row.label,
-      value: row.value,
-      detail: row.detail,
-    })),
     credentials: sortByIndex(credentialRowsByProfessionalId.get(professionalRow.id) || []).map((row) => ({
       index: row.index,
       title: row.title,
@@ -370,7 +361,7 @@ export const getProfessionalCategoryLabel = (professional: Professional, maxItem
 
 const toRadians = (value: number) => (value * Math.PI) / 180;
 
-const getDistanceKm = (from: GeoPoint, to: GeoPoint) => {
+export const getDistanceKm = (from: GeoPoint, to: GeoPoint) => {
   const earthRadiusKm = 6371;
   const deltaLatitude = toRadians(to.latitude - from.latitude);
   const deltaLongitude = toRadians(to.longitude - from.longitude);
@@ -381,6 +372,19 @@ const getDistanceKm = (from: GeoPoint, to: GeoPoint) => {
     Math.sin(deltaLatitude / 2) ** 2 + Math.cos(latitude1) * Math.cos(latitude2) * Math.sin(deltaLongitude / 2) ** 2;
 
   return earthRadiusKm * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
+
+export const findNearestAreaByPoint = (point: GeoPoint) => {
+  if (MOCK_AREAS.length === 0) {
+    return undefined;
+  }
+
+  return MOCK_AREAS.reduce((nearestArea, area) =>
+    getDistanceKm(point, { latitude: area.latitude, longitude: area.longitude }) <
+    getDistanceKm(point, { latitude: nearestArea.latitude, longitude: nearestArea.longitude })
+      ? area
+      : nearestArea,
+  );
 };
 
 export const estimateTravelTimeMinutes = (distanceKm: number, averageSpeedKph = 25) =>

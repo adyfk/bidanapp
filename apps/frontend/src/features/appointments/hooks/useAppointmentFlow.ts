@@ -1,14 +1,19 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ACTIVE_APPOINTMENT_STATUSES, HISTORY_APPOINTMENT_STATUSES } from '@/features/appointments/lib/status';
+import {
+  ACTIVE_APPOINTMENT_STATUSES,
+  type AppointmentStatusFilter,
+  type AppointmentTab,
+  getAppointmentStatusFilterOptions,
+  HISTORY_APPOINTMENT_STATUSES,
+  isAppointmentChatAvailable,
+} from '@/features/appointments/lib/status';
 import { MOCK_APPOINTMENTS } from '@/lib/mock-db/appointments';
 import { getAppointmentChatThread } from '@/lib/mock-db/chat';
 import { useUiText } from '@/lib/ui-text';
 import type { Appointment, AppointmentStatus } from '@/types/appointments';
 import type { ChatMessage } from '@/types/chat';
-
-type AppointmentTab = 'active' | 'history';
 
 export interface AppointmentChatSession {
   dayLabel: string;
@@ -60,10 +65,19 @@ const buildInitialChatState = (uiText: ReturnType<typeof useUiText>) =>
     }),
   ) as Record<string, AppointmentChatSession>;
 
-export const useAppointmentFlow = (initialSelectedAppointmentId: string | null = null) => {
+export const useAppointmentFlow = ({
+  initialSelectedAppointmentId = null,
+  initialStatusFilter = 'all',
+  initialTab = 'active',
+}: {
+  initialSelectedAppointmentId?: string | null;
+  initialStatusFilter?: AppointmentStatusFilter;
+  initialTab?: AppointmentTab;
+} = {}) => {
   const uiText = useUiText();
-  const [activeTab, setActiveTab] = useState<AppointmentTab>('active');
+  const [activeTab, setActiveTab] = useState<AppointmentTab>(initialTab);
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<AppointmentStatusFilter>(initialStatusFilter);
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | null>(initialSelectedAppointmentId);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState('');
@@ -97,23 +111,39 @@ export const useAppointmentFlow = (initialSelectedAppointmentId: string | null =
     [statusOverrides],
   );
 
-  const filteredAppointments = appointments
-    .filter((appointment) => {
-      const query = searchQuery.trim().toLowerCase();
-      if (!query) {
-        return true;
-      }
+  const searchedAppointments = appointments.filter((appointment) => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) {
+      return true;
+    }
 
-      return (
-        appointment.professional.name.toLowerCase().includes(query) ||
-        appointment.service.name.toLowerCase().includes(query)
-      );
-    })
-    .filter((appointment) => {
-      const allowedStatuses = activeTab === 'active' ? ACTIVE_APPOINTMENT_STATUSES : HISTORY_APPOINTMENT_STATUSES;
+    return (
+      appointment.professional.name.toLowerCase().includes(query) ||
+      appointment.service.name.toLowerCase().includes(query)
+    );
+  });
 
-      return allowedStatuses.includes(appointment.status);
-    });
+  const tabAppointments = searchedAppointments.filter((appointment) => {
+    const allowedStatuses = activeTab === 'active' ? ACTIVE_APPOINTMENT_STATUSES : HISTORY_APPOINTMENT_STATUSES;
+
+    return allowedStatuses.includes(appointment.status);
+  });
+
+  useEffect(() => {
+    const allowedStatuses = getAppointmentStatusFilterOptions(activeTab);
+
+    if (statusFilter !== 'all' && !allowedStatuses.includes(statusFilter)) {
+      setStatusFilter('all');
+    }
+  }, [activeTab, statusFilter]);
+
+  const filteredAppointments = tabAppointments.filter((appointment) => {
+    if (statusFilter === 'all') {
+      return true;
+    }
+
+    return appointment.status === statusFilter;
+  });
 
   const selectedAppointment =
     selectedAppointmentId === null
@@ -124,6 +154,9 @@ export const useAppointmentFlow = (initialSelectedAppointmentId: string | null =
     selectedAppointment === null
       ? null
       : chatSessions[selectedAppointment.id] || createFallbackChatSession(selectedAppointment, uiText);
+  const canChatSelectedAppointment = selectedAppointment
+    ? isAppointmentChatAvailable(selectedAppointment.status)
+    : false;
 
   const selectAppointment = (appointmentId: string) => {
     setSelectedAppointmentId(appointmentId);
@@ -144,6 +177,13 @@ export const useAppointmentFlow = (initialSelectedAppointmentId: string | null =
   };
 
   const openChat = () => {
+    if (!selectedAppointment || !isAppointmentChatAvailable(selectedAppointment.status)) {
+      setIsChatOpen(false);
+      setChatInput('');
+      setNotice(uiText.chatUnavailableAlert);
+      return;
+    }
+
     setIsChatOpen(true);
   };
 
@@ -176,7 +216,12 @@ export const useAppointmentFlow = (initialSelectedAppointmentId: string | null =
   };
 
   const submitChatMessage = () => {
-    if (!selectedAppointment || !selectedChatSession || !chatInput.trim()) {
+    if (
+      !selectedAppointment ||
+      !selectedChatSession ||
+      !chatInput.trim() ||
+      !isAppointmentChatAvailable(selectedAppointment.status)
+    ) {
       return;
     }
 
@@ -228,6 +273,15 @@ export const useAppointmentFlow = (initialSelectedAppointmentId: string | null =
     timeoutIdsRef.current.push(timeoutId);
   };
 
+  useEffect(() => {
+    if (!selectedAppointment || isAppointmentChatAvailable(selectedAppointment.status)) {
+      return;
+    }
+
+    setIsChatOpen(false);
+    setChatInput('');
+  }, [selectedAppointment]);
+
   const submitReview = () => {
     if (!selectedAppointment || rating === 0) {
       return;
@@ -242,6 +296,7 @@ export const useAppointmentFlow = (initialSelectedAppointmentId: string | null =
 
   return {
     activeTab,
+    canChatSelectedAppointment,
     chatInput,
     closeAppointment,
     closeChat,
@@ -257,6 +312,7 @@ export const useAppointmentFlow = (initialSelectedAppointmentId: string | null =
     reviewPhotoName,
     reviewText,
     searchQuery,
+    searchedAppointments,
     selectAppointment,
     selectReviewPhoto,
     selectedAppointment,
@@ -267,7 +323,10 @@ export const useAppointmentFlow = (initialSelectedAppointmentId: string | null =
     setRating,
     setReviewText,
     setSearchQuery,
+    setStatusFilter,
     submitChatMessage,
     submitReview,
+    statusFilter,
+    tabAppointments,
   };
 };
