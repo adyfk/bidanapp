@@ -9,7 +9,11 @@
     "popularServices": "Popular {service}s",
     "explore": "Explore",
     "categories": "Categories",
-    "professionalsNearYou": "{professional} near you"
+    "professionalsNearYou": "{professional} near you",
+    "visitorActivityTitle": "Sign in to view your activity",
+    "visitorActivityDescription": "Activity history, chat with providers, payments, and reviews are only available to signed-in customers.",
+    "visitorActivityPrimaryCta": "Sign In / Register Customer",
+    "visitorActivitySecondaryCta": "I am a Midwife"
   },
   "Navigation": {
     "home": "Home",
@@ -18,7 +22,98 @@
     "activity": "Activity"
   },
   "Onboarding": {
-    "getStarted": "Get Started"
+    "getStarted": "Get Started",
+    "visitorTitle": "Continue as visitor",
+    "visitorDescription": "Explore services and professionals without signing in.",
+    "customerTitle": "Sign in / register customer",
+    "customerDescription": "Save activity, bookings, and family follow-up.",
+    "bidanTitle": "I am a midwife",
+    "bidanDescription": "Use a separate path so the customer flow stays focused."
+  },
+  "CustomerAccess": {
+    "navTitle": "Customer Access",
+    "eyebrow": "Customer Access",
+    "demoBadge": "Frontend Demo",
+    "alreadyCustomer": "You are already in customer mode. Continue to the page you need.",
+    "tabs": {
+      "login": "Sign In",
+      "register": "Register"
+    },
+    "intent": {
+      "general": {
+        "title": "Sign in as a customer to continue",
+        "description": "Customer access is used for activity, bookings, family preferences, and care follow-up."
+      },
+      "activity": {
+        "title": "Your activity requires a customer account",
+        "description": "Activity history, payments, chat, and reviews only appear after you sign in as a customer."
+      },
+      "profile": {
+        "title": "Customer profile is separate from visitor mode",
+        "description": "Account details, family preferences, and account security are only available for signed-in customers."
+      },
+      "booking": {
+        "title": "Booking is only for signed-in customers",
+        "description": "Sign in as a customer so schedules, payments, and care follow-up can be stored properly."
+      }
+    },
+    "benefits": {
+      "savedHistory": "Activity and care status stay saved",
+      "familyContext": "Chat and family context stay connected",
+      "followUp": "Bookings and follow-up feel consistent"
+    },
+    "fields": {
+      "phone": "WhatsApp number",
+      "password": "Password",
+      "fullName": "Full name",
+      "city": "Home city"
+    },
+    "placeholders": {
+      "phone": "Example: +62 812 3456 7890",
+      "password": "Enter a demo password",
+      "fullName": "Your name",
+      "city": "Example: Depok"
+    },
+    "errors": {
+      "loginPhoneRequired": "WhatsApp number is required for the login simulation.",
+      "loginPasswordRequired": "Password is required for the login simulation.",
+      "registerNameRequired": "Full name is required for the registration simulation.",
+      "registerPhoneRequired": "WhatsApp number is required for the registration simulation."
+    },
+    "actions": {
+      "login": "Sign in and continue",
+      "register": "Register and continue",
+      "continueVisitor": "Continue as visitor"
+    },
+    "registerHelper": "This form is still a frontend-only simulation. After submitting, the app will switch to customer mode without backend auth.",
+    "visitorEyebrow": "Visitor mode",
+    "visitorDescription": "Visitors can still explore services and professionals, but activity, booking, and customer profile are gated to this page.",
+    "bidan": {
+      "eyebrow": "Midwife Path",
+      "title": "Midwife access is separated from the customer app",
+      "description": "We separate the midwife flow so customer navigation stays focused on discovery, booking, and family activity.",
+      "cta": "Open midwife path"
+    }
+  },
+  "BidanGateway": {
+    "navTitle": "Midwife Path",
+    "eyebrow": "Midwife Area",
+    "title": "The midwife portal is separated from the customer app",
+    "description": "In this frontend simulation, the midwife flow is intentionally not merged into the customer app so operational needs and family needs stay distinct.",
+    "capabilities": {
+      "dashboardTitle": "Operational dashboard for midwives",
+      "dashboardDescription": "This area is better suited for practice schedules, service performance, and professional activity summaries.",
+      "queueTitle": "Request queue and visit schedule",
+      "queueDescription": "Incoming requests, approvals, and home-visit scheduling are better handled in a dedicated midwife portal.",
+      "separationTitle": "Clear role separation",
+      "separationDescription": "Customers focus on finding care and follow-up. Midwives focus on operations, capacity, and SLA."
+    },
+    "nextStepLabel": "Route people by role",
+    "nextStepDescription": "If you are a customer, go back to the customer path. If you only want to browse the catalog, continue as a visitor.",
+    "actions": {
+      "customer": "I am a customer",
+      "visitor": "Back as visitor"
+    }
   },
   "Professional": {
     "about": "About {professional}",
@@ -188,6 +283,10 @@
       "activityDescription": "Review active sessions, progress, and family follow-up.",
       "exploreTitle": "Find care",
       "exploreDescription": "Discover midwives and follow-up services that fit home needs."
+    },
+    "bidanCard": {
+      "title": "Midwife Path Stays Separate",
+      "description": "If you are a midwife, use this CTA to reach a dedicated area so the customer flow does not get mixed."
     },
     "menu": {
       "languageDescription": "Switch between Bahasa Indonesia and English anytime.",

@@ -9,7 +9,11 @@
     "popularServices": "{service} Populer",
     "explore": "Eksplor",
     "categories": "Kategori",
-    "professionalsNearYou": "{professional} di sekitar Anda"
+    "professionalsNearYou": "{professional} di sekitar Anda",
+    "visitorActivityTitle": "Masuk untuk melihat aktivitas Anda",
+    "visitorActivityDescription": "Riwayat aktivitas, chat dengan bidan, pembayaran, dan review hanya tersedia untuk customer yang sudah masuk.",
+    "visitorActivityPrimaryCta": "Masuk / Daftar Customer",
+    "visitorActivitySecondaryCta": "Saya Bidan"
   },
   "Navigation": {
     "home": "Beranda",
@@ -18,7 +22,98 @@
     "activity": "Aktivitas"
   },
   "Onboarding": {
-    "getStarted": "Mulai Sekarang"
+    "getStarted": "Mulai Sekarang",
+    "visitorTitle": "Lanjut sebagai visitor",
+    "visitorDescription": "Jelajahi layanan dan profesional tanpa login.",
+    "customerTitle": "Masuk / daftar customer",
+    "customerDescription": "Simpan aktivitas, booking, dan follow-up keluarga.",
+    "bidanTitle": "Saya bidan",
+    "bidanDescription": "Masuk ke jalur terpisah agar flow customer tidak tercampur."
+  },
+  "CustomerAccess": {
+    "navTitle": "Akses Customer",
+    "eyebrow": "Customer Access",
+    "demoBadge": "Simulasi FE",
+    "alreadyCustomer": "Anda sudah berada di mode customer. Lanjutkan ke halaman yang dibutuhkan.",
+    "tabs": {
+      "login": "Masuk",
+      "register": "Daftar"
+    },
+    "intent": {
+      "general": {
+        "title": "Masuk sebagai customer untuk melanjutkan",
+        "description": "Akses customer dipakai untuk aktivitas, booking, preferensi keluarga, dan tindak lanjut layanan."
+      },
+      "activity": {
+        "title": "Aktivitas Anda butuh akun customer",
+        "description": "Riwayat aktivitas, pembayaran, chat, dan review hanya muncul setelah Anda masuk sebagai customer."
+      },
+      "profile": {
+        "title": "Profil customer dipisahkan dari visitor",
+        "description": "Detail akun, preferensi keluarga, dan keamanan akun hanya tersedia untuk customer yang sudah masuk."
+      },
+      "booking": {
+        "title": "Booking hanya untuk customer yang sudah masuk",
+        "description": "Masuk sebagai customer agar jadwal, pembayaran, dan tindak lanjut layanan dapat tersimpan dengan rapi."
+      }
+    },
+    "benefits": {
+      "savedHistory": "Aktivitas dan status layanan tersimpan",
+      "familyContext": "Chat dan konteks keluarga lebih terhubung",
+      "followUp": "Booking dan follow-up terasa konsisten"
+    },
+    "fields": {
+      "phone": "Nomor WhatsApp",
+      "password": "Password",
+      "fullName": "Nama lengkap",
+      "city": "Kota domisili"
+    },
+    "placeholders": {
+      "phone": "Contoh: +62 812 3456 7890",
+      "password": "Masukkan password demo",
+      "fullName": "Nama Anda",
+      "city": "Contoh: Depok"
+    },
+    "errors": {
+      "loginPhoneRequired": "Nomor WhatsApp wajib diisi untuk simulasi login.",
+      "loginPasswordRequired": "Password wajib diisi untuk simulasi login.",
+      "registerNameRequired": "Nama lengkap wajib diisi untuk simulasi pendaftaran.",
+      "registerPhoneRequired": "Nomor WhatsApp wajib diisi untuk simulasi pendaftaran."
+    },
+    "actions": {
+      "login": "Masuk dan lanjut",
+      "register": "Daftar dan lanjut",
+      "continueVisitor": "Lanjut sebagai visitor"
+    },
+    "registerHelper": "Form ini masih simulasi FE. Setelah submit, aplikasi akan berpindah ke mode customer tanpa backend auth.",
+    "visitorEyebrow": "Mode visitor",
+    "visitorDescription": "Visitor tetap bisa eksplor layanan dan profesional, tetapi aktivitas, booking, dan profil customer akan digate ke halaman ini.",
+    "bidan": {
+      "eyebrow": "Jalur Bidan",
+      "title": "Masuk sebagai bidan dipisah dari customer app",
+      "description": "Kami pisahkan flow bidan supaya navigasi customer tetap fokus pada pencarian layanan, booking, dan aktivitas keluarga.",
+      "cta": "Buka jalur bidan"
+    }
+  },
+  "BidanGateway": {
+    "navTitle": "Jalur Bidan",
+    "eyebrow": "Bidan Area",
+    "title": "Portal bidan dipisahkan dari aplikasi customer",
+    "description": "Untuk simulasi FE ini, flow bidan tidak digabung ke aplikasi customer agar kebutuhan operasional bidan dan kebutuhan keluarga tidak saling bercampur.",
+    "capabilities": {
+      "dashboardTitle": "Dashboard operasional bidan",
+      "dashboardDescription": "Area ini ideal untuk jadwal praktik, performa layanan, dan ringkasan aktivitas profesional.",
+      "queueTitle": "Antrian request dan jadwal visit",
+      "queueDescription": "Request masuk, approval, dan pengelolaan jadwal home visit lebih tepat bila ditaruh di portal bidan tersendiri.",
+      "separationTitle": "Pemisahan role yang jelas",
+      "separationDescription": "Customer fokus cari layanan dan follow-up. Bidan fokus operasional, kapasitas, dan SLA."
+    },
+    "nextStepLabel": "Arahkan user sesuai peran",
+    "nextStepDescription": "Kalau Anda customer, kembali ke jalur customer. Kalau hanya ingin melihat katalog, lanjut sebagai visitor.",
+    "actions": {
+      "customer": "Saya customer",
+      "visitor": "Kembali sebagai visitor"
+    }
   },
   "Professional": {
     "about": "Tentang {professional}",
@@ -197,6 +292,10 @@
       "activityDescription": "Lihat sesi aktif, progress, dan tindak lanjut keluarga.",
       "exploreTitle": "Cari layanan",
       "exploreDescription": "Temukan bidan dan layanan lanjutan sesuai kebutuhan rumah."
+    },
+    "bidanCard": {
+      "title": "Jalur Bidan Dipisah",
+      "description": "Jika Anda bidan, gunakan CTA ini ke area terpisah agar flow customer tidak tercampur."
     },
     "menu": {
       "languageDescription": "Pakai Bahasa Indonesia atau English kapan saja.",

@@ -1,5 +1,15 @@
 'use client';
-import { Bell, Calendar, ChevronRight, Clock, MapPin, MessageSquare, Navigation, Search } from 'lucide-react';
+import {
+  Bell,
+  Calendar,
+  ChevronRight,
+  Clock,
+  MapPin,
+  MessageSquare,
+  Navigation,
+  Search,
+  UserRound,
+} from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { IconButton } from '@/components/ui/IconButton';
@@ -10,15 +20,24 @@ import { Link, useRouter } from '@/i18n/routing';
 import { APP_CONFIG } from '@/lib/config';
 import { getEnabledServiceModes, getProfessionalCategoryLabel, MOCK_CATEGORIES } from '@/lib/mock-db/catalog';
 import { ACTIVE_HOME_FEED, APP_SECTION_CONFIG } from '@/lib/mock-db/runtime';
-import { APP_ROUTES, activityRoute, appointmentsRoute, exploreRoute, professionalRoute } from '@/lib/routes';
+import {
+  APP_ROUTES,
+  activityRoute,
+  appointmentsRoute,
+  customerAccessRoute,
+  exploreRoute,
+  professionalRoute,
+} from '@/lib/routes';
 import { useUiText } from '@/lib/ui-text';
 import { useProfessionalUserPreferences } from '@/lib/use-professional-user-preferences';
+import { useViewerSession } from '@/lib/use-viewer-session';
 
 export const HomeScreen = () => {
   const router = useRouter();
   const t = useTranslations('Home');
   const professionalT = useTranslations('Professional');
   const uiText = useUiText();
+  const { isCustomer } = useViewerSession();
   const { isFavorite, selectedAreaId, toggleFavorite, userLocation } = useProfessionalUserPreferences();
   const featuredAppointmentCard = ACTIVE_HOME_FEED.featuredAppointment;
   const featuredProfessional = featuredAppointmentCard?.professional;
@@ -31,6 +50,8 @@ export const HomeScreen = () => {
         status: featuredAppointmentCard.appointment.status,
       })
     : APP_ROUTES.appointments;
+  const customerActivityRoute = customerAccessRoute({ intent: 'activity', next: APP_ROUTES.appointments });
+  const customerProfileRoute = customerAccessRoute({ intent: 'profile', next: APP_ROUTES.profile });
   const homeCategories = (
     APP_SECTION_CONFIG.homeCategoryIds?.length
       ? APP_SECTION_CONFIG.homeCategoryIds
@@ -51,15 +72,21 @@ export const HomeScreen = () => {
       >
         <button
           type="button"
-          onClick={() => router.push(APP_ROUTES.profile)}
+          onClick={() => router.push(isCustomer ? APP_ROUTES.profile : customerProfileRoute)}
           className="w-11 h-11 relative rounded-full bg-gray-200 overflow-hidden border-2 border-white shadow-sm hover:opacity-80 transition-opacity active:scale-95"
         >
-          <Image
-            src={ACTIVE_HOME_FEED.currentUser.avatar}
-            alt={ACTIVE_HOME_FEED.currentUser.name}
-            fill
-            className="object-cover"
-          />
+          {isCustomer ? (
+            <Image
+              src={ACTIVE_HOME_FEED.currentUser.avatar}
+              alt={ACTIVE_HOME_FEED.currentUser.name}
+              fill
+              className="object-cover"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-white/70 text-gray-700">
+              <UserRound className="h-5 w-5" />
+            </div>
+          )}
         </button>
         <div className="flex flex-col items-center">
           <span className="text-[11px] text-gray-400 font-medium tracking-wide">{t('location')}</span>
@@ -96,8 +123,39 @@ export const HomeScreen = () => {
       <div className="px-6 space-y-7">
         {/* Section: Appointment */}
         <div>
-          <SectionHeader title={t('appointment')} onSeeAll={() => router.push(featuredAppointmentsRoute)} />
-          {featuredAppointmentCard && featuredProfessional && featuredAppointmentRoute ? (
+          <SectionHeader
+            title={t('appointment')}
+            onSeeAll={() => router.push(isCustomer ? featuredAppointmentsRoute : customerActivityRoute)}
+          />
+          {!isCustomer ? (
+            <div className="rounded-[28px] border border-rose-100 bg-white p-6 shadow-sm">
+              <div
+                className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl"
+                style={{ backgroundColor: APP_CONFIG.colors.primaryLight, color: APP_CONFIG.colors.primary }}
+              >
+                <Calendar className="w-5 h-5" />
+              </div>
+              <h3 className="mb-2 text-[18px] font-bold text-gray-900">{t('visitorActivityTitle')}</h3>
+              <p className="mb-5 text-[14px] leading-relaxed text-gray-500">{t('visitorActivityDescription')}</p>
+              <div className="flex flex-col gap-3">
+                <button
+                  type="button"
+                  onClick={() => router.push(customerActivityRoute)}
+                  className="w-full rounded-full py-3.5 text-[14px] font-bold text-white"
+                  style={{ backgroundColor: APP_CONFIG.colors.primary }}
+                >
+                  {t('visitorActivityPrimaryCta')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push(APP_ROUTES.bidanAccess)}
+                  className="w-full rounded-full bg-gray-100 py-3.5 text-[14px] font-bold text-gray-700 transition-colors hover:bg-gray-200"
+                >
+                  {t('visitorActivitySecondaryCta')}
+                </button>
+              </div>
+            </div>
+          ) : featuredAppointmentCard && featuredProfessional && featuredAppointmentRoute ? (
             <div
               onClick={() => router.push(featuredAppointmentRoute)}
               onKeyDown={(event) => {

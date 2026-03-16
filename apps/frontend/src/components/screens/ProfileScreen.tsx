@@ -1,9 +1,10 @@
 'use client';
 
-import { BookHeart, ChevronLeft, ChevronRight, KeyRound, LogOut, MapPin, User } from 'lucide-react';
+import { BookHeart, BriefcaseMedical, ChevronLeft, ChevronRight, KeyRound, LogOut, MapPin, User } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
+import { CustomerAccessScreen } from '@/components/screens/CustomerAccessScreen';
 import { IconButton } from '@/components/ui/IconButton';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { ProfileSettingsSheet } from '@/features/profile/components/ProfileSettingsSheet';
@@ -12,10 +13,12 @@ import { useRouter } from '@/i18n/routing';
 import { APP_CONFIG } from '@/lib/config';
 import { ACTIVE_CONSUMER, ACTIVE_USER_CONTEXT } from '@/lib/mock-db/runtime';
 import { APP_ROUTES } from '@/lib/routes';
+import { useViewerSession } from '@/lib/use-viewer-session';
 
 export const ProfileScreen = () => {
   const router = useRouter();
   const t = useTranslations('Profile');
+  const { continueAsVisitor, isCustomer } = useViewerSession();
   const {
     activeSheet,
     closeSheet,
@@ -32,6 +35,10 @@ export const ProfileScreen = () => {
     updatePasswordField,
     updateProfileField,
   } = useProfileSettings();
+
+  if (!isCustomer) {
+    return <CustomerAccessScreen intent="profile" nextHref={APP_ROUTES.profile} />;
+  }
 
   return (
     <>
@@ -117,6 +124,27 @@ export const ProfileScreen = () => {
 
           <button
             type="button"
+            onClick={() => router.push(APP_ROUTES.bidanAccess)}
+            className="flex w-full items-center justify-between rounded-[28px] border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-cyan-50 p-5 text-left shadow-sm transition-all hover:shadow-md active:scale-[0.99]"
+          >
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-blue-600 shadow-sm">
+                <BriefcaseMedical className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-[15px] font-bold text-gray-900">{t('bidanCard.title')}</p>
+                <p className="mt-1 text-[12px] leading-relaxed text-gray-500">{t('bidanCard.description')}</p>
+              </div>
+            </div>
+            <ChevronRight className="h-5 w-5 text-blue-300" />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              continueAsVisitor();
+              router.push(APP_ROUTES.home);
+            }}
             className="mt-2 flex w-full items-center justify-center gap-2 rounded-[24px] bg-red-50 p-4 font-bold text-red-500 shadow-sm transition-colors active:bg-red-100"
           >
             <LogOut className="h-5 w-5" />

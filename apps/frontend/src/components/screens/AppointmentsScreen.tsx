@@ -1,6 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
+import { CustomerAccessScreen } from '@/components/screens/CustomerAccessScreen';
 import { InlineFeedbackNotice } from '@/components/ui/InlineFeedbackNotice';
 import { AppointmentChatSheet } from '@/features/appointments/components/AppointmentChatSheet';
 import { AppointmentDetailSheet } from '@/features/appointments/components/AppointmentDetailSheet';
@@ -16,6 +17,8 @@ import {
   isValidAppointmentTab,
 } from '@/features/appointments/lib/status';
 import { APP_CONFIG } from '@/lib/config';
+import { APP_ROUTES } from '@/lib/routes';
+import { useViewerSession } from '@/lib/use-viewer-session';
 
 export const AppointmentsScreen = () => {
   const searchParams = useSearchParams();
@@ -23,6 +26,7 @@ export const AppointmentsScreen = () => {
   const statusParam = searchParams.get('status');
   const requestedTab = isValidAppointmentTab(tabParam) ? tabParam : 'active';
   const requestedStatus = isValidAppointmentStatusFilter(statusParam) ? statusParam : 'all';
+  const { isCustomer } = useViewerSession();
   const {
     activeTab,
     canChatSelectedAppointment,
@@ -63,6 +67,10 @@ export const AppointmentsScreen = () => {
         : 'all',
     initialTab: requestedTab,
   });
+
+  if (!isCustomer) {
+    return <CustomerAccessScreen intent="activity" nextHref={APP_ROUTES.appointments} />;
+  }
 
   return (
     <div
