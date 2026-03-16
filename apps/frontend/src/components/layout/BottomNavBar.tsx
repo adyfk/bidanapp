@@ -25,7 +25,10 @@ export const BottomNavBar = () => {
   )
     return null;
 
-  if (!isCustomer && (pathname === APP_ROUTES.appointments || pathname === APP_ROUTES.profile)) {
+  if (
+    !isCustomer &&
+    (pathname === APP_ROUTES.appointments || pathname === APP_ROUTES.profile || pathname === APP_ROUTES.notifications)
+  ) {
     return null;
   }
 

@@ -23,12 +23,14 @@ type AccessErrorKey =
   | 'registerPhoneRequired'
   | null;
 
-const intentKeyByValue: Record<CustomerAccessIntent, 'general' | 'activity' | 'profile' | 'booking'> = {
-  activity: 'activity',
-  booking: 'booking',
-  general: 'general',
-  profile: 'profile',
-};
+const intentKeyByValue: Record<CustomerAccessIntent, 'general' | 'activity' | 'profile' | 'booking' | 'notifications'> =
+  {
+    activity: 'activity',
+    booking: 'booking',
+    general: 'general',
+    notifications: 'notifications',
+    profile: 'profile',
+  };
 
 export const CustomerAccessScreen = ({ intent = 'general', nextHref = APP_ROUTES.home }: CustomerAccessScreenProps) => {
   const router = useRouter();

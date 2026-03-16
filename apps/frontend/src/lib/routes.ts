@@ -1,7 +1,7 @@
 import type { Route } from 'next';
 import type { AppointmentStatus } from '@/types/appointments';
 
-export type CustomerAccessIntent = 'general' | 'activity' | 'profile' | 'booking';
+export type CustomerAccessIntent = 'general' | 'activity' | 'profile' | 'booking' | 'notifications';
 export type ProfessionalAccessTab = 'login' | 'register';
 export const PROFESSIONAL_DASHBOARD_TABS = [
   'overview',
@@ -25,6 +25,7 @@ export const APP_ROUTES = {
   explore: '/explore' as Route,
   profile: '/profile' as Route,
   appointments: '/appointments' as Route,
+  notifications: '/notifications' as Route,
 } as const;
 
 export function professionalRoute(slug: string): Route {

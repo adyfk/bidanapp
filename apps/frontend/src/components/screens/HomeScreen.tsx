@@ -31,15 +31,18 @@ import {
   professionalRoute,
 } from '@/lib/routes';
 import { useUiText } from '@/lib/ui-text';
+import { useCustomerNotifications } from '@/lib/use-customer-notifications';
 import { useProfessionalUserPreferences } from '@/lib/use-professional-user-preferences';
 import { useViewerSession } from '@/lib/use-viewer-session';
 
 export const HomeScreen = () => {
   const router = useRouter();
   const t = useTranslations('Home');
+  const notificationsT = useTranslations('Notifications');
   const professionalT = useTranslations('Professional');
   const uiText = useUiText();
   const { isCustomer, isProfessional } = useViewerSession();
+  const { unreadCount } = useCustomerNotifications();
   const { isFavorite, selectedAreaId, toggleFavorite, userLocation } = useProfessionalUserPreferences();
   const featuredAppointmentCard = ACTIVE_HOME_FEED.featuredAppointment;
   const featuredProfessional = featuredAppointmentCard?.professional;
@@ -107,13 +110,25 @@ export const HomeScreen = () => {
             {ACTIVE_HOME_FEED.sharedContext.currentArea}
           </div>
         </div>
-        <div className="relative">
-          <IconButton icon={<Bell className="w-6 h-6 text-gray-800" />} />
-          <span
-            className="absolute top-2 right-2.5 w-2.5 h-2.5 rounded-full border-2"
-            style={{ backgroundColor: APP_CONFIG.colors.danger, borderColor: APP_CONFIG.colors.bgLight }}
-          ></span>
-        </div>
+        {isCustomer ? (
+          <div className="relative">
+            <IconButton
+              ariaLabel={notificationsT('openAriaLabel')}
+              icon={<Bell className="w-6 h-6 text-gray-800" />}
+              onClick={() => router.push(APP_ROUTES.notifications)}
+            />
+            {unreadCount > 0 ? (
+              <span
+                className="absolute -right-0.5 top-0 flex h-5 min-w-5 items-center justify-center rounded-full border-2 px-1 text-[10px] font-bold text-white"
+                style={{ backgroundColor: APP_CONFIG.colors.danger, borderColor: APP_CONFIG.colors.bgLight }}
+              >
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            ) : null}
+          </div>
+        ) : (
+          <div className="w-10" />
+        )}
       </div>
 
       {/* Search Bar - Global Services Entry Point */}

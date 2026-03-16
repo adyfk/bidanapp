@@ -56,6 +56,10 @@
         "title": "Your activity requires a customer account",
         "description": "Activity history, payments, chat, and reviews only appear after you sign in as a customer."
       },
+      "notifications": {
+        "title": "Customer notifications are only available for signed-in accounts",
+        "description": "Schedule updates, professional replies, payment reminders, and family follow-up only appear for active customer accounts."
+      },
       "profile": {
         "title": "Customer profile is separate from visitor mode",
         "description": "Account details, family preferences, and account security are only available for signed-in customers."
@@ -101,6 +105,50 @@
       "title": "Professional access is separated from the customer app",
       "description": "We separate the professional flow so customer navigation stays focused on discovery, booking, and family activity.",
       "cta": "Open professional portal"
+    }
+  },
+  "Notifications": {
+    "title": "Notifications",
+    "eyebrow": "Customer updates",
+    "heroTitle": "Track customer updates without losing context",
+    "heroDescriptionUnread": "You still have {count} notifications to open so schedules, chat, and payments stay in sync.",
+    "heroDescriptionClear": "You are all caught up. Keep monitoring appointments and conversations from one place.",
+    "openAriaLabel": "Open customer notifications",
+    "summary": {
+      "unread": "Unread",
+      "total": "Total updates"
+    },
+    "filters": {
+      "all": "All",
+      "unread": "Unread",
+      "appointments": "Appointments",
+      "messages": "Messages"
+    },
+    "sections": {
+      "today": "Today",
+      "earlier": "Earlier"
+    },
+    "types": {
+      "appointment": "Appointment",
+      "message": "Message",
+      "payment": "Payment",
+      "account": "Account"
+    },
+    "badges": {
+      "unread": "New"
+    },
+    "actions": {
+      "markAllRead": "Mark all read",
+      "openActivity": "Open detail",
+      "replyNow": "Reply now",
+      "completePayment": "Pay now",
+      "openProfile": "Open profile",
+      "leaveReview": "Leave review"
+    },
+    "empty": {
+      "title": "No notifications match this filter",
+      "description": "Try switching back to all updates to review the latest schedule, payment, or professional message.",
+      "resetAction": "Show all"
     }
   },
   "ProfessionalGateway": {

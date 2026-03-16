@@ -56,6 +56,10 @@
         "title": "Aktivitas Anda butuh akun customer",
         "description": "Riwayat aktivitas, pembayaran, chat, dan review hanya muncul setelah Anda masuk sebagai customer."
       },
+      "notifications": {
+        "title": "Notifikasi customer hanya untuk akun yang sudah masuk",
+        "description": "Update jadwal, balasan profesional, pengingat pembayaran, dan tindak lanjut keluarga hanya muncul untuk customer yang aktif."
+      },
       "profile": {
         "title": "Profil customer dipisahkan dari visitor",
         "description": "Detail akun, preferensi keluarga, dan keamanan akun hanya tersedia untuk customer yang sudah masuk."
@@ -101,6 +105,50 @@
       "title": "Akses profesional dipisahkan dari aplikasi pelanggan",
       "description": "Kami pisahkan alur profesional agar navigasi pelanggan tetap fokus pada pencarian layanan, booking, dan aktivitas keluarga.",
       "cta": "Buka portal profesional"
+    }
+  },
+  "Notifications": {
+    "title": "Notifikasi",
+    "eyebrow": "Customer updates",
+    "heroTitle": "Pantau update customer tanpa kehilangan konteks",
+    "heroDescriptionUnread": "Ada {count} notifikasi yang masih perlu Anda buka agar jadwal, chat, dan pembayaran tetap sinkron.",
+    "heroDescriptionClear": "Semua update customer sudah terbaca. Anda bisa lanjut memantau jadwal dan percakapan dengan lebih tenang.",
+    "openAriaLabel": "Buka notifikasi customer",
+    "summary": {
+      "unread": "Belum dibaca",
+      "total": "Total update"
+    },
+    "filters": {
+      "all": "Semua",
+      "unread": "Belum dibaca",
+      "appointments": "Jadwal",
+      "messages": "Pesan"
+    },
+    "sections": {
+      "today": "Hari ini",
+      "earlier": "Sebelumnya"
+    },
+    "types": {
+      "appointment": "Jadwal",
+      "message": "Pesan",
+      "payment": "Pembayaran",
+      "account": "Akun"
+    },
+    "badges": {
+      "unread": "Baru"
+    },
+    "actions": {
+      "markAllRead": "Tandai semua dibaca",
+      "openActivity": "Buka detail",
+      "replyNow": "Balas sekarang",
+      "completePayment": "Bayar sekarang",
+      "openProfile": "Buka profil",
+      "leaveReview": "Isi ulasan"
+    },
+    "empty": {
+      "title": "Tidak ada notifikasi di filter ini",
+      "description": "Coba buka semua update untuk melihat jadwal, pembayaran, atau balasan profesional yang terbaru.",
+      "resetAction": "Lihat semua"
     }
   },
   "ProfessionalGateway": {
