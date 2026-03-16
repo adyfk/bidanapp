@@ -1,0 +1,62 @@
+[
+  {
+    "id": "professional-practice-6",
+    "index": 1,
+    "professionalId": "6",
+    "label": "BidanCare Video Room",
+    "address": "Studio konsultasi virtual, link sesi dikirim otomatis.",
+    "areaId": "jakarta-selatan-cilandak",
+    "latitude": -6.2892,
+    "longitude": 106.7956
+  },
+  {
+    "id": "professional-practice-1",
+    "index": 1,
+    "professionalId": "1",
+    "label": "BidanCare Center",
+    "address": "BidanCare Center, lantai 2 ruang perawatan bayi.",
+    "areaId": "depok-pancoran-mas",
+    "latitude": -6.4012,
+    "longitude": 106.8158
+  },
+  {
+    "id": "professional-practice-4",
+    "index": 1,
+    "professionalId": "4",
+    "label": "BidanCare South District",
+    "address": "Jl. Wijaya Timur No. 18, ruang keluarga postpartum.",
+    "areaId": "jakarta-selatan-cilandak",
+    "latitude": -6.2815,
+    "longitude": 106.802
+  },
+  {
+    "id": "professional-practice-3",
+    "index": 1,
+    "professionalId": "3",
+    "label": "BidanCare Rehab Mobile",
+    "address": "Base operasional rehabilitasi Soreang untuk kunjungan terapi rumah.",
+    "areaId": "bandung-soreang",
+    "latitude": -7.031,
+    "longitude": 107.519
+  },
+  {
+    "id": "professional-practice-2",
+    "index": 1,
+    "professionalId": "2",
+    "label": "BidanCare Home Service",
+    "address": "Base home care Sukmajaya untuk home visit area terbatas.",
+    "areaId": "depok-sukmajaya",
+    "latitude": -6.394,
+    "longitude": 106.824
+  },
+  {
+    "id": "professional-practice-5",
+    "index": 1,
+    "professionalId": "5",
+    "label": "West Point Wellness",
+    "address": "Studio terapi West Point untuk sesi sore dan malam.",
+    "areaId": "jakarta-barat-kembangan",
+    "latitude": -6.1935,
+    "longitude": 106.739
+  }
+]

@@ -51,7 +51,7 @@ The current defaults are suitable for local development:
 - frontend public API base URL: `http://localhost:8080/api/v1`
 - backend port: `8080`
 - backend CORS origin: `http://localhost:3000`
-- backend simulation data dir: `../frontend/src/data/simulation`
+- backend mock-db dir: `../frontend/src/data/mock-db`
 - PostgreSQL URL: `postgres://postgres:postgres@localhost:5432/bidanapp?sslmode=disable`
 - Redis URL: `redis://localhost:6379`
 
@@ -217,7 +217,7 @@ See [Development Workflow](./development-workflow.md) for the full governance ru
 - Work primarily in `apps/frontend`.
 - Read [Frontend Guide](./frontend.md).
 
-You usually do not need PostgreSQL or Redis yet because most current business data is still simulation-backed.
+You usually do not need PostgreSQL or Redis yet because most current business data is still served from frontend-owned mock-db seed tables.
 
 ### I need API contract changes
 
@@ -243,7 +243,7 @@ The backend is fail-fast. Common causes:
 - invalid URL in `DATABASE_URL`
 - invalid URL in `REDIS_URL`
 - invalid `CORS_ALLOWED_ORIGINS`
-- non-existent `SIMULATION_DATA_DIR`
+- non-existent `MOCK_DB_DIR`
 - unsupported `APP_ENV`, `LOG_LEVEL`, or `LOG_FORMAT`
 
 Check [Environment Setup](./environment.md) and verify the env files you copied.

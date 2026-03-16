@@ -1,0 +1,50 @@
+[
+  {
+    "id": "professional-coverage-6",
+    "index": 1,
+    "professionalId": "6",
+    "homeVisitRadiusKm": 0,
+    "centerLatitude": -6.2892,
+    "centerLongitude": 106.7956
+  },
+  {
+    "id": "professional-coverage-1",
+    "index": 1,
+    "professionalId": "1",
+    "homeVisitRadiusKm": 8,
+    "centerLatitude": -6.4012,
+    "centerLongitude": 106.8158
+  },
+  {
+    "id": "professional-coverage-4",
+    "index": 1,
+    "professionalId": "4",
+    "homeVisitRadiusKm": 10,
+    "centerLatitude": -6.2815,
+    "centerLongitude": 106.802
+  },
+  {
+    "id": "professional-coverage-3",
+    "index": 1,
+    "professionalId": "3",
+    "homeVisitRadiusKm": 18,
+    "centerLatitude": -7.031,
+    "centerLongitude": 107.519
+  },
+  {
+    "id": "professional-coverage-2",
+    "index": 1,
+    "professionalId": "2",
+    "homeVisitRadiusKm": 6,
+    "centerLatitude": -6.394,
+    "centerLongitude": 106.824
+  },
+  {
+    "id": "professional-coverage-5",
+    "index": 1,
+    "professionalId": "5",
+    "homeVisitRadiusKm": 12,
+    "centerLatitude": -6.1935,
+    "centerLongitude": 106.739
+  }
+]

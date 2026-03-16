@@ -52,7 +52,7 @@ Notes:
 | `HTTP_SHUTDOWN_TIMEOUT` | Yes | Graceful shutdown timeout | `10s` |
 | `HTTP_MAX_HEADER_BYTES` | Yes | Header size limit | `1048576` |
 | `CORS_ALLOWED_ORIGINS` | Yes | Comma-separated allowed browser origins | `http://localhost:3000` |
-| `SIMULATION_DATA_DIR` | Yes | Path to CMS-like JSON simulation dataset | `../frontend/src/data/simulation` |
+| `MOCK_DB_DIR` | Yes | Path to normalized JSON mock-db tables | `../frontend/src/data/mock-db` |
 | `DATABASE_URL` | Yes | PostgreSQL connection URL | `postgres://postgres:postgres@localhost:5432/bidanapp?sslmode=disable` |
 | `REDIS_URL` | Yes | Redis connection URL | `redis://localhost:6379` |
 | `LOG_LEVEL` | Yes | Log verbosity: `debug`, `info`, `warn`, `error` | `debug` |
@@ -60,7 +60,7 @@ Notes:
 
 Notes:
 
-- Backend config is fail-fast. Invalid URLs, invalid ports, missing simulation data, and unsupported enum values stop boot immediately.
+- Backend config is fail-fast. Invalid URLs, invalid ports, missing mock-db data, and unsupported enum values stop boot immediately.
 - Backend loads `apps/backend/.env`, `apps/backend/.env.local`, plus environment-specific files such as `apps/backend/.env.production`.
 - In staging and production, `APP_VERSION` and `NEXT_PUBLIC_APP_VERSION` should be injected by CI/CD from the release tag or deployment metadata.
 

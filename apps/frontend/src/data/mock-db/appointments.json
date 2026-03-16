@@ -1,0 +1,92 @@
+[
+  {
+    "index": 1,
+    "id": "apt-005",
+    "consumerId": "guest-primary",
+    "professionalId": "3",
+    "serviceId": "s6",
+    "status": "in_service",
+    "scheduledTimeLabel": "Sedang berjalan, mulai 13:00 WIB",
+    "totalPriceLabel": "Rp 250.000"
+  },
+  {
+    "index": 2,
+    "id": "apt-004",
+    "consumerId": "guest-primary",
+    "professionalId": "4",
+    "serviceId": "s7",
+    "status": "confirmed",
+    "scheduledTimeLabel": "Senin, 08:00 WIB",
+    "totalPriceLabel": "Rp 175.000"
+  },
+  {
+    "index": 3,
+    "id": "apt-003",
+    "consumerId": "guest-primary",
+    "professionalId": "1",
+    "serviceId": "s10",
+    "status": "paid",
+    "scheduledTimeLabel": "Hari ini, 19:30 WIB",
+    "totalPriceLabel": "Rp 90.000"
+  },
+  {
+    "index": 4,
+    "id": "apt-002",
+    "consumerId": "guest-primary",
+    "professionalId": "2",
+    "serviceId": "s4",
+    "status": "approved_waiting_payment",
+    "scheduledTimeLabel": "Hari ini, 15:00 WIB",
+    "totalPriceLabel": "Rp 120.000"
+  },
+  {
+    "index": 5,
+    "id": "apt-001",
+    "consumerId": "guest-primary",
+    "professionalId": "1",
+    "serviceId": "s1",
+    "status": "requested",
+    "scheduledTimeLabel": "Besok, 10:00 WIB",
+    "totalPriceLabel": "Rp 150.000"
+  },
+  {
+    "index": 6,
+    "id": "apt-006",
+    "consumerId": "guest-primary",
+    "professionalId": "6",
+    "serviceId": "s8",
+    "status": "completed",
+    "scheduledTimeLabel": "Kemarin, 09:30 WIB",
+    "totalPriceLabel": "Rp 140.000"
+  },
+  {
+    "index": 7,
+    "id": "apt-007",
+    "consumerId": "guest-primary",
+    "professionalId": "5",
+    "serviceId": "s9",
+    "status": "cancelled",
+    "scheduledTimeLabel": "12 Maret 2026, 18:00 WIB",
+    "totalPriceLabel": "Rp 105.000"
+  },
+  {
+    "index": 8,
+    "id": "apt-008",
+    "consumerId": "guest-primary",
+    "professionalId": "4",
+    "serviceId": "s1",
+    "status": "rejected",
+    "scheduledTimeLabel": "11 Maret 2026, 11:00 WIB",
+    "totalPriceLabel": "Rp 145.000"
+  },
+  {
+    "index": 9,
+    "id": "apt-009",
+    "consumerId": "guest-primary",
+    "professionalId": "1",
+    "serviceId": "s5",
+    "status": "expired",
+    "scheduledTimeLabel": "10 Maret 2026, 20:00 WIB",
+    "totalPriceLabel": "Rp 200.000"
+  }
+]

@@ -1,0 +1,109 @@
+{
+  "serviceDeliveryModes": [
+    {
+      "code": "online",
+      "description": "Layanan remote tanpa kebutuhan coverage fisik.",
+      "requiresSchedule": false,
+      "requiresCoverage": false
+    },
+    {
+      "code": "home_visit",
+      "description": "Profesional datang ke lokasi user.",
+      "requiresSchedule": true,
+      "requiresCoverage": true
+    },
+    {
+      "code": "onsite",
+      "description": "User datang ke titik layanan profesional.",
+      "requiresSchedule": true,
+      "requiresCoverage": false
+    }
+  ],
+  "bookingFlows": [
+    {
+      "code": "instant",
+      "description": "Booking bisa langsung aktif tanpa review manual.",
+      "entryState": "paid",
+      "requiresApproval": false
+    },
+    {
+      "code": "request",
+      "description": "Booking diawali request dan menunggu approval.",
+      "entryState": "requested",
+      "requiresApproval": true
+    }
+  ],
+  "timeSlotStatuses": [
+    {
+      "code": "available",
+      "description": "Slot masih terbuka penuh.",
+      "isBookable": true
+    },
+    {
+      "code": "limited",
+      "description": "Slot hampir penuh tetapi masih bisa dipilih.",
+      "isBookable": true
+    },
+    {
+      "code": "booked",
+      "description": "Slot sudah tidak tersedia.",
+      "isBookable": false
+    }
+  ],
+  "appointmentStatuses": [
+    {
+      "code": "requested",
+      "phase": "pre_service",
+      "isTerminal": false,
+      "nextStates": ["approved_waiting_payment", "rejected", "cancelled", "expired"]
+    },
+    {
+      "code": "approved_waiting_payment",
+      "phase": "payment",
+      "isTerminal": false,
+      "nextStates": ["paid", "cancelled", "expired"]
+    },
+    {
+      "code": "paid",
+      "phase": "pre_service",
+      "isTerminal": false,
+      "nextStates": ["confirmed", "in_service", "cancelled"]
+    },
+    {
+      "code": "confirmed",
+      "phase": "pre_service",
+      "isTerminal": false,
+      "nextStates": ["in_service", "cancelled"]
+    },
+    {
+      "code": "in_service",
+      "phase": "service_delivery",
+      "isTerminal": false,
+      "nextStates": ["completed", "cancelled"]
+    },
+    {
+      "code": "completed",
+      "phase": "post_service",
+      "isTerminal": true,
+      "nextStates": []
+    },
+    {
+      "code": "cancelled",
+      "phase": "closed",
+      "isTerminal": true,
+      "nextStates": []
+    },
+    {
+      "code": "rejected",
+      "phase": "closed",
+      "isTerminal": true,
+      "nextStates": []
+    },
+    {
+      "code": "expired",
+      "phase": "closed",
+      "isTerminal": true,
+      "nextStates": []
+    }
+  ]
+}

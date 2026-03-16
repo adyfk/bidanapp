@@ -6,19 +6,19 @@ This document collects the non-obvious facts and rules that are easy to miss whe
 
 The codebase is intentionally between two phases:
 
-- current product development still leans on simulation data
+- current product development still leans on mock-db seed data
 - future product development is moving toward backend-owned contracts and real persistence
 
 Do not document or design features as if the migration is already complete.
 
-## 2. Frontend And Backend Currently Share Simulation Data
+## 2. Frontend And Backend Currently Share Mock DB Data
 
 This is one of the most important facts in the repo.
 
 Today:
 
-- frontend reads simulation JSON for many product flows
-- backend reads the same simulation dataset for its demo and contract endpoints
+- frontend reads normalized mock-db JSON tables for many product flows
+- backend reads the same mock-db dataset for its demo and contract endpoints
 
 This is useful because:
 
@@ -27,7 +27,7 @@ This is useful because:
 
 This is dangerous if misunderstood because:
 
-- a backend endpoint returning simulation-backed data is not the same thing as a production persistence layer
+- a backend endpoint returning mock-db-backed data is not the same thing as a production persistence layer
 
 ## 3. Backend Owns REST Contract Truth
 

@@ -10,7 +10,7 @@ type Config struct {
 	App           AppConfig
 	HTTP          HTTPConfig
 	CORS          CORSConfig
-	Simulation    SimulationConfig
+	MockDB        MockDBConfig
 	Database      DatabaseConfig
 	Redis         RedisConfig
 	Observability ObservabilityConfig
@@ -49,7 +49,7 @@ func (c CORSConfig) PrimaryOrigin() string {
 	return c.AllowedOrigins[0]
 }
 
-type SimulationConfig struct {
+type MockDBConfig struct {
 	DataDir string
 }
 

@@ -1,11 +1,27 @@
 'use client';
 
 import { useState } from 'react';
-import { getBookingMessage, MOCK_CATEGORIES, MOCK_PROFESSIONALS, MOCK_SERVICES } from '@/lib/constants';
+import {
+  getAccessibleServiceModes,
+  getProfessionalCategoryLabel,
+  getProfessionalCoverageStatus,
+  MOCK_CATEGORIES,
+  MOCK_PROFESSIONALS,
+  MOCK_SERVICES,
+} from '@/lib/mock-db/catalog';
+import { ACTIVE_USER_CONTEXT } from '@/lib/mock-db/runtime';
+import { useUiText } from '@/lib/ui-text';
+import type { ProfessionalService, ServiceDeliveryMode, ServiceModeFlags } from '@/types/catalog';
 
 export interface ServiceProviderSummary {
-  availabilityLabel: string;
+  accessibleModes: ServiceDeliveryMode[];
   badgeLabel: string;
+  bookingFlow: ProfessionalService['bookingFlow'];
+  canBook: boolean;
+  categoryLabel: string;
+  defaultMode: ServiceDeliveryMode;
+  isAvailable: boolean;
+  isHomeVisitCovered: boolean;
   id: string;
   image: string;
   location: string;
@@ -13,10 +29,12 @@ export interface ServiceProviderSummary {
   providedServiceDuration?: string;
   providedServicePrice?: string;
   rating: number;
+  serviceModes: ServiceModeFlags;
   slug: string;
 }
 
 export const useServiceDetail = (serviceId: string) => {
+  const uiText = useUiText();
   const [notice, setNotice] = useState<string | null>(null);
   const service = MOCK_SERVICES.find((item) => item.id === serviceId) || null;
   const categoryName = service
@@ -29,10 +47,32 @@ export const useServiceDetail = (serviceId: string) => {
         const professionalService = professional.services.find(
           (serviceMapping) => serviceMapping.serviceId === service.id,
         );
+        const coverageStatus = getProfessionalCoverageStatus(
+          professional,
+          ACTIVE_USER_CONTEXT.userLocation,
+          ACTIVE_USER_CONTEXT.area.id,
+        );
+        const accessibleModes = professionalService
+          ? getAccessibleServiceModes(
+              professionalService.serviceModes,
+              coverageStatus,
+              professional.availability.isAvailable,
+            )
+          : [];
+        const bookingMode =
+          professionalService && accessibleModes.includes(professionalService.defaultMode)
+            ? professionalService.defaultMode
+            : accessibleModes[0] || professionalService?.defaultMode || service.defaultMode;
 
         return {
-          availabilityLabel: professional.availabilityLabel,
+          accessibleModes,
           badgeLabel: professional.badgeLabel,
+          bookingFlow: professionalService?.bookingFlow || 'request',
+          canBook: accessibleModes.length > 0,
+          categoryLabel: getProfessionalCategoryLabel(professional) || 'Professional',
+          defaultMode: bookingMode,
+          isAvailable: professional.availability.isAvailable,
+          isHomeVisitCovered: coverageStatus.isHomeVisitCovered,
           id: professional.id,
           image: professional.image,
           location: professional.location,
@@ -40,20 +80,25 @@ export const useServiceDetail = (serviceId: string) => {
           providedServiceDuration: professionalService?.duration,
           providedServicePrice: professionalService?.price,
           rating: professional.rating,
+          serviceModes: professionalService?.serviceModes || service.serviceModes,
           slug: professional.slug,
         };
       })
     : [];
 
-  const requestBooking = (providerName?: string) => {
+  const requestBooking = (provider?: ServiceProviderSummary) => {
     if (!service) {
       return;
     }
 
+    if (provider && !provider.canBook) {
+      return;
+    }
+
     setNotice(
-      providerName
-        ? `${getBookingMessage(service.type)} Profesional terpilih: ${providerName}.`
-        : getBookingMessage(service.type),
+      provider
+        ? uiText.getProviderBookingNotice(provider.defaultMode, provider.name)
+        : uiText.getBookingMessage(service.defaultMode),
     );
   };
 

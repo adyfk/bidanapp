@@ -1,4 +1,28 @@
-export type ServiceType = 'visit' | 'consultation';
+export type ServiceDeliveryMode = 'online' | 'home_visit' | 'onsite';
+export type BookingFlow = 'instant' | 'request';
+export type TimeSlotStatus = 'available' | 'limited' | 'booked';
+
+export interface GeoPoint {
+  latitude: number;
+  longitude: number;
+}
+
+export interface Area {
+  index: number;
+  id: string;
+  city: string;
+  district: string;
+  province: string;
+  label: string;
+  latitude: number;
+  longitude: number;
+}
+
+export interface ServiceModeFlags {
+  online: boolean;
+  homeVisit: boolean;
+  onsite: boolean;
+}
 
 export interface Category {
   index: number;
@@ -21,10 +45,10 @@ export interface GlobalService {
   categoryId: string;
   description: string;
   shortDescription: string;
-  type: ServiceType;
   image: string;
   coverImage: string;
-  badge: string;
+  defaultMode: ServiceDeliveryMode;
+  serviceModes: ServiceModeFlags;
   tags: string[];
   highlights: string[];
 }
@@ -34,7 +58,27 @@ export interface ProfessionalService {
   serviceId: string;
   duration: string;
   price: string;
+  serviceModes: ServiceModeFlags;
+  defaultMode: ServiceDeliveryMode;
+  bookingFlow: BookingFlow;
+  scheduleByMode?: Partial<Record<ServiceDeliveryMode, ProfessionalServiceScheduleDay[]>>;
   summary?: string;
+}
+
+export interface ProfessionalServiceTimeSlot {
+  index: number;
+  id: string;
+  label: string;
+  note?: string;
+  status: TimeSlotStatus;
+}
+
+export interface ProfessionalServiceScheduleDay {
+  index: number;
+  id: string;
+  label: string;
+  dateIso: string;
+  slots: ProfessionalServiceTimeSlot[];
 }
 
 export interface ProfessionalPortfolioStat {
@@ -116,13 +160,29 @@ export interface ProfessionalRecentActivity {
   summary: string;
 }
 
+export interface ProfessionalAvailability {
+  isAvailable: boolean;
+}
+
+export interface ProfessionalPracticeLocation {
+  label: string;
+  address: string;
+  areaId: string;
+  coordinates: GeoPoint;
+}
+
+export interface ProfessionalCoverage {
+  areaIds: string[];
+  homeVisitRadiusKm: number;
+  center: GeoPoint;
+}
+
 export interface Professional {
   index: number;
   id: string;
   slug: string;
   name: string;
   title: string;
-  categoryId: string;
   location: string;
   rating: number;
   reviews: string;
@@ -131,11 +191,12 @@ export interface Professional {
   image: string;
   coverImage?: string;
   badgeLabel: string;
-  availabilityLabel: string;
+  availability: ProfessionalAvailability;
   responseTime: string;
   specialties: string[];
   languages: string[];
-  addressLines: string[];
+  practiceLocation?: ProfessionalPracticeLocation;
+  coverage: ProfessionalCoverage;
   about: string;
   portfolioStats: ProfessionalPortfolioStat[];
   credentials: ProfessionalCredential[];
@@ -148,10 +209,4 @@ export interface Professional {
   feedbackBreakdown: ProfessionalFeedbackBreakdown[];
   recentActivities: ProfessionalRecentActivity[];
   services: ProfessionalService[];
-}
-
-export interface CatalogSimulationFile {
-  categories: Category[];
-  services: GlobalService[];
-  professionals: Professional[];
 }

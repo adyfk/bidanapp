@@ -1,0 +1,23 @@
+[
+  {
+    "code": "online",
+    "label": "Online",
+    "requiresPhysicalCoverage": false,
+    "requiresSchedule": false,
+    "description": "Layanan dijalankan secara remote tanpa batasan coverage fisik."
+  },
+  {
+    "code": "home_visit",
+    "label": "Home visit",
+    "requiresPhysicalCoverage": true,
+    "requiresSchedule": true,
+    "description": "Profesional datang ke alamat pengguna dan harus lolos coverage area serta radius."
+  },
+  {
+    "code": "onsite",
+    "label": "Onsite",
+    "requiresPhysicalCoverage": false,
+    "requiresSchedule": true,
+    "description": "Pengguna datang ke titik layanan milik profesional."
+  }
+]

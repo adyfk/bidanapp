@@ -7,16 +7,20 @@ import { ProfessionalCard } from '@/components/ui/ProfessionalCard';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { Link, useRouter } from '@/i18n/routing';
 import { APP_CONFIG } from '@/lib/config';
-import { MOCK_CATEGORIES, SIMULATION_APP_SECTIONS, SIMULATION_HOME, SIMULATION_MESSAGES } from '@/lib/constants';
+import { getEnabledServiceModes, getProfessionalCategoryLabel, MOCK_CATEGORIES } from '@/lib/mock-db/catalog';
+import { ACTIVE_HOME_FEED, APP_SECTION_CONFIG } from '@/lib/mock-db/runtime';
 import { APP_ROUTES, exploreRoute, professionalRoute } from '@/lib/routes';
+import { useUiText } from '@/lib/ui-text';
 
 export const HomeScreen = () => {
   const router = useRouter();
   const t = useTranslations('Home');
-  const featuredProfessional = SIMULATION_HOME.featuredAppointment?.professional;
+  const professionalT = useTranslations('Professional');
+  const uiText = useUiText();
+  const featuredProfessional = ACTIVE_HOME_FEED.featuredAppointment?.professional;
   const homeCategories = (
-    SIMULATION_APP_SECTIONS.homeCategoryIds?.length
-      ? SIMULATION_APP_SECTIONS.homeCategoryIds
+    APP_SECTION_CONFIG.homeCategoryIds?.length
+      ? APP_SECTION_CONFIG.homeCategoryIds
           .map((categoryId) => MOCK_CATEGORIES.find((category) => category.id === categoryId))
           .filter(Boolean)
       : MOCK_CATEGORIES
@@ -38,8 +42,8 @@ export const HomeScreen = () => {
           className="w-11 h-11 relative rounded-full bg-gray-200 overflow-hidden border-2 border-white shadow-sm hover:opacity-80 transition-opacity active:scale-95"
         >
           <Image
-            src={SIMULATION_HOME.currentUser.avatar}
-            alt={SIMULATION_HOME.currentUser.name}
+            src={ACTIVE_HOME_FEED.currentUser.avatar}
+            alt={ACTIVE_HOME_FEED.currentUser.name}
             fill
             className="object-cover"
           />
@@ -48,7 +52,7 @@ export const HomeScreen = () => {
           <span className="text-[11px] text-gray-400 font-medium tracking-wide">{t('location')}</span>
           <div className="flex items-center text-gray-900 font-bold text-[14px]">
             <MapPin className="w-4 h-4 mr-1" style={{ color: APP_CONFIG.colors.primary }} />
-            {SIMULATION_HOME.sharedContext.currentArea}
+            {ACTIVE_HOME_FEED.sharedContext.currentArea}
           </div>
         </div>
         <div className="relative">
@@ -69,8 +73,8 @@ export const HomeScreen = () => {
           <Search className="w-5 h-5 text-gray-400 mr-2" />
           <span className="text-sm text-gray-400 font-medium">
             {t('searchPlaceholder', {
-              service: APP_CONFIG.terms.service.toLowerCase(),
-              category: APP_CONFIG.terms.category.toLowerCase(),
+              service: uiText.terms.service.toLowerCase(),
+              category: uiText.terms.category.toLowerCase(),
             })}
           </span>
         </Link>
@@ -80,7 +84,7 @@ export const HomeScreen = () => {
         {/* Section: Appointment */}
         <div>
           <SectionHeader title={t('appointment')} onSeeAll={() => router.push(APP_ROUTES.explore)} />
-          {SIMULATION_HOME.featuredAppointment && featuredProfessional ? (
+          {ACTIVE_HOME_FEED.featuredAppointment && featuredProfessional ? (
             <div
               className="rounded-[28px] p-5 text-white relative shadow-[0_10px_30px_rgba(233,30,140,0.25)]"
               style={{
@@ -93,11 +97,11 @@ export const HomeScreen = () => {
                 <div className="space-y-2.5">
                   <div className="flex items-center text-[13px] font-medium bg-white/10 w-fit px-3 py-1.5 rounded-full backdrop-blur-sm border border-white/10">
                     <Calendar className="w-4 h-4 mr-2 opacity-80" />
-                    {SIMULATION_HOME.featuredAppointment.dateLabel}
+                    {ACTIVE_HOME_FEED.featuredAppointment.dateLabel}
                   </div>
                   <div className="flex items-center text-[13px] ml-1 font-medium">
                     <Clock className="w-4 h-4 mr-2 opacity-80" />
-                    {SIMULATION_HOME.featuredAppointment.timeLabel}
+                    {ACTIVE_HOME_FEED.featuredAppointment.timeLabel}
                   </div>
                 </div>
                 <button
@@ -122,7 +126,7 @@ export const HomeScreen = () => {
                   <div>
                     <h3 className="font-bold text-[15px]">{featuredProfessional.name}</h3>
                     <p className="text-[12px] text-gray-500">
-                      {MOCK_CATEGORIES.find((cat) => cat.id === featuredProfessional.categoryId)?.name}
+                      {getProfessionalCategoryLabel(featuredProfessional) || uiText.terms.professional}
                     </p>
                   </div>
                 </div>
@@ -137,17 +141,15 @@ export const HomeScreen = () => {
               >
                 <Calendar className="w-5 h-5" />
               </div>
-              <h3 className="text-[18px] font-bold text-gray-900 mb-2">{SIMULATION_MESSAGES.homeEmptyStateTitle}</h3>
-              <p className="text-[14px] text-gray-500 leading-relaxed mb-4">
-                {SIMULATION_MESSAGES.homeEmptyStateDescription}
-              </p>
+              <h3 className="text-[18px] font-bold text-gray-900 mb-2">{uiText.homeEmptyStateTitle}</h3>
+              <p className="text-[14px] text-gray-500 leading-relaxed mb-4">{uiText.homeEmptyStateDescription}</p>
               <button
                 type="button"
                 onClick={() => router.push(APP_ROUTES.services)}
                 className="px-5 py-3 rounded-full text-white font-bold text-[14px]"
                 style={{ backgroundColor: APP_CONFIG.colors.primary }}
               >
-                {SIMULATION_MESSAGES.homeEmptyStateAction}
+                {uiText.homeEmptyStateAction}
               </button>
             </div>
           )}
@@ -156,12 +158,13 @@ export const HomeScreen = () => {
         {/* Section: Popular Services */}
         <div>
           <SectionHeader
-            title={t('popularServices', { service: APP_CONFIG.terms.service })}
+            title={t('popularServices', { service: uiText.terms.service })}
             onSeeAll={() => router.push(APP_ROUTES.services)}
           />
           <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar -mx-6 px-6">
-            {SIMULATION_HOME.popularServices.map((svc) => {
+            {ACTIVE_HOME_FEED.popularServices.map((svc) => {
               const catName = MOCK_CATEGORIES.find((cat) => cat.id === svc.categoryId)?.name || '';
+              const enabledModes = getEnabledServiceModes(svc.serviceModes);
               const targetRoute = exploreRoute({ category: svc.categoryId, q: svc.name });
               return (
                 <div
@@ -191,9 +194,23 @@ export const HomeScreen = () => {
                     </div>
                     <h4 className="font-bold text-[15px] text-gray-900 leading-tight mb-2 pr-2">{svc.name}</h4>
                     <p className="text-[12px] text-gray-500 line-clamp-2 mb-3">{svc.shortDescription}</p>
+                    <div className="mb-3 flex flex-wrap gap-2">
+                      {enabledModes.map((mode) => (
+                        <span
+                          key={`${svc.id}-${mode}`}
+                          className="rounded-full bg-gray-50 px-2.5 py-1 text-[10px] font-semibold text-gray-600"
+                        >
+                          {mode === 'online'
+                            ? professionalT('modeOnline')
+                            : mode === 'home_visit'
+                              ? professionalT('modeHomeVisit')
+                              : professionalT('modeOnsite')}
+                        </span>
+                      ))}
+                    </div>
 
                     <div className="mt-auto pt-2 flex items-center justify-between text-[12px] font-medium text-gray-500">
-                      <span>{svc.badge || catName}</span>
+                      <span>{catName}</span>
                       <span
                         className="flex items-center opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300"
                         style={{ color: APP_CONFIG.colors.primary }}
@@ -211,7 +228,7 @@ export const HomeScreen = () => {
         {/* Section: Categories */}
         <div>
           <SectionHeader
-            title={APP_CONFIG.terms.category || t('categories')}
+            title={uiText.terms.category || t('categories')}
             onSeeAll={() => router.push(APP_ROUTES.explore)}
           />
           <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar -mx-6 px-6">
@@ -250,11 +267,11 @@ export const HomeScreen = () => {
         {/* Section: Professionals Near You */}
         <div className="pb-4">
           <SectionHeader
-            title={t('professionalsNearYou', { professional: APP_CONFIG.terms.professional })}
+            title={t('professionalsNearYou', { professional: uiText.terms.professional })}
             onSeeAll={() => router.push(APP_ROUTES.explore)}
           />
           <div className="space-y-4">
-            {SIMULATION_HOME.nearbyProfessionals.map((prof) => (
+            {ACTIVE_HOME_FEED.nearbyProfessionals.map((prof) => (
               <ProfessionalCard key={prof.id} professional={prof} href={professionalRoute(prof.slug)} />
             ))}
           </div>

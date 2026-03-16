@@ -106,23 +106,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/settings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get app settings payload */
-        get: operations["get-settings"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/ws/chat": {
         parameters: {
             query?: never;
@@ -155,39 +138,6 @@ export interface components {
              */
             readonly $schema?: string;
             error: components["schemas"]["ErrorPayload"];
-        };
-        AppBranding: {
-            appName: string;
-            baseUrl: string;
-            ogImage: string;
-            seoDescription: string;
-        };
-        AppColors: {
-            accent: string;
-            bgLight: string;
-            danger: string;
-            darkNav: string;
-            primary: string;
-            primaryDark: string;
-            primaryLight: string;
-            secondary: string;
-            success: string;
-            textMain: string;
-            textMuted: string;
-            warning: string;
-        };
-        AppSettings: {
-            branding: components["schemas"]["AppBranding"];
-            colors: components["schemas"]["AppColors"];
-            terms: components["schemas"]["AppTerms"];
-        };
-        AppTerms: {
-            category: string;
-            experience: string;
-            location: string;
-            patients: string;
-            professional: string;
-            service: string;
         };
         AppointmentData: {
             appointments: components["schemas"]["AppointmentSeed"][] | null;
@@ -446,15 +396,6 @@ export interface components {
             readonly $schema?: string;
             data: components["schemas"]["Professional"][] | null;
         };
-        SettingsResponseBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/SettingsResponseBody.json
-             */
-            readonly $schema?: string;
-            data: components["schemas"]["AppSettings"];
-        };
     };
     responses: never;
     parameters: never;
@@ -655,35 +596,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "get-settings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SettingsResponseBody"];
                 };
             };
             /** @description Internal Server Error */

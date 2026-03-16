@@ -11,16 +11,6 @@ export type AppointmentStatus =
   | 'rejected'
   | 'expired';
 
-export interface AppointmentSeed {
-  index: number;
-  id: string;
-  professionalId: string;
-  serviceId: string;
-  time: string;
-  status: AppointmentStatus;
-  totalPrice: string;
-}
-
 export interface Appointment {
   id: string;
   professional: Professional;
@@ -28,8 +18,4 @@ export interface Appointment {
   time: string;
   status: AppointmentStatus;
   totalPrice: string;
-}
-
-export interface AppointmentSimulationFile {
-  appointments: AppointmentSeed[];
 }

@@ -1,0 +1,50 @@
+[
+  {
+    "id": "professional-coverage-area-1-1",
+    "index": 1,
+    "professionalId": "1",
+    "areaId": "depok-sukmajaya"
+  },
+  {
+    "id": "professional-coverage-area-1-2",
+    "index": 2,
+    "professionalId": "1",
+    "areaId": "depok-pancoran-mas"
+  },
+  {
+    "id": "professional-coverage-area-1-3",
+    "index": 3,
+    "professionalId": "1",
+    "areaId": "depok-cimanggis"
+  },
+  {
+    "id": "professional-coverage-area-4-1",
+    "index": 1,
+    "professionalId": "4",
+    "areaId": "jakarta-selatan-cilandak"
+  },
+  {
+    "id": "professional-coverage-area-4-2",
+    "index": 2,
+    "professionalId": "4",
+    "areaId": "jakarta-selatan-kebayoran-baru"
+  },
+  {
+    "id": "professional-coverage-area-3-1",
+    "index": 1,
+    "professionalId": "3",
+    "areaId": "bandung-soreang"
+  },
+  {
+    "id": "professional-coverage-area-2-1",
+    "index": 1,
+    "professionalId": "2",
+    "areaId": "depok-sukmajaya"
+  },
+  {
+    "id": "professional-coverage-area-5-1",
+    "index": 1,
+    "professionalId": "5",
+    "areaId": "jakarta-barat-kembangan"
+  }
+]

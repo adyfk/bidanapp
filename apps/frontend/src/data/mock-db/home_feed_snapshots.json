@@ -1,0 +1,23 @@
+[
+  {
+    "index": 1,
+    "id": "default-family-care",
+    "title": "Featured appointment with mixed nearby professionals",
+    "consumerId": "guest-primary",
+    "userContextId": "depok-sukmajaya"
+  },
+  {
+    "index": 2,
+    "id": "recovery-focus",
+    "title": "Rehabilitation-focused home state",
+    "consumerId": "mr-hendra",
+    "userContextId": "bandung-soreang"
+  },
+  {
+    "index": 3,
+    "id": "empty-schedule",
+    "title": "No upcoming appointment state",
+    "consumerId": "ibu-nadia",
+    "userContextId": "jakarta-selatan-cilandak"
+  }
+]

@@ -22,138 +22,6 @@
         ],
         "type": "object"
       },
-      "AppBranding": {
-        "additionalProperties": false,
-        "properties": {
-          "appName": {
-            "type": "string"
-          },
-          "baseUrl": {
-            "type": "string"
-          },
-          "ogImage": {
-            "type": "string"
-          },
-          "seoDescription": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "appName",
-          "seoDescription",
-          "baseUrl",
-          "ogImage"
-        ],
-        "type": "object"
-      },
-      "AppColors": {
-        "additionalProperties": false,
-        "properties": {
-          "accent": {
-            "type": "string"
-          },
-          "bgLight": {
-            "type": "string"
-          },
-          "danger": {
-            "type": "string"
-          },
-          "darkNav": {
-            "type": "string"
-          },
-          "primary": {
-            "type": "string"
-          },
-          "primaryDark": {
-            "type": "string"
-          },
-          "primaryLight": {
-            "type": "string"
-          },
-          "secondary": {
-            "type": "string"
-          },
-          "success": {
-            "type": "string"
-          },
-          "textMain": {
-            "type": "string"
-          },
-          "textMuted": {
-            "type": "string"
-          },
-          "warning": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "primary",
-          "primaryDark",
-          "primaryLight",
-          "secondary",
-          "accent",
-          "success",
-          "warning",
-          "danger",
-          "darkNav",
-          "textMain",
-          "textMuted",
-          "bgLight"
-        ],
-        "type": "object"
-      },
-      "AppSettings": {
-        "additionalProperties": false,
-        "properties": {
-          "branding": {
-            "$ref": "#/components/schemas/AppBranding"
-          },
-          "colors": {
-            "$ref": "#/components/schemas/AppColors"
-          },
-          "terms": {
-            "$ref": "#/components/schemas/AppTerms"
-          }
-        },
-        "required": [
-          "branding",
-          "terms",
-          "colors"
-        ],
-        "type": "object"
-      },
-      "AppTerms": {
-        "additionalProperties": false,
-        "properties": {
-          "category": {
-            "type": "string"
-          },
-          "experience": {
-            "type": "string"
-          },
-          "location": {
-            "type": "string"
-          },
-          "patients": {
-            "type": "string"
-          },
-          "professional": {
-            "type": "string"
-          },
-          "service": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "professional",
-          "category",
-          "service",
-          "location",
-          "experience",
-          "patients"
-        ],
-        "type": "object"
-      },
       "AppointmentData": {
         "additionalProperties": false,
         "properties": {
@@ -1176,27 +1044,6 @@
           "data"
         ],
         "type": "object"
-      },
-      "SettingsResponseBody": {
-        "additionalProperties": false,
-        "properties": {
-          "$schema": {
-            "description": "A URL to the JSON Schema for this object.",
-            "examples": [
-              "https://example.com/schemas/SettingsResponseBody.json"
-            ],
-            "format": "uri",
-            "readOnly": true,
-            "type": "string"
-          },
-          "data": {
-            "$ref": "#/components/schemas/AppSettings"
-          }
-        },
-        "required": [
-          "data"
-        ],
-        "type": "object"
       }
     }
   },
@@ -1430,37 +1277,6 @@
           }
         },
         "summary": "Get professional by slug",
-        "tags": [
-          "Simulation"
-        ]
-      }
-    },
-    "/settings": {
-      "get": {
-        "operationId": "get-settings",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SettingsResponseBody"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/APIError"
-                }
-              }
-            },
-            "description": "Internal Server Error"
-          }
-        },
-        "summary": "Get app settings payload",
         "tags": [
           "Simulation"
         ]

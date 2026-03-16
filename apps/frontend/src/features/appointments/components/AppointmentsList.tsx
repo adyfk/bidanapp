@@ -4,7 +4,7 @@ import { Activity, History } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { APP_CONFIG } from '@/lib/config';
-import { SIMULATION_MESSAGES } from '@/lib/constants';
+import { useUiText } from '@/lib/ui-text';
 import type { Appointment } from '@/types/appointments';
 
 interface AppointmentsListProps {
@@ -22,6 +22,7 @@ const getStatusChipClassName = (status: Appointment['status']) => {
 
 export const AppointmentsList = ({ activeTab, appointments, onSelect }: AppointmentsListProps) => {
   const t = useTranslations('Appointments');
+  const uiText = useUiText();
 
   return (
     <div className="px-5">
@@ -74,7 +75,7 @@ export const AppointmentsList = ({ activeTab, appointments, onSelect }: Appointm
                     className="pointer-events-none rounded-full px-4 py-1.5 text-[13px] font-bold"
                     style={{ color: APP_CONFIG.colors.primary, backgroundColor: APP_CONFIG.colors.primaryLight }}
                   >
-                    {SIMULATION_MESSAGES.appointmentActionLabels.detail}
+                    {uiText.appointmentActionLabels.detail}
                   </button>
                 </div>
                 <p className="text-right text-[12px] font-medium text-gray-500">{appointment.time}</p>

@@ -1,0 +1,192 @@
+[
+  {
+    "index": 1,
+    "fileName": "reference_service_delivery_modes.json",
+    "rowCount": 3
+  },
+  {
+    "index": 2,
+    "fileName": "reference_booking_flows.json",
+    "rowCount": 2
+  },
+  {
+    "index": 3,
+    "fileName": "reference_time_slot_statuses.json",
+    "rowCount": 3
+  },
+  {
+    "index": 4,
+    "fileName": "reference_appointment_statuses.json",
+    "rowCount": 9
+  },
+  {
+    "index": 5,
+    "fileName": "areas.json",
+    "rowCount": 7
+  },
+  {
+    "index": 6,
+    "fileName": "service_categories.json",
+    "rowCount": 6
+  },
+  {
+    "index": 7,
+    "fileName": "services.json",
+    "rowCount": 11
+  },
+  {
+    "index": 8,
+    "fileName": "professionals.json",
+    "rowCount": 6
+  },
+  {
+    "index": 9,
+    "fileName": "professional_specialties.json",
+    "rowCount": 18
+  },
+  {
+    "index": 10,
+    "fileName": "professional_languages.json",
+    "rowCount": 9
+  },
+  {
+    "index": 11,
+    "fileName": "professional_practice_locations.json",
+    "rowCount": 6
+  },
+  {
+    "index": 12,
+    "fileName": "professional_coverage_policies.json",
+    "rowCount": 6
+  },
+  {
+    "index": 13,
+    "fileName": "professional_coverage_areas.json",
+    "rowCount": 8
+  },
+  {
+    "index": 14,
+    "fileName": "professional_portfolio_stats.json",
+    "rowCount": 24
+  },
+  {
+    "index": 15,
+    "fileName": "professional_credentials.json",
+    "rowCount": 18
+  },
+  {
+    "index": 16,
+    "fileName": "professional_activity_stories.json",
+    "rowCount": 18
+  },
+  {
+    "index": 17,
+    "fileName": "professional_portfolio_entries.json",
+    "rowCount": 18
+  },
+  {
+    "index": 18,
+    "fileName": "professional_gallery_items.json",
+    "rowCount": 24
+  },
+  {
+    "index": 19,
+    "fileName": "professional_testimonials.json",
+    "rowCount": 12
+  },
+  {
+    "index": 20,
+    "fileName": "professional_feedback_summaries.json",
+    "rowCount": 6
+  },
+  {
+    "index": 21,
+    "fileName": "professional_feedback_metrics.json",
+    "rowCount": 18
+  },
+  {
+    "index": 22,
+    "fileName": "professional_feedback_breakdowns.json",
+    "rowCount": 30
+  },
+  {
+    "index": 23,
+    "fileName": "professional_recent_activities.json",
+    "rowCount": 18
+  },
+  {
+    "index": 24,
+    "fileName": "professional_service_offerings.json",
+    "rowCount": 17
+  },
+  {
+    "index": 25,
+    "fileName": "professional_service_schedule_days.json",
+    "rowCount": 80
+  },
+  {
+    "index": 26,
+    "fileName": "professional_service_time_slots.json",
+    "rowCount": 320
+  },
+  {
+    "index": 27,
+    "fileName": "consumers.json",
+    "rowCount": 3
+  },
+  {
+    "index": 28,
+    "fileName": "user_contexts.json",
+    "rowCount": 3
+  },
+  {
+    "index": 29,
+    "fileName": "home_feed_snapshots.json",
+    "rowCount": 3
+  },
+  {
+    "index": 30,
+    "fileName": "home_feed_featured_appointments.json",
+    "rowCount": 2
+  },
+  {
+    "index": 31,
+    "fileName": "home_feed_popular_services.json",
+    "rowCount": 12
+  },
+  {
+    "index": 32,
+    "fileName": "home_feed_nearby_professionals.json",
+    "rowCount": 12
+  },
+  {
+    "index": 33,
+    "fileName": "media_presets.json",
+    "rowCount": 2
+  },
+  {
+    "index": 34,
+    "fileName": "appointments.json",
+    "rowCount": 9
+  },
+  {
+    "index": 35,
+    "fileName": "chat_threads.json",
+    "rowCount": 12
+  },
+  {
+    "index": 36,
+    "fileName": "chat_messages.json",
+    "rowCount": 19
+  },
+  {
+    "index": 37,
+    "fileName": "app_section_configs.json",
+    "rowCount": 6
+  },
+  {
+    "index": 38,
+    "fileName": "app_runtime_selections.json",
+    "rowCount": 1
+  }
+]

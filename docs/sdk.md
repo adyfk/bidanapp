@@ -9,7 +9,7 @@ The repository needs one FE-facing integration boundary that is:
 - generated from backend-owned contracts
 - usable by the frontend without duplicating schemas
 - capable of handling REST and realtime concerns together
-- stable enough to support screen-by-screen migration from simulation data to live backend data
+- stable enough to support screen-by-screen migration from mock-db seed data to live backend data
 
 `packages/sdk` is that boundary.
 
@@ -157,7 +157,7 @@ If only a frontend mapping changes and backend contract is unchanged:
 
 - `@bidanapp/sdk` is not intended for npm publishing at this stage
 - it is a workspace integration boundary for this monorepo
-- some frontend screens still consume simulation-hydrated data and have not migrated to SDK-backed transport
+- some frontend screens still consume mock-db-hydrated data and have not migrated to SDK-backed transport
 - websocket event contracts are typed, but not yet persisted to database-backed chat storage
 
 ## 11. Key Commands

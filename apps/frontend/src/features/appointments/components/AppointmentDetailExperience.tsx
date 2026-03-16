@@ -7,7 +7,7 @@ import { AppointmentDetailSheet } from '@/features/appointments/components/Appoi
 import { AppointmentReviewSheet } from '@/features/appointments/components/AppointmentReviewSheet';
 import { useAppointmentFlow } from '@/features/appointments/hooks/useAppointmentFlow';
 import { APP_CONFIG } from '@/lib/config';
-import { SIMULATION_MESSAGES } from '@/lib/constants';
+import { useUiText } from '@/lib/ui-text';
 
 interface AppointmentDetailExperienceProps {
   appointmentId: string;
@@ -15,6 +15,7 @@ interface AppointmentDetailExperienceProps {
 }
 
 export const AppointmentDetailExperience = ({ appointmentId, onBack }: AppointmentDetailExperienceProps) => {
+  const uiText = useUiText();
   const {
     chatInput,
     closeChat,
@@ -49,11 +50,11 @@ export const AppointmentDetailExperience = ({ appointmentId, onBack }: Appointme
           <button type="button" onClick={onBack} className="mr-2 -ml-2 rounded-full p-2 hover:bg-gray-100">
             <ChevronLeft className="h-6 w-6 text-gray-800" />
           </button>
-          <h2 className="text-[17px] font-bold text-gray-900">{SIMULATION_MESSAGES.appointmentDetailTitle}</h2>
+          <h2 className="text-[17px] font-bold text-gray-900">{uiText.appointmentDetailTitle}</h2>
         </div>
-        <p className="mt-20 text-gray-500">{SIMULATION_MESSAGES.appointmentNotFoundMessage}</p>
+        <p className="mt-20 text-gray-500">{uiText.appointmentNotFoundMessage}</p>
         <button type="button" onClick={onBack} className="mt-4 rounded-full bg-gray-200 px-6 py-2 font-medium">
-          {SIMULATION_MESSAGES.appointmentBackLabel}
+          {uiText.appointmentBackLabel}
         </button>
       </div>
     );

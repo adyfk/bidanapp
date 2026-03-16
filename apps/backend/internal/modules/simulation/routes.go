@@ -11,27 +11,11 @@ import (
 	"bidanapp/apps/backend/internal/platform/web"
 )
 
-type rootInfo struct {
-	Name           string `json:"name"`
-	Version        string `json:"version"`
-	Environment    string `json:"environment"`
-	FrontendOrigin string `json:"frontendOrigin"`
-	Docs           string `json:"docs"`
-}
-
 type healthInfo struct {
 	Status      string `json:"status"`
 	Service     string `json:"service"`
 	Version     string `json:"version"`
 	Environment string `json:"environment"`
-}
-
-type rootResponseBody struct {
-	Data rootInfo `json:"data"`
-}
-
-type rootResponse struct {
-	Body rootResponseBody
 }
 
 type healthResponseBody struct {
@@ -40,14 +24,6 @@ type healthResponseBody struct {
 
 type healthResponse struct {
 	Body healthResponseBody
-}
-
-type settingsResponseBody struct {
-	Data AppSettings `json:"data"`
-}
-
-type settingsResponse struct {
-	Body settingsResponseBody
 }
 
 type catalogResponseBody struct {
@@ -109,24 +85,6 @@ func RegisterRoutes(api huma.API, cfg config.Config, service Service) {
 			Version:     cfg.App.Version,
 			Environment: cfg.App.Environment,
 		}
-		return response, nil
-	})
-
-	huma.Register(api, huma.Operation{
-		OperationID: "get-settings",
-		Method:      http.MethodGet,
-		Path:        "/settings",
-		Summary:     "Get app settings payload",
-		Tags:        []string{"Simulation"},
-		Errors:      []int{http.StatusInternalServerError},
-	}, func(ctx context.Context, input *struct{}) (*settingsResponse, error) {
-		payload, err := service.Settings(ctx)
-		if err != nil {
-			return nil, toAPIError(err)
-		}
-
-		response := &settingsResponse{}
-		response.Body.Data = payload
 		return response, nil
 	})
 

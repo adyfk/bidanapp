@@ -9,11 +9,12 @@ import { ProfessionalPracticeSections } from '@/features/professional-detail/com
 import { ProfessionalServicesSection } from '@/features/professional-detail/components/ProfessionalServicesSection';
 import { ProfessionalTrustSections } from '@/features/professional-detail/components/ProfessionalTrustSections';
 import { useProfessionalDetail } from '@/features/professional-detail/hooks/useProfessionalDetail';
-import { SIMULATION_MESSAGES } from '@/lib/constants';
+import { useUiText } from '@/lib/ui-text';
 
 export const ProfessionalDetailScreen = ({ professionalSlug }: { professionalSlug?: string }) => {
   const t = useTranslations('Professional');
-  const profileCopy = SIMULATION_MESSAGES.professionalProfile;
+  const uiText = useUiText();
+  const profileCopy = uiText.professionalProfile;
   const trustIndicators = [
     {
       label: profileCopy.availabilityLabel,
@@ -33,16 +34,28 @@ export const ProfessionalDetailScreen = ({ professionalSlug }: { professionalSlu
   ];
 
   const {
+    canRequestBooking,
     getServiceName,
     notice,
     offeredServices,
     professional,
     profCategory,
     requestBooking,
+    requiresOfflineScheduleSelection,
+    selectedAccessibleModes,
+    selectedBookingMode,
+    selectedScheduleDay,
+    selectedScheduleDayId,
+    selectedScheduleDays,
     selectedService,
     selectedServiceEntry,
+    selectedTimeSlot,
+    selectedTimeSlotId,
     setNotice,
+    setSelectedBookingMode,
+    setSelectedScheduleDayId,
     setSelectedService,
+    setSelectedTimeSlotId,
   } = useProfessionalDetail(professionalSlug);
 
   if (!professional) {
@@ -52,7 +65,7 @@ export const ProfessionalDetailScreen = ({ professionalSlug }: { professionalSlu
   const hydratedTrustIndicators = [
     {
       ...trustIndicators[0],
-      value: professional.availabilityLabel,
+      value: professional.availability.isAvailable ? t('available') : t('unavailable'),
     },
     {
       ...trustIndicators[1],
@@ -91,9 +104,19 @@ export const ProfessionalDetailScreen = ({ professionalSlug }: { professionalSlu
         <ProfessionalTrustSections profileCopy={profileCopy} professional={professional} />
         <ProfessionalServicesSection
           offeredServices={offeredServices}
+          onSelectBookingMode={setSelectedBookingMode}
+          onSelectScheduleDay={setSelectedScheduleDayId}
           onSelectService={setSelectedService}
+          onSelectTimeSlot={setSelectedTimeSlotId}
           profileCopy={profileCopy}
+          requiresOfflineScheduleSelection={requiresOfflineScheduleSelection}
+          selectedAccessibleModes={selectedAccessibleModes}
+          selectedBookingMode={selectedBookingMode}
+          selectedScheduleDayId={selectedScheduleDayId}
+          selectedScheduleDays={selectedScheduleDays}
           selectedService={selectedService}
+          selectedServiceEntry={selectedServiceEntry}
+          selectedTimeSlotId={selectedTimeSlotId}
         />
       </div>
 
@@ -102,7 +125,12 @@ export const ProfessionalDetailScreen = ({ professionalSlug }: { professionalSlu
         notice={notice}
         onDismissNotice={() => setNotice(null)}
         onRequestBooking={requestBooking}
+        canRequestBooking={canRequestBooking}
+        requiresOfflineScheduleSelection={requiresOfflineScheduleSelection}
+        selectedBookingMode={selectedBookingMode}
+        selectedScheduleDay={selectedScheduleDay}
         selectedServiceEntry={selectedServiceEntry}
+        selectedTimeSlot={selectedTimeSlot}
       />
     </div>
   );

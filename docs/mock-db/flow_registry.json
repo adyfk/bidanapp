@@ -1,0 +1,96 @@
+[
+  {
+    "id": "flow-home-discovery",
+    "index": 1,
+    "name": "Home Discovery",
+    "goal": "Menyusun home feed berdasarkan consumer aktif, context area, dan kurasi section.",
+    "entryTables": ["app_runtime_selections.json", "home_feed_snapshots.json", "user_contexts.json"],
+    "steps": [
+      "Pilih runtime aktif dari app_runtime_selections",
+      "Ambil consumer dan user context aktif",
+      "Hydrate home_feed_snapshots",
+      "Join popular services dan nearby professionals",
+      "Terapkan app_section_configs jika ada override tampilan"
+    ],
+    "exitState": "Home feed siap dirender"
+  },
+  {
+    "id": "flow-provider-selection",
+    "index": 2,
+    "name": "Provider Selection",
+    "goal": "Menentukan profesional dan mode layanan yang valid untuk consumer.",
+    "entryTables": [
+      "services.json",
+      "professional_service_offerings.json",
+      "professional_coverage_policies.json",
+      "professional_coverage_areas.json"
+    ],
+    "steps": [
+      "Cari offering profesional untuk service yang dipilih",
+      "Evaluasi mode aktif: online, home_visit, onsite",
+      "Jika home_visit, cek coverage area dan radius",
+      "Tampilkan mode yang masih bookable"
+    ],
+    "exitState": "User melihat pilihan mode layanan yang valid"
+  },
+  {
+    "id": "flow-booking-request",
+    "index": 3,
+    "name": "Booking Request",
+    "goal": "Membentuk appointment baru dari pilihan service, mode, dan slot.",
+    "entryTables": [
+      "professional_service_schedule_days.json",
+      "professional_service_time_slots.json",
+      "appointments.json",
+      "reference_booking_flows.json"
+    ],
+    "steps": [
+      "Pilih hari dan slot jika mode offline",
+      "Cek bookingFlow di professional_service_offerings",
+      "Simpan appointment awal dengan status requested atau state sesuai flow"
+    ],
+    "exitState": "Appointment berhasil dibuat"
+  },
+  {
+    "id": "flow-payment-and-confirmation",
+    "index": 4,
+    "name": "Payment And Confirmation",
+    "goal": "Menggerakkan appointment dari approval ke pembayaran lalu ke sesi aktif.",
+    "entryTables": ["appointments.json", "reference_appointment_statuses.json"],
+    "steps": [
+      "Profesional approve request",
+      "Appointment masuk approved_waiting_payment",
+      "Pembayaran sukses memindahkan state ke paid",
+      "Operasional mengunci jadwal ke confirmed",
+      "Saat sesi dimulai, state berpindah ke in_service"
+    ],
+    "exitState": "Appointment aktif atau selesai"
+  },
+  {
+    "id": "flow-chat-support",
+    "index": 5,
+    "name": "Chat Support",
+    "goal": "Menjaga komunikasi consumer dan profesional di luar atau selama appointment.",
+    "entryTables": ["chat_threads.json", "chat_messages.json", "appointments.json"],
+    "steps": [
+      "Buka direct thread atau appointment thread",
+      "Tambahkan pesan baru ke chat_messages",
+      "Gunakan appointmentId bila thread terikat transaksi"
+    ],
+    "exitState": "Percakapan tercatat per thread"
+  },
+  {
+    "id": "flow-review-loop",
+    "index": 6,
+    "name": "Review Loop",
+    "goal": "Membuka kesempatan review setelah layanan selesai dan mengembalikan sinyal trust ke profesional.",
+    "entryTables": ["appointments.json", "professional_feedback_summaries.json"],
+    "steps": [
+      "Validasi appointment berstatus completed",
+      "Tampilkan form review dari copy preset aktif",
+      "Simpan review ke tabel review nyata di fase backend berikutnya",
+      "Update agregasi feedback profesional"
+    ],
+    "exitState": "Review tercatat dan trust metric bisa diperbarui"
+  }
+]

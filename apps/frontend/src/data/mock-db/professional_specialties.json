@@ -1,0 +1,110 @@
+[
+  {
+    "id": "professional-specialty-6-1",
+    "index": 1,
+    "professionalId": "6",
+    "label": "Laktasi"
+  },
+  {
+    "id": "professional-specialty-6-2",
+    "index": 2,
+    "professionalId": "6",
+    "label": "Milestone bayi"
+  },
+  {
+    "id": "professional-specialty-6-3",
+    "index": 3,
+    "professionalId": "6",
+    "label": "Kelas orang tua baru"
+  },
+  {
+    "id": "professional-specialty-1-1",
+    "index": 1,
+    "professionalId": "1",
+    "label": "Pijat bayi"
+  },
+  {
+    "id": "professional-specialty-1-2",
+    "index": 2,
+    "professionalId": "1",
+    "label": "Cukur rambut bayi"
+  },
+  {
+    "id": "professional-specialty-1-3",
+    "index": 3,
+    "professionalId": "1",
+    "label": "Pendampingan awal menyusui"
+  },
+  {
+    "id": "professional-specialty-4-1",
+    "index": 1,
+    "professionalId": "4",
+    "label": "Masa nifas"
+  },
+  {
+    "id": "professional-specialty-4-2",
+    "index": 2,
+    "professionalId": "4",
+    "label": "Pemulihan ibu"
+  },
+  {
+    "id": "professional-specialty-4-3",
+    "index": 3,
+    "professionalId": "4",
+    "label": "Pendampingan keluarga"
+  },
+  {
+    "id": "professional-specialty-3-1",
+    "index": 1,
+    "professionalId": "3",
+    "label": "Latihan motorik"
+  },
+  {
+    "id": "professional-specialty-3-2",
+    "index": 2,
+    "professionalId": "3",
+    "label": "Pemulihan stroke"
+  },
+  {
+    "id": "professional-specialty-3-3",
+    "index": 3,
+    "professionalId": "3",
+    "label": "Program rumah"
+  },
+  {
+    "id": "professional-specialty-2-1",
+    "index": 1,
+    "professionalId": "2",
+    "label": "Bekam"
+  },
+  {
+    "id": "professional-specialty-2-2",
+    "index": 2,
+    "professionalId": "2",
+    "label": "Terapi sunnah"
+  },
+  {
+    "id": "professional-specialty-2-3",
+    "index": 3,
+    "professionalId": "2",
+    "label": "Wellness home service"
+  },
+  {
+    "id": "professional-specialty-5-1",
+    "index": 1,
+    "professionalId": "5",
+    "label": "Refleksi rumah"
+  },
+  {
+    "id": "professional-specialty-5-2",
+    "index": 2,
+    "professionalId": "5",
+    "label": "Relaksasi singkat"
+  },
+  {
+    "id": "professional-specialty-5-3",
+    "index": 3,
+    "professionalId": "5",
+    "label": "After-work recovery"
+  }
+]

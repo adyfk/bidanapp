@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { routing } from '@/i18n/routing';
 import { APP_CONFIG } from '@/lib/config';
-import { MOCK_PROFESSIONALS, MOCK_SERVICES } from '@/lib/constants';
+import { MOCK_PROFESSIONALS, MOCK_SERVICES } from '@/lib/mock-db/catalog';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = APP_CONFIG.baseUrl;

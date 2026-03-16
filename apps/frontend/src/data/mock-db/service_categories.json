@@ -1,0 +1,78 @@
+[
+  {
+    "index": 1,
+    "id": "newborn",
+    "name": "Newborn",
+    "shortLabel": "Bayi",
+    "description": "Perawatan khusus untuk bayi baru lahir dan kebutuhan pendampingan awal keluarga.",
+    "image": "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=600&auto=format&fit=crop",
+    "iconImage": "https://images.unsplash.com/photo-1544126592-807ade215a0b?q=80&w=200&auto=format&fit=crop",
+    "coverImage": "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=1200&auto=format&fit=crop",
+    "accentColor": "#FDE7F3",
+    "overviewPoints": ["Pijat dan stimulasi bayi", "Edukasi perawatan awal newborn", "Konsultasi laktasi dan bonding"]
+  },
+  {
+    "index": 2,
+    "id": "postpartum",
+    "name": "Postpartum",
+    "shortLabel": "Nifas",
+    "description": "Pendampingan ibu setelah persalinan, masa nifas, dan kesiapan keluarga pada fase awal.",
+    "image": "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=600&auto=format&fit=crop",
+    "iconImage": "https://images.unsplash.com/photo-1493894473891-10fc1e5dbd22?q=80&w=200&auto=format&fit=crop",
+    "coverImage": "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=1200&auto=format&fit=crop",
+    "accentColor": "#FFF1E6",
+    "overviewPoints": ["Monitoring pemulihan ibu", "Pendampingan masa nifas", "Konseling emosional awal"]
+  },
+  {
+    "index": 3,
+    "id": "konsultasi",
+    "name": "Konsultasi",
+    "shortLabel": "Online",
+    "description": "Layanan edukasi dan konsultasi jarak jauh untuk pertanyaan ringan sampai tindak lanjut rutin.",
+    "image": "https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=600&auto=format&fit=crop",
+    "iconImage": "https://images.unsplash.com/photo-1584515933487-779824d29309?q=80&w=200&auto=format&fit=crop",
+    "coverImage": "https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=1200&auto=format&fit=crop",
+    "accentColor": "#E8F3FF",
+    "overviewPoints": [
+      "Video call dan edukasi terstruktur",
+      "Follow up pasca tindakan",
+      "Review milestone dan feeding plan"
+    ]
+  },
+  {
+    "index": 4,
+    "id": "stroke",
+    "name": "Stroke",
+    "shortLabel": "Stroke",
+    "description": "Terapi pemulihan pasca stroke untuk latihan fungsi motorik dan aktivitas harian.",
+    "image": "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?q=80&w=600&auto=format&fit=crop",
+    "iconImage": "https://images.unsplash.com/photo-1550831107-1553da8c8464?q=80&w=200&auto=format&fit=crop",
+    "coverImage": "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?q=80&w=1200&auto=format&fit=crop",
+    "accentColor": "#EEF2FF",
+    "overviewPoints": ["Latihan gerak terstruktur", "Pendampingan terapi di rumah", "Pemantauan progres mingguan"]
+  },
+  {
+    "index": 5,
+    "id": "pijat-cape",
+    "name": "Pijat Cape",
+    "shortLabel": "Relaks",
+    "description": "Relaksasi tubuh menyeluruh untuk memulihkan kebugaran setelah aktivitas padat.",
+    "image": "https://images.unsplash.com/photo-1519823551278-64ac92734fb1?q=80&w=600&auto=format&fit=crop",
+    "iconImage": "https://images.unsplash.com/photo-1515377905703-c4788e51af15?q=80&w=200&auto=format&fit=crop",
+    "coverImage": "https://images.unsplash.com/photo-1519823551278-64ac92734fb1?q=80&w=1200&auto=format&fit=crop",
+    "accentColor": "#ECFDF5",
+    "overviewPoints": ["Relaksasi rumah dan mobile", "Tekanan pijat bisa disesuaikan", "Cocok untuk pemulihan ringan"]
+  },
+  {
+    "index": 6,
+    "id": "sunnah",
+    "name": "Sunnah",
+    "shortLabel": "Sunnah",
+    "description": "Pengobatan preventif dan kuratif sesuai syariat dengan pendekatan kebugaran.",
+    "image": "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?q=80&w=600&auto=format&fit=crop",
+    "iconImage": "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=200&auto=format&fit=crop",
+    "coverImage": "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?q=80&w=1200&auto=format&fit=crop",
+    "accentColor": "#FEF3C7",
+    "overviewPoints": ["Terapi bekam steril", "Sesi kebugaran preventif", "Paket tindak lanjut berkala"]
+  }
+]

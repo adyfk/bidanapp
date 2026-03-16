@@ -1,0 +1,50 @@
+[
+  {
+    "id": "app-section-home-category-1",
+    "index": 1,
+    "section": "home",
+    "configKey": "homeCategoryIds",
+    "entityType": "category",
+    "entityId": "newborn"
+  },
+  {
+    "id": "app-section-home-category-2",
+    "index": 2,
+    "section": "home",
+    "configKey": "homeCategoryIds",
+    "entityType": "category",
+    "entityId": "postpartum"
+  },
+  {
+    "id": "app-section-home-category-3",
+    "index": 3,
+    "section": "home",
+    "configKey": "homeCategoryIds",
+    "entityType": "category",
+    "entityId": "konsultasi"
+  },
+  {
+    "id": "app-section-home-category-4",
+    "index": 4,
+    "section": "home",
+    "configKey": "homeCategoryIds",
+    "entityType": "category",
+    "entityId": "stroke"
+  },
+  {
+    "id": "app-section-home-category-5",
+    "index": 5,
+    "section": "home",
+    "configKey": "homeCategoryIds",
+    "entityType": "category",
+    "entityId": "pijat-cape"
+  },
+  {
+    "id": "app-section-home-category-6",
+    "index": 6,
+    "section": "home",
+    "configKey": "homeCategoryIds",
+    "entityType": "category",
+    "entityId": "sunnah"
+  }
+]

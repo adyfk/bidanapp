@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { Link } from '@/i18n/routing';
 import { APP_CONFIG } from '@/lib/config';
-import { SIMULATION_MEDIA } from '@/lib/constants';
+import { ACTIVE_MEDIA_PRESET } from '@/lib/mock-db/runtime';
 import { APP_ROUTES } from '@/lib/routes';
 
 export const OnboardingScreen = () => {
@@ -39,8 +39,8 @@ export const OnboardingScreen = () => {
 
       <div className="relative h-[55%] flex justify-center items-end z-10 w-full max-w-sm mx-auto">
         <Image
-          src={SIMULATION_MEDIA.onboardingHeroImage}
-          alt={SIMULATION_MEDIA.onboardingHeroAlt}
+          src={ACTIVE_MEDIA_PRESET.onboardingHeroImage}
+          alt={ACTIVE_MEDIA_PRESET.onboardingHeroAlt}
           fill
           className="object-cover object-top drop-shadow-2xl"
           style={{

@@ -1,0 +1,23 @@
+[
+  {
+    "code": "available",
+    "label": "Available",
+    "capacityState": "open",
+    "isBookable": true,
+    "description": "Slot masih tersedia penuh untuk dipilih."
+  },
+  {
+    "code": "limited",
+    "label": "Limited",
+    "capacityState": "constrained",
+    "isBookable": true,
+    "description": "Slot masih bisa dipilih tetapi kapasitasnya mulai menipis."
+  },
+  {
+    "code": "booked",
+    "label": "Booked",
+    "capacityState": "closed",
+    "isBookable": false,
+    "description": "Slot sudah penuh dan tidak dapat dipesan lagi."
+  }
+]
