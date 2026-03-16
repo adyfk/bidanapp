@@ -23,7 +23,7 @@ If you are new to the repository, read these documents in order:
 - [Architecture](./architecture.md)
   Monorepo boundaries, runtime flow, contract flow, realtime flow, and current system state.
 - [Frontend Guide](./frontend.md)
-  Next.js route layout, locale handling, screen decomposition, simulation data, and frontend testing.
+  Next.js route layout, locale handling, screen decomposition, mock-db data, and frontend testing.
 - [Backend Guide](./backend.md)
   Go service boot flow, module structure, Huma contract generation, websocket chat, Atlas readiness, and backend testing.
 - [SDK And API Contract](./sdk.md)
@@ -41,8 +41,10 @@ If you are new to the repository, read these documents in order:
   Detailed environment variable reference for frontend, backend, and deploy templates.
 - [API Contract Alignment](./api-contract.md)
   Concise explanation of backend-generated OpenAPI and generated TypeScript types.
-- [Simulation Data Contract](./simulation-data-contract.md)
-  Shape and ownership of the simulation JSON dataset shared by frontend and backend.
+- [Mock DB Contract](./mock-db-contract.md)
+  Shape and ownership of the normalized JSON table set used as dummy domain data before PostgreSQL.
+- [Mock DB Blueprint](./mock-db/README.md)
+  Entity, flow, state, and manifest reference for the normalized dummy table set.
 
 ## Who Should Read What
 
@@ -82,7 +84,7 @@ Start with:
 - Websocket handshake belongs in OpenAPI; websocket frame types belong in the SDK.
 - Route building should stay aligned with `@/i18n/routing` and route helpers, not hardcoded localized strings.
 - Local preflight is the default gate. External CI can be attached later, but it should reuse the same repository commands.
-- The current system is intentionally in transition from simulation-backed data toward persistent storage. Documentation should state that clearly instead of pretending the migration is complete.
+- The current system is intentionally in transition from mock-db seed tables toward persistent storage. Documentation should state that clearly instead of pretending the migration is complete.
 
 ## How To Maintain These Docs
 

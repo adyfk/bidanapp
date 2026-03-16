@@ -42,8 +42,8 @@ services:
       HTTP_PORT: 8080
       LOG_FORMAT: ${LOG_FORMAT:-json}
       LOG_LEVEL: ${LOG_LEVEL:-info}
+      MOCK_DB_DIR: /app/mock-db
       REDIS_URL: ${REDIS_URL}
-      SIMULATION_DATA_DIR: /app/simulation
     image: ${BACKEND_IMAGE}
     ports:
       - "${BACKEND_PORT:-8080}:8080"

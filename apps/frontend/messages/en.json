@@ -22,9 +22,51 @@
   },
   "Professional": {
     "about": "About {professional}",
+    "available": "Available",
+    "unavailable": "Unavailable",
+    "coverageArea": "Coverage area",
+    "coverageIn": "In coverage",
+    "coverageOut": "Out of coverage",
+    "coordinates": "Coordinates",
     "distance": "Distance",
     "time": "Time",
+    "homeVisitRadius": "Home care radius",
+    "modeHomeVisit": "Home care",
+    "modeOnline": "Online",
+    "modeOnsite": "Visit provider",
+    "onlineOnlyCoverage": "No home care",
+    "paginationNext": "Next",
+    "paginationPrevious": "Previous",
+    "paginationStatus": "Page {current} of {total}",
+    "practiceLocation": "Service point",
     "rating": "Rating",
+    "selectedArea": "User area",
+    "selectedSchedule": "Selected schedule",
+    "selectedServiceLabel": "Active service",
+    "serviceModes": "Service modes",
+    "serviceSearchPlaceholder": "Search services, summaries, or tags...",
+    "serviceResultsCount": "{count} matching services",
+    "serviceListTitle": "All services from this professional",
+    "serviceSelected": "Selected",
+    "allCategories": "All categories",
+    "allModes": "All modes",
+    "resetServiceFilters": "Reset filters",
+    "bookingFlowLabel": "Flow",
+    "bookingFlowInstant": "Instant",
+    "bookingFlowRequest": "Request",
+    "chooseServiceMode": "Choose service mode",
+    "chooseVisitDay": "Choose visit day",
+    "chooseVisitTime": "Choose visit time",
+    "scheduleRequired": "Choose a visit time before continuing with an offline booking.",
+    "offlineScheduleRequired": "Choose a visit day and time before continuing the offline booking.",
+    "modeReadyToBook": "Ready to book",
+    "modeNotBookable": "Not bookable now",
+    "slotOpenLabel": "open",
+    "slotAvailable": "Available",
+    "slotLimited": "Limited",
+    "slotBooked": "Booked",
+    "noFilteredServices": "No services match the current filters.",
+    "noFilteredServicesHint": "Try another search term or reset the filters to see more services.",
     "makeAppointment": "Booking Request",
     "inquiryChat": "Tanya {professional}",
     "experience": "Years Exp."
@@ -58,7 +100,10 @@
       "paid": "Paid",
       "confirmed": "Confirmed",
       "in_service": "In Service",
-      "completed": "Completed"
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "rejected": "Rejected",
+      "expired": "Expired"
     }
   },
   "Services": {
@@ -86,6 +131,110 @@
     "account": "Account Settings",
     "aboutApp": "About BidanApp",
     "logout": "Log Out"
+  },
+  "UiText": {
+    "terms": {
+      "professional": "Midwife",
+      "category": "Category",
+      "service": "Service",
+      "location": "Clinic / Private Practice",
+      "experience": "Years of Practice",
+      "patients": "Patients Served"
+    },
+    "booking": {
+      "online": "Online booking created. Continue to scheduling and payment.",
+      "homeVisit": "Home care request submitted. The system will check coverage and confirm the schedule.",
+      "onsite": "Visit reservation created. Choose an available appointment slot.",
+      "providerSelectedNotice": "{bookingMessage} Selected professional: {providerName}.",
+      "serviceSelectedNotice": "{bookingMessage} Selected service: {serviceName}.{scheduleMessage}",
+      "scheduleNotice": " Schedule: {dateIso} • {timeLabel}."
+    },
+    "alerts": {
+      "chatAutoReply": "Okay, I received your message.",
+      "paymentSuccess": "Payment simulation successful",
+      "chatSent": "Message sent in demo mode",
+      "reviewPhotoReady": "Review photo ready to upload: {fileName}",
+      "reviewSuccessWithPhoto": "{successMessage} Photo: {fileName}."
+    },
+    "appointment": {
+      "detailTitle": "Activity Details",
+      "notFoundMessage": "Activity not found.",
+      "backLabel": "Back",
+      "welcomeTemplate": "Hello, how can I help you with your {serviceName} reservation?",
+      "chatDayLabel": "TODAY",
+      "chatInputPlaceholder": "Write a message...",
+      "fieldLabels": {
+        "status": "Status",
+        "time": "Schedule",
+        "location": "Location",
+        "service": "Service",
+        "totalPayment": "Total Payment"
+      },
+      "actionLabels": {
+        "detail": "Details",
+        "cancel": "Cancel",
+        "payNow": "Pay Now"
+      },
+      "statusBanners": {
+        "requested": "The provider is reviewing your request. We will notify you as soon as it is approved.",
+        "paid": "Payment received. The provider will follow the selected schedule.",
+        "confirmed": "Your schedule is confirmed. Please prepare the location and anything relevant before the session starts.",
+        "inService": "The session is in progress. You can still send a message if anything else is needed.",
+        "cancelled": "This reservation has been cancelled. You can book a new schedule anytime.",
+        "rejected": "This request was declined. Try another slot or a different available provider.",
+        "expired": "This request expired because the payment was not completed in time."
+      }
+    },
+    "home": {
+      "emptyStateTitle": "No active schedule yet",
+      "emptyStateDescription": "Use the service catalog to start a new flow from discovery to booking.",
+      "emptyStateAction": "Explore services"
+    },
+    "serviceDetail": {
+      "highlightsTitle": "Highlights"
+    },
+    "professionalProfile": {
+      "storiesTitle": "Activity stories",
+      "portfolioStatsTitle": "Practice footprint",
+      "portfolioEntriesTitle": "Service portfolio",
+      "galleryTitle": "Practice gallery",
+      "testimonialsTitle": "Family testimonials",
+      "feedbackTitle": "Client feedback",
+      "credentialsTitle": "Certification and compliance",
+      "recentActivityTitle": "Recent activity",
+      "serviceSectionTitle": "Choose a service",
+      "availabilityLabel": "Availability",
+      "responseTimeLabel": "Response time",
+      "languagesLabel": "Languages",
+      "totalReviewsLabel": "total reviews",
+      "recommendationLabel": "Recommends",
+      "repeatClientsLabel": "Returning clients"
+    },
+    "explore": {
+      "sortOptions": {
+        "recommended": "Recommended",
+        "nearestDistance": "Nearest Distance",
+        "highestRating": "Highest Rating",
+        "lowestPrice": "Lowest Price"
+      },
+      "genderOptions": {
+        "any": "Any",
+        "female": "Female",
+        "male": "Male"
+      }
+    },
+    "review": {
+      "title": "Leave a Review",
+      "titleTemplate": "How was your session with {professionalName}?",
+      "helperText": "Your review helps us improve service quality.",
+      "photoLabel": "Add Photo (Optional)",
+      "photoButtonLabel": "Add",
+      "reviewLabel": "Tell us about your experience",
+      "reviewPlaceholder": "The service was very friendly and professional...",
+      "submitLabel": "Submit Review",
+      "uploadAlert": "Photo upload simulation",
+      "successAlert": "Review submitted successfully. Thank you for your feedback."
+    }
   },
   "Integration": {
     "eyebrow": "Backend Integration",

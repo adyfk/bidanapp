@@ -1,0 +1,72 @@
+[
+  {
+    "index": 1,
+    "id": "depok-sukmajaya",
+    "city": "Depok",
+    "district": "Sukmajaya",
+    "province": "Jawa Barat",
+    "label": "Depok, Sukmajaya",
+    "latitude": -6.3975,
+    "longitude": 106.8239
+  },
+  {
+    "index": 2,
+    "id": "depok-pancoran-mas",
+    "city": "Depok",
+    "district": "Pancoran Mas",
+    "province": "Jawa Barat",
+    "label": "Depok, Pancoran Mas",
+    "latitude": -6.4021,
+    "longitude": 106.8126
+  },
+  {
+    "index": 3,
+    "id": "jakarta-selatan-cilandak",
+    "city": "Jakarta Selatan",
+    "district": "Cilandak",
+    "province": "DKI Jakarta",
+    "label": "Jakarta Selatan, Cilandak",
+    "latitude": -6.2892,
+    "longitude": 106.7956
+  },
+  {
+    "index": 4,
+    "id": "jakarta-selatan-kebayoran-baru",
+    "city": "Jakarta Selatan",
+    "district": "Kebayoran Baru",
+    "province": "DKI Jakarta",
+    "label": "Jakarta Selatan, Kebayoran Baru",
+    "latitude": -6.2447,
+    "longitude": 106.7985
+  },
+  {
+    "index": 5,
+    "id": "bandung-soreang",
+    "city": "Bandung",
+    "district": "Soreang",
+    "province": "Jawa Barat",
+    "label": "Bandung, Soreang",
+    "latitude": -7.0346,
+    "longitude": 107.5185
+  },
+  {
+    "index": 6,
+    "id": "jakarta-barat-kembangan",
+    "city": "Jakarta Barat",
+    "district": "Kembangan",
+    "province": "DKI Jakarta",
+    "label": "Jakarta Barat, Kembangan",
+    "latitude": -6.1918,
+    "longitude": 106.7382
+  },
+  {
+    "index": 7,
+    "id": "depok-cimanggis",
+    "city": "Depok",
+    "district": "Cimanggis",
+    "province": "Jawa Barat",
+    "label": "Depok, Cimanggis",
+    "latitude": -6.3663,
+    "longitude": 106.877
+  }
+]

@@ -4,7 +4,7 @@ import { Camera, ChevronLeft, Star } from 'lucide-react';
 import Image from 'next/image';
 import { useId } from 'react';
 import { APP_CONFIG } from '@/lib/config';
-import { fillSimulationTemplate, SIMULATION_MESSAGES } from '@/lib/constants';
+import { useUiText } from '@/lib/ui-text';
 import type { Appointment } from '@/types/appointments';
 
 interface AppointmentReviewSheetProps {
@@ -32,6 +32,7 @@ export const AppointmentReviewSheet = ({
 }: AppointmentReviewSheetProps) => {
   const inputId = useId();
   const reviewTextId = useId();
+  const uiText = useUiText();
 
   return (
     <div className="fixed inset-y-0 left-1/2 z-[70] flex w-full max-w-md -translate-x-1/2 flex-col bg-white animate-in fade-in slide-in-from-bottom-4 duration-300">
@@ -39,7 +40,7 @@ export const AppointmentReviewSheet = ({
         <button type="button" onClick={onClose} className="mr-2 -ml-2 rounded-full p-2 hover:bg-gray-100">
           <ChevronLeft className="h-6 w-6 text-gray-800" />
         </button>
-        <h2 className="text-[17px] font-bold text-gray-900">{SIMULATION_MESSAGES.review.title}</h2>
+        <h2 className="text-[17px] font-bold text-gray-900">{uiText.review.title}</h2>
       </div>
 
       <div className="custom-scrollbar flex-1 overflow-y-auto p-5">
@@ -53,11 +54,9 @@ export const AppointmentReviewSheet = ({
             />
           </div>
           <h3 className="text-center text-[18px] font-bold leading-snug text-gray-900">
-            {fillSimulationTemplate(SIMULATION_MESSAGES.review.titleTemplate, {
-              professionalName: appointment.professional.name,
-            })}
+            {uiText.review.getTitleForProfessional(appointment.professional.name)}
           </h3>
-          <p className="mt-1 px-4 text-center text-[13px] text-gray-500">{SIMULATION_MESSAGES.review.helperText}</p>
+          <p className="mt-1 px-4 text-center text-[13px] text-gray-500">{uiText.review.helperText}</p>
         </div>
 
         <div className="mb-8 flex justify-center gap-2">
@@ -75,16 +74,14 @@ export const AppointmentReviewSheet = ({
 
         <div className="mb-6">
           <label htmlFor={inputId} className="mb-2 block text-[13px] font-bold text-gray-700">
-            {SIMULATION_MESSAGES.review.photoLabel}
+            {uiText.review.photoLabel}
           </label>
           <label
             htmlFor={inputId}
             className="flex h-[100px] w-[120px] cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 text-gray-400 transition-colors hover:border-gray-300 hover:bg-gray-50"
           >
             <Camera className="mb-2 h-6 w-6" />
-            <span className="text-[11px] font-medium">
-              {reviewPhotoName || SIMULATION_MESSAGES.review.photoButtonLabel}
-            </span>
+            <span className="text-[11px] font-medium">{reviewPhotoName || uiText.review.photoButtonLabel}</span>
           </label>
           <input
             id={inputId}
@@ -97,13 +94,13 @@ export const AppointmentReviewSheet = ({
 
         <div className="mb-6">
           <label htmlFor={reviewTextId} className="mb-2 block text-[13px] font-bold text-gray-700">
-            {SIMULATION_MESSAGES.review.reviewLabel}
+            {uiText.review.reviewLabel}
           </label>
           <textarea
             id={reviewTextId}
             value={reviewText}
             onChange={(event) => onUpdateReviewText(event.target.value)}
-            placeholder={SIMULATION_MESSAGES.review.reviewPlaceholder}
+            placeholder={uiText.review.reviewPlaceholder}
             className="h-32 w-full resize-none rounded-2xl border border-gray-200 bg-gray-50 p-4 text-[14px] text-gray-800 transition-all focus:border-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-100"
           />
         </div>
@@ -121,7 +118,7 @@ export const AppointmentReviewSheet = ({
           }`}
           style={{ backgroundColor: rating > 0 ? APP_CONFIG.colors.primary : undefined }}
         >
-          {SIMULATION_MESSAGES.review.submitLabel}
+          {uiText.review.submitLabel}
         </button>
       </div>
     </div>

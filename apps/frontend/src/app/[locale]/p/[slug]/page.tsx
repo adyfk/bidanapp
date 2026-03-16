@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ProfessionalDetailScreen } from '@/components/screens/ProfessionalDetailScreen';
 import { APP_CONFIG } from '@/lib/config';
-import { getCategoryById, getProfessionalBySlug } from '@/lib/constants';
+import { getProfessionalBySlug, getProfessionalCategoryLabel } from '@/lib/mock-db/catalog';
 
 interface Props {
   params: Promise<{
@@ -20,7 +20,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     };
   }
 
-  const profCategory = getCategoryById(professional.categoryId)?.name || 'Professional';
+  const profCategory = getProfessionalCategoryLabel(professional) || 'Professional';
 
   return {
     title: `${professional.name} - ${profCategory} | ${APP_CONFIG.appName}`,

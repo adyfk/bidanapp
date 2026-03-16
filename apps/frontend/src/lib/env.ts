@@ -1,7 +1,4 @@
-import settingsData from '@/data/simulation/settings.json';
-import type { AppSettingsFile } from '@/types/settings';
-
-const settings = settingsData as AppSettingsFile;
+import { APP_BRANDING } from '@/lib/app-config';
 
 type PublicEnv = {
   appVersion: string;
@@ -19,7 +16,7 @@ function loadPublicEnv(): PublicEnv {
 
   return {
     appVersion: readText('NEXT_PUBLIC_APP_VERSION', 'dev'),
-    siteUrl: readUrl('NEXT_PUBLIC_SITE_URL', settings.branding.baseUrl),
+    siteUrl: readUrl('NEXT_PUBLIC_SITE_URL', APP_BRANDING.baseUrl),
     apiBaseUrl: readUrl('NEXT_PUBLIC_API_BASE_URL', 'http://localhost:8080/api/v1'),
     nodeEnv,
     isDevelopment: nodeEnv === 'development',

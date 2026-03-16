@@ -1,0 +1,146 @@
+[
+  {
+    "id": "professional-feedback-metric-6-1",
+    "index": 1,
+    "label": "Kejelasan edukasi",
+    "value": "4.9/5",
+    "detail": "Bahasa sederhana, mudah dipraktikkan, dan ada ringkasan setelah sesi",
+    "professionalId": "6"
+  },
+  {
+    "id": "professional-feedback-metric-6-2",
+    "index": 2,
+    "label": "Kecepatan follow-up",
+    "value": "4.8/5",
+    "detail": "Konsisten membalas pertanyaan lanjutan di hari yang sama",
+    "professionalId": "6"
+  },
+  {
+    "id": "professional-feedback-metric-6-3",
+    "index": 3,
+    "label": "Empati sesi",
+    "value": "5.0/5",
+    "detail": "Klien merasa tenang karena pendekatan suportif dan tidak menyalahkan",
+    "professionalId": "6"
+  },
+  {
+    "id": "professional-feedback-metric-1-1",
+    "index": 1,
+    "label": "Kebersihan tindakan",
+    "value": "5.0/5",
+    "detail": "Proses steril dan briefing alat konsisten diapresiasi keluarga",
+    "professionalId": "1"
+  },
+  {
+    "id": "professional-feedback-metric-1-2",
+    "index": 2,
+    "label": "Ketenangan bayi",
+    "value": "4.9/5",
+    "detail": "Bayi lebih mudah settle selama dan setelah sesi",
+    "professionalId": "1"
+  },
+  {
+    "id": "professional-feedback-metric-1-3",
+    "index": 3,
+    "label": "Edukasi keluarga",
+    "value": "4.9/5",
+    "detail": "Instruksi sederhana untuk ayah, ibu, dan pengasuh di rumah",
+    "professionalId": "1"
+  },
+  {
+    "id": "professional-feedback-metric-4-1",
+    "index": 1,
+    "label": "Kejelasan rencana harian",
+    "value": "4.8/5",
+    "detail": "Monitoring ibu dan bayi mudah diikuti keluarga",
+    "professionalId": "4"
+  },
+  {
+    "id": "professional-feedback-metric-4-2",
+    "index": 2,
+    "label": "Pendekatan suportif",
+    "value": "4.9/5",
+    "detail": "Komunikasi hangat saat keluarga sedang lelah dan sensitif",
+    "professionalId": "4"
+  },
+  {
+    "id": "professional-feedback-metric-4-3",
+    "index": 3,
+    "label": "Pemahaman kondisi ibu",
+    "value": "4.8/5",
+    "detail": "Saran pemulihan realistis sesuai kapasitas rumah tangga",
+    "professionalId": "4"
+  },
+  {
+    "id": "professional-feedback-metric-3-1",
+    "index": 1,
+    "label": "Kejelasan instruksi",
+    "value": "4.9/5",
+    "detail": "Latihan dibagi menjadi langkah kecil yang mudah diikuti keluarga",
+    "professionalId": "3"
+  },
+  {
+    "id": "professional-feedback-metric-3-2",
+    "index": 2,
+    "label": "Progress tracking",
+    "value": "4.8/5",
+    "detail": "Target mingguan dan evaluasi video membuat progres terasa nyata",
+    "professionalId": "3"
+  },
+  {
+    "id": "professional-feedback-metric-3-3",
+    "index": 3,
+    "label": "Keamanan latihan",
+    "value": "5.0/5",
+    "detail": "Keluarga merasa lebih aman melakukan transfer dan latihan di rumah",
+    "professionalId": "3"
+  },
+  {
+    "id": "professional-feedback-metric-2-1",
+    "index": 1,
+    "label": "Kebersihan setup",
+    "value": "4.9/5",
+    "detail": "Poin paling sering disebut adalah sterilitas alat dan area tindakan",
+    "professionalId": "2"
+  },
+  {
+    "id": "professional-feedback-metric-2-2",
+    "index": 2,
+    "label": "Kenyamanan sesi",
+    "value": "4.8/5",
+    "detail": "Klien merasa ritme tindakan tenang dan komunikatif",
+    "professionalId": "2"
+  },
+  {
+    "id": "professional-feedback-metric-2-3",
+    "index": 3,
+    "label": "After-care guidance",
+    "value": "4.7/5",
+    "detail": "Instruksi pasca tindakan mudah diikuti untuk recovery di rumah",
+    "professionalId": "2"
+  },
+  {
+    "id": "professional-feedback-metric-5-1",
+    "index": 1,
+    "label": "Efisiensi sesi",
+    "value": "4.7/5",
+    "detail": "Klien menghargai sesi singkat yang tetap terasa efektif",
+    "professionalId": "5"
+  },
+  {
+    "id": "professional-feedback-metric-5-2",
+    "index": 2,
+    "label": "Kenyamanan mobile visit",
+    "value": "4.6/5",
+    "detail": "Setup rapi dan tidak merepotkan ruang rumah klien",
+    "professionalId": "5"
+  },
+  {
+    "id": "professional-feedback-metric-5-3",
+    "index": 3,
+    "label": "After-work recovery",
+    "value": "4.8/5",
+    "detail": "Keluhan bahu, leher, dan kaki terasa lebih ringan setelah sesi",
+    "professionalId": "5"
+  }
+]

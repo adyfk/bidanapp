@@ -6,8 +6,10 @@ import { useTranslations } from 'next-intl';
 import { Suspense, useState } from 'react';
 import { ProfessionalCard } from '@/components/ui/ProfessionalCard';
 import { APP_CONFIG } from '@/lib/config';
-import { MOCK_CATEGORIES, MOCK_PROFESSIONALS, SIMULATION_MESSAGES, SIMULATION_SHARED } from '@/lib/constants';
+import { getProfessionalCategoryLabel, MOCK_PROFESSIONALS } from '@/lib/mock-db/catalog';
+import { ACTIVE_USER_CONTEXT } from '@/lib/mock-db/runtime';
 import { professionalRoute } from '@/lib/routes';
+import { useUiText } from '@/lib/ui-text';
 
 // Extract the core component into a separate function to wrap it with Suspense
 const ExploreContent = () => {
@@ -18,21 +20,23 @@ const ExploreContent = () => {
   const [activeFilter, setActiveFilter] = useState<string>('all');
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const t = useTranslations('Explore');
+  const uiText = useUiText();
 
   // Filter professionals based on search query and active filter
   const filteredProfessionals = MOCK_PROFESSIONALS.filter((prof) => {
-    const categoryName = MOCK_CATEGORIES.find((c) => c.id === prof.categoryId)?.name || '';
+    const categoryName = getProfessionalCategoryLabel(prof).toLowerCase();
+    const query = searchQuery.toLowerCase();
 
     // Search match
     const matchesSearch =
-      prof.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      categoryName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      prof.location.toLowerCase().includes(searchQuery.toLowerCase());
+      prof.name.toLowerCase().includes(query) ||
+      categoryName.includes(query) ||
+      prof.location.toLowerCase().includes(query);
 
     // Filter match
     let matchesFilter = true;
     if (activeFilter === 'top_rated') matchesFilter = prof.rating >= 4.8;
-    if (activeFilter === 'available') matchesFilter = true; // Assuming all mock are available for now
+    if (activeFilter === 'available') matchesFilter = prof.availability.isAvailable;
 
     return matchesSearch && matchesFilter;
   });
@@ -46,11 +50,11 @@ const ExploreContent = () => {
         {/* Header Sticky */}
         <div className="px-6 pt-14 pb-4 sticky top-0 z-20" style={{ backgroundColor: APP_CONFIG.colors.bgLight }}>
           <h1 className="text-[22px] font-bold text-gray-900 mb-1">
-            {t('title', { professional: APP_CONFIG.terms.professional })}
+            {t('title', { professional: uiText.terms.professional })}
           </h1>
           <div className="flex items-center text-sm font-medium" style={{ color: APP_CONFIG.colors.textMuted }}>
             <MapPin className="w-4 h-4 mr-1" style={{ color: APP_CONFIG.colors.primary }} />
-            {SIMULATION_SHARED.currentArea} <span className="ml-2 text-xs opacity-70">({t('yourLocation')})</span>
+            {ACTIVE_USER_CONTEXT.currentArea} <span className="ml-2 text-xs opacity-70">({t('yourLocation')})</span>
           </div>
         </div>
 
@@ -61,7 +65,7 @@ const ExploreContent = () => {
               <Search className="w-5 h-5 text-gray-400 mr-2" />
               <input
                 type="text"
-                placeholder={t('searchPlaceholder', { professional: APP_CONFIG.terms.professional.toLowerCase() })}
+                placeholder={t('searchPlaceholder', { professional: uiText.terms.professional.toLowerCase() })}
                 className="bg-transparent border-none outline-none text-sm w-full text-gray-700 placeholder:text-gray-400"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -160,7 +164,7 @@ const ExploreContent = () => {
 
             <div className="flex items-center justify-between px-6 pb-4 pt-2 border-b border-gray-100">
               <h2 className="text-xl font-bold text-gray-900">
-                {t('filterTitle', { professional: APP_CONFIG.terms.professional })}
+                {t('filterTitle', { professional: uiText.terms.professional })}
               </h2>
               <button
                 type="button"
@@ -176,13 +180,13 @@ const ExploreContent = () => {
               <div className="space-y-4">
                 <h3 className="font-bold text-gray-900 text-[15px]">{t('sortBy')}</h3>
                 <div className="space-y-3">
-                  {SIMULATION_MESSAGES.exploreSortOptions.map((sortType) => (
+                  {uiText.exploreSortOptions.map((sortType) => (
                     <button key={sortType} type="button" className="flex w-full items-center justify-between group">
                       <span className="text-[14px] text-gray-700 font-medium group-hover:text-gray-900">
                         {sortType}
                       </span>
                       <div className="w-5 h-5 rounded-full border border-gray-300 flex items-center justify-center">
-                        {sortType === SIMULATION_MESSAGES.exploreSortOptions[0] && (
+                        {sortType === uiText.exploreSortOptions[0] && (
                           <div
                             className="w-3 h-3 rounded-full"
                             style={{ backgroundColor: APP_CONFIG.colors.primary }}
@@ -198,17 +202,17 @@ const ExploreContent = () => {
               <div className="space-y-4">
                 <h3 className="font-bold text-gray-900 text-[15px]">{t('genderPreference')}</h3>
                 <div className="flex gap-3">
-                  {SIMULATION_MESSAGES.exploreGenderOptions.map((gender) => (
+                  {uiText.exploreGenderOptions.map((gender) => (
                     <button
                       type="button"
                       key={gender}
                       className={`flex-1 py-3 rounded-xl text-[13px] font-bold border transition-all ${
-                        gender === SIMULATION_MESSAGES.exploreGenderOptions[0]
+                        gender === uiText.exploreGenderOptions[0]
                           ? 'bg-gray-50 border-gray-200 text-gray-900'
                           : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
                       }`}
                       style={
-                        gender === SIMULATION_MESSAGES.exploreGenderOptions[0]
+                        gender === uiText.exploreGenderOptions[0]
                           ? {
                               borderColor: APP_CONFIG.colors.primary,
                               color: APP_CONFIG.colors.primary,

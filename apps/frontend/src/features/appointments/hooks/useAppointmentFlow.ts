@@ -2,12 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ACTIVE_APPOINTMENT_STATUSES, HISTORY_APPOINTMENT_STATUSES } from '@/features/appointments/lib/status';
-import {
-  fillSimulationTemplate,
-  getAppointmentChatThread,
-  MOCK_APPOINTMENTS,
-  SIMULATION_MESSAGES,
-} from '@/lib/constants';
+import { MOCK_APPOINTMENTS } from '@/lib/mock-db/appointments';
+import { getAppointmentChatThread } from '@/lib/mock-db/chat';
+import { useUiText } from '@/lib/ui-text';
 import type { Appointment, AppointmentStatus } from '@/types/appointments';
 import type { ChatMessage } from '@/types/chat';
 
@@ -26,16 +23,17 @@ const formatMessageTime = () =>
     minute: '2-digit',
   });
 
-const createFallbackChatSession = (appointment: Appointment): AppointmentChatSession => ({
-  dayLabel: SIMULATION_MESSAGES.appointmentChatDayLabel,
-  inputPlaceholder: SIMULATION_MESSAGES.appointmentChatInputPlaceholder,
-  autoReplyText: SIMULATION_MESSAGES.chatAutoReply,
+const createFallbackChatSession = (
+  appointment: Appointment,
+  uiText: ReturnType<typeof useUiText>,
+): AppointmentChatSession => ({
+  dayLabel: uiText.appointmentChatDayLabel,
+  inputPlaceholder: uiText.appointmentChatInputPlaceholder,
+  autoReplyText: uiText.chatAutoReply,
   messages: [
     {
       id: Number(`${Date.now()}${appointment.id.slice(-2).padStart(2, '0')}`),
-      text: fillSimulationTemplate(SIMULATION_MESSAGES.appointmentWelcomeTemplate, {
-        serviceName: appointment.service.name,
-      }),
+      text: uiText.getAppointmentWelcomeMessage(appointment.service.name),
       sender: 'professional',
       time: '10:41',
       isRead: true,
@@ -43,7 +41,7 @@ const createFallbackChatSession = (appointment: Appointment): AppointmentChatSes
   ],
 });
 
-const buildInitialChatState = () =>
+const buildInitialChatState = (uiText: ReturnType<typeof useUiText>) =>
   Object.fromEntries(
     MOCK_APPOINTMENTS.map((appointment) => {
       const existingThread = getAppointmentChatThread(appointment.id);
@@ -54,15 +52,16 @@ const buildInitialChatState = () =>
           ? {
               dayLabel: existingThread.dayLabel,
               inputPlaceholder: existingThread.inputPlaceholder,
-              autoReplyText: existingThread.autoReplyText || SIMULATION_MESSAGES.chatAutoReply,
+              autoReplyText: existingThread.autoReplyText || uiText.chatAutoReply,
               messages: existingThread.messages,
             }
-          : createFallbackChatSession(appointment),
+          : createFallbackChatSession(appointment, uiText),
       ] as const;
     }),
   ) as Record<string, AppointmentChatSession>;
 
 export const useAppointmentFlow = (initialSelectedAppointmentId: string | null = null) => {
+  const uiText = useUiText();
   const [activeTab, setActiveTab] = useState<AppointmentTab>('active');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | null>(initialSelectedAppointmentId);
@@ -74,7 +73,9 @@ export const useAppointmentFlow = (initialSelectedAppointmentId: string | null =
   const [reviewPhotoName, setReviewPhotoName] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [statusOverrides, setStatusOverrides] = useState<Record<string, AppointmentStatus>>({});
-  const [chatSessions, setChatSessions] = useState<Record<string, AppointmentChatSession>>(buildInitialChatState);
+  const [chatSessions, setChatSessions] = useState<Record<string, AppointmentChatSession>>(() =>
+    buildInitialChatState(uiText),
+  );
   const timeoutIdsRef = useRef<number[]>([]);
 
   useEffect(() => {
@@ -122,7 +123,7 @@ export const useAppointmentFlow = (initialSelectedAppointmentId: string | null =
   const selectedChatSession =
     selectedAppointment === null
       ? null
-      : chatSessions[selectedAppointment.id] || createFallbackChatSession(selectedAppointment);
+      : chatSessions[selectedAppointment.id] || createFallbackChatSession(selectedAppointment, uiText);
 
   const selectAppointment = (appointmentId: string) => {
     setSelectedAppointmentId(appointmentId);
@@ -163,14 +164,14 @@ export const useAppointmentFlow = (initialSelectedAppointmentId: string | null =
       ...current,
       [selectedAppointment.id]: 'paid',
     }));
-    setNotice(SIMULATION_MESSAGES.paymentSuccessAlert);
+    setNotice(uiText.paymentSuccessAlert);
   };
 
   const selectReviewPhoto = (fileName: string | null) => {
     setReviewPhotoName(fileName);
 
     if (fileName) {
-      setNotice(`Foto review siap diunggah: ${fileName}`);
+      setNotice(uiText.getReviewPhotoReadyNotice(fileName));
     }
   };
 
@@ -196,7 +197,7 @@ export const useAppointmentFlow = (initialSelectedAppointmentId: string | null =
       },
     }));
     setChatInput('');
-    setNotice(SIMULATION_MESSAGES.chatSentAlert);
+    setNotice(uiText.chatSentAlert);
 
     const timeoutId = window.setTimeout(() => {
       setChatSessions((current) => {
@@ -232,11 +233,7 @@ export const useAppointmentFlow = (initialSelectedAppointmentId: string | null =
       return;
     }
 
-    setNotice(
-      reviewPhotoName
-        ? `${SIMULATION_MESSAGES.review.successAlert} Foto: ${reviewPhotoName}.`
-        : SIMULATION_MESSAGES.review.successAlert,
-    );
+    setNotice(uiText.getReviewSuccessNotice(reviewPhotoName));
     setIsReviewOpen(false);
     setReviewText('');
     setRating(0);

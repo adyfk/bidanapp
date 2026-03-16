@@ -14,7 +14,7 @@ The codebase is designed around a few deliberate boundaries:
 
 The current implementation is transitional by design:
 
-- product data is still largely simulation-backed
+- product data is still largely mock-db-backed
 - backend persistence is only partially prepared
 - chat websocket integration exists today, but persistent message storage does not yet power it
 
@@ -29,7 +29,7 @@ This is acceptable as long as those boundaries remain explicit.
 │   │   ├── src/app              # localized App Router entrypoints
 │   │   ├── src/components       # screens, layout, and shared UI pieces
 │   │   ├── src/features         # feature-level sections and hooks
-│   │   ├── src/lib              # config, env, routes, backend helpers, simulation adapters
+│   │   ├── src/lib              # config, env, routes, backend helpers, mock-db adapters
 │   │   ├── src/i18n             # locale routing and request helpers
 │   │   └── tests                # frontend smoke tests
 │   └── backend
@@ -62,7 +62,7 @@ Browser
   -> Next.js frontend
   -> @bidanapp/sdk
   -> Go backend
-  -> simulation JSON today
+  -> mock-db JSON today
   -> PostgreSQL and Redis later
 ```
 
@@ -84,7 +84,7 @@ The frontend owns:
 - page composition
 - screen containers
 - reusable UI primitives
-- frontend-only simulation hydration
+- frontend-only mock-db hydration
 - integration diagnostics screen
 - public runtime configuration
 
@@ -117,11 +117,10 @@ The backend owns:
 The backend currently exposes:
 
 - health and service metadata
-- settings
 - catalog
 - professionals list and detail
 - appointments
-- chat thread data from simulation JSON
+- chat thread data from shared mock-db tables
 - websocket chat handshake
 
 The backend is implemented using:
@@ -129,7 +128,7 @@ The backend is implemented using:
 - standard-library HTTP primitives
 - Huma for route registration and OpenAPI
 - middleware chain around `http.ServeMux`
-- simulation file readers for current business payloads
+- mock-db table readers for current business payloads
 
 ## 6. Contract And SDK Flow
 
@@ -182,8 +181,8 @@ The system currently mixes two realities:
 
 ### Live today
 
-- frontend reads simulation content for most product screens
-- backend reads the same simulation dataset for demo and contract alignment
+- frontend reads mock-db content for most product screens
+- backend reads the same mock-db dataset for demo and contract alignment
 - websocket chat works in-memory for FE/BE integration
 
 ### Prepared for next phase
@@ -205,7 +204,7 @@ For a professionals page backed by the backend:
 2. frontend creates a typed client from `@bidanapp/sdk`
 3. frontend calls a generated path method such as `GET /professionals`
 4. backend route registered through Huma serves the request
-5. simulation service reads `catalog.json`
+5. backend mock-db reader hydrates the relevant table set
 6. response is returned inside a stable `{ data: ... }` envelope
 7. frontend adapter or screen renders the normalized result
 

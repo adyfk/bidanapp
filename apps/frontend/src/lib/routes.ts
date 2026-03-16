@@ -12,18 +12,6 @@ export function professionalRoute(slug: string): Route {
   return `/p/${slug}` as Route;
 }
 
-export function serviceRoute(slug: string): Route {
-  return `/s/${slug}` as Route;
-}
-
-export function appointmentActivityRoute(id: string): Route {
-  return `/activity/${id}` as Route;
-}
-
-export function appointmentChatRoute(id: string): Route {
-  return `/appointments/${id}` as Route;
-}
-
 export function exploreRoute(params: { category?: string; q?: string } = {}): Route {
   const query = new URLSearchParams();
 

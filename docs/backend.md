@@ -77,7 +77,7 @@ Configuration validation covers:
 - port and timeouts
 - max header bytes
 - CORS origins
-- simulation data directory existence
+- mock-db data directory existence
 - database URL shape
 - Redis URL shape
 - log level and log format
@@ -149,13 +149,12 @@ Current route:
 
 Purpose:
 
-- serve settings, catalog, professionals, appointments, and chat data from simulation JSON
+- serve catalog, professionals, appointments, and chat data from shared mock-db tables
 - act as a bridge while persistent storage is not yet the main source
 - keep FE and BE aligned around shared demo payloads
 
 Current routes:
 
-- `GET /api/v1/settings`
 - `GET /api/v1/catalog`
 - `GET /api/v1/professionals`
 - `GET /api/v1/professionals/{slug}`

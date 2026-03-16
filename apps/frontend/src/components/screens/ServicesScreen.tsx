@@ -7,14 +7,16 @@ import { useState } from 'react';
 import { IconButton } from '@/components/ui/IconButton';
 import { useRouter } from '@/i18n/routing';
 import { APP_CONFIG } from '@/lib/config';
-import { MOCK_CATEGORIES, MOCK_PROFESSIONALS, MOCK_SERVICES } from '@/lib/constants';
+import { MOCK_CATEGORIES, MOCK_PROFESSIONALS, MOCK_SERVICES } from '@/lib/mock-db/catalog';
 import { exploreRoute } from '@/lib/routes';
+import { useUiText } from '@/lib/ui-text';
 
 export const ServicesScreen = () => {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>('All');
   const t = useTranslations('Services');
+  const uiText = useUiText();
 
   // Helper functions for ranges
   const parseDuration = (d?: string) => {
@@ -87,7 +89,7 @@ export const ServicesScreen = () => {
       <div className="flex items-center justify-between px-4 pt-14 pb-4 bg-white sticky top-0 z-20 shadow-sm">
         <IconButton icon={<ChevronLeft className="w-6 h-6 text-gray-800" />} onClick={() => router.back()} />
         <h1 className="text-[16px] font-bold text-gray-900 tracking-wide">
-          {t('globalTitle', { service: APP_CONFIG.terms.service })}
+          {t('globalTitle', { service: uiText.terms.service })}
         </h1>
         <div className="w-10" /> {/* Spacer for centering */}
       </div>
@@ -98,7 +100,7 @@ export const ServicesScreen = () => {
           <Search className="w-5 h-5 text-gray-400 mr-2" />
           <input
             type="text"
-            placeholder={t('searchPlaceholder', { service: APP_CONFIG.terms.service.toLowerCase() })}
+            placeholder={t('searchPlaceholder', { service: uiText.terms.service.toLowerCase() })}
             className="bg-transparent border-none outline-none text-sm w-full text-gray-700 placeholder:text-gray-400"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -168,7 +170,7 @@ export const ServicesScreen = () => {
                         className="text-[11px] font-bold uppercase tracking-wide"
                         style={{ color: APP_CONFIG.colors.primary }}
                       >
-                        {svc.badge}
+                        {svc.categoryName}
                       </p>
                     </div>
                   </div>
@@ -199,7 +201,6 @@ export const ServicesScreen = () => {
                     <Tag className="w-4 h-4 mr-1.5 opacity-50" />
                     {formatPriceRange(svc.providers.map((p) => p.price))}
                   </div>
-                  <div className="ml-auto text-[12px] font-semibold text-gray-500">{svc.categoryName}</div>
                 </div>
               </div>
             ))}

@@ -7,6 +7,7 @@ import type { ProfessionalTrustIndicator } from '@/features/professional-detail/
 import { Link } from '@/i18n/routing';
 import { APP_CONFIG } from '@/lib/config';
 import { APP_ROUTES } from '@/lib/routes';
+import { useUiText } from '@/lib/ui-text';
 import type { Professional } from '@/types/catalog';
 
 interface ProfessionalHeroSectionProps {
@@ -24,6 +25,8 @@ export const ProfessionalHeroSection = ({
   totalReviewsLabel,
   trustIndicators,
 }: ProfessionalHeroSectionProps) => {
+  const uiText = useUiText();
+
   return (
     <>
       <div className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[520px] overflow-hidden">
@@ -111,14 +114,14 @@ export const ProfessionalHeroSection = ({
                 <CalendarDays className="mr-1.5 h-4 w-4" style={{ color: APP_CONFIG.colors.primary }} />
                 {professional.experience}
               </div>
-              <span className="text-[11px] font-medium text-gray-400">{APP_CONFIG.terms.experience}</span>
+              <span className="text-[11px] font-medium text-gray-400">{uiText.terms.experience}</span>
             </div>
             <div className="flex flex-col items-center rounded-[20px] bg-gray-50 px-3 py-4 text-center">
               <div className="mb-1.5 flex items-center text-[15px] font-bold text-gray-900">
                 <Users className="mr-1.5 h-4 w-4" style={{ color: APP_CONFIG.colors.primary }} />
                 {professional.clientsServed}
               </div>
-              <span className="text-[11px] font-medium text-gray-400">{APP_CONFIG.terms.patients}</span>
+              <span className="text-[11px] font-medium text-gray-400">{uiText.terms.patients}</span>
             </div>
             <div className="flex flex-col items-center rounded-[20px] bg-gray-50 px-3 py-4 text-center">
               <div className="mb-1.5 flex items-center text-[15px] font-bold text-gray-900">

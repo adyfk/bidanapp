@@ -72,7 +72,7 @@ npm run dev:backend
 - Backend is the API contract source of truth through Huma.
 - `packages/sdk` is the FE-facing transport boundary for generated types, typed REST, realtime helpers, and adapters.
 - Frontend navigation is localized through `next-intl` and `@/i18n/routing`.
-- Atlas schema and migrations are prepared for future persistence, while some flows still run on simulation data today.
+- Atlas schema and migrations are prepared for future persistence, while the frontend still uses normalized `mock-db` seed tables for dummy domain data today.
 - Validation is local-first: `npm run ci:check` is the canonical preflight before commit or PR.
 - The repository no longer ships a self-hosted Git platform stack. CI/CD can be attached later to any provider that runs the same local commands.
 

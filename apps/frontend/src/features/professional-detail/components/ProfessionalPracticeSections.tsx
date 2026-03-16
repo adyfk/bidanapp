@@ -8,6 +8,7 @@ import {
   professionalSectionClassName,
 } from '@/features/professional-detail/components/ProfessionalSectionTitle';
 import { APP_CONFIG } from '@/lib/config';
+import { useUiText } from '@/lib/ui-text';
 import type { Professional } from '@/types/catalog';
 
 interface ProfessionalPracticeSectionsProps {
@@ -26,6 +27,7 @@ export const ProfessionalPracticeSections = ({
   professional,
 }: ProfessionalPracticeSectionsProps) => {
   const t = useTranslations('Professional');
+  const uiText = useUiText();
 
   return (
     <>
@@ -74,7 +76,7 @@ export const ProfessionalPracticeSections = ({
       <section className={professionalSectionClassName}>
         <ProfessionalSectionTitle
           icon={<User className="h-4 w-4" />}
-          title={t('about', { professional: APP_CONFIG.terms.professional })}
+          title={t('about', { professional: uiText.terms.professional })}
         />
         <p className="text-[13px] leading-relaxed text-gray-500">{professional.about}</p>
         <div className="mt-4 flex flex-wrap gap-2">

@@ -34,9 +34,9 @@ func loadFromAppRoot(appRoot string) (Config, error) {
 	}
 
 	environment := envOrDefault("APP_ENV", defaultEnvironment)
-	simulationDataDir, err := resolveDir(appRoot, envOrDefault("SIMULATION_DATA_DIR", filepath.Join(appRoot, "../frontend/src/data/simulation")))
+	mockDBDataDir, err := resolveDir(appRoot, envOrDefault("MOCK_DB_DIR", filepath.Join(appRoot, "../frontend/src/data/mock-db")))
 	if err != nil {
-		return Config{}, fmt.Errorf("resolve simulation data dir: %w", err)
+		return Config{}, fmt.Errorf("resolve mock db dir: %w", err)
 	}
 
 	httpPort, err := envIntOrDefault("HTTP_PORT", 8080)
@@ -95,8 +95,8 @@ func loadFromAppRoot(appRoot string) (Config, error) {
 		CORS: CORSConfig{
 			AllowedOrigins: allowedOrigins,
 		},
-		Simulation: SimulationConfig{
-			DataDir: simulationDataDir,
+		MockDB: MockDBConfig{
+			DataDir: mockDBDataDir,
 		},
 		Database: DatabaseConfig{
 			URL: envOrDefault("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/bidanapp?sslmode=disable"),
@@ -178,10 +178,10 @@ func (c *Config) validate() error {
 		c.CORS.AllowedOrigins[index] = normalized
 	}
 
-	if info, err := os.Stat(c.Simulation.DataDir); err != nil {
-		issues = append(issues, fmt.Sprintf("SIMULATION_DATA_DIR must point to an existing directory (got %q)", c.Simulation.DataDir))
+	if info, err := os.Stat(c.MockDB.DataDir); err != nil {
+		issues = append(issues, fmt.Sprintf("MOCK_DB_DIR must point to an existing directory (got %q)", c.MockDB.DataDir))
 	} else if !info.IsDir() {
-		issues = append(issues, fmt.Sprintf("SIMULATION_DATA_DIR must be a directory (got %q)", c.Simulation.DataDir))
+		issues = append(issues, fmt.Sprintf("MOCK_DB_DIR must be a directory (got %q)", c.MockDB.DataDir))
 	}
 
 	if err := validateURL("DATABASE_URL", c.Database.URL); err != nil {

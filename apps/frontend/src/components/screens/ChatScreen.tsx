@@ -17,12 +17,9 @@ import { useEffect, useRef, useState } from 'react';
 import { IconButton } from '@/components/ui/IconButton';
 import { useRouter } from '@/i18n/routing';
 import { APP_CONFIG } from '@/lib/config';
-import {
-  getChatThreadByProfessionalSlug,
-  MOCK_PROFESSIONALS,
-  SIMULATION_CHAT_THREADS,
-  SIMULATION_SHARED,
-} from '@/lib/constants';
+import { MOCK_PROFESSIONALS } from '@/lib/mock-db/catalog';
+import { CHAT_THREADS, getChatThreadByProfessionalSlug } from '@/lib/mock-db/chat';
+import { ACTIVE_USER_CONTEXT } from '@/lib/mock-db/runtime';
 import { professionalRoute } from '@/lib/routes';
 import type { ChatMessage } from '@/types/chat';
 
@@ -33,7 +30,7 @@ export const ChatScreen = ({ professionalId }: { professionalId: string }) => {
 
   // Fallback to first professional if ID not found for demo purposes
   const professional = MOCK_PROFESSIONALS.find((p) => p.slug === professionalId) || MOCK_PROFESSIONALS[0];
-  const chatThread = getChatThreadByProfessionalSlug(professional.slug) || SIMULATION_CHAT_THREADS[0];
+  const chatThread = getChatThreadByProfessionalSlug(professional.slug) || CHAT_THREADS[0];
   const [messages, setMessages] = useState(chatThread.messages);
 
   useEffect(() => {
@@ -103,7 +100,7 @@ export const ChatScreen = ({ professionalId }: { professionalId: string }) => {
             <div className="flex flex-col flex-1 min-w-0 pr-2">
               <h2 className="text-[16px] font-bold text-gray-900 leading-tight truncate">{professional.name}</h2>
               <span className="text-[12px] text-green-500 font-medium leading-none mt-1">
-                {SIMULATION_SHARED.onlineStatusLabel}
+                {ACTIVE_USER_CONTEXT.onlineStatusLabel}
               </span>
             </div>
           </div>

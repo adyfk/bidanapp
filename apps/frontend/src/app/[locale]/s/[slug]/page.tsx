@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ServiceDetailScreen } from '@/components/screens/ServiceDetailScreen';
 import { APP_CONFIG } from '@/lib/config';
-import { getServiceBySlug, MOCK_SERVICES } from '@/lib/constants';
+import { getServiceBySlug, MOCK_SERVICES } from '@/lib/mock-db/catalog';
 
 interface Props {
   params: Promise<{

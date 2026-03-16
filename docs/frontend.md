@@ -30,9 +30,9 @@ apps/frontend/src
 │   ├── backend-integration
 │   ├── professional-detail
 │   └── service-detail
-├── data/simulation            # JSON source for simulation-backed domains
+├── data/mock-db               # normalized dummy data tables before PostgreSQL
 ├── i18n                       # next-intl locale routing and request helpers
-├── lib                        # config, env, routes, simulation adapters, backend helpers
+├── lib                        # config, env, routes, mock-db adapters, backend helpers
 ├── messages                   # localized message catalogs
 └── types                      # TypeScript app-specific types
 ```
@@ -126,22 +126,23 @@ If a component becomes page-aware, it probably belongs in `components/screens` o
 
 The frontend currently consumes data from two sources:
 
-### Simulation-backed content
+### Mock-db content
 
-Simulation files live under `src/data/simulation`:
+Normalized table seeds live under `src/data/mock-db`:
 
-- `settings.json`
-- `catalog.json`
+- `services.json`
+- `professionals.json`
 - `appointments.json`
-- `chat.json`
-- `ui.json`
+- `chat_threads.json`
+- `chat_messages.json`
+- and related relation/reference tables
 
-Simulation adapters live under `src/lib/simulation`:
+Frontend hydration lives under `src/lib/mock-db`:
 
 - `catalog.ts`
 - `appointments.ts`
 - `chat.ts`
-- `ui.ts`
+- `runtime.ts`
 - `utils.ts`
 
 Use these when the screen is still fully frontend-owned and not yet migrated to live backend data.
@@ -163,7 +164,7 @@ The integration example page at `/[locale]/examples/backend` is the reference im
 
 ## 8. Runtime Configuration
 
-Frontend public env values are loaded in `src/lib/env.ts` and composed with simulation settings in `src/lib/config.ts`.
+Frontend public env values are loaded in `src/lib/env.ts` and composed with code-level app config in `src/lib/config.ts`.
 
 Important runtime values:
 
@@ -173,13 +174,13 @@ Important runtime values:
 
 `APP_CONFIG` combines:
 
-- branding and content defaults from simulation settings
+- branding and theme constants from code
 - deployment-specific public env values
 
 This split is important:
 
 - env controls environment-specific values
-- simulation settings control product content defaults
+- code constants control product defaults that are not domain data
 
 ## 9. Styling And UI Notes
 
@@ -218,7 +219,7 @@ The smoke test runs a real Next.js dev server, so it is slower than a pure unit 
 
 Recommended checklist:
 
-1. Decide whether the feature is simulation-backed, SDK-backed, or mixed.
+1. Decide whether the feature is mock-db-backed, SDK-backed, or mixed.
 2. Add or update route files under `src/app/[locale]` as needed.
 3. Create or update a screen container in `components/screens`.
 4. Split complex sections into `features/<feature>/components`.
@@ -234,4 +235,4 @@ Recommended checklist:
 - putting page-specific logic into shared UI primitives
 - reintroducing monolithic screen components when sections and hooks are more appropriate
 - forgetting to validate both `/id/*` and `/en/*`
-- treating simulation content as if it were already persistent backend data
+- treating mock-db seed content as if it were already persistent backend data

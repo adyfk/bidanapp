@@ -3,7 +3,7 @@
 import { ChevronLeft, Heart, Share2 } from 'lucide-react';
 import Image from 'next/image';
 import { IconButton } from '@/components/ui/IconButton';
-import { SIMULATION_MEDIA } from '@/lib/constants';
+import { ACTIVE_MEDIA_PRESET } from '@/lib/mock-db/runtime';
 import type { GlobalService } from '@/types/catalog';
 
 interface ServiceDetailHeroSectionProps {
@@ -16,7 +16,7 @@ export const ServiceDetailHeroSection = ({ categoryName, onBack, service }: Serv
   return (
     <div className="relative h-64 w-full bg-gray-200">
       <Image
-        src={service.coverImage || SIMULATION_MEDIA.serviceDetailCoverImage}
+        src={service.coverImage || ACTIVE_MEDIA_PRESET.serviceDetailCoverImage}
         alt={service.name}
         fill
         className="object-cover"
@@ -37,7 +37,7 @@ export const ServiceDetailHeroSection = ({ categoryName, onBack, service }: Serv
 
       <div className="absolute bottom-6 left-6 right-6 z-10 text-white text-shadow-sm">
         <div className="mb-2 inline-block rounded-full border border-white/30 bg-white/20 px-3 py-1 text-[11px] font-bold uppercase tracking-wide backdrop-blur-md">
-          {service.badge || categoryName}
+          {categoryName}
         </div>
         <h1 className="mb-2 text-3xl font-bold leading-tight">{service.name}</h1>
         <p className="max-w-xl text-sm text-white/80">{service.shortDescription}</p>

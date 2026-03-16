@@ -13,10 +13,12 @@ const nextBin = require.resolve('next/dist/bin/next');
 const port = 3201;
 const baseUrl = `http://127.0.0.1:${port}`;
 
-const catalogJsonPath = resolve(frontendDir, 'src/data/simulation/catalog.json');
-const catalog = JSON.parse(await readFile(catalogJsonPath, 'utf8'));
-const professionalSlug = catalog.professionals[0]?.slug;
-const serviceSlug = catalog.services[0]?.slug;
+const professionalsJsonPath = resolve(frontendDir, 'src/data/mock-db/professionals.json');
+const servicesJsonPath = resolve(frontendDir, 'src/data/mock-db/services.json');
+const professionals = JSON.parse(await readFile(professionalsJsonPath, 'utf8'));
+const services = JSON.parse(await readFile(servicesJsonPath, 'utf8'));
+const professionalSlug = professionals[0]?.slug;
+const serviceSlug = services[0]?.slug;
 
 let nextProcess;
 let processOutput = '';

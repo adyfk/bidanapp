@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { IconButton } from '@/components/ui/IconButton';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { useRouter } from '@/i18n/routing';
-import { SIMULATION_CURRENT_USER } from '@/lib/constants';
+import { ACTIVE_CONSUMER } from '@/lib/mock-db/runtime';
 
 export const ProfileScreen = () => {
   const router = useRouter();
@@ -24,16 +24,11 @@ export const ProfileScreen = () => {
         {/* Profile Card */}
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 mb-6 flex items-center gap-4">
           <div className="w-16 h-16 relative rounded-full overflow-hidden bg-gray-200 border-2 border-white shadow-sm flex-shrink-0">
-            <Image
-              src={SIMULATION_CURRENT_USER.avatar}
-              alt={SIMULATION_CURRENT_USER.name}
-              fill
-              className="object-cover"
-            />
+            <Image src={ACTIVE_CONSUMER.avatar} alt={ACTIVE_CONSUMER.name} fill className="object-cover" />
           </div>
           <div className="flex-1">
-            <h2 className="font-bold text-[18px] text-gray-900 leading-tight mb-1">{SIMULATION_CURRENT_USER.name}</h2>
-            <p className="text-[13px] text-gray-500 font-medium">{SIMULATION_CURRENT_USER.phone}</p>
+            <h2 className="font-bold text-[18px] text-gray-900 leading-tight mb-1">{ACTIVE_CONSUMER.name}</h2>
+            <p className="text-[13px] text-gray-500 font-medium">{ACTIVE_CONSUMER.phone}</p>
           </div>
           <button
             type="button"

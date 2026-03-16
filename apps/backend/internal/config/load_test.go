@@ -9,10 +9,10 @@ import (
 
 func TestLoadFromAppRootReadsEnvFilesAndNormalizesConfig(t *testing.T) {
 	appRoot := t.TempDir()
-	simulationDir := filepath.Join(appRoot, "fixtures", "simulation")
+	mockDBDir := filepath.Join(appRoot, "fixtures", "mock-db")
 
-	if err := os.MkdirAll(simulationDir, 0o755); err != nil {
-		t.Fatalf("create simulation dir: %v", err)
+	if err := os.MkdirAll(mockDBDir, 0o755); err != nil {
+		t.Fatalf("create mock db dir: %v", err)
 	}
 
 	envFile := strings.Join([]string{
@@ -28,7 +28,7 @@ func TestLoadFromAppRootReadsEnvFilesAndNormalizesConfig(t *testing.T) {
 		"HTTP_SHUTDOWN_TIMEOUT=12s",
 		"HTTP_MAX_HEADER_BYTES=4096",
 		"CORS_ALLOWED_ORIGINS=https://example.com/, https://admin.example.com",
-		"SIMULATION_DATA_DIR=./fixtures/simulation",
+		"MOCK_DB_DIR=./fixtures/mock-db",
 		"DATABASE_URL=postgres://postgres:postgres@localhost:5432/bidanapp?sslmode=disable",
 		"REDIS_URL=redis://localhost:6379",
 		"LOG_LEVEL=warn",
@@ -52,7 +52,7 @@ func TestLoadFromAppRootReadsEnvFilesAndNormalizesConfig(t *testing.T) {
 		"HTTP_SHUTDOWN_TIMEOUT",
 		"HTTP_MAX_HEADER_BYTES",
 		"CORS_ALLOWED_ORIGINS",
-		"SIMULATION_DATA_DIR",
+		"MOCK_DB_DIR",
 		"DATABASE_URL",
 		"REDIS_URL",
 		"LOG_LEVEL",
@@ -81,8 +81,8 @@ func TestLoadFromAppRootReadsEnvFilesAndNormalizesConfig(t *testing.T) {
 		t.Fatalf("unexpected normalized origin: got %s want %s", got, want)
 	}
 
-	if got, want := cfg.Simulation.DataDir, simulationDir; got != want {
-		t.Fatalf("unexpected simulation dir: got %s want %s", got, want)
+	if got, want := cfg.MockDB.DataDir, mockDBDir; got != want {
+		t.Fatalf("unexpected mock db dir: got %s want %s", got, want)
 	}
 
 	if cfg.Observability.LogFormat != "json" {
@@ -92,22 +92,22 @@ func TestLoadFromAppRootReadsEnvFilesAndNormalizesConfig(t *testing.T) {
 
 func TestLoadFromAppRootFailsForInvalidPort(t *testing.T) {
 	appRoot := t.TempDir()
-	simulationDir := filepath.Join(appRoot, "simulation")
+	mockDBDir := filepath.Join(appRoot, "mock-db")
 
-	if err := os.MkdirAll(simulationDir, 0o755); err != nil {
-		t.Fatalf("create simulation dir: %v", err)
+	if err := os.MkdirAll(mockDBDir, 0o755); err != nil {
+		t.Fatalf("create mock db dir: %v", err)
 	}
 
 	envFile := strings.Join([]string{
 		"HTTP_PORT=not-a-number",
-		"SIMULATION_DATA_DIR=./simulation",
+		"MOCK_DB_DIR=./mock-db",
 	}, "\n")
 
 	if err := os.WriteFile(filepath.Join(appRoot, ".env"), []byte(envFile), 0o644); err != nil {
 		t.Fatalf("write env file: %v", err)
 	}
 
-	restore := clearEnv("HTTP_PORT", "SIMULATION_DATA_DIR")
+	restore := clearEnv("HTTP_PORT", "MOCK_DB_DIR")
 	defer restore()
 
 	_, err := loadFromAppRoot(appRoot)

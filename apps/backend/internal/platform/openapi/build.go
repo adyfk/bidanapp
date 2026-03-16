@@ -27,7 +27,7 @@ func Build(mux *http.ServeMux, cfg config.Config) huma.API {
 	humaConfig.DocsPath = "/docs"
 
 	api := humago.NewWithPrefix(mux, "/api/v1", humaConfig)
-	simulation.RegisterRoutes(api, cfg, simulation.NewService(cfg.Simulation.DataDir))
+	simulation.RegisterRoutes(api, cfg, simulation.NewService(cfg.MockDB.DataDir))
 	registerWebsocketContract(api)
 
 	return api

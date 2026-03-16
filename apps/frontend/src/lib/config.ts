@@ -1,16 +1,12 @@
-import settingsData from '@/data/simulation/settings.json';
+import { APP_BRANDING, APP_COLORS } from '@/lib/app-config';
 import { PUBLIC_ENV } from '@/lib/env';
-import type { AppSettingsFile } from '@/types/settings';
-
-const settings = settingsData as AppSettingsFile;
 
 export const APP_CONFIG = {
-  appName: settings.branding.appName,
+  appName: APP_BRANDING.appName,
   appVersion: PUBLIC_ENV.appVersion,
-  seoDescription: settings.branding.seoDescription,
+  seoDescription: APP_BRANDING.seoDescription,
   baseUrl: PUBLIC_ENV.siteUrl,
   apiBaseUrl: PUBLIC_ENV.apiBaseUrl,
-  ogImage: settings.branding.ogImage,
-  terms: settings.terms,
-  colors: settings.colors,
+  ogImage: APP_BRANDING.ogImage,
+  colors: APP_COLORS,
 };

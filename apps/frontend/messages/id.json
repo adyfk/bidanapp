@@ -22,9 +22,51 @@
   },
   "Professional": {
     "about": "Tentang {professional}",
+    "available": "Tersedia",
+    "unavailable": "Tidak tersedia",
+    "coverageArea": "Area coverage",
+    "coverageIn": "Masuk coverage",
+    "coverageOut": "Di luar coverage",
+    "coordinates": "Koordinat",
     "distance": "Jarak",
     "time": "Waktu",
+    "homeVisitRadius": "Radius home care",
+    "modeHomeVisit": "Home care",
+    "modeOnline": "Online",
+    "modeOnsite": "Datang ke lokasi",
+    "onlineOnlyCoverage": "Tanpa home care",
+    "paginationNext": "Berikutnya",
+    "paginationPrevious": "Sebelumnya",
+    "paginationStatus": "Halaman {current} dari {total}",
+    "practiceLocation": "Titik layanan",
     "rating": "Penilaian",
+    "selectedArea": "Area pengguna",
+    "selectedSchedule": "Jadwal terpilih",
+    "selectedServiceLabel": "Layanan aktif",
+    "serviceModes": "Mode layanan",
+    "serviceSearchPlaceholder": "Cari layanan, ringkasan, atau tag...",
+    "serviceResultsCount": "{count} layanan cocok",
+    "serviceListTitle": "Semua layanan profesional ini",
+    "serviceSelected": "Dipilih",
+    "allCategories": "Semua kategori",
+    "allModes": "Semua mode",
+    "resetServiceFilters": "Reset filter",
+    "bookingFlowLabel": "Flow",
+    "bookingFlowInstant": "Instan",
+    "bookingFlowRequest": "Request",
+    "chooseServiceMode": "Pilih mode layanan",
+    "chooseVisitDay": "Pilih hari kunjungan",
+    "chooseVisitTime": "Pilih jam kunjungan",
+    "scheduleRequired": "Pilih jam kunjungan untuk melanjutkan booking offline.",
+    "offlineScheduleRequired": "Pilih hari dan jam kunjungan sebelum booking offline dilanjutkan.",
+    "modeReadyToBook": "Siap dipesan",
+    "modeNotBookable": "Belum bisa dipesan",
+    "slotOpenLabel": "slot buka",
+    "slotAvailable": "Tersedia",
+    "slotLimited": "Terbatas",
+    "slotBooked": "Penuh",
+    "noFilteredServices": "Tidak ada layanan yang cocok dengan filter saat ini.",
+    "noFilteredServicesHint": "Coba ubah pencarian atau reset filter untuk melihat layanan lain.",
     "makeAppointment": "Booking Request",
     "inquiryChat": "Tanya {professional}",
     "experience": "Tahun Pengalaman"
@@ -67,7 +109,10 @@
       "paid": "Dibayar",
       "confirmed": "Dikonfirmasi",
       "in_service": "Sedang Berlangsung",
-      "completed": "Selesai"
+      "completed": "Selesai",
+      "cancelled": "Dibatalkan",
+      "rejected": "Ditolak",
+      "expired": "Kedaluwarsa"
     }
   },
   "Services": {
@@ -95,6 +140,110 @@
     "account": "Pengaturan Akun",
     "aboutApp": "Tentang BidanApp",
     "logout": "Keluar"
+  },
+  "UiText": {
+    "terms": {
+      "professional": "Bidan",
+      "category": "Kategori",
+      "service": "Layanan",
+      "location": "Klinik / Praktik Mandiri",
+      "experience": "Tahun Berpraktik",
+      "patients": "Pasien Dilayani"
+    },
+    "booking": {
+      "online": "Booking online berhasil dibuat. Lanjut ke penjadwalan dan pembayaran.",
+      "homeVisit": "Permintaan home care dikirim. Sistem akan cek coverage area dan konfirmasi jadwal.",
+      "onsite": "Reservasi ke lokasi profesional dibuat. Pilih slot kunjungan yang tersedia.",
+      "providerSelectedNotice": "{bookingMessage} Profesional terpilih: {providerName}.",
+      "serviceSelectedNotice": "{bookingMessage} Layanan terpilih: {serviceName}.{scheduleMessage}",
+      "scheduleNotice": " Jadwal: {dateIso} • {timeLabel}."
+    },
+    "alerts": {
+      "chatAutoReply": "Baik, pesan Anda sudah saya terima.",
+      "paymentSuccess": "Simulasi pembayaran berhasil",
+      "chatSent": "Pesan terkirim dalam mode demo",
+      "reviewPhotoReady": "Foto review siap diunggah: {fileName}",
+      "reviewSuccessWithPhoto": "{successMessage} Foto: {fileName}."
+    },
+    "appointment": {
+      "detailTitle": "Detail Aktivitas",
+      "notFoundMessage": "Aktivitas tidak ditemukan.",
+      "backLabel": "Kembali",
+      "welcomeTemplate": "Halo, ada yang bisa saya bantu terkait reservasi {serviceName}?",
+      "chatDayLabel": "HARI INI",
+      "chatInputPlaceholder": "Tulis pesan...",
+      "fieldLabels": {
+        "status": "Status",
+        "time": "Jadwal",
+        "location": "Lokasi",
+        "service": "Layanan",
+        "totalPayment": "Total Pembayaran"
+      },
+      "actionLabels": {
+        "detail": "Detail",
+        "cancel": "Batalkan",
+        "payNow": "Bayar Sekarang"
+      },
+      "statusBanners": {
+        "requested": "Bidan sedang meninjau permintaan Anda. Kami akan memberitahu Anda segera setelah disetujui.",
+        "paid": "Pembayaran berhasil. Bidan akan segera berangkat ke lokasi Anda sesuai jadwal.",
+        "confirmed": "Jadwal Anda sudah dikonfirmasi. Mohon siapkan lokasi dan kebutuhan yang relevan sebelum sesi dimulai.",
+        "inService": "Sesi sedang berjalan. Anda tetap bisa mengirim pesan bila ada kebutuhan tambahan.",
+        "cancelled": "Reservasi ini sudah dibatalkan. Anda bisa membuat jadwal baru kapan saja.",
+        "rejected": "Permintaan ini ditolak. Coba pilih slot lain atau profesional lain yang masih tersedia.",
+        "expired": "Permintaan ini kedaluwarsa karena pembayaran tidak selesai dalam batas waktu."
+      }
+    },
+    "home": {
+      "emptyStateTitle": "Belum ada jadwal aktif",
+      "emptyStateDescription": "Gunakan katalog layanan untuk mulai flow baru dari pencarian sampai booking.",
+      "emptyStateAction": "Cari layanan"
+    },
+    "serviceDetail": {
+      "highlightsTitle": "Highlights"
+    },
+    "professionalProfile": {
+      "storiesTitle": "Story aktivitas",
+      "portfolioStatsTitle": "Jejak praktik",
+      "portfolioEntriesTitle": "Portofolio tindakan",
+      "galleryTitle": "Galeri praktik",
+      "testimonialsTitle": "Testimoni keluarga",
+      "feedbackTitle": "Feedback klien",
+      "credentialsTitle": "Sertifikasi dan legalitas",
+      "recentActivityTitle": "Aktivitas terbaru",
+      "serviceSectionTitle": "Pilih layanan",
+      "availabilityLabel": "Ketersediaan",
+      "responseTimeLabel": "Respon",
+      "languagesLabel": "Bahasa",
+      "totalReviewsLabel": "total feedback",
+      "recommendationLabel": "Merekomendasikan",
+      "repeatClientsLabel": "Klien kembali"
+    },
+    "explore": {
+      "sortOptions": {
+        "recommended": "Recommended",
+        "nearestDistance": "Nearest Distance",
+        "highestRating": "Highest Rating",
+        "lowestPrice": "Lowest Price"
+      },
+      "genderOptions": {
+        "any": "Any",
+        "female": "Female",
+        "male": "Male"
+      }
+    },
+    "review": {
+      "title": "Beri Ulasan",
+      "titleTemplate": "Bagaimana sesi Anda dengan {professionalName}?",
+      "helperText": "Ulasan Anda membantu kami meningkatkan kualitas layanan.",
+      "photoLabel": "Tambahkan Foto (Opsional)",
+      "photoButtonLabel": "Tambah",
+      "reviewLabel": "Ceritakan pengalaman Anda",
+      "reviewPlaceholder": "Pelayanan sangat ramah dan profesional...",
+      "submitLabel": "Kirim Ulasan",
+      "uploadAlert": "Simulasi Upload Foto",
+      "successAlert": "Ulasan berhasil dikirim. Terima kasih atas feedback Anda."
+    }
   },
   "Integration": {
     "eyebrow": "Integrasi Backend",

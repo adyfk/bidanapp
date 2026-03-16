@@ -2,10 +2,13 @@
 
 import { BadgeCheck, MapPin, Star } from 'lucide-react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
 import {
   ProfessionalSectionTitle,
   professionalSectionClassName,
 } from '@/features/professional-detail/components/ProfessionalSectionTitle';
+import { SectionPaginationControls } from '@/features/professional-detail/components/SectionPaginationControls';
 import { APP_CONFIG } from '@/lib/config';
 import type { Professional } from '@/types/catalog';
 
@@ -24,6 +27,15 @@ export const ProfessionalPortfolioSections = ({
   profileCopy,
   professional,
 }: ProfessionalPortfolioSectionsProps) => {
+  const t = useTranslations('Professional');
+  const [testimonialPage, setTestimonialPage] = useState(1);
+  const testimonialPageSize = 1;
+  const totalTestimonialPages = Math.ceil(professional.testimonials.length / testimonialPageSize);
+  const visibleTestimonials = professional.testimonials.slice(
+    (testimonialPage - 1) * testimonialPageSize,
+    testimonialPage * testimonialPageSize,
+  );
+
   return (
     <>
       <section className={professionalSectionClassName}>
@@ -94,14 +106,14 @@ export const ProfessionalPortfolioSections = ({
 
       <section className={professionalSectionClassName}>
         <ProfessionalSectionTitle icon={<Star className="h-4 w-4" />} title={profileCopy.testimonialsTitle} />
-        <div className="custom-scrollbar flex gap-3 overflow-x-auto pb-1">
-          {professional.testimonials.map((testimonial) => {
+        <div className="space-y-3">
+          {visibleTestimonials.map((testimonial) => {
             const serviceName = getServiceName(testimonial.serviceId);
 
             return (
               <article
                 key={`${testimonial.author}-${testimonial.dateLabel}`}
-                className="min-w-[280px] rounded-[24px] bg-[#FCFCFC] p-4 shadow-[0_16px_28px_-24px_rgba(17,24,39,0.34)]"
+                className="rounded-[24px] bg-[#FCFCFC] p-4 shadow-[0_16px_28px_-24px_rgba(17,24,39,0.34)]"
               >
                 <div className="mb-4 flex items-center gap-3">
                   <div className="relative h-12 w-12 overflow-hidden rounded-full">
@@ -133,6 +145,15 @@ export const ProfessionalPortfolioSections = ({
             );
           })}
         </div>
+        <SectionPaginationControls
+          currentPage={testimonialPage}
+          nextLabel={t('paginationNext')}
+          onNext={() => setTestimonialPage((current) => Math.min(current + 1, totalTestimonialPages))}
+          onPrevious={() => setTestimonialPage((current) => Math.max(current - 1, 1))}
+          previousLabel={t('paginationPrevious')}
+          statusLabel={t('paginationStatus', { current: testimonialPage, total: totalTestimonialPages })}
+          totalPages={totalTestimonialPages}
+        />
       </section>
     </>
   );

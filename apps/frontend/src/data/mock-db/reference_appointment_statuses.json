@@ -1,0 +1,83 @@
+[
+  {
+    "code": "requested",
+    "label": "Requested",
+    "phase": "pre_service",
+    "isActive": true,
+    "isTerminal": false,
+    "description": "Pengguna sudah mengirim request, profesional belum memberikan keputusan.",
+    "nextStates": ["approved_waiting_payment", "rejected", "cancelled", "expired"]
+  },
+  {
+    "code": "approved_waiting_payment",
+    "label": "Approved waiting payment",
+    "phase": "payment",
+    "isActive": true,
+    "isTerminal": false,
+    "description": "Profesional menerima request, tetapi pembayaran belum selesai.",
+    "nextStates": ["paid", "cancelled", "expired"]
+  },
+  {
+    "code": "paid",
+    "label": "Paid",
+    "phase": "pre_service",
+    "isActive": true,
+    "isTerminal": false,
+    "description": "Pembayaran sudah berhasil, sistem menunggu sesi benar-benar dimulai.",
+    "nextStates": ["confirmed", "in_service", "cancelled"]
+  },
+  {
+    "code": "confirmed",
+    "label": "Confirmed",
+    "phase": "pre_service",
+    "isActive": true,
+    "isTerminal": false,
+    "description": "Jadwal sudah dikonfirmasi dan siap dijalankan.",
+    "nextStates": ["in_service", "cancelled"]
+  },
+  {
+    "code": "in_service",
+    "label": "In service",
+    "phase": "service_delivery",
+    "isActive": true,
+    "isTerminal": false,
+    "description": "Layanan sedang berjalan.",
+    "nextStates": ["completed", "cancelled"]
+  },
+  {
+    "code": "completed",
+    "label": "Completed",
+    "phase": "post_service",
+    "isActive": false,
+    "isTerminal": true,
+    "description": "Layanan selesai dan bisa masuk tahap review.",
+    "nextStates": []
+  },
+  {
+    "code": "cancelled",
+    "label": "Cancelled",
+    "phase": "closed",
+    "isActive": false,
+    "isTerminal": true,
+    "description": "Booking dibatalkan oleh salah satu pihak atau sistem.",
+    "nextStates": []
+  },
+  {
+    "code": "rejected",
+    "label": "Rejected",
+    "phase": "closed",
+    "isActive": false,
+    "isTerminal": true,
+    "description": "Profesional menolak request booking.",
+    "nextStates": []
+  },
+  {
+    "code": "expired",
+    "label": "Expired",
+    "phase": "closed",
+    "isActive": false,
+    "isTerminal": true,
+    "description": "Booking gugur otomatis karena melewati SLA tertentu, umumnya pembayaran.",
+    "nextStates": []
+  }
+]

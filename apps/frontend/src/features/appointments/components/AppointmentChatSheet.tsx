@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useEffect, useRef } from 'react';
 import type { AppointmentChatSession } from '@/features/appointments/hooks/useAppointmentFlow';
 import { APP_CONFIG } from '@/lib/config';
-import { SIMULATION_SHARED } from '@/lib/constants';
+import { ACTIVE_USER_CONTEXT } from '@/lib/mock-db/runtime';
 import type { Appointment } from '@/types/appointments';
 
 interface AppointmentChatSheetProps {
@@ -48,7 +48,7 @@ export const AppointmentChatSheet = ({
           </div>
           <div>
             <h2 className="text-[15px] font-bold leading-tight text-gray-900">{appointment.professional.name}</h2>
-            <p className="mt-0.5 text-[11px] font-bold text-green-500">{SIMULATION_SHARED.onlineStatusLabel}</p>
+            <p className="mt-0.5 text-[11px] font-bold text-green-500">{ACTIVE_USER_CONTEXT.onlineStatusLabel}</p>
           </div>
         </div>
       </div>

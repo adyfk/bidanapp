@@ -18,8 +18,3 @@ export interface ChatThread {
   autoReplyText?: string;
   messages: ChatMessage[];
 }
-
-export interface ChatSimulationFile {
-  directThreads: ChatThread[];
-  appointmentThreads: ChatThread[];
-}

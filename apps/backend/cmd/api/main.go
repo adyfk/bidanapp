@@ -38,7 +38,7 @@ func main() {
 			slog.String("env", cfg.App.Environment),
 			slog.String("addr", cfg.HTTP.Address()),
 			slog.Any("cors_allowed_origins", cfg.CORS.AllowedOrigins),
-			slog.String("simulation_data_dir", cfg.Simulation.DataDir),
+			slog.String("mock_db_dir", cfg.MockDB.DataDir),
 		)
 		errCh <- httpServer.ListenAndServe()
 	}()
