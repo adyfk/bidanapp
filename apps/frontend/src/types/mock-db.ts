@@ -244,6 +244,35 @@ export interface AppointmentRow extends IndexedRow {
   totalPriceLabel: string;
 }
 
+export interface ProfessionalRequestRow extends IndexedRow {
+  id: string;
+  professionalId: string;
+  clientId: string;
+  clientName: string;
+  areaId: string;
+  serviceId: string;
+  requestedMode: ServiceDeliveryMode;
+  budgetLabel: string;
+  channelKey: string;
+  noteKey: string;
+  priority: 'high' | 'medium' | 'low';
+  status: 'new' | 'quoted' | 'scheduled' | 'completed';
+  requestedAt: string;
+  appointmentId: string | null;
+  customerStatus: AppointmentStatus | null;
+}
+
+export interface ProfessionalRequestStatusHistoryRow extends IndexedRow {
+  id: string;
+  requestId: string;
+  fromStatus: 'new' | 'quoted' | 'scheduled' | 'completed';
+  status: 'new' | 'quoted' | 'scheduled' | 'completed';
+  createdAt: string;
+  customerSummaryKey: string | null;
+  evidenceNoteKey: string | null;
+  evidenceUrl: string | null;
+}
+
 export interface ChatThreadRow extends IndexedRow {
   id: string;
   threadType: 'direct' | 'appointment';

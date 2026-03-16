@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-export type ViewerMode = 'visitor' | 'customer';
+export type ViewerMode = 'visitor' | 'customer' | 'professional';
 
 interface ViewerSessionState {
   mode: ViewerMode;
@@ -28,7 +28,7 @@ const readViewerSession = (): ViewerSessionState => {
 
     const parsedValue = JSON.parse(storedValue) as Partial<ViewerSessionState>;
 
-    if (parsedValue.mode === 'visitor' || parsedValue.mode === 'customer') {
+    if (parsedValue.mode === 'visitor' || parsedValue.mode === 'customer' || parsedValue.mode === 'professional') {
       return {
         mode: parsedValue.mode,
       };
@@ -81,8 +81,10 @@ export const useViewerSession = () => {
 
   return {
     continueAsCustomer: () => updateViewerMode('customer'),
+    continueAsProfessional: () => updateViewerMode('professional'),
     continueAsVisitor: () => updateViewerMode('visitor'),
     isCustomer: viewerSession.mode === 'customer',
+    isProfessional: viewerSession.mode === 'professional',
     isVisitor: viewerSession.mode === 'visitor',
     viewerMode: viewerSession.mode,
   };

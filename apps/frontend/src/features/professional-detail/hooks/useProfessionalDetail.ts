@@ -8,10 +8,10 @@ import {
   getProfessionalCoverageStatus,
   getProfessionalServiceScheduleDays,
   isOfflineServiceMode,
-  MOCK_PROFESSIONALS,
   MOCK_SERVICES,
 } from '@/lib/mock-db/catalog';
 import { useUiText } from '@/lib/ui-text';
+import { useProfessionalPortal } from '@/lib/use-professional-portal';
 import { useProfessionalUserPreferences } from '@/lib/use-professional-user-preferences';
 import type { Professional, ServiceDeliveryMode } from '@/types/catalog';
 
@@ -34,8 +34,11 @@ export const useProfessionalDetail = (professionalSlug: string | undefined) => {
   const [selectedScheduleDayId, setSelectedScheduleDayId] = useState('');
   const [selectedTimeSlotId, setSelectedTimeSlotId] = useState('');
   const { selectedAreaId, userLocation } = useProfessionalUserPreferences();
+  const { createCustomerRequest, getCustomerRequestForProfessional, getPublicProfessionalBySlug } =
+    useProfessionalPortal();
 
-  const professional = MOCK_PROFESSIONALS.find((item) => item.slug === professionalSlug) || null;
+  const professional = professionalSlug ? getPublicProfessionalBySlug(professionalSlug) : null;
+  const customerRequest = professional ? getCustomerRequestForProfessional(professional.id) : null;
   const profCategory = professional ? getProfessionalCategoryLabel(professional) || 'Professional' : 'Professional';
   const offeredServices: ProfessionalServiceEntry[] = professional
     ? professional.services.flatMap((serviceMapping) => {
@@ -161,10 +164,24 @@ export const useProfessionalDetail = (professionalSlug: string | undefined) => {
       requiresOfflineScheduleSelection && selectedScheduleDay && selectedTimeSlot
         ? uiText.getScheduleNotice(selectedScheduleDay.dateIso, selectedTimeSlot.label)
         : '';
-
-    setNotice(
-      uiText.getServiceBookingNotice(selectedBookingMode, selectedServiceEntry.catalogService.name, scheduleMessage),
+    const nextNotice = uiText.getServiceBookingNotice(
+      selectedBookingMode,
+      selectedServiceEntry.catalogService.name,
+      scheduleMessage,
     );
+
+    if (professional) {
+      createCustomerRequest({
+        budgetLabel: selectedServiceEntry.serviceMapping.price,
+        channel: uiText.booking.customerAppChannel,
+        note: nextNotice,
+        professionalId: professional.id,
+        requestedMode: selectedBookingMode,
+        serviceId: selectedServiceEntry.catalogService.id,
+      });
+    }
+
+    setNotice(nextNotice);
   };
 
   const getServiceName = (serviceId?: string) =>
@@ -172,6 +189,7 @@ export const useProfessionalDetail = (professionalSlug: string | undefined) => {
 
   return {
     canRequestBooking,
+    customerRequest,
     getServiceName,
     notice,
     offeredServices,

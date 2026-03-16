@@ -11,6 +11,7 @@ import {
 } from '@/features/appointments/lib/status';
 import { MOCK_APPOINTMENTS } from '@/lib/mock-db/appointments';
 import { getAppointmentChatThread } from '@/lib/mock-db/chat';
+import { ACTIVE_CONSUMER } from '@/lib/mock-db/runtime';
 import { useUiText } from '@/lib/ui-text';
 import type { Appointment, AppointmentStatus } from '@/types/appointments';
 import type { ChatMessage } from '@/types/chat';
@@ -107,7 +108,7 @@ export const useAppointmentFlow = ({
       MOCK_APPOINTMENTS.map((appointment) => ({
         ...appointment,
         status: statusOverrides[appointment.id] ?? appointment.status,
-      })),
+      })).filter((appointment) => appointment.consumerId === ACTIVE_CONSUMER.id),
     [statusOverrides],
   );
 

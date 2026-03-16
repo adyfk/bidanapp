@@ -1,0 +1,117 @@
+'use client';
+
+import { ClipboardList } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { surfaceCardPaddedClass } from '@/components/ui/tokens';
+import type { ProfessionalManagedRequest, ProfessionalRequestStatus } from '@/lib/use-professional-portal';
+import type { ServiceDeliveryMode } from '@/types/catalog';
+import { requestStatuses } from './helpers';
+import { MiniStatCard, RequestCard, RequestFilterChip, SectionHeading } from './ProfessionalDashboardShared';
+import type { RequestFilter } from './types';
+
+interface ProfessionalDashboardRequestsTabProps {
+  filteredRequests: ProfessionalManagedRequest[];
+  getAreaLabel: (areaId: string) => string;
+  getModeLabel: (mode: ServiceDeliveryMode) => string;
+  getServiceLabel: (serviceId: string) => string;
+  onChangeStatus: (requestId: string, status: ProfessionalRequestStatus) => void;
+  requestFilter: RequestFilter;
+  requestStatusCounts: Record<ProfessionalRequestStatus, number>;
+  setRequestFilter: (filter: RequestFilter) => void;
+}
+
+export const ProfessionalDashboardRequestsTab = ({
+  filteredRequests,
+  getAreaLabel,
+  getModeLabel,
+  getServiceLabel,
+  onChangeStatus,
+  requestFilter,
+  requestStatusCounts,
+  setRequestFilter,
+}: ProfessionalDashboardRequestsTabProps) => {
+  const t = useTranslations('ProfessionalPortal');
+
+  return (
+    <section className="space-y-4">
+      <div className="grid grid-cols-2 gap-3">
+        {requestStatuses.map((status) => (
+          <MiniStatCard
+            key={status}
+            label={t(`requests.status.${status}`)}
+            value={String(requestStatusCounts[status])}
+          />
+        ))}
+      </div>
+
+      <div className={surfaceCardPaddedClass}>
+        <SectionHeading
+          icon={<ClipboardList className="h-5 w-5" />}
+          title={t('requests.visibleCount', {
+            count: filteredRequests.length,
+            status: t(`requests.status.${requestFilter}`),
+          })}
+          description={t('requests.summaryDescription')}
+        />
+
+        <div className="mt-4 flex gap-2 overflow-x-auto pb-1 pr-4 custom-scrollbar">
+          {requestStatuses.map((status) => (
+            <RequestFilterChip
+              key={status}
+              isActive={requestFilter === status}
+              label={t(`requests.status.${status}`)}
+              onClick={() => setRequestFilter(status)}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        {filteredRequests.length > 0 ? (
+          filteredRequests.map((request) => (
+            <RequestCard
+              key={request.id}
+              evidenceLabels={{
+                customerSummary: t('requests.evidence.customerSummary'),
+                empty: t('requests.evidence.empty'),
+                historyEmpty: t('requests.evidence.historyEmpty'),
+                internalNote: t('requests.evidence.internalNote'),
+                link: t('requests.evidence.openLink'),
+                timeline: t('requests.timelineTitle'),
+                title: t('requests.evidence.title'),
+                updatedAt: t('requests.evidence.updatedAt'),
+              }}
+              fieldLabels={{
+                area: t('requests.fields.area'),
+                budget: t('requests.fields.budget'),
+                channel: t('requests.fields.channel'),
+                currentStatus: t('requests.fields.currentStatus'),
+                note: t('requests.fields.note'),
+                requestedMode: t('requests.fields.requestedMode'),
+                service: t('requests.fields.service'),
+              }}
+              getAreaLabel={getAreaLabel}
+              getModeLabel={getModeLabel}
+              getServiceLabel={getServiceLabel}
+              moveToLabel={t('requests.moveTo')}
+              priorityLabel={t(`requests.priority.${request.priority}`)}
+              request={request}
+              requestStatuses={requestStatuses}
+              statusLabel={(status) => t(`requests.status.${status}`)}
+              updateActionLabel={(status) => t('requests.updateAction', { status: t(`requests.status.${status}`) })}
+              onChangeStatus={(status) => onChangeStatus(request.id, status)}
+            />
+          ))
+        ) : (
+          <div className={surfaceCardPaddedClass}>
+            <SectionHeading
+              icon={<ClipboardList className="h-5 w-5" />}
+              title={t('requests.emptyTitle')}
+              description={t('requests.emptyDescription')}
+            />
+          </div>
+        )}
+      </div>
+    </section>
+  );
+};

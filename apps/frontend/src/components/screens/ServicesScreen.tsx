@@ -7,9 +7,10 @@ import { useState } from 'react';
 import { IconButton } from '@/components/ui/IconButton';
 import { useRouter } from '@/i18n/routing';
 import { APP_CONFIG } from '@/lib/config';
-import { MOCK_CATEGORIES, MOCK_PROFESSIONALS, MOCK_SERVICES } from '@/lib/mock-db/catalog';
+import { MOCK_CATEGORIES, MOCK_SERVICES } from '@/lib/mock-db/catalog';
 import { exploreRoute } from '@/lib/routes';
 import { useUiText } from '@/lib/ui-text';
+import { useProfessionalPortal } from '@/lib/use-professional-portal';
 
 export const ServicesScreen = () => {
   const router = useRouter();
@@ -17,6 +18,7 @@ export const ServicesScreen = () => {
   const [activeCategory, setActiveCategory] = useState<string>('All');
   const t = useTranslations('Services');
   const uiText = useUiText();
+  const { publicProfessionals } = useProfessionalPortal();
 
   // Helper functions for ranges
   const parseDuration = (d?: string) => {
@@ -51,8 +53,9 @@ export const ServicesScreen = () => {
     const categoryName = MOCK_CATEGORIES.find((c) => c.id === svc.categoryId)?.name || '';
 
     // Cari semua profesional yang menyediakan layanan ini
-    const providers = MOCK_PROFESSIONALS.filter((prof) => prof.services.some((ps) => ps.serviceId === svc.id)).map(
-      (prof) => {
+    const providers = publicProfessionals
+      .filter((prof) => prof.services.some((ps) => ps.serviceId === svc.id))
+      .map((prof) => {
         const pSvc = prof.services.find((ps) => ps.serviceId === svc.id);
         return {
           name: prof.name,
@@ -61,8 +64,7 @@ export const ServicesScreen = () => {
           price: pSvc?.price,
           duration: pSvc?.duration,
         };
-      },
-    );
+      });
 
     return {
       ...svc,

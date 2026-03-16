@@ -12,26 +12,35 @@ import {
   Video,
 } from 'lucide-react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { IconButton } from '@/components/ui/IconButton';
+import { PROFESSIONAL_REQUEST_STATUS_ORDER } from '@/features/professional-portal/lib/request-status';
 import { useRouter } from '@/i18n/routing';
 import { APP_CONFIG } from '@/lib/config';
-import { MOCK_PROFESSIONALS } from '@/lib/mock-db/catalog';
 import { CHAT_THREADS, getChatThreadByProfessionalSlug } from '@/lib/mock-db/chat';
 import { ACTIVE_USER_CONTEXT } from '@/lib/mock-db/runtime';
 import { professionalRoute } from '@/lib/routes';
+import { useProfessionalPortal } from '@/lib/use-professional-portal';
 import type { ChatMessage } from '@/types/chat';
 
 export const ChatScreen = ({ professionalId }: { professionalId: string }) => {
   const router = useRouter();
+  const professionalT = useTranslations('Professional');
+  const portalT = useTranslations('ProfessionalPortal');
   const [inputText, setInputText] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { getCustomerRequestForProfessional, getPublicProfessionalBySlug, publicProfessionals } =
+    useProfessionalPortal();
 
-  // Fallback to first professional if ID not found for demo purposes
-  const professional = MOCK_PROFESSIONALS.find((p) => p.slug === professionalId) || MOCK_PROFESSIONALS[0];
-  const chatThread = getChatThreadByProfessionalSlug(professional.slug) || CHAT_THREADS[0];
-  const [messages, setMessages] = useState(chatThread.messages);
+  const professional = getPublicProfessionalBySlug(professionalId) || publicProfessionals[0];
+  const customerRequest = professional ? getCustomerRequestForProfessional(professional.id) : null;
+  const latestStatusEvidence = customerRequest
+    ? [...customerRequest.statusHistory].reverse().find((item) => item.status === customerRequest.status)
+    : null;
+  const chatThread = getChatThreadByProfessionalSlug(professional?.slug || '') || CHAT_THREADS[0];
+  const [messages, setMessages] = useState<ChatMessage[]>(() => chatThread.messages);
 
   useEffect(() => {
     if (messages.length === 0) {
@@ -40,6 +49,14 @@ export const ChatScreen = ({ professionalId }: { professionalId: string }) => {
 
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  useEffect(() => {
+    setMessages(chatThread.messages);
+  }, [chatThread]);
+
+  if (!professional) {
+    return null;
+  }
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,6 +137,55 @@ export const ChatScreen = ({ professionalId }: { professionalId: string }) => {
             {chatThread.dayLabel}
           </span>
         </div>
+
+        {customerRequest ? (
+          <div className="mx-auto w-full max-w-[92%] rounded-[22px] border border-blue-100 bg-white px-4 py-4 shadow-sm">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-blue-500">
+                  {professionalT('requestUpdates.eyebrow')}
+                </p>
+                <p className="mt-1 text-[14px] font-bold text-slate-900">
+                  {professionalT('requestUpdates.title', { professional: professional.name })}
+                </p>
+              </div>
+              <span className="rounded-full bg-blue-50 px-3 py-1.5 text-[11px] font-semibold text-blue-700">
+                {portalT(`requests.status.${customerRequest.status}`)}
+              </span>
+            </div>
+
+            <div className="mt-3 flex flex-wrap gap-2">
+              {PROFESSIONAL_REQUEST_STATUS_ORDER.map((status) => {
+                const currentIndex = PROFESSIONAL_REQUEST_STATUS_ORDER.indexOf(customerRequest.status);
+                const statusIndex = PROFESSIONAL_REQUEST_STATUS_ORDER.indexOf(status);
+                const isCurrent = customerRequest.status === status;
+                const isReached = statusIndex <= currentIndex;
+
+                return (
+                  <span
+                    key={status}
+                    className={`rounded-full px-3 py-1.5 text-[10px] font-semibold ${
+                      isCurrent
+                        ? 'bg-slate-900 text-white'
+                        : isReached
+                          ? 'bg-blue-50 text-blue-700'
+                          : 'bg-slate-100 text-slate-400'
+                    }`}
+                  >
+                    {portalT(`requests.status.${status}`)}
+                  </span>
+                );
+              })}
+            </div>
+
+            <p className="mt-3 text-[13px] leading-relaxed text-slate-600">
+              {latestStatusEvidence?.customerSummary ||
+                (customerRequest.status === 'new'
+                  ? professionalT('requestUpdates.submittedSummary')
+                  : professionalT('requestUpdates.emptySummary'))}
+            </p>
+          </div>
+        ) : null}
 
         {messages.map((msg) => {
           const isUser = msg.sender === 'user';

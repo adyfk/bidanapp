@@ -12,6 +12,7 @@ export type AppointmentStatus =
   | 'expired';
 
 export interface Appointment {
+  consumerId: string;
   id: string;
   professional: Professional;
   service: GlobalService;

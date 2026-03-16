@@ -1,12 +1,12 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { filterChipClass } from '@/components/ui/tokens';
 import {
   type AppointmentStatusFilter,
   type AppointmentTab,
   getAppointmentStatusFilterOptions,
 } from '@/features/appointments/lib/status';
-import { APP_CONFIG } from '@/lib/config';
 import type { Appointment } from '@/types/appointments';
 
 interface AppointmentsStatusFiltersProps {
@@ -30,16 +30,11 @@ export const AppointmentsStatusFilters = ({
       <button
         type="button"
         onClick={() => onChange('all')}
-        className={`flex items-center justify-center gap-2 rounded-full border px-4 py-2 text-[13px] font-bold whitespace-nowrap transition-all ${
-          statusFilter === 'all'
-            ? 'border-transparent text-white shadow-md'
-            : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
-        }`}
-        style={{ backgroundColor: statusFilter === 'all' ? APP_CONFIG.colors.primary : undefined }}
+        className={`flex items-center justify-center gap-2 whitespace-nowrap ${filterChipClass(statusFilter === 'all')}`}
       >
         {t('allStatuses')}
         <span
-          className={`rounded-full px-2 py-0.5 text-[11px] ${statusFilter === 'all' ? 'bg-white/20' : 'bg-gray-100'}`}
+          className={`rounded-full px-2 py-0.5 text-[11px] ${statusFilter === 'all' ? 'bg-white/70 text-blue-700' : 'bg-slate-100 text-slate-600'}`}
         >
           {appointments.length}
         </span>
@@ -54,15 +49,12 @@ export const AppointmentsStatusFilters = ({
             type="button"
             key={status}
             onClick={() => onChange(status)}
-            className={`flex items-center justify-center gap-2 rounded-full border px-4 py-2 text-[13px] font-bold whitespace-nowrap transition-all ${
-              isActive
-                ? 'border-transparent text-white shadow-md'
-                : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
-            }`}
-            style={{ backgroundColor: isActive ? APP_CONFIG.colors.primary : undefined }}
+            className={`flex items-center justify-center gap-2 whitespace-nowrap ${filterChipClass(isActive)}`}
           >
             {t(`status.${status}`)}
-            <span className={`rounded-full px-2 py-0.5 text-[11px] ${isActive ? 'bg-white/20' : 'bg-gray-100'}`}>
+            <span
+              className={`rounded-full px-2 py-0.5 text-[11px] ${isActive ? 'bg-white/70 text-blue-700' : 'bg-slate-100 text-slate-600'}`}
+            >
               {count}
             </span>
           </button>

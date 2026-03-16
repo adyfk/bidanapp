@@ -1,5 +1,6 @@
 'use client';
 
+import { useSearchParams } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import { useTransition } from 'react';
 import { usePathname, useRouter } from '@/i18n/routing';
@@ -13,12 +14,16 @@ export const LanguageSwitcher = ({ variant = 'light' }: LanguageSwitcherProps) =
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const toggleLocale = (nextLocale: string) => {
     if (locale === nextLocale) return;
 
+    const query = searchParams.toString();
+    const nextTarget = (query ? `${pathname}?${query}` : pathname) as Parameters<typeof router.replace>[0];
+
     startTransition(() => {
-      router.replace(pathname, { locale: nextLocale });
+      router.replace(nextTarget, { locale: nextLocale });
     });
   };
 

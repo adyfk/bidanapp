@@ -7,7 +7,7 @@ import type { ReactNode } from 'react';
 import { useId, useState } from 'react';
 import { useRouter } from '@/i18n/routing';
 import { APP_CONFIG } from '@/lib/config';
-import { APP_ROUTES, type CustomerAccessIntent } from '@/lib/routes';
+import { APP_ROUTES, type CustomerAccessIntent, professionalAccessRoute } from '@/lib/routes';
 import { useViewerSession } from '@/lib/use-viewer-session';
 
 interface CustomerAccessScreenProps {
@@ -294,19 +294,19 @@ export const CustomerAccessScreen = ({ intent = 'general', nextHref = APP_ROUTES
             </div>
             <div>
               <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-blue-500">
-                {t('bidan.eyebrow')}
+                {t('professional.eyebrow')}
               </p>
-              <h2 className="mt-2 text-[20px] font-bold leading-tight text-gray-900">{t('bidan.title')}</h2>
-              <p className="mt-2 text-[13px] leading-relaxed text-gray-600">{t('bidan.description')}</p>
+              <h2 className="mt-2 text-[20px] font-bold leading-tight text-gray-900">{t('professional.title')}</h2>
+              <p className="mt-2 text-[13px] leading-relaxed text-gray-600">{t('professional.description')}</p>
             </div>
           </div>
 
           <button
             type="button"
-            onClick={() => router.push(APP_ROUTES.bidanAccess)}
+            onClick={() => router.push(professionalAccessRoute())}
             className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-white py-4 text-[14px] font-bold text-blue-700 shadow-sm transition-transform active:scale-[0.99]"
           >
-            {t('bidan.cta')}
+            {t('professional.cta')}
             <ArrowRight className="h-4 w-4" />
           </button>
         </section>

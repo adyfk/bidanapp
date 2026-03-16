@@ -114,6 +114,7 @@ export interface ProfessionalStory {
 }
 
 export interface ProfessionalPortfolioEntry {
+  id: string;
   index: number;
   title: string;
   serviceId?: string;
@@ -124,6 +125,7 @@ export interface ProfessionalPortfolioEntry {
 }
 
 export interface ProfessionalGalleryItem {
+  id: string;
   index: number;
   image: string;
   alt: string;

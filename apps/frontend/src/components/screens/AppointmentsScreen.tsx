@@ -1,6 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
+import { useEffect } from 'react';
 import { CustomerAccessScreen } from '@/components/screens/CustomerAccessScreen';
 import { InlineFeedbackNotice } from '@/components/ui/InlineFeedbackNotice';
 import { AppointmentChatSheet } from '@/features/appointments/components/AppointmentChatSheet';
@@ -16,17 +17,19 @@ import {
   isValidAppointmentStatusFilter,
   isValidAppointmentTab,
 } from '@/features/appointments/lib/status';
+import { useRouter } from '@/i18n/routing';
 import { APP_CONFIG } from '@/lib/config';
-import { APP_ROUTES } from '@/lib/routes';
+import { APP_ROUTES, professionalDashboardRoute } from '@/lib/routes';
 import { useViewerSession } from '@/lib/use-viewer-session';
 
 export const AppointmentsScreen = () => {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab');
   const statusParam = searchParams.get('status');
   const requestedTab = isValidAppointmentTab(tabParam) ? tabParam : 'active';
   const requestedStatus = isValidAppointmentStatusFilter(statusParam) ? statusParam : 'all';
-  const { isCustomer } = useViewerSession();
+  const { isCustomer, isProfessional } = useViewerSession();
   const {
     activeTab,
     canChatSelectedAppointment,
@@ -67,6 +70,16 @@ export const AppointmentsScreen = () => {
         : 'all',
     initialTab: requestedTab,
   });
+
+  useEffect(() => {
+    if (isProfessional) {
+      router.replace(professionalDashboardRoute('requests'));
+    }
+  }, [isProfessional, router]);
+
+  if (isProfessional) {
+    return null;
+  }
 
   if (!isCustomer) {
     return <CustomerAccessScreen intent="activity" nextHref={APP_ROUTES.appointments} />;

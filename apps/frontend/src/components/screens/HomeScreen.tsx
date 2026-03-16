@@ -26,6 +26,8 @@ import {
   appointmentsRoute,
   customerAccessRoute,
   exploreRoute,
+  professionalAccessRoute,
+  professionalDashboardRoute,
   professionalRoute,
 } from '@/lib/routes';
 import { useUiText } from '@/lib/ui-text';
@@ -37,7 +39,7 @@ export const HomeScreen = () => {
   const t = useTranslations('Home');
   const professionalT = useTranslations('Professional');
   const uiText = useUiText();
-  const { isCustomer } = useViewerSession();
+  const { isCustomer, isProfessional } = useViewerSession();
   const { isFavorite, selectedAreaId, toggleFavorite, userLocation } = useProfessionalUserPreferences();
   const featuredAppointmentCard = ACTIVE_HOME_FEED.featuredAppointment;
   const featuredProfessional = featuredAppointmentCard?.professional;
@@ -52,6 +54,16 @@ export const HomeScreen = () => {
     : APP_ROUTES.appointments;
   const customerActivityRoute = customerAccessRoute({ intent: 'activity', next: APP_ROUTES.appointments });
   const customerProfileRoute = customerAccessRoute({ intent: 'profile', next: APP_ROUTES.profile });
+  const headerProfileRoute = isProfessional
+    ? professionalDashboardRoute('overview')
+    : isCustomer
+      ? APP_ROUTES.profile
+      : customerProfileRoute;
+  const appointmentSectionRoute = isProfessional
+    ? professionalDashboardRoute('requests')
+    : isCustomer
+      ? featuredAppointmentsRoute
+      : customerActivityRoute;
   const homeCategories = (
     APP_SECTION_CONFIG.homeCategoryIds?.length
       ? APP_SECTION_CONFIG.homeCategoryIds
@@ -72,7 +84,7 @@ export const HomeScreen = () => {
       >
         <button
           type="button"
-          onClick={() => router.push(isCustomer ? APP_ROUTES.profile : customerProfileRoute)}
+          onClick={() => router.push(headerProfileRoute)}
           className="w-11 h-11 relative rounded-full bg-gray-200 overflow-hidden border-2 border-white shadow-sm hover:opacity-80 transition-opacity active:scale-95"
         >
           {isCustomer ? (
@@ -123,11 +135,32 @@ export const HomeScreen = () => {
       <div className="px-6 space-y-7">
         {/* Section: Appointment */}
         <div>
-          <SectionHeader
-            title={t('appointment')}
-            onSeeAll={() => router.push(isCustomer ? featuredAppointmentsRoute : customerActivityRoute)}
-          />
-          {!isCustomer ? (
+          <SectionHeader title={t('appointment')} onSeeAll={() => router.push(appointmentSectionRoute)} />
+          {isProfessional ? (
+            <div className="rounded-[28px] border border-blue-100 bg-white p-6 shadow-sm">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+                <Calendar className="w-5 h-5" />
+              </div>
+              <h3 className="mb-2 text-[18px] font-bold text-gray-900">{t('professionalActivityTitle')}</h3>
+              <p className="mb-5 text-[14px] leading-relaxed text-gray-500">{t('professionalActivityDescription')}</p>
+              <div className="flex flex-col gap-3">
+                <button
+                  type="button"
+                  onClick={() => router.push(professionalDashboardRoute('requests'))}
+                  className="w-full rounded-full bg-blue-600 py-3.5 text-[14px] font-bold text-white"
+                >
+                  {t('professionalActivityPrimaryCta')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push(APP_ROUTES.explore)}
+                  className="w-full rounded-full bg-gray-100 py-3.5 text-[14px] font-bold text-gray-700 transition-colors hover:bg-gray-200"
+                >
+                  {t('professionalActivitySecondaryCta')}
+                </button>
+              </div>
+            </div>
+          ) : !isCustomer ? (
             <div className="rounded-[28px] border border-rose-100 bg-white p-6 shadow-sm">
               <div
                 className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl"
@@ -148,7 +181,9 @@ export const HomeScreen = () => {
                 </button>
                 <button
                   type="button"
-                  onClick={() => router.push(APP_ROUTES.bidanAccess)}
+                  onClick={() =>
+                    router.push(isProfessional ? professionalDashboardRoute('overview') : professionalAccessRoute())
+                  }
                   className="w-full rounded-full bg-gray-100 py-3.5 text-[14px] font-bold text-gray-700 transition-colors hover:bg-gray-200"
                 >
                   {t('visitorActivitySecondaryCta')}

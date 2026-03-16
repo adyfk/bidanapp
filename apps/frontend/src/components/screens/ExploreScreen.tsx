@@ -5,17 +5,25 @@ import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Suspense, useEffect, useState } from 'react';
 import { ProfessionalCard } from '@/components/ui/ProfessionalCard';
+import {
+  filterChipClass,
+  iconButtonSurfaceClass,
+  insetSurfaceClass,
+  mutedInputClass,
+  surfaceCardClass,
+  surfaceCardPaddedClass,
+} from '@/components/ui/tokens';
 import { APP_CONFIG } from '@/lib/config';
 import {
   getProfessionalCategories,
   getProfessionalCategoryLabel,
   MOCK_CATEGORIES,
-  MOCK_PROFESSIONALS,
   MOCK_SERVICES,
 } from '@/lib/mock-db/catalog';
 import { ACTIVE_USER_CONTEXT } from '@/lib/mock-db/runtime';
 import { professionalRoute } from '@/lib/routes';
 import { useUiText } from '@/lib/ui-text';
+import { useProfessionalPortal } from '@/lib/use-professional-portal';
 import { useProfessionalUserPreferences } from '@/lib/use-professional-user-preferences';
 import type { GeoPoint, ProfessionalGender } from '@/types/catalog';
 
@@ -42,6 +50,7 @@ const ExploreContent = () => {
   const [longitudeInput, setLongitudeInput] = useState(formatCoordinate(ACTIVE_USER_CONTEXT.userLocation.longitude));
   const t = useTranslations('Explore');
   const uiText = useUiText();
+  const { publicProfessionals } = useProfessionalPortal();
   const {
     favoriteProfessionalIds,
     isCustomLocation,
@@ -173,7 +182,7 @@ const ExploreContent = () => {
     }
   };
 
-  const filteredProfessionals = MOCK_PROFESSIONALS.filter((professional) => {
+  const filteredProfessionals = publicProfessionals.filter((professional) => {
     const categoryName = getProfessionalCategoryLabel(professional).toLowerCase();
     const query = searchQuery.toLowerCase();
     const matchesServiceName =
@@ -232,12 +241,14 @@ const ExploreContent = () => {
 
         <div className="space-y-6 px-6">
           <div className="flex gap-3">
-            <div className="flex flex-1 items-center rounded-full border border-gray-100 bg-white px-4 py-3 shadow-sm transition-all focus-within:ring-2 focus-within:ring-teal-500/20">
+            <div
+              className={`flex flex-1 items-center ${surfaceCardClass} rounded-full px-4 py-3 focus-within:border-blue-200 focus-within:ring-2 focus-within:ring-blue-100`}
+            >
               <Search className="mr-2 h-5 w-5 text-gray-400" />
               <input
                 type="text"
                 placeholder={t('searchPlaceholder', { professional: uiText.terms.professional.toLowerCase() })}
-                className="w-full border-none bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-400"
+                className="w-full border-none bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
               />
@@ -245,8 +256,7 @@ const ExploreContent = () => {
             <button
               type="button"
               onClick={() => setIsFilterModalOpen(true)}
-              className="relative flex h-12 w-12 items-center justify-center rounded-full border border-gray-100 bg-white shadow-sm transition-transform hover:bg-gray-50 active:scale-95"
-              style={{ color: APP_CONFIG.colors.primary }}
+              className={`relative h-12 w-12 ${iconButtonSurfaceClass}`}
             >
               <SlidersHorizontal className="h-5 w-5" />
               {activeFilterCount > 0 ? (
@@ -274,10 +284,12 @@ const ExploreContent = () => {
                 {t('changeLocation')}
               </button>
             </div>
-            <p className="mb-4 text-[12px] text-gray-500">{resolvedLocation.formattedAddress}</p>
-            <p className="-mt-2 mb-4 text-[11px] text-gray-400">
-              {formatCoordinate(userLocation.latitude)}, {formatCoordinate(userLocation.longitude)}
-            </p>
+            <div className={`${surfaceCardPaddedClass} mb-4`}>
+              <p className="text-[12px] text-slate-500">{resolvedLocation.formattedAddress}</p>
+              <p className="mt-2 text-[11px] text-slate-400">
+                {formatCoordinate(userLocation.latitude)}, {formatCoordinate(userLocation.longitude)}
+              </p>
+            </div>
 
             {filteredProfessionals.length > 0 ? (
               <div className="space-y-4">
@@ -325,7 +337,7 @@ const ExploreContent = () => {
               <button
                 type="button"
                 onClick={() => setIsFilterModalOpen(false)}
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-all hover:bg-gray-200 active:scale-95"
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition-all hover:bg-slate-200 active:scale-95"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -335,7 +347,7 @@ const ExploreContent = () => {
               <div className="space-y-4">
                 <h3 className="text-[15px] font-bold text-gray-900">{t('locationSection')}</h3>
 
-                <div className="rounded-[22px] border border-gray-100 bg-gray-50 p-4">
+                <div className={`${insetSurfaceClass} p-4`}>
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
@@ -382,8 +394,7 @@ const ExploreContent = () => {
                   type="button"
                   onClick={detectCurrentLocation}
                   disabled={isDetectingLocation || isResolvingLocation}
-                  className="flex w-full items-center justify-center rounded-2xl px-4 py-3 text-[14px] font-bold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-70"
-                  style={{ backgroundColor: APP_CONFIG.colors.primary }}
+                  className="flex w-full items-center justify-center rounded-[18px] bg-blue-600 px-4 py-3 text-[14px] font-bold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {isDetectingLocation || isResolvingLocation ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -401,7 +412,7 @@ const ExploreContent = () => {
                       step="any"
                       value={latitudeInput}
                       onChange={(event) => setLatitudeInput(event.target.value)}
-                      className="w-full rounded-2xl border border-gray-200 px-4 py-3 text-sm text-gray-700 outline-none transition-all focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+                      className={mutedInputClass}
                     />
                   </label>
                   <label className="space-y-2">
@@ -411,7 +422,7 @@ const ExploreContent = () => {
                       step="any"
                       value={longitudeInput}
                       onChange={(event) => setLongitudeInput(event.target.value)}
-                      className="w-full rounded-2xl border border-gray-200 px-4 py-3 text-sm text-gray-700 outline-none transition-all focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+                      className={mutedInputClass}
                     />
                   </label>
                 </div>
@@ -427,12 +438,7 @@ const ExploreContent = () => {
                   <button
                     type="button"
                     onClick={() => setActiveCategoryId('all')}
-                    className={`rounded-full border px-4 py-2.5 text-[13px] font-bold transition-all ${
-                      activeCategoryId === 'all'
-                        ? 'border-transparent text-white shadow-md'
-                        : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
-                    }`}
-                    style={{ backgroundColor: activeCategoryId === 'all' ? APP_CONFIG.colors.primary : undefined }}
+                    className={filterChipClass(activeCategoryId === 'all')}
                   >
                     {t('allCategories')}
                   </button>
@@ -441,14 +447,7 @@ const ExploreContent = () => {
                       type="button"
                       key={category.id}
                       onClick={() => setActiveCategoryId(category.id)}
-                      className={`rounded-full border px-4 py-2.5 text-[13px] font-bold transition-all ${
-                        activeCategoryId === category.id
-                          ? 'border-transparent text-white shadow-md'
-                          : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
-                      }`}
-                      style={{
-                        backgroundColor: activeCategoryId === category.id ? APP_CONFIG.colors.primary : undefined,
-                      }}
+                      className={filterChipClass(activeCategoryId === category.id)}
                     >
                       {category.name}
                     </button>
@@ -462,36 +461,21 @@ const ExploreContent = () => {
                   <button
                     type="button"
                     onClick={() => setActiveFilter('all')}
-                    className={`rounded-full border px-4 py-2.5 text-[13px] font-bold transition-all ${
-                      activeFilter === 'all'
-                        ? 'border-transparent text-white shadow-md'
-                        : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
-                    }`}
-                    style={{ backgroundColor: activeFilter === 'all' ? APP_CONFIG.colors.primary : undefined }}
+                    className={filterChipClass(activeFilter === 'all')}
                   >
                     {t('allExperts')}
                   </button>
                   <button
                     type="button"
                     onClick={() => setActiveFilter('top_rated')}
-                    className={`rounded-full border px-4 py-2.5 text-[13px] font-bold transition-all ${
-                      activeFilter === 'top_rated'
-                        ? 'border-transparent text-white shadow-md'
-                        : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
-                    }`}
-                    style={{ backgroundColor: activeFilter === 'top_rated' ? APP_CONFIG.colors.primary : undefined }}
+                    className={filterChipClass(activeFilter === 'top_rated')}
                   >
                     <Star className="mr-2 inline h-4 w-4" /> {t('topRated')}
                   </button>
                   <button
                     type="button"
                     onClick={() => setActiveFilter('available')}
-                    className={`rounded-full border px-4 py-2.5 text-[13px] font-bold transition-all ${
-                      activeFilter === 'available'
-                        ? 'border-transparent text-white shadow-md'
-                        : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
-                    }`}
-                    style={{ backgroundColor: activeFilter === 'available' ? APP_CONFIG.colors.primary : undefined }}
+                    className={filterChipClass(activeFilter === 'available')}
                   >
                     <Clock className="mr-2 inline h-4 w-4" /> {t('availableToday')}
                   </button>
@@ -509,20 +493,7 @@ const ExploreContent = () => {
                         type="button"
                         key={genderOption.key}
                         onClick={() => setSelectedGender(genderOption.key)}
-                        className={`flex-1 rounded-xl border py-3 text-[13px] font-bold transition-all ${
-                          isSelected
-                            ? 'bg-gray-50 border-gray-200 text-gray-900'
-                            : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
-                        }`}
-                        style={
-                          isSelected
-                            ? {
-                                borderColor: APP_CONFIG.colors.primary,
-                                color: APP_CONFIG.colors.primary,
-                                backgroundColor: APP_CONFIG.colors.primaryLight,
-                              }
-                            : {}
-                        }
+                        className={`flex-1 ${filterChipClass(isSelected)}`}
                       >
                         {genderOption.label}
                       </button>
@@ -536,24 +507,13 @@ const ExploreContent = () => {
                 <button
                   type="button"
                   onClick={() => setFavoritesOnly((current) => !current)}
-                  className={`flex w-full items-center justify-between rounded-2xl border px-4 py-4 text-left transition-all ${
-                    favoritesOnly ? 'shadow-sm' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
-                  }`}
-                  style={
-                    favoritesOnly
-                      ? {
-                          borderColor: APP_CONFIG.colors.primary,
-                          color: APP_CONFIG.colors.primary,
-                          backgroundColor: APP_CONFIG.colors.primaryLight,
-                        }
-                      : undefined
-                  }
+                  className={`flex w-full items-center justify-between px-4 py-4 text-left transition-all ${filterChipClass(favoritesOnly)}`}
                 >
                   <span className="flex items-center text-[14px] font-semibold">
                     <Heart className={`mr-2 h-4 w-4 ${favoritesOnly ? 'fill-current' : ''}`} />
                     {t('myFavorites')}
                   </span>
-                  <span className="text-[12px] font-medium text-gray-500">{favoriteProfessionalIds.length}</span>
+                  <span className="text-[12px] font-medium text-slate-500">{favoriteProfessionalIds.length}</span>
                 </button>
               </div>
             </div>
@@ -566,7 +526,7 @@ const ExploreContent = () => {
                   setIsFilterModalOpen(false);
                 }}
                 disabled={isResolvingLocation}
-                className="w-1/3 rounded-full bg-gray-100 px-6 py-4 font-bold text-gray-600 transition-all hover:bg-gray-200 active:scale-95"
+                className="w-1/3 rounded-full bg-slate-100 px-6 py-4 font-bold text-slate-600 transition-all hover:bg-slate-200 active:scale-95"
               >
                 {t('reset')}
               </button>
@@ -582,10 +542,7 @@ const ExploreContent = () => {
                   setIsFilterModalOpen(false);
                 }}
                 disabled={isResolvingLocation}
-                className="flex-1 rounded-full py-4 text-center font-bold text-white shadow-lg shadow-pink-500/30 transition-all hover:opacity-90 active:scale-95"
-                style={{
-                  background: `linear-gradient(to right, ${APP_CONFIG.colors.primary}, ${APP_CONFIG.colors.secondary})`,
-                }}
+                className="flex-1 rounded-full bg-blue-600 py-4 text-center font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:opacity-90 active:scale-95"
               >
                 {isResolvingLocation ? t('resolvingLocation') : t('applyFilters')}
               </button>

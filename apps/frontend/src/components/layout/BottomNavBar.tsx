@@ -10,12 +10,16 @@ import { useViewerSession } from '@/lib/use-viewer-session';
 export const BottomNavBar = () => {
   const pathname = usePathname();
   const t = useTranslations('Navigation');
-  const { isCustomer } = useViewerSession();
+  const { isCustomer, isProfessional } = useViewerSession();
+
+  if (isProfessional) {
+    return null;
+  }
 
   if (
     pathname === '/' ||
     pathname.startsWith('/auth') ||
-    pathname.startsWith('/for-bidan') ||
+    pathname.startsWith('/for-professionals') ||
     pathname.startsWith('/p') ||
     pathname.startsWith('/messages/')
   )

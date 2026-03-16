@@ -13,7 +13,11 @@
     "visitorActivityTitle": "Sign in to view your activity",
     "visitorActivityDescription": "Activity history, chat with providers, payments, and reviews are only available to signed-in customers.",
     "visitorActivityPrimaryCta": "Sign In / Register Customer",
-    "visitorActivitySecondaryCta": "I am a Midwife"
+    "visitorActivitySecondaryCta": "Professional Portal",
+    "professionalActivityTitle": "You are currently in professional mode",
+    "professionalActivityDescription": "Use the professional portal to manage profile readiness, active services, coverage, and operational activity without mixing it with the customer flow.",
+    "professionalActivityPrimaryCta": "Open Professional Dashboard",
+    "professionalActivitySecondaryCta": "View customer catalog"
   },
   "Navigation": {
     "home": "Home",
@@ -23,12 +27,16 @@
   },
   "Onboarding": {
     "getStarted": "Get Started",
+    "heroHint": "Choose the path that fits best.",
+    "modeCount": "3 modes",
+    "accessPrompt": "Choose the access flow you want to use first.",
+    "accessBadge": "Access",
     "visitorTitle": "Continue as visitor",
     "visitorDescription": "Explore services and professionals without signing in.",
     "customerTitle": "Sign in / register customer",
     "customerDescription": "Save activity, bookings, and family follow-up.",
-    "bidanTitle": "I am a midwife",
-    "bidanDescription": "Use a separate path so the customer flow stays focused."
+    "professionalTitle": "Sign in as a professional",
+    "professionalDescription": "Use a separate professional path so the customer flow stays focused."
   },
   "CustomerAccess": {
     "navTitle": "Customer Access",
@@ -88,31 +96,474 @@
     "registerHelper": "This form is still a frontend-only simulation. After submitting, the app will switch to customer mode without backend auth.",
     "visitorEyebrow": "Visitor mode",
     "visitorDescription": "Visitors can still explore services and professionals, but activity, booking, and customer profile are gated to this page.",
-    "bidan": {
-      "eyebrow": "Midwife Path",
-      "title": "Midwife access is separated from the customer app",
-      "description": "We separate the midwife flow so customer navigation stays focused on discovery, booking, and family activity.",
-      "cta": "Open midwife path"
+    "professional": {
+      "eyebrow": "Professional Portal",
+      "title": "Professional access is separated from the customer app",
+      "description": "We separate the professional flow so customer navigation stays focused on discovery, booking, and family activity.",
+      "cta": "Open professional portal"
     }
   },
-  "BidanGateway": {
-    "navTitle": "Midwife Path",
-    "eyebrow": "Midwife Area",
-    "title": "The midwife portal is separated from the customer app",
-    "description": "In this frontend simulation, the midwife flow is intentionally not merged into the customer app so operational needs and family needs stay distinct.",
+  "ProfessionalGateway": {
+    "navTitle": "Professional Portal",
+    "eyebrow": "Professional Area",
+    "title": "The professional portal is separated from the customer app",
+    "description": "In this frontend simulation, the professional flow is intentionally not merged into the customer app so operational needs and family needs stay distinct.",
     "capabilities": {
-      "dashboardTitle": "Operational dashboard for midwives",
+      "dashboardTitle": "Operational dashboard for professionals",
       "dashboardDescription": "This area is better suited for practice schedules, service performance, and professional activity summaries.",
       "queueTitle": "Request queue and visit schedule",
-      "queueDescription": "Incoming requests, approvals, and home-visit scheduling are better handled in a dedicated midwife portal.",
+      "queueDescription": "Incoming requests, approvals, and home-visit scheduling are better handled in a dedicated professional portal.",
       "separationTitle": "Clear role separation",
-      "separationDescription": "Customers focus on finding care and follow-up. Midwives focus on operations, capacity, and SLA."
+      "separationDescription": "Customers focus on finding care and follow-up. Professionals focus on operations, capacity, and SLA."
     },
     "nextStepLabel": "Route people by role",
     "nextStepDescription": "If you are a customer, go back to the customer path. If you only want to browse the catalog, continue as a visitor.",
     "actions": {
       "customer": "I am a customer",
       "visitor": "Back as visitor"
+    }
+  },
+  "ProfessionalAccess": {
+    "navTitle": "Professional Access",
+    "eyebrow": "Professional Access",
+    "demoBadge": "Frontend Demo",
+    "title": "Enter the professional portal",
+    "description": "This portal handles professional auth, operational setup, and a dashboard connected to the public professional profile.",
+    "benefits": {
+      "dashboard": "Operational dashboard and profile readiness",
+      "requests": "Monitor requests, schedules, and follow-up",
+      "separation": "Customer and professional flows stay separate"
+    },
+    "alreadyProfessional": "You are already in professional mode. Open the dashboard to continue.",
+    "loginHelper": "Use the demo WhatsApp number and password. If you forget the password, send a reset link to the same number.",
+    "connectedProfileLabel": "Connected public profile",
+    "language": {
+      "title": "Language",
+      "description": "Keep the professional portal in the language you prefer."
+    },
+    "tabs": {
+      "login": "Sign In",
+      "register": "Register"
+    },
+    "profileSelectorLabel": "Choose a professional demo profile",
+    "profileSelectorHint": "This demo profile links the auth flow, setup, dashboard, and public professional profile together.",
+    "fields": {
+      "phone": "WhatsApp number",
+      "password": "Password",
+      "fullName": "Full name",
+      "city": "Home city",
+      "credential": "STR / license number"
+    },
+    "placeholders": {
+      "phone": "Example: +62 812 3000 0000",
+      "password": "Enter a demo password",
+      "fullName": "Professional name",
+      "city": "Example: South Tangerang",
+      "credential": "Example: STR-001-2026"
+    },
+    "errors": {
+      "loginPhoneRequired": "WhatsApp number is required for the professional login simulation.",
+      "loginPasswordRequired": "Password is required for the professional login simulation.",
+      "registerNameRequired": "Full name is required for the professional registration simulation.",
+      "registerPhoneRequired": "WhatsApp number is required for the professional registration simulation.",
+      "registerCredentialRequired": "STR / license number is required for the professional registration simulation."
+    },
+    "actions": {
+      "openDashboard": "Open dashboard",
+      "openProfile": "Professional profile",
+      "login": "Sign in to portal",
+      "register": "Register and continue setup",
+      "forgotPassword": "Forgot password",
+      "sendResetLink": "Send reset link",
+      "useAnotherAccount": "Use another account",
+      "customer": "I am a customer",
+      "visitor": "Back as visitor"
+    },
+    "forgotPassword": {
+      "title": "Reset professional password",
+      "description": "This is a frontend simulation. Enter the professional WhatsApp number to receive a password reset link and continue the login flow.",
+      "phoneLabel": "WhatsApp number for reset",
+      "success": "A demo password reset link was sent to that WhatsApp number.",
+      "error": "Enter a WhatsApp number before sending the reset link."
+    },
+    "registerHelper": "After registering, you will continue to the frontend-only professional setup. The connected public profile focus is: {category}.",
+    "fallbackCategory": "Professional",
+    "separationTitle": "Customer and professional paths stay separate",
+    "separationDescription": "Customers focus on discovery and booking. Professionals focus on readiness, services, coverage, and operations."
+  },
+  "ProfessionalSetup": {
+    "navTitle": "Professional Setup",
+    "eyebrow": "Professional Setup",
+    "title": "Complete operational readiness",
+    "description": "Finish the setup so the professional profile, coverage, and service modes feel complete before entering the dashboard.",
+    "completionLabel": "Completion",
+    "errors": {
+      "coverageRequired": "Choose at least one coverage area.",
+      "practiceModesRequired": "Choose at least one service mode.",
+      "yearsExperienceRequired": "Years of experience is required."
+    },
+    "identityLabel": "Identity and profile",
+    "identityRows": {
+      "phone": "WhatsApp",
+      "city": "City",
+      "credential": "STR / license"
+    },
+    "experienceLabel": "Practice experience",
+    "fields": {
+      "yearsExperience": "Years of experience"
+    },
+    "placeholders": {
+      "yearsExperience": "Example: 8+"
+    },
+    "practiceModesLabel": "Active service modes",
+    "practiceModeHints": {
+      "online": "Enable for quick consults, follow-up, and remote coordination.",
+      "home_visit": "Enable for home visits based on coverage and service radius.",
+      "onsite": "Enable for sessions where the user comes to the practice location."
+    },
+    "coverageLabel": "Coverage areas",
+    "coverageHint": "Choose the main areas used in this professional service coverage simulation.",
+    "selectionSummary": "{areaCount} active areas • {modeCount} service modes",
+    "actions": {
+      "viewPublicProfile": "View public profile",
+      "complete": "Save setup and open dashboard"
+    }
+  },
+  "ProfessionalPortal": {
+    "navTitle": "Professional Dashboard",
+    "eyebrow": "Professional Portal",
+    "headerLabel": "Professional area",
+    "completionLabel": "Completion",
+    "metrics": {
+      "rating": "Rating",
+      "clients": "Clients",
+      "response": "Response",
+      "averagePrice": "Average price",
+      "activeServices": "Active services",
+      "coverage": "Coverage",
+      "areaUnit": "areas"
+    },
+    "actions": {
+      "viewPublicProfile": "View public profile",
+      "openCatalog": "Open customer catalog"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "requests": "Requests",
+      "services": "Services",
+      "portfolio": "Portfolio",
+      "coverage": "Coverage",
+      "trust": "Trust"
+    },
+    "units": {
+      "weeklyCapacity": "{count} per week",
+      "weeklyCapacityLabel": "weekly capacity",
+      "hoursShort": "{count} hours",
+      "hoursCompact": "{count}h",
+      "kilometers": "{count} km",
+      "monthlyCapacity": "{count} per month"
+    },
+    "readiness": {
+      "identity": "Identity ready",
+      "practice": "Active service modes",
+      "practiceCount": "modes",
+      "coverage": "Coverage areas",
+      "coverageCount": "areas",
+      "services": "Active services"
+    },
+    "overview": {
+      "readinessTitle": "Operational checklist",
+      "featuredServiceTitle": "Featured customer-facing service",
+      "noFeaturedService": "No featured service yet",
+      "priceLabel": "Price",
+      "capacityLabel": "Weekly capacity",
+      "bookingFlowLabel": "Booking flow",
+      "leadTimeLabel": "Lead time",
+      "noServiceHint": "Activate at least one service so customers can see clear pricing, duration, and booking modes.",
+      "nextScheduleTitle": "Nearest schedule",
+      "noScheduleTitle": "No ready slot yet",
+      "noSchedule": "No offline slot is ready to show yet. You can still continue managing services and coverage.",
+      "publicProfileTitle": "Public profile summary",
+      "profileChips": {
+        "services": "services",
+        "portfolio": "case studies",
+        "gallery": "gallery assets"
+      }
+    },
+    "requests": {
+      "title": "Recent activity",
+      "summaryDescription": "New requests open by default so inbound work is easier to triage. Switch stages to review quoted, scheduled, and completed cases with their supporting proof.",
+      "visibleCount": "{status}: {count}",
+      "statusUpdateTitle": "Update request stage",
+      "closeButton": "Close editor",
+      "saveButton": "Save status update",
+      "filters": {
+        "all": "All requests"
+      },
+      "fields": {
+        "service": "Service",
+        "area": "Area",
+        "budget": "Budget",
+        "channel": "Channel",
+        "note": "Client note",
+        "currentStatus": "Current status",
+        "requestedMode": "Requested mode"
+      },
+      "moveTo": "Move to stage",
+      "timelineTitle": "Stage progress",
+      "updateAction": "Move to {status}",
+      "evidence": {
+        "title": "Supporting evidence",
+        "description": "Sensitive status updates should include a customer-facing summary and proof so the change can be audited by both sides.",
+        "helper": "Add the summary shared to the customer, then attach proof such as a quote, schedule confirmation, invoice, recap, or other supporting link.",
+        "customerSummaryLabel": "Customer-facing update summary",
+        "noteLabel": "Internal proof note",
+        "urlLabel": "Evidence link (optional)",
+        "customerSummary": "Customer update",
+        "internalNote": "Internal proof note",
+        "historyEmpty": "No stage update has been saved yet. This request is still waiting for the first professional response.",
+        "updatedAt": "Updated",
+        "openLink": "Open evidence",
+        "empty": "No supporting evidence has been attached for this status yet."
+      },
+      "requirements": {
+        "customerSummary": "Customer-facing summary required",
+        "evidence": "Proof required",
+        "internalNote": "Internal note required for completion"
+      },
+      "priority": {
+        "high": "High priority",
+        "medium": "Medium priority",
+        "low": "Low priority"
+      },
+      "status": {
+        "new": "New requests",
+        "quoted": "Quoted",
+        "scheduled": "Scheduled",
+        "completed": "Completed"
+      },
+      "emptyTitle": "No requests in this stage",
+      "emptyDescription": "Switch to another stage or wait for new customer activity to show up here.",
+      "saveSuccess": "Request for {client} was updated to {status}.",
+      "errors": {
+        "invalidTransition": "This request can only move to the next valid stage.",
+        "customerSummaryRequired": "Write the customer-facing summary before saving this status update.",
+        "evidenceRequired": "Add an internal note or an evidence link before saving this status update.",
+        "evidenceNoteRequired": "Add an internal completion note before marking this request as completed."
+      }
+    },
+    "services": {
+      "title": "Services visible to customers",
+      "description": "Choose from existing service templates, then complete pricing, duration, capacity, and booking setup shown in the customer catalog.",
+      "activeLabel": "Active services",
+      "averagePriceLabel": "Average price",
+      "activeCount": "active services",
+      "activeBadge": "Active",
+      "templateBadge": "Ready to fill",
+      "templateLibrary": "Available service templates",
+      "editorTitle": "Configure service details",
+      "featuredBadge": "Featured",
+      "fields": {
+        "summary": "Service summary",
+        "price": "Displayed price",
+        "duration": "Duration",
+        "capacity": "Weekly capacity",
+        "leadTime": "Lead time (hours)",
+        "bookingFlow": "Booking flow",
+        "serviceModes": "Service modes",
+        "defaultMode": "Default mode",
+        "featured": "Set as featured service"
+      },
+      "featuredHint": "The featured service is prioritized in the public profile and dashboard summary.",
+      "editButton": "Edit service",
+      "closeButton": "Close editor",
+      "saveButton": "Save service details",
+      "archiveButton": "Hide from catalog",
+      "activateButton": "Add from template",
+      "saveSuccess": "Service details for {service} were saved.",
+      "archiveSuccess": "{service} was hidden from the public catalog.",
+      "activateSuccess": "{service} was added from the template library."
+    },
+    "portfolio": {
+      "title": "Portfolio and proof of work",
+      "description": "Curate case studies, outcomes, and visual assets so customers can understand the quality and context behind your work.",
+      "publicCountLabel": "Public portfolio",
+      "galleryCountLabel": "Gallery assets",
+      "addButton": "Add portfolio",
+      "addSuccess": "A new portfolio draft was added.",
+      "editButton": "Edit portfolio",
+      "galleryEditButton": "Edit asset",
+      "closeButton": "Close editor",
+      "editorTitle": "Portfolio editor",
+      "fields": {
+        "title": "Case study title",
+        "period": "Period",
+        "service": "Linked service",
+        "summary": "Case summary",
+        "outcomes": "Key outcomes",
+        "image": "Image URL",
+        "visibility": "Visibility"
+      },
+      "noServiceOption": "No specific service",
+      "visibility": {
+        "public": "Public",
+        "private": "Private"
+      },
+      "saveButton": "Save portfolio",
+      "deleteButton": "Delete portfolio",
+      "saveSuccess": "Portfolio was updated.",
+      "deleteSuccess": "Portfolio was removed from the simulation.",
+      "galleryTitle": "Profile gallery",
+      "galleryDescription": "Add assets that strengthen customer trust in your practice, services, and outcomes.",
+      "galleryAddButton": "Add asset",
+      "galleryAddSuccess": "A new gallery asset was added.",
+      "galleryFields": {
+        "label": "Asset label",
+        "alt": "Alt text",
+        "image": "Image URL",
+        "featured": "Set as featured asset"
+      },
+      "galleryFeaturedHint": "The featured asset will appear first in the public gallery.",
+      "gallerySaveButton": "Save asset",
+      "galleryDeleteButton": "Delete asset",
+      "gallerySaveSuccess": "Gallery asset was updated.",
+      "galleryDeleteSuccess": "Gallery asset was removed from the simulation.",
+      "featuredAsset": "Featured asset"
+    },
+    "coverage": {
+      "title": "Service coverage",
+      "radius": "service radius",
+      "areas": "Selected areas",
+      "city": "Home city",
+      "coordinates": "Coverage center coordinates",
+      "practiceModes": "Active mode count",
+      "radiusLabel": "Home-visit radius",
+      "areaCountLabel": "Active areas",
+      "fields": {
+        "city": "Primary city / regency",
+        "responseTime": "Response time target",
+        "practiceLabel": "Practice location label",
+        "practiceAddress": "Practice address",
+        "publicBio": "Public bio",
+        "radius": "Home-visit radius (km)",
+        "capacity": "Monthly capacity",
+        "latitude": "Coverage center latitude",
+        "longitude": "Coverage center longitude",
+        "practiceModes": "Enabled service modes",
+        "areaSelection": "Select coverage areas"
+      },
+      "switches": {
+        "accepting": "Accepting new clients",
+        "acceptingDescription": "Turn this off if the profile should stay visible but stop taking new requests.",
+        "instant": "Auto-approve instant bookings",
+        "instantDescription": "Enable this if instant bookings can go through without manual review.",
+        "onLabel": "On",
+        "offLabel": "Off"
+      },
+      "editButton": "Edit coverage",
+      "closeButton": "Close editor",
+      "validationMessage": "Choose at least one coverage area and one service mode before saving.",
+      "saveButton": "Save coverage settings",
+      "saveSuccess": "Coverage and operational settings were updated."
+    },
+    "trust": {
+      "credentials": "Credentials and compliance",
+      "feedback": "Feedback and service quality",
+      "testimonials": "Recent customer voices",
+      "customerSignals": "Customer trust signals",
+      "summary": {
+        "recommendationRate": "Recommendation rate",
+        "repeatClientRate": "Repeat clients"
+      },
+      "signals": {
+        "services": "Bookable services",
+        "portfolio": "Public portfolio",
+        "gallery": "Visual assets",
+        "response": "Response target"
+      }
+    }
+  },
+  "ProfessionalProfile": {
+    "navTitle": "Professional Profile",
+    "eyebrow": "Professional Settings",
+    "buttons": {
+      "close": "Close",
+      "editProfile": "Edit"
+    },
+    "quickActions": {
+      "dashboardTitle": "Dashboard",
+      "dashboardDescription": "Open requests, readiness, and the main professional summary.",
+      "publicProfileTitle": "Public profile",
+      "publicProfileDescription": "Preview the page customers will see before they book."
+    },
+    "hero": {
+      "credentialLabel": "License"
+    },
+    "language": {
+      "title": "App language",
+      "description": "Choose the display language that feels most comfortable when managing the professional account.",
+      "compactDescription": "Use the language that feels easiest"
+    },
+    "actions": {
+      "openDashboard": "Open dashboard",
+      "logout": "Exit professional mode"
+    },
+    "menu": {
+      "accountDescription": "Identity, contact number, public bio, and response target.",
+      "securityDescription": "Change the password or send a reset link when access is blocked."
+    },
+    "account": {
+      "title": "Professional account details",
+      "description": "Keep identity details, the public bio, and the response target clear so customers understand the profile quickly.",
+      "saveButton": "Save profile changes",
+      "success": "The professional profile was updated.",
+      "profileCompletionHint": "The more complete this profile is, the more ready the public profile and operations dashboard become.",
+      "fields": {
+        "displayName": "Professional name",
+        "phone": "WhatsApp number",
+        "city": "Home city",
+        "credentialNumber": "License number",
+        "responseTimeGoal": "Response time target",
+        "profileCompletion": "Profile completion",
+        "publicBio": "Public bio"
+      },
+      "errors": {
+        "displayNameRequired": "Professional name is required.",
+        "phoneRequired": "WhatsApp number is required.",
+        "credentialRequired": "License number is required."
+      }
+    },
+    "security": {
+      "title": "Account security",
+      "description": "Manage the professional demo password and keep a reset path ready whenever the password is forgotten.",
+      "saveButton": "Save new password",
+      "success": "The demo professional password was updated.",
+      "resetTitle": "Forgot password?",
+      "resetDescription": "Send a reset link to the professional WhatsApp number so access can be restored without changing profile data.",
+      "resetButton": "Send password reset",
+      "resetSuccess": "The demo password reset link was sent.",
+      "fields": {
+        "currentPassword": "Current password",
+        "newPassword": "New password",
+        "confirmPassword": "Confirm new password",
+        "resetPhone": "WhatsApp number for reset"
+      },
+      "rules": {
+        "minLength": "At least 8 characters",
+        "hasUppercase": "Contains 1 uppercase letter",
+        "hasNumber": "Contains 1 number",
+        "matches": "Password confirmation must match"
+      },
+      "status": {
+        "ready": "Ready",
+        "pending": "Pending"
+      },
+      "errors": {
+        "currentRequired": "Enter the current password first.",
+        "newPasswordWeak": "The new password does not meet the minimum security rules.",
+        "confirmMismatch": "The password confirmation does not match the new password.",
+        "resetPhoneRequired": "Enter the WhatsApp number for the reset flow first."
+      }
     }
   },
   "Professional": {
@@ -167,9 +618,21 @@
     "noFilteredServicesHint": "Try another search term or reset the filters to see more services.",
     "showServiceDetails": "View service details",
     "hideServiceDetails": "Hide details",
-    "makeAppointment": "Booking Request",
-    "inquiryChat": "Tanya {professional}",
-    "experience": "Years Exp."
+    "makeAppointment": "Request booking",
+    "inquiryChat": "Ask {professional}",
+    "experience": "Years Exp.",
+    "requestUpdates": {
+      "eyebrow": "Request update",
+      "title": "Your latest request with {professional}",
+      "description": "This status is shared by the provider so you can track quotes, scheduling, and completion more transparently.",
+      "service": "Service",
+      "area": "Area",
+      "requestedAt": "Requested",
+      "updatedAt": "Last updated",
+      "submittedSummary": "Your request has been sent and is waiting for provider review.",
+      "emptySummary": "The provider has not added a customer-facing summary for this stage yet.",
+      "openEvidence": "Open proof"
+    }
   },
   "Explore": {
     "title": "{professional}s",
@@ -247,8 +710,8 @@
     "available": "Available {professional}s",
     "expertsCount": "{count} {count, plural, =1 {Expert} other {Experts}}",
     "noProfessionals": "No professionals currently provide this service.",
-    "makeAppointment": "Booking Request",
-    "inquiryChat": "Tanya Bidan"
+    "makeAppointment": "Request booking",
+    "inquiryChat": "Ask Professional"
   },
   "UI": {
     "seeAll": "See All"
@@ -282,11 +745,11 @@
       "activityTitle": "Activity",
       "activityDescription": "Review active sessions, progress, and family follow-up.",
       "exploreTitle": "Find care",
-      "exploreDescription": "Discover midwives and follow-up services that fit home needs."
+      "exploreDescription": "Discover professionals and follow-up services that fit home needs."
     },
-    "bidanCard": {
-      "title": "Midwife Path Stays Separate",
-      "description": "If you are a midwife, use this CTA to reach a dedicated area so the customer flow does not get mixed."
+    "professionalCard": {
+      "title": "Professional Portal Stays Separate",
+      "description": "If you are a professional, use this CTA to reach a dedicated area so the customer flow does not get mixed."
     },
     "menu": {
       "languageDescription": "Switch between Bahasa Indonesia and English anytime.",
@@ -375,7 +838,7 @@
   },
   "UiText": {
     "terms": {
-      "professional": "Midwife",
+      "professional": "Professional",
       "category": "Category",
       "service": "Service",
       "location": "Clinic / Private Practice",
@@ -386,6 +849,7 @@
       "online": "Online booking created. Continue to scheduling and payment.",
       "homeVisit": "Home care request submitted. The system will check coverage and confirm the schedule.",
       "onsite": "Visit reservation created. Choose an available appointment slot.",
+      "customerAppChannel": "Customer app",
       "providerSelectedNotice": "{bookingMessage} Selected professional: {providerName}.",
       "serviceSelectedNotice": "{bookingMessage} Selected service: {serviceName}.{scheduleMessage}",
       "scheduleNotice": " Schedule: {dateIso} • {timeLabel}."

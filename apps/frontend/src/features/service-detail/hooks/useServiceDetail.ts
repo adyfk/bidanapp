@@ -6,10 +6,10 @@ import {
   getProfessionalCategoryLabel,
   getProfessionalCoverageStatus,
   MOCK_CATEGORIES,
-  MOCK_PROFESSIONALS,
   MOCK_SERVICES,
 } from '@/lib/mock-db/catalog';
 import { useUiText } from '@/lib/ui-text';
+import { useProfessionalPortal } from '@/lib/use-professional-portal';
 import { useProfessionalUserPreferences } from '@/lib/use-professional-user-preferences';
 import type { ProfessionalService, ServiceDeliveryMode, ServiceModeFlags } from '@/types/catalog';
 
@@ -37,50 +37,53 @@ export const useServiceDetail = (serviceId: string) => {
   const uiText = useUiText();
   const [notice, setNotice] = useState<string | null>(null);
   const { selectedAreaId, userLocation } = useProfessionalUserPreferences();
+  const { createCustomerRequest, publicProfessionals } = useProfessionalPortal();
   const service = MOCK_SERVICES.find((item) => item.id === serviceId) || null;
   const categoryName = service
     ? MOCK_CATEGORIES.find((category) => category.id === service.categoryId)?.name || ''
     : '';
   const providers: ServiceProviderSummary[] = service
-    ? MOCK_PROFESSIONALS.filter((professional) =>
-        professional.services.some((professionalService) => professionalService.serviceId === service.id),
-      ).map((professional) => {
-        const professionalService = professional.services.find(
-          (serviceMapping) => serviceMapping.serviceId === service.id,
-        );
-        const coverageStatus = getProfessionalCoverageStatus(professional, userLocation, selectedAreaId);
-        const accessibleModes = professionalService
-          ? getAccessibleServiceModes(
-              professionalService.serviceModes,
-              coverageStatus,
-              professional.availability.isAvailable,
-            )
-          : [];
-        const bookingMode =
-          professionalService && accessibleModes.includes(professionalService.defaultMode)
-            ? professionalService.defaultMode
-            : accessibleModes[0] || professionalService?.defaultMode || service.defaultMode;
+    ? publicProfessionals
+        .filter((professional) =>
+          professional.services.some((professionalService) => professionalService.serviceId === service.id),
+        )
+        .map((professional) => {
+          const professionalService = professional.services.find(
+            (serviceMapping) => serviceMapping.serviceId === service.id,
+          );
+          const coverageStatus = getProfessionalCoverageStatus(professional, userLocation, selectedAreaId);
+          const accessibleModes = professionalService
+            ? getAccessibleServiceModes(
+                professionalService.serviceModes,
+                coverageStatus,
+                professional.availability.isAvailable,
+              )
+            : [];
+          const bookingMode =
+            professionalService && accessibleModes.includes(professionalService.defaultMode)
+              ? professionalService.defaultMode
+              : accessibleModes[0] || professionalService?.defaultMode || service.defaultMode;
 
-        return {
-          accessibleModes,
-          badgeLabel: professional.badgeLabel,
-          bookingFlow: professionalService?.bookingFlow || 'request',
-          canBook: accessibleModes.length > 0,
-          categoryLabel: getProfessionalCategoryLabel(professional) || 'Professional',
-          defaultMode: bookingMode,
-          isAvailable: professional.availability.isAvailable,
-          isHomeVisitCovered: coverageStatus.isHomeVisitCovered,
-          id: professional.id,
-          image: professional.image,
-          location: professional.location,
-          name: professional.name,
-          providedServiceDuration: professionalService?.duration,
-          providedServicePrice: professionalService?.price,
-          rating: professional.rating,
-          serviceModes: professionalService?.serviceModes || service.serviceModes,
-          slug: professional.slug,
-        };
-      })
+          return {
+            accessibleModes,
+            badgeLabel: professional.badgeLabel,
+            bookingFlow: professionalService?.bookingFlow || 'request',
+            canBook: accessibleModes.length > 0,
+            categoryLabel: getProfessionalCategoryLabel(professional) || 'Professional',
+            defaultMode: bookingMode,
+            isAvailable: professional.availability.isAvailable,
+            isHomeVisitCovered: coverageStatus.isHomeVisitCovered,
+            id: professional.id,
+            image: professional.image,
+            location: professional.location,
+            name: professional.name,
+            providedServiceDuration: professionalService?.duration,
+            providedServicePrice: professionalService?.price,
+            rating: professional.rating,
+            serviceModes: professionalService?.serviceModes || service.serviceModes,
+            slug: professional.slug,
+          };
+        })
     : [];
 
   const requestBooking = (provider?: ServiceProviderSummary) => {
@@ -92,11 +95,22 @@ export const useServiceDetail = (serviceId: string) => {
       return;
     }
 
-    setNotice(
-      provider
-        ? uiText.getProviderBookingNotice(provider.defaultMode, provider.name)
-        : uiText.getBookingMessage(service.defaultMode),
-    );
+    const nextNotice = provider
+      ? uiText.getProviderBookingNotice(provider.defaultMode, provider.name)
+      : uiText.getBookingMessage(service.defaultMode);
+
+    if (provider) {
+      createCustomerRequest({
+        budgetLabel: provider.providedServicePrice || 'Rp 0',
+        channel: uiText.booking.customerAppChannel,
+        note: nextNotice,
+        professionalId: provider.id,
+        requestedMode: provider.defaultMode,
+        serviceId: service.id,
+      });
+    }
+
+    setNotice(nextNotice);
   };
 
   return {

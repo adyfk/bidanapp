@@ -241,6 +241,7 @@ export const MOCK_PROFESSIONALS: Professional[] = professionals.map((professiona
       note: row.note,
     })),
     portfolioEntries: sortByIndex(portfolioEntryRowsByProfessionalId.get(professionalRow.id) || []).map((row) => ({
+      id: row.id,
       index: row.index,
       title: row.title,
       serviceId: row.serviceId || undefined,
@@ -250,6 +251,7 @@ export const MOCK_PROFESSIONALS: Professional[] = professionals.map((professiona
       image: row.image,
     })),
     gallery: sortByIndex(galleryItemRowsByProfessionalId.get(professionalRow.id) || []).map((row) => ({
+      id: row.id,
       index: row.index,
       image: row.image,
       alt: row.alt,

@@ -7,6 +7,7 @@ import { getRequiredItem, sortByIndex } from './utils';
 const appointmentRows = sortByIndex(appointmentRowsData as AppointmentRow[]);
 
 const hydrateAppointment = (appointmentRow: AppointmentRow): Appointment => ({
+  consumerId: appointmentRow.consumerId,
   id: appointmentRow.id,
   professional: getRequiredItem(
     getProfessionalById(appointmentRow.professionalId),

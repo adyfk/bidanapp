@@ -35,7 +35,6 @@ export const useUiText = () => {
   }));
 
   return {
-    booking: bookingMessages,
     terms: {
       professional: t('terms.professional'),
       category: t('terms.category'),
@@ -61,6 +60,12 @@ export const useUiText = () => {
         dateIso,
         timeLabel,
       }),
+    booking: {
+      customerAppChannel: t('booking.customerAppChannel'),
+      home_visit: bookingMessages.home_visit,
+      online: bookingMessages.online,
+      onsite: bookingMessages.onsite,
+    },
     chatAutoReply: t('alerts.chatAutoReply'),
     paymentSuccessAlert: t('alerts.paymentSuccess'),
     chatSentAlert: t('alerts.chatSent'),

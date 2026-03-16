@@ -2,6 +2,7 @@
 
 import { BadgeCheck, Clock3, Languages } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { CustomerRequestStatusCard } from '@/features/professional-detail/components/CustomerRequestStatusCard';
 import { ProfessionalBookingBar } from '@/features/professional-detail/components/ProfessionalBookingBar';
 import { ProfessionalHeroSection } from '@/features/professional-detail/components/ProfessionalHeroSection';
 import { ProfessionalPortfolioSections } from '@/features/professional-detail/components/ProfessionalPortfolioSections';
@@ -43,6 +44,7 @@ export const ProfessionalDetailScreen = ({ professionalSlug }: { professionalSlu
 
   const {
     canRequestBooking,
+    customerRequest,
     getServiceName,
     notice,
     offeredServices,
@@ -102,6 +104,9 @@ export const ProfessionalDetailScreen = ({ professionalSlug }: { professionalSlu
       />
 
       <div className="relative z-10 mt-6 space-y-5 px-6 pb-52">
+        {isCustomer && customerRequest ? (
+          <CustomerRequestStatusCard professionalName={professional.name} request={customerRequest} />
+        ) : null}
         <ProfessionalPracticeSections
           profCategory={profCategory}
           profileCopy={profileCopy}
