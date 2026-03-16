@@ -10,7 +10,6 @@ import professionalGalleryItemsData from '@/data/mock-db/professional_gallery_it
 import professionalLanguagesData from '@/data/mock-db/professional_languages.json';
 import professionalPortfolioEntriesData from '@/data/mock-db/professional_portfolio_entries.json';
 import professionalPracticeLocationsData from '@/data/mock-db/professional_practice_locations.json';
-import professionalRecentActivitiesData from '@/data/mock-db/professional_recent_activities.json';
 import professionalServiceOfferingsData from '@/data/mock-db/professional_service_offerings.json';
 import professionalServiceScheduleDaysData from '@/data/mock-db/professional_service_schedule_days.json';
 import professionalServiceTimeSlotsData from '@/data/mock-db/professional_service_time_slots.json';
@@ -44,13 +43,13 @@ import type {
   ProfessionalLabelRow,
   ProfessionalPortfolioEntryRow,
   ProfessionalPracticeLocationRow,
-  ProfessionalRecentActivityRow,
   ProfessionalRow,
   ProfessionalServiceOfferingRow,
   ProfessionalServiceScheduleDayRow,
   ProfessionalServiceTimeSlotRow,
   ProfessionalTestimonialRow,
 } from '@/types/mock-db';
+import { APPOINTMENT_ROWS } from './appointment-records';
 import { getRequiredItem, sortByIndex } from './utils';
 
 const groupBy = <T, K>(items: T[], getKey: (item: T) => K) => {
@@ -93,7 +92,6 @@ const professionalFeedbackMetrics = sortByIndex(professionalFeedbackMetricsData 
 const professionalFeedbackBreakdowns = sortByIndex(
   professionalFeedbackBreakdownsData as ProfessionalFeedbackBreakdownRow[],
 );
-const professionalRecentActivities = sortByIndex(professionalRecentActivitiesData as ProfessionalRecentActivityRow[]);
 const professionalServiceOfferings = sortByIndex(professionalServiceOfferingsData as ProfessionalServiceOfferingRow[]);
 const professionalServiceScheduleDays = sortByIndex(
   professionalServiceScheduleDaysData as ProfessionalServiceScheduleDayRow[],
@@ -113,10 +111,38 @@ const testimonialRowsByProfessionalId = groupBy(professionalTestimonials, (row) 
 const feedbackSummaryByProfessionalId = new Map(professionalFeedbackSummaries.map((row) => [row.professionalId, row]));
 const feedbackMetricRowsByProfessionalId = groupBy(professionalFeedbackMetrics, (row) => row.professionalId);
 const feedbackBreakdownRowsByProfessionalId = groupBy(professionalFeedbackBreakdowns, (row) => row.professionalId);
-const recentActivityRowsByProfessionalId = groupBy(professionalRecentActivities, (row) => row.professionalId);
 const serviceOfferingRowsByProfessionalId = groupBy(professionalServiceOfferings, (row) => row.professionalId);
 const scheduleDayRowsByOfferingId = groupBy(professionalServiceScheduleDays, (row) => row.serviceOfferingId);
 const timeSlotRowsByScheduleDayId = groupBy(professionalServiceTimeSlots, (row) => row.scheduleDayId);
+const appointmentRecentActivitiesByProfessionalId = groupBy(
+  APPOINTMENT_ROWS.flatMap((appointmentRow) =>
+    appointmentRow.recentActivity
+      ? [
+          {
+            index: appointmentRow.index,
+            professionalId: appointmentRow.professionalId,
+            ...appointmentRow.recentActivity,
+          },
+        ]
+      : [],
+  ),
+  (row) => row.professionalId,
+);
+const appointmentTestimonialsByProfessionalId = groupBy(
+  APPOINTMENT_ROWS.flatMap((appointmentRow) =>
+    appointmentRow.customerFeedback
+      ? [
+          {
+            index: appointmentRow.index,
+            professionalId: appointmentRow.professionalId,
+            serviceId: appointmentRow.serviceId,
+            ...appointmentRow.customerFeedback,
+          },
+        ]
+      : [],
+  ),
+  (row) => row.professionalId,
+);
 
 export const SERVICE_DELIVERY_MODE_ORDER: ServiceDeliveryMode[] = ['online', 'home_visit', 'onsite'];
 export const isOfflineServiceMode = (mode: ServiceDeliveryMode) => mode !== 'online';
@@ -182,6 +208,30 @@ export const MOCK_PROFESSIONALS: Professional[] = professionals.map((professiona
   const feedbackSummary = getRequiredItem(
     feedbackSummaryByProfessionalId.get(professionalRow.id),
     `professional_feedback_summaries.professionalId -> ${professionalRow.id}`,
+  );
+  const linkedTestimonials = sortByIndex(appointmentTestimonialsByProfessionalId.get(professionalRow.id) || []).map(
+    (row) => ({
+      index: row.index,
+      author: row.author,
+      role: row.role,
+      rating: row.rating,
+      dateLabel: row.dateLabel,
+      quote: row.quote,
+      serviceId: row.serviceId,
+      image: row.image,
+    }),
+  );
+  const seededTestimonials = sortByIndex(testimonialRowsByProfessionalId.get(professionalRow.id) || []).map(
+    (row, index) => ({
+      index: linkedTestimonials.length + index + 1,
+      author: row.author,
+      role: row.role,
+      rating: row.rating,
+      dateLabel: row.dateLabel,
+      quote: row.quote,
+      serviceId: row.serviceId || undefined,
+      image: row.image,
+    }),
   );
 
   return {
@@ -257,16 +307,7 @@ export const MOCK_PROFESSIONALS: Professional[] = professionals.map((professiona
       alt: row.alt,
       label: row.label,
     })),
-    testimonials: sortByIndex(testimonialRowsByProfessionalId.get(professionalRow.id) || []).map((row) => ({
-      index: row.index,
-      author: row.author,
-      role: row.role,
-      rating: row.rating,
-      dateLabel: row.dateLabel,
-      quote: row.quote,
-      serviceId: row.serviceId || undefined,
-      image: row.image,
-    })),
+    testimonials: [...linkedTestimonials, ...seededTestimonials],
     feedbackSummary: {
       recommendationRate: feedbackSummary.recommendationRate,
       repeatClientRate: feedbackSummary.repeatClientRate,
@@ -283,13 +324,15 @@ export const MOCK_PROFESSIONALS: Professional[] = professionals.map((professiona
       total: row.total,
       percentage: row.percentage,
     })),
-    recentActivities: sortByIndex(recentActivityRowsByProfessionalId.get(professionalRow.id) || []).map((row) => ({
-      index: row.index,
-      dateLabel: row.dateLabel,
-      title: row.title,
-      channel: row.channel,
-      summary: row.summary,
-    })),
+    recentActivities: sortByIndex(appointmentRecentActivitiesByProfessionalId.get(professionalRow.id) || []).map(
+      (row) => ({
+        index: row.index,
+        dateLabel: row.dateLabel,
+        title: row.title,
+        channel: row.channel,
+        summary: row.summary,
+      }),
+    ),
     services: sortByIndex(serviceOfferingRowsByProfessionalId.get(professionalRow.id) || []).map(
       hydrateProfessionalService,
     ),

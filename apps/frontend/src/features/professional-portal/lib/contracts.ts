@@ -1,3 +1,4 @@
+import type { AppointmentStatus } from '@/types/appointments';
 import type {
   BookingFlow,
   GeoPoint,
@@ -7,7 +8,7 @@ import type {
   ServiceDeliveryMode,
 } from '@/types/catalog';
 
-export const PROFESSIONAL_PORTAL_SCHEMA_VERSION = 2;
+export const PROFESSIONAL_PORTAL_SCHEMA_VERSION = 3;
 
 export const PROFESSIONAL_PORTAL_API_ENDPOINTS = {
   coverage: '/professionals/me/coverage',
@@ -53,17 +54,20 @@ export interface ProfessionalManagedGalleryItem extends ProfessionalGalleryItem 
 }
 
 export interface ProfessionalManagedRequest {
+  appointmentId: string;
   areaId: string;
   budgetLabel: string;
   channel: string;
   clientId: string;
   clientName: string;
+  customerStatus: AppointmentStatus;
   id: string;
   note: string;
   priority: ProfessionalRequestPriority;
   requestedAt: string;
   requestedAtLabel: string;
   requestedMode: ServiceDeliveryMode;
+  scheduledTimeLabel: string;
   serviceId: string;
   status: ProfessionalRequestStatus;
   statusHistory: ProfessionalRequestStatusEvidence[];
@@ -149,6 +153,7 @@ export interface CreateCustomerRequestInput {
   priority?: ProfessionalRequestPriority;
   professionalId: string;
   requestedMode: ServiceDeliveryMode;
+  scheduledTimeLabel?: string;
   serviceId: string;
 }
 

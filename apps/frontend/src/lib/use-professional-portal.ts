@@ -1,36 +1,41 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type {
-  CreateCustomerRequestInput,
-  ProfessionalAccessDraft,
-  ProfessionalManagedGalleryItem,
-  ProfessionalManagedPortfolioEntry,
-  ProfessionalManagedRequest,
-  ProfessionalManagedService,
-  ProfessionalPortalState,
-  ProfessionalRequestStatus,
-  ProfessionalRequestStatusEvidence,
-  ProfessionalSetupInput,
-  SaveBusinessSettingsInput,
-  UpdateRequestStatusInput,
+import { ACTIVE_APPOINTMENT_STATUSES, HISTORY_APPOINTMENT_STATUSES } from '@/features/appointments/lib/status';
+import {
+  type CreateCustomerRequestInput,
+  PROFESSIONAL_PORTAL_SCHEMA_VERSION,
+  type ProfessionalAccessDraft,
+  type ProfessionalManagedGalleryItem,
+  type ProfessionalManagedPortfolioEntry,
+  type ProfessionalManagedRequest,
+  type ProfessionalManagedService,
+  type ProfessionalPortalState,
+  type ProfessionalRequestStatus,
+  type ProfessionalRequestStatusEvidence,
+  type ProfessionalSetupInput,
+  type SaveBusinessSettingsInput,
+  type UpdateRequestStatusInput,
 } from '@/features/professional-portal/lib/contracts';
 import {
   createProfessionalPortalSnapshot,
   getProfessionalPortalRepository,
 } from '@/features/professional-portal/lib/repository';
 import { validateProfessionalRequestStatusUpdate } from '@/features/professional-portal/lib/request-status';
+import { getAppointmentRowsByProfessionalId } from '@/lib/mock-db/appointment-records';
+import { createHydratedAppointment } from '@/lib/mock-db/appointments';
 import {
   getAreaById,
   getProfessionalById,
   getProfessionalCategoryLabel,
   getServiceById,
-  MOCK_AREAS,
   MOCK_CATEGORIES,
   MOCK_PROFESSIONALS,
   MOCK_SERVICES,
 } from '@/lib/mock-db/catalog';
 import { ACTIVE_CONSUMER, ACTIVE_USER_CONTEXT } from '@/lib/mock-db/runtime';
+import { getRequiredItem } from '@/lib/mock-db/utils';
+import type { Appointment, AppointmentStatus } from '@/types/appointments';
 import type {
   Area,
   BookingFlow,
@@ -382,51 +387,55 @@ for (const professional of MOCK_PROFESSIONALS) {
   }
 }
 
-const getRequestDateOffset = ({
-  days = 0,
-  hours = 0,
-  minutes = 0,
-}: {
-  days?: number;
-  hours?: number;
-  minutes?: number;
-}) => new Date(Date.now() - ((days * 24 + hours) * 60 + minutes) * 60 * 1000);
+const getDateWithOffset = (dateIso: string, minutes: number) =>
+  new Date(new Date(dateIso).getTime() + minutes * 60 * 1000);
 
-const supportsRequestedMode = (service: ProfessionalService | undefined, mode: ServiceDeliveryMode) => {
-  if (!service) {
-    return mode === 'online';
+const getProfessionalRequestStatusFromAppointmentStatus = (status: AppointmentStatus): ProfessionalRequestStatus => {
+  if (status === 'requested') {
+    return 'new';
   }
 
-  if (mode === 'online') {
-    return service.serviceModes.online;
+  if (status === 'approved_waiting_payment' || status === 'paid') {
+    return 'quoted';
   }
 
-  if (mode === 'home_visit') {
-    return service.serviceModes.homeVisit;
+  if (status === 'confirmed' || status === 'in_service') {
+    return 'scheduled';
   }
 
-  return service.serviceModes.onsite;
+  return 'completed';
 };
 
-const pickRequestedMode = (
-  service: ProfessionalService | undefined,
-  preferredModes: ServiceDeliveryMode[],
-): ServiceDeliveryMode => {
-  const nextMode = preferredModes.find((mode) => supportsRequestedMode(service, mode));
-
-  if (nextMode) {
-    return nextMode;
+const getCustomerStatusFromRequestStatus = (
+  requestStatus: ProfessionalRequestStatus,
+  currentCustomerStatus?: AppointmentStatus,
+): AppointmentStatus => {
+  if (requestStatus === 'new') {
+    return 'requested';
   }
 
-  if (service && supportsRequestedMode(service, service.defaultMode)) {
-    return service.defaultMode;
+  if (requestStatus === 'quoted') {
+    return currentCustomerStatus === 'paid' ? 'paid' : 'approved_waiting_payment';
   }
 
-  return 'online';
+  if (requestStatus === 'scheduled') {
+    return currentCustomerStatus === 'in_service' ? 'in_service' : 'confirmed';
+  }
+
+  return 'completed';
 };
 
-const adjustBudgetLabel = (priceLabel: string | undefined, delta: number) =>
-  formatRupiah(Math.max(50000, priceToNumber(priceLabel || formatRupiah(150000)) + delta));
+const getRequestPriorityFromCustomerStatus = (status: AppointmentStatus): ProfessionalManagedRequest['priority'] => {
+  if (status === 'requested' || status === 'approved_waiting_payment' || status === 'in_service') {
+    return 'high';
+  }
+
+  if (status === 'paid' || status === 'confirmed') {
+    return 'medium';
+  }
+
+  return 'low';
+};
 
 const buildRequestStatusHistoryEntry = ({
   createdAt,
@@ -456,6 +465,209 @@ const buildRequestStatusHistoryEntry = ({
   id: `${requestId}-history-${sequence}`,
   status,
 });
+
+const buildLinkedAppointmentStatusHistory = ({
+  appointmentId,
+  customerStatus,
+  requestId,
+  requestedAt,
+  scheduledTimeLabel,
+  serviceName,
+}: {
+  appointmentId: string;
+  customerStatus: AppointmentStatus;
+  requestId: string;
+  requestedAt: string;
+  scheduledTimeLabel: string;
+  serviceName: string;
+}): ProfessionalRequestStatusEvidence[] => {
+  if (customerStatus === 'requested') {
+    return [];
+  }
+
+  const historyEntries: ProfessionalRequestStatusEvidence[] = [];
+
+  if (customerStatus === 'approved_waiting_payment' || customerStatus === 'paid') {
+    historyEntries.push(
+      buildRequestStatusHistoryEntry({
+        createdAt: getDateWithOffset(requestedAt, 15),
+        customerSummary:
+          customerStatus === 'paid'
+            ? `Permintaan ${serviceName} disetujui dan pelanggan sudah menyelesaikan pembayaran.`
+            : `Permintaan ${serviceName} disetujui dan pelanggan sedang menunggu menyelesaikan pembayaran.`,
+        evidenceNote:
+          customerStatus === 'paid'
+            ? `Status booking ${appointmentId} sudah masuk tahap pembayaran terverifikasi.`
+            : `Status booking ${appointmentId} sudah masuk tahap menunggu pembayaran pelanggan.`,
+        fromStatus: 'new',
+        requestId,
+        sequence: 1,
+        status: 'quoted',
+      }),
+    );
+
+    return historyEntries;
+  }
+
+  if (customerStatus === 'confirmed' || customerStatus === 'in_service' || customerStatus === 'completed') {
+    historyEntries.push(
+      buildRequestStatusHistoryEntry({
+        createdAt: getDateWithOffset(requestedAt, 15),
+        customerSummary: `Ringkasan biaya dan persiapan ${serviceName} sudah dibagikan ke pelanggan.`,
+        evidenceNote: `Thread booking ${appointmentId} sudah menyimpan penawaran dan detail persiapan sesi.`,
+        fromStatus: 'new',
+        requestId,
+        sequence: 1,
+        status: 'quoted',
+      }),
+      buildRequestStatusHistoryEntry({
+        createdAt: getDateWithOffset(requestedAt, 45),
+        customerSummary:
+          customerStatus === 'in_service'
+            ? `Sesi ${serviceName} sedang berjalan sesuai jadwal ${scheduledTimeLabel}.`
+            : `Jadwal ${serviceName} sudah dikonfirmasi untuk ${scheduledTimeLabel}.`,
+        evidenceNote: `Jadwal layanan ${appointmentId} sudah dikunci pada ${scheduledTimeLabel}.`,
+        fromStatus: 'quoted',
+        requestId,
+        sequence: 2,
+        status: 'scheduled',
+      }),
+    );
+  }
+
+  if (customerStatus === 'completed') {
+    historyEntries.push(
+      buildRequestStatusHistoryEntry({
+        createdAt: getDateWithOffset(requestedAt, 90),
+        customerSummary: `Sesi ${serviceName} selesai dan ringkasan tindak lanjut sudah dikirim ke pelanggan.`,
+        evidenceNote: `Booking ${appointmentId} ditutup sebagai sesi selesai dengan recap layanan terkirim.`,
+        fromStatus: 'scheduled',
+        requestId,
+        sequence: 3,
+        status: 'completed',
+      }),
+    );
+
+    return historyEntries;
+  }
+
+  if (customerStatus === 'cancelled') {
+    return [
+      buildRequestStatusHistoryEntry({
+        createdAt: getDateWithOffset(requestedAt, 20),
+        customerSummary: `Pelanggan membatalkan ${serviceName} sebelum sesi berlangsung, sehingga slot dikembalikan ke jadwal.`,
+        evidenceNote: `Booking ${appointmentId} ditutup sebagai pembatalan pelanggan.`,
+        fromStatus: 'new',
+        requestId,
+        sequence: 1,
+        status: 'completed',
+      }),
+    ];
+  }
+
+  if (customerStatus === 'rejected') {
+    return [
+      buildRequestStatusHistoryEntry({
+        createdAt: getDateWithOffset(requestedAt, 20),
+        customerSummary: `Permintaan ${serviceName} tidak bisa diproses karena area atau kebutuhan pelanggan tidak sesuai cakupan profesional.`,
+        evidenceNote: `Booking ${appointmentId} ditolak saat proses validasi awal.`,
+        fromStatus: 'new',
+        requestId,
+        sequence: 1,
+        status: 'completed',
+      }),
+    ];
+  }
+
+  return [
+    buildRequestStatusHistoryEntry({
+      createdAt: getDateWithOffset(requestedAt, 15),
+      customerSummary: `Permintaan ${serviceName} disetujui, tetapi booking otomatis ditutup karena pembayaran tidak selesai tepat waktu.`,
+      evidenceNote: `Booking ${appointmentId} kedaluwarsa pada tahap pembayaran.`,
+      fromStatus: 'new',
+      requestId,
+      sequence: 1,
+      status: 'quoted',
+    }),
+    buildRequestStatusHistoryEntry({
+      createdAt: getDateWithOffset(requestedAt, 60),
+      customerSummary: `Booking ${serviceName} berakhir karena pelanggan tidak menyelesaikan pembayaran sebelum batas waktu.`,
+      evidenceNote: `Booking ${appointmentId} ditutup sebagai kedaluwarsa pembayaran.`,
+      fromStatus: 'quoted',
+      requestId,
+      sequence: 2,
+      status: 'completed',
+    }),
+  ];
+};
+
+const buildRequestFromAppointmentSeed = (
+  appointment: Pick<
+    Appointment,
+    | 'areaId'
+    | 'consumerId'
+    | 'id'
+    | 'requestChannel'
+    | 'requestNote'
+    | 'requestedAt'
+    | 'requestedMode'
+    | 'service'
+    | 'status'
+    | 'time'
+    | 'totalPrice'
+  > & { professionalId: string },
+): ProfessionalManagedRequest => {
+  const requestId = `professional-request-linked-${appointment.id}`;
+  const requestedAtDate = new Date(appointment.requestedAt);
+
+  return {
+    appointmentId: appointment.id,
+    areaId: appointment.areaId,
+    budgetLabel: appointment.totalPrice,
+    channel: appointment.requestChannel,
+    clientId: appointment.consumerId,
+    clientName: ACTIVE_CONSUMER.name,
+    customerStatus: appointment.status,
+    id: requestId,
+    note: appointment.requestNote,
+    priority: getRequestPriorityFromCustomerStatus(appointment.status),
+    requestedAt: appointment.requestedAt,
+    requestedAtLabel: formatRequestStatusTimestamp(requestedAtDate),
+    requestedMode: appointment.requestedMode,
+    scheduledTimeLabel: appointment.time,
+    serviceId: appointment.service.id,
+    status: getProfessionalRequestStatusFromAppointmentStatus(appointment.status),
+    statusHistory: buildLinkedAppointmentStatusHistory({
+      appointmentId: appointment.id,
+      customerStatus: appointment.status,
+      requestId,
+      requestedAt: appointment.requestedAt,
+      scheduledTimeLabel: appointment.time,
+      serviceName: appointment.service.name,
+    }),
+  };
+};
+
+const buildRequestFromAppointmentRow = (professionalId: string) =>
+  getAppointmentRowsByProfessionalId(professionalId).map((appointmentRow) =>
+    buildRequestFromAppointmentSeed({
+      areaId: appointmentRow.areaId,
+      consumerId: appointmentRow.consumerId,
+      id: appointmentRow.id,
+      professionalId,
+      requestChannel: appointmentRow.requestChannel,
+      requestNote: appointmentRow.requestNote,
+      requestedAt: appointmentRow.requestedAt,
+      requestedMode: appointmentRow.requestedMode,
+      service: getRequiredItem(
+        getServiceById(appointmentRow.serviceId),
+        `appointments.${appointmentRow.id}.serviceId -> ${appointmentRow.serviceId}`,
+      ),
+      status: appointmentRow.status,
+      time: appointmentRow.scheduledTimeLabel,
+      totalPrice: appointmentRow.totalPriceLabel,
+    }),
+  );
 
 const buildDefaultServiceConfigurations = (professional: Professional | null): ProfessionalManagedService[] => {
   const professionalServiceById = new Map(
@@ -533,328 +745,14 @@ const buildDefaultRequestBoard = (professional: Professional | null): Profession
     return [];
   }
 
-  const copy = getProfessionalPortalCopy();
-  const servicePool = professional.services.length > 0 ? professional.services : [];
-  const areaPool =
-    professional.coverage.areaIds.length > 0
-      ? professional.coverage.areaIds
-      : MOCK_AREAS.slice(0, 3).map((area) => area.id);
-
-  const getServiceAt = (index: number) =>
-    servicePool[index % Math.max(servicePool.length, 1)] || professional.services[0];
-  const getAreaAt = (index: number) =>
-    areaPool[index % Math.max(areaPool.length, 1)] || ACTIVE_USER_CONTEXT.area.id || '';
-
-  const firstService = getServiceAt(0);
-  const secondService = getServiceAt(1);
-  const thirdService = getServiceAt(2);
-
-  const newPrimaryRequestedAt = getRequestDateOffset({ hours: 1, minutes: 40 });
-  const newSecondaryRequestedAt = getRequestDateOffset({ hours: 5, minutes: 15 });
-  const newTertiaryRequestedAt = getRequestDateOffset({ hours: 9, minutes: 20 });
-  const quotedPrimaryRequestedAt = getRequestDateOffset({ days: 1, hours: 2, minutes: 30 });
-  const quotedSecondaryRequestedAt = getRequestDateOffset({ days: 1, hours: 7 });
-  const scheduledPrimaryRequestedAt = getRequestDateOffset({ days: 3, hours: 4 });
-  const scheduledSecondaryRequestedAt = getRequestDateOffset({ days: 4, hours: 5, minutes: 30 });
-  const completedPrimaryRequestedAt = getRequestDateOffset({ days: 6, hours: 3 });
-  const completedSecondaryRequestedAt = getRequestDateOffset({ days: 8, hours: 6 });
-
-  const quotedPrimaryId = `professional-request-${professional.id}-scenario-quoted-1`;
-  const quotedSecondaryId = `professional-request-${professional.id}-scenario-quoted-2`;
-  const scheduledPrimaryId = `professional-request-${professional.id}-scenario-scheduled-1`;
-  const scheduledSecondaryId = `professional-request-${professional.id}-scenario-scheduled-2`;
-  const completedPrimaryId = `professional-request-${professional.id}-scenario-completed-1`;
-  const completedSecondaryId = `professional-request-${professional.id}-scenario-completed-2`;
-
-  return [
-    {
-      areaId: ACTIVE_USER_CONTEXT.area.id || getAreaAt(0),
-      budgetLabel: adjustBudgetLabel(firstService?.price, 0),
-      channel: copy.requestBoard.channels.customerApp,
-      clientId: ACTIVE_CONSUMER.id,
-      clientName: ACTIVE_CONSUMER.name,
-      id: `professional-request-${professional.id}-scenario-new-1`,
-      note: copy.requestBoard.notes.newPrimary,
-      priority: 'high',
-      requestedAt: newPrimaryRequestedAt.toISOString(),
-      requestedAtLabel: formatRequestStatusTimestamp(newPrimaryRequestedAt),
-      requestedMode: pickRequestedMode(firstService, ['home_visit', 'online', 'onsite']),
-      serviceId: firstService?.serviceId || MOCK_SERVICES[0]?.id || '',
-      status: 'new',
-      statusHistory: [],
-    },
-    {
-      areaId: getAreaAt(1),
-      budgetLabel: adjustBudgetLabel(secondService?.price, -15000),
-      channel: copy.requestBoard.channels.whatsappReferral,
-      clientId: `demo-client-${professional.id}-scenario-new-2`,
-      clientName: 'Maya Kurnia',
-      id: `professional-request-${professional.id}-scenario-new-2`,
-      note: copy.requestBoard.notes.newSecondary,
-      priority: 'medium',
-      requestedAt: newSecondaryRequestedAt.toISOString(),
-      requestedAtLabel: formatRequestStatusTimestamp(newSecondaryRequestedAt),
-      requestedMode: pickRequestedMode(secondService, ['online', 'home_visit', 'onsite']),
-      serviceId: secondService?.serviceId || firstService?.serviceId || MOCK_SERVICES[0]?.id || '',
-      status: 'new',
-      statusHistory: [],
-    },
-    {
-      areaId: getAreaAt(2),
-      budgetLabel: adjustBudgetLabel(thirdService?.price, -10000),
-      channel: copy.requestBoard.channels.clinicFollowUpDesk,
-      clientId: `demo-client-${professional.id}-scenario-new-3`,
-      clientName: 'Putri Mahesa',
-      id: `professional-request-${professional.id}-scenario-new-3`,
-      note: copy.requestBoard.notes.newTertiary,
-      priority: 'low',
-      requestedAt: newTertiaryRequestedAt.toISOString(),
-      requestedAtLabel: formatRequestStatusTimestamp(newTertiaryRequestedAt),
-      requestedMode: pickRequestedMode(thirdService, ['onsite', 'online', 'home_visit']),
-      serviceId: thirdService?.serviceId || firstService?.serviceId || MOCK_SERVICES[0]?.id || '',
-      status: 'new',
-      statusHistory: [],
-    },
-    {
-      areaId: getAreaAt(0),
-      budgetLabel: adjustBudgetLabel(firstService?.price, 25000),
-      channel: copy.requestBoard.channels.customerApp,
-      clientId: `demo-client-${professional.id}-scenario-quoted-1`,
-      clientName: 'Farah Nabila',
-      id: quotedPrimaryId,
-      note: copy.requestBoard.notes.quotedPrimary,
-      priority: 'high',
-      requestedAt: quotedPrimaryRequestedAt.toISOString(),
-      requestedAtLabel: formatRequestStatusTimestamp(quotedPrimaryRequestedAt),
-      requestedMode: pickRequestedMode(firstService, ['online', 'home_visit', 'onsite']),
-      serviceId: firstService?.serviceId || MOCK_SERVICES[0]?.id || '',
-      status: 'quoted',
-      statusHistory: [
-        buildRequestStatusHistoryEntry({
-          createdAt: getRequestDateOffset({ days: 1, hours: 1, minutes: 15 }),
-          customerSummary: copy.requestBoard.updates.quotedPrimaryCustomer,
-          evidenceNote: copy.requestBoard.updates.quotedPrimaryInternal,
-          evidenceUrl: 'https://example.com/quotes/lactation-intake',
-          fromStatus: 'new',
-          requestId: quotedPrimaryId,
-          sequence: 1,
-          status: 'quoted',
-        }),
-      ],
-    },
-    {
-      areaId: getAreaAt(1),
-      budgetLabel: adjustBudgetLabel(secondService?.price, 0),
-      channel: copy.requestBoard.channels.clinicDeskHandoff,
-      clientId: `demo-client-${professional.id}-scenario-quoted-2`,
-      clientName: 'Dina Paramita',
-      id: quotedSecondaryId,
-      note: copy.requestBoard.notes.quotedSecondary,
-      priority: 'medium',
-      requestedAt: quotedSecondaryRequestedAt.toISOString(),
-      requestedAtLabel: formatRequestStatusTimestamp(quotedSecondaryRequestedAt),
-      requestedMode: pickRequestedMode(secondService, ['onsite', 'online', 'home_visit']),
-      serviceId: secondService?.serviceId || firstService?.serviceId || MOCK_SERVICES[0]?.id || '',
-      status: 'quoted',
-      statusHistory: [
-        buildRequestStatusHistoryEntry({
-          createdAt: getRequestDateOffset({ days: 1, hours: 5, minutes: 30 }),
-          customerSummary: copy.requestBoard.updates.quotedSecondaryCustomer,
-          evidenceNote: copy.requestBoard.updates.quotedSecondaryInternal,
-          fromStatus: 'new',
-          requestId: quotedSecondaryId,
-          sequence: 1,
-          status: 'quoted',
-        }),
-      ],
-    },
-    {
-      areaId: getAreaAt(2),
-      budgetLabel: adjustBudgetLabel(thirdService?.price, 10000),
-      channel: copy.requestBoard.channels.videoRoom,
-      clientId: `demo-client-${professional.id}-scenario-scheduled-1`,
-      clientName: 'Citra Maheswari',
-      id: scheduledPrimaryId,
-      note: copy.requestBoard.notes.scheduledPrimary,
-      priority: 'medium',
-      requestedAt: scheduledPrimaryRequestedAt.toISOString(),
-      requestedAtLabel: formatRequestStatusTimestamp(scheduledPrimaryRequestedAt),
-      requestedMode: pickRequestedMode(thirdService, ['online', 'onsite', 'home_visit']),
-      serviceId: thirdService?.serviceId || firstService?.serviceId || MOCK_SERVICES[0]?.id || '',
-      status: 'scheduled',
-      statusHistory: [
-        buildRequestStatusHistoryEntry({
-          createdAt: getRequestDateOffset({ days: 3, hours: 2, minutes: 30 }),
-          customerSummary: copy.requestBoard.updates.scheduledPrimaryQuotedCustomer,
-          evidenceNote: copy.requestBoard.updates.scheduledPrimaryQuotedInternal,
-          evidenceUrl: 'https://example.com/quotes/class-prep',
-          fromStatus: 'new',
-          requestId: scheduledPrimaryId,
-          sequence: 1,
-          status: 'quoted',
-        }),
-        buildRequestStatusHistoryEntry({
-          createdAt: getRequestDateOffset({ days: 2, hours: 20 }),
-          customerSummary: copy.requestBoard.updates.scheduledPrimaryScheduledCustomer,
-          evidenceNote: copy.requestBoard.updates.scheduledPrimaryScheduledInternal,
-          evidenceUrl: 'https://example.com/schedules/class-confirmation',
-          fromStatus: 'quoted',
-          requestId: scheduledPrimaryId,
-          sequence: 2,
-          status: 'scheduled',
-        }),
-      ],
-    },
-    {
-      areaId: getAreaAt(0),
-      budgetLabel: adjustBudgetLabel(firstService?.price, 35000),
-      channel: copy.requestBoard.channels.phoneFollowUp,
-      clientId: `demo-client-${professional.id}-scenario-scheduled-2`,
-      clientName: 'Santi Laras',
-      id: scheduledSecondaryId,
-      note: copy.requestBoard.notes.scheduledSecondary,
-      priority: 'high',
-      requestedAt: scheduledSecondaryRequestedAt.toISOString(),
-      requestedAtLabel: formatRequestStatusTimestamp(scheduledSecondaryRequestedAt),
-      requestedMode: pickRequestedMode(firstService, ['home_visit', 'online', 'onsite']),
-      serviceId: firstService?.serviceId || MOCK_SERVICES[0]?.id || '',
-      status: 'scheduled',
-      statusHistory: [
-        buildRequestStatusHistoryEntry({
-          createdAt: getRequestDateOffset({ days: 4, hours: 2, minutes: 30 }),
-          customerSummary: copy.requestBoard.updates.scheduledSecondaryQuotedCustomer,
-          evidenceNote: copy.requestBoard.updates.scheduledSecondaryQuotedInternal,
-          fromStatus: 'new',
-          requestId: scheduledSecondaryId,
-          sequence: 1,
-          status: 'quoted',
-        }),
-        buildRequestStatusHistoryEntry({
-          createdAt: getRequestDateOffset({ days: 3, hours: 22 }),
-          customerSummary: copy.requestBoard.updates.scheduledSecondaryScheduledCustomer,
-          evidenceNote: copy.requestBoard.updates.scheduledSecondaryScheduledInternal,
-          evidenceUrl: 'https://example.com/schedules/home-visit-confirmation',
-          fromStatus: 'quoted',
-          requestId: scheduledSecondaryId,
-          sequence: 2,
-          status: 'scheduled',
-        }),
-      ],
-    },
-    {
-      areaId: getAreaAt(1),
-      budgetLabel: adjustBudgetLabel(secondService?.price, 20000),
-      channel: copy.requestBoard.channels.customerApp,
-      clientId: `demo-client-${professional.id}-scenario-completed-1`,
-      clientName: 'Keisha Adelia',
-      id: completedPrimaryId,
-      note: copy.requestBoard.notes.completedPrimary,
-      priority: 'medium',
-      requestedAt: completedPrimaryRequestedAt.toISOString(),
-      requestedAtLabel: formatRequestStatusTimestamp(completedPrimaryRequestedAt),
-      requestedMode: pickRequestedMode(secondService, ['online', 'onsite', 'home_visit']),
-      serviceId: secondService?.serviceId || firstService?.serviceId || MOCK_SERVICES[0]?.id || '',
-      status: 'completed',
-      statusHistory: [
-        buildRequestStatusHistoryEntry({
-          createdAt: getRequestDateOffset({ days: 6, hours: 1, minutes: 30 }),
-          customerSummary: copy.requestBoard.updates.completedPrimaryQuotedCustomer,
-          evidenceNote: copy.requestBoard.updates.completedPrimaryQuotedInternal,
-          evidenceUrl: 'https://example.com/quotes/growth-review',
-          fromStatus: 'new',
-          requestId: completedPrimaryId,
-          sequence: 1,
-          status: 'quoted',
-        }),
-        buildRequestStatusHistoryEntry({
-          createdAt: getRequestDateOffset({ days: 5, hours: 19 }),
-          customerSummary: copy.requestBoard.updates.completedPrimaryScheduledCustomer,
-          evidenceNote: copy.requestBoard.updates.completedPrimaryScheduledInternal,
-          fromStatus: 'quoted',
-          requestId: completedPrimaryId,
-          sequence: 2,
-          status: 'scheduled',
-        }),
-        buildRequestStatusHistoryEntry({
-          createdAt: getRequestDateOffset({ days: 5, hours: 12, minutes: 30 }),
-          customerSummary: copy.requestBoard.updates.completedPrimaryCompletedCustomer,
-          evidenceNote: copy.requestBoard.updates.completedPrimaryCompletedInternal,
-          evidenceUrl: 'https://example.com/recaps/growth-review-summary',
-          fromStatus: 'scheduled',
-          requestId: completedPrimaryId,
-          sequence: 3,
-          status: 'completed',
-        }),
-      ],
-    },
-    {
-      areaId: getAreaAt(2),
-      budgetLabel: adjustBudgetLabel(thirdService?.price, -5000),
-      channel: copy.requestBoard.channels.asyncFollowUp,
-      clientId: `demo-client-${professional.id}-scenario-completed-2`,
-      clientName: 'Fira Lestari',
-      id: completedSecondaryId,
-      note: copy.requestBoard.notes.completedSecondary,
-      priority: 'low',
-      requestedAt: completedSecondaryRequestedAt.toISOString(),
-      requestedAtLabel: formatRequestStatusTimestamp(completedSecondaryRequestedAt),
-      requestedMode: pickRequestedMode(thirdService, ['online', 'onsite', 'home_visit']),
-      serviceId: thirdService?.serviceId || firstService?.serviceId || MOCK_SERVICES[0]?.id || '',
-      status: 'completed',
-      statusHistory: [
-        buildRequestStatusHistoryEntry({
-          createdAt: getRequestDateOffset({ days: 8, hours: 3, minutes: 30 }),
-          customerSummary: copy.requestBoard.updates.completedSecondaryQuotedCustomer,
-          evidenceNote: copy.requestBoard.updates.completedSecondaryQuotedInternal,
-          fromStatus: 'new',
-          requestId: completedSecondaryId,
-          sequence: 1,
-          status: 'quoted',
-        }),
-        buildRequestStatusHistoryEntry({
-          createdAt: getRequestDateOffset({ days: 7, hours: 20 }),
-          customerSummary: copy.requestBoard.updates.completedSecondaryScheduledCustomer,
-          evidenceNote: copy.requestBoard.updates.completedSecondaryScheduledInternal,
-          evidenceUrl: 'https://example.com/schedules/class-reminder',
-          fromStatus: 'quoted',
-          requestId: completedSecondaryId,
-          sequence: 2,
-          status: 'scheduled',
-        }),
-        buildRequestStatusHistoryEntry({
-          createdAt: getRequestDateOffset({ days: 7, hours: 14 }),
-          customerSummary: copy.requestBoard.updates.completedSecondaryCompletedCustomer,
-          evidenceNote: copy.requestBoard.updates.completedSecondaryCompletedInternal,
-          fromStatus: 'scheduled',
-          requestId: completedSecondaryId,
-          sequence: 3,
-          status: 'completed',
-        }),
-      ],
-    },
-  ];
+  return buildRequestFromAppointmentRow(professional.id);
 };
 
-const isLegacyDemoRequest = (professionalId: string, request: ProfessionalManagedRequest) =>
-  request.clientId !== ACTIVE_CONSUMER.id &&
-  request.id.startsWith(`professional-request-${professionalId}-`) &&
-  !request.id.includes('-scenario-');
-
-const ensureDemoRequestBoardCoverage = (
-  professionalId: string,
-  requestBoard: ProfessionalManagedRequest[],
-): ProfessionalManagedRequest[] => {
-  const professional = getProfessionalById(professionalId) || defaultProfessional;
-  const demoRequests = buildDefaultRequestBoard(professional);
-  const filteredExistingRequests = requestBoard.filter((request) => !isLegacyDemoRequest(professionalId, request));
-  const hasActiveConsumerRequest = filteredExistingRequests.some((request) => request.clientId === ACTIVE_CONSUMER.id);
-  const eligibleDemoRequests = hasActiveConsumerRequest
-    ? demoRequests.filter((request) => request.clientId !== ACTIVE_CONSUMER.id)
-    : demoRequests;
-  const existingIds = new Set(filteredExistingRequests.map((request) => request.id));
-
-  return [...filteredExistingRequests, ...eligibleDemoRequests.filter((request) => !existingIds.has(request.id))];
-};
+const buildDefaultRequestBoards = () =>
+  MOCK_PROFESSIONALS.reduce<Record<string, ProfessionalManagedRequest[]>>((boards, professional) => {
+    boards[professional.id] = buildDefaultRequestBoard(professional);
+    return boards;
+  }, {});
 
 const buildDefaultPortalState = (professionalId = defaultProfessional?.id || ''): ProfessionalPortalState => {
   const professional = getProfessionalById(professionalId) || defaultProfessional;
@@ -970,11 +868,17 @@ const sanitizeManagedRequest = (
   const copy = getProfessionalPortalCopy();
 
   return {
+    appointmentId: value.appointmentId?.trim() || fallback?.appointmentId || `appointment-${Date.now()}`,
     areaId: value.areaId || fallback?.areaId || '',
     budgetLabel: value.budgetLabel?.trim() || fallback?.budgetLabel || formatRupiah(150000),
     channel: value.channel?.trim() || fallback?.channel || copy.defaults.requestChannel,
     clientId: value.clientId?.trim() || fallback?.clientId || `demo-client-${Date.now()}`,
     clientName: value.clientName?.trim() || fallback?.clientName || copy.defaults.requestClientName,
+    customerStatus:
+      value.customerStatus &&
+      [...ACTIVE_APPOINTMENT_STATUSES, ...HISTORY_APPOINTMENT_STATUSES].includes(value.customerStatus)
+        ? value.customerStatus
+        : fallback?.customerStatus || 'requested',
     id: value.id || fallback?.id || `professional-request-${Date.now()}`,
     note: value.note?.trim() || fallback?.note || copy.defaults.requestNote,
     priority:
@@ -990,6 +894,8 @@ const sanitizeManagedRequest = (
       value.requestedMode && isPracticeMode(value.requestedMode)
         ? value.requestedMode
         : fallback?.requestedMode || 'online',
+    scheduledTimeLabel:
+      value.scheduledTimeLabel?.trim() || fallback?.scheduledTimeLabel || copy.defaults.requestTodayLabel,
     serviceId: value.serviceId || fallback?.serviceId || '',
     status:
       value.status && professionalRequestStatuses.includes(value.status) ? value.status : fallback?.status || 'new',
@@ -1058,7 +964,7 @@ const sanitizeRequestBoard = (
     sanitizeManagedRequest(item, fallbackRequestBoard[index]),
   );
 
-  return ensureDemoRequestBoardCoverage(professionalId, sanitizedRequestBoard);
+  return sanitizedRequestBoard;
 };
 
 const sanitizeRequestBoardsByProfessionalId = (value: unknown): Record<string, ProfessionalManagedRequest[]> => {
@@ -1140,11 +1046,7 @@ const readProfessionalPortalData = (): {
   requestBoardsByProfessionalId: Record<string, ProfessionalManagedRequest[]>;
 } => {
   const defaultState = buildDefaultPortalState();
-  const defaultRequestBoards = defaultState.activeProfessionalId
-    ? {
-        [defaultState.activeProfessionalId]: defaultState.requestBoard,
-      }
-    : {};
+  const defaultRequestBoards = buildDefaultRequestBoards();
 
   if (typeof window === 'undefined') {
     return {
@@ -1156,14 +1058,17 @@ const readProfessionalPortalData = (): {
   try {
     const storedSnapshot = professionalPortalRepository.read();
 
-    if (!storedSnapshot) {
+    if (!storedSnapshot || storedSnapshot.schemaVersion !== PROFESSIONAL_PORTAL_SCHEMA_VERSION) {
       return {
         portalState: defaultState,
         requestBoardsByProfessionalId: defaultRequestBoards,
       };
     }
 
-    const sanitizedRequestBoards = sanitizeRequestBoardsByProfessionalId(storedSnapshot.requestBoardsByProfessionalId);
+    const sanitizedRequestBoards = {
+      ...defaultRequestBoards,
+      ...sanitizeRequestBoardsByProfessionalId(storedSnapshot.requestBoardsByProfessionalId),
+    };
     const activeProfessionalId = storedSnapshot.state.activeProfessionalId || defaultState.activeProfessionalId;
     const requestBoard =
       sanitizedRequestBoards[activeProfessionalId] ||
@@ -1198,6 +1103,43 @@ const persistProfessionalPortalState = (
 
   professionalPortalRepository.write(createProfessionalPortalSnapshot(nextState, requestBoardsByProfessionalId));
 };
+
+const getRequestLastUpdatedAt = (request: ProfessionalManagedRequest) =>
+  request.statusHistory[request.statusHistory.length - 1]?.createdAt || request.requestedAt;
+
+const buildCustomerAppointmentsFromRequestBoards = (
+  requestBoardsByProfessionalId: Record<string, ProfessionalManagedRequest[]>,
+): Appointment[] =>
+  Object.entries(requestBoardsByProfessionalId)
+    .flatMap(([professionalId, requests]) =>
+      requests
+        .filter((request) => request.clientId === ACTIVE_CONSUMER.id)
+        .map((request) => ({
+          professionalId,
+          request,
+        })),
+    )
+    .sort(
+      (leftEntry, rightEntry) =>
+        new Date(getRequestLastUpdatedAt(rightEntry.request)).getTime() -
+        new Date(getRequestLastUpdatedAt(leftEntry.request)).getTime(),
+    )
+    .map(({ professionalId, request }) =>
+      createHydratedAppointment({
+        areaId: request.areaId,
+        consumerId: request.clientId,
+        id: request.appointmentId,
+        professionalId,
+        requestChannel: request.channel,
+        requestNote: request.note,
+        requestedAt: request.requestedAt,
+        requestedMode: request.requestedMode,
+        scheduledTimeLabel: request.scheduledTimeLabel,
+        serviceId: request.serviceId,
+        status: request.customerStatus,
+        totalPriceLabel: request.budgetLabel,
+      }),
+    );
 
 const mergeProfessionalWithPortalState = (
   professional: Professional,
@@ -1495,13 +1437,18 @@ export const useProfessionalPortal = () => {
     priority = 'high',
     professionalId,
     requestedMode,
+    scheduledTimeLabel,
     serviceId,
   }: CreateCustomerRequestInput) => {
     const professional = getProfessionalById(professionalId) || defaultProfessional;
     const baseRequestBoard = requestBoardsByProfessionalId[professionalId] || buildDefaultRequestBoard(professional);
-    const requestId = `professional-request-${professionalId}-${Date.now()}`;
+    const requestTimestamp = Date.now();
+    const requestId = `professional-request-${professionalId}-${requestTimestamp}`;
     const requestedAt = new Date();
     const requestedAtLabel = formatRequestStatusTimestamp(requestedAt);
+    const nextScheduledTimeLabel =
+      scheduledTimeLabel?.trim() ||
+      (requestedMode === 'online' ? 'Menunggu detail sesi online' : 'Menunggu konfirmasi jadwal');
     const existingRequest = baseRequestBoard.find(
       (request) =>
         request.clientId === ACTIVE_CONSUMER.id && request.serviceId === serviceId && request.status === 'new',
@@ -1520,8 +1467,11 @@ export const useProfessionalPortal = () => {
                   requestedAt: requestedAt.toISOString(),
                   requestedAtLabel,
                   requestedMode,
+                  scheduledTimeLabel: nextScheduledTimeLabel,
                   serviceId,
+                  customerStatus: 'requested',
                   status: 'new',
+                  statusHistory: [],
                 },
                 request,
               )
@@ -1529,17 +1479,20 @@ export const useProfessionalPortal = () => {
         )
       : [
           sanitizeManagedRequest({
+            appointmentId: `apt-local-${professionalId}-${requestTimestamp}`,
             areaId: ACTIVE_USER_CONTEXT.area.id,
             budgetLabel,
             channel,
             clientId: ACTIVE_CONSUMER.id,
             clientName: ACTIVE_CONSUMER.name,
+            customerStatus: 'requested',
             id: requestId,
             note,
             priority,
             requestedAt: requestedAt.toISOString(),
             requestedAtLabel,
             requestedMode,
+            scheduledTimeLabel: nextScheduledTimeLabel,
             serviceId,
             status: 'new',
             statusHistory: [],
@@ -1559,6 +1512,43 @@ export const useProfessionalPortal = () => {
         [professionalId]: nextRequestBoard,
       },
     );
+  };
+
+  const markCustomerAppointmentPaid = (appointmentId: string) => {
+    let hasChanged = false;
+    const nextRequestBoards = Object.fromEntries(
+      Object.entries(requestBoardsByProfessionalId).map(([professionalId, requestBoard]) => [
+        professionalId,
+        requestBoard.map((request) => {
+          if (request.appointmentId !== appointmentId || request.customerStatus !== 'approved_waiting_payment') {
+            return request;
+          }
+
+          hasChanged = true;
+          return sanitizeManagedRequest(
+            {
+              ...request,
+              customerStatus: 'paid',
+            },
+            request,
+          );
+        }),
+      ]),
+    );
+
+    if (!hasChanged) {
+      return false;
+    }
+
+    updatePortalState(
+      {
+        ...portalState,
+        requestBoard: nextRequestBoards[portalState.activeProfessionalId] || portalState.requestBoard,
+      },
+      nextRequestBoards,
+    );
+
+    return true;
   };
 
   const updateRequestStatus = (
@@ -1589,6 +1579,7 @@ export const useProfessionalPortal = () => {
       currentRequest.id === requestId
         ? {
             ...currentRequest,
+            customerStatus: getCustomerStatusFromRequestStatus(status, currentRequest.customerStatus),
             status,
             statusHistory: [
               ...currentRequest.statusHistory,
@@ -1631,6 +1622,7 @@ export const useProfessionalPortal = () => {
   const activeCoverageAreas = portalState.coverageAreaIds
     .map((areaId) => getAreaById(areaId))
     .filter((area): area is Area => Boolean(area));
+  const customerAppointments = buildCustomerAppointmentsFromRequestBoards(requestBoardsByProfessionalId);
   const activeServiceConfigurations = [...portalState.serviceConfigurations]
     .filter((service) => service.isActive)
     .sort((leftService, rightService) => {
@@ -1689,6 +1681,7 @@ export const useProfessionalPortal = () => {
     activeProfessionalCategoryLabel: activeProfessional ? getProfessionalCategoryLabel(activeProfessional) : '',
     activeServiceConfigurations,
     averageServicePriceLabel,
+    customerAppointments,
     demoProfessionals: MOCK_PROFESSIONALS.slice(0, 4),
     featuredServiceConfiguration,
     inactiveServiceTemplates,
@@ -1718,16 +1711,14 @@ export const useProfessionalPortal = () => {
       return (
         requestBoard
           .filter((request) => request.clientId === ACTIVE_CONSUMER.id)
-          .sort((leftRequest, rightRequest) => {
-            const leftUpdatedAt =
-              leftRequest.statusHistory[leftRequest.statusHistory.length - 1]?.createdAt || leftRequest.requestedAt;
-            const rightUpdatedAt =
-              rightRequest.statusHistory[rightRequest.statusHistory.length - 1]?.createdAt || rightRequest.requestedAt;
-
-            return new Date(rightUpdatedAt).getTime() - new Date(leftUpdatedAt).getTime();
-          })[0] || null
+          .sort(
+            (leftRequest, rightRequest) =>
+              new Date(getRequestLastUpdatedAt(rightRequest)).getTime() -
+              new Date(getRequestLastUpdatedAt(leftRequest)).getTime(),
+          )[0] || null
       );
     },
+    markCustomerAppointmentPaid,
     saveBusinessSettings,
     saveGalleryItem,
     savePortfolioEntry,

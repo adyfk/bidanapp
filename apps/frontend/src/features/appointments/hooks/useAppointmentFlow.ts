@@ -9,11 +9,10 @@ import {
   HISTORY_APPOINTMENT_STATUSES,
   isAppointmentChatAvailable,
 } from '@/features/appointments/lib/status';
-import { MOCK_APPOINTMENTS } from '@/lib/mock-db/appointments';
 import { getAppointmentChatThread } from '@/lib/mock-db/chat';
-import { ACTIVE_CONSUMER } from '@/lib/mock-db/runtime';
 import { useUiText } from '@/lib/ui-text';
-import type { Appointment, AppointmentStatus } from '@/types/appointments';
+import { useProfessionalPortal } from '@/lib/use-professional-portal';
+import type { Appointment } from '@/types/appointments';
 import type { ChatMessage } from '@/types/chat';
 
 export interface AppointmentChatSession {
@@ -47,9 +46,9 @@ const createFallbackChatSession = (
   ],
 });
 
-const buildInitialChatState = (uiText: ReturnType<typeof useUiText>) =>
+const buildInitialChatState = (appointments: Appointment[], uiText: ReturnType<typeof useUiText>) =>
   Object.fromEntries(
-    MOCK_APPOINTMENTS.map((appointment) => {
+    appointments.map((appointment) => {
       const existingThread = getAppointmentChatThread(appointment.id);
 
       return [
@@ -76,6 +75,7 @@ export const useAppointmentFlow = ({
   initialTab?: AppointmentTab;
 } = {}) => {
   const uiText = useUiText();
+  const { customerAppointments, markCustomerAppointmentPaid } = useProfessionalPortal();
   const [activeTab, setActiveTab] = useState<AppointmentTab>(initialTab);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<AppointmentStatusFilter>(initialStatusFilter);
@@ -87,10 +87,7 @@ export const useAppointmentFlow = ({
   const [reviewText, setReviewText] = useState('');
   const [reviewPhotoName, setReviewPhotoName] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const [statusOverrides, setStatusOverrides] = useState<Record<string, AppointmentStatus>>({});
-  const [chatSessions, setChatSessions] = useState<Record<string, AppointmentChatSession>>(() =>
-    buildInitialChatState(uiText),
-  );
+  const [chatSessions, setChatSessions] = useState<Record<string, AppointmentChatSession>>({});
   const timeoutIdsRef = useRef<number[]>([]);
 
   useEffect(() => {
@@ -103,14 +100,21 @@ export const useAppointmentFlow = ({
     };
   }, []);
 
-  const appointments = useMemo(
-    () =>
-      MOCK_APPOINTMENTS.map((appointment) => ({
-        ...appointment,
-        status: statusOverrides[appointment.id] ?? appointment.status,
-      })).filter((appointment) => appointment.consumerId === ACTIVE_CONSUMER.id),
-    [statusOverrides],
-  );
+  const appointments = useMemo(() => customerAppointments, [customerAppointments]);
+
+  useEffect(() => {
+    setChatSessions((currentSessions) => {
+      const nextSessions = buildInitialChatState(appointments, uiText);
+
+      for (const [appointmentId, session] of Object.entries(currentSessions)) {
+        if (nextSessions[appointmentId]) {
+          nextSessions[appointmentId] = session;
+        }
+      }
+
+      return nextSessions;
+    });
+  }, [appointments, uiText]);
 
   const searchedAppointments = appointments.filter((appointment) => {
     const query = searchQuery.trim().toLowerCase();
@@ -201,10 +205,7 @@ export const useAppointmentFlow = ({
       return;
     }
 
-    setStatusOverrides((current) => ({
-      ...current,
-      [selectedAppointment.id]: 'paid',
-    }));
+    markCustomerAppointmentPaid(selectedAppointment.id);
     setNotice(uiText.paymentSuccessAlert);
   };
 

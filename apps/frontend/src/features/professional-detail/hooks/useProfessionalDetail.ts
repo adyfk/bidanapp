@@ -164,6 +164,10 @@ export const useProfessionalDetail = (professionalSlug: string | undefined) => {
       requiresOfflineScheduleSelection && selectedScheduleDay && selectedTimeSlot
         ? uiText.getScheduleNotice(selectedScheduleDay.dateIso, selectedTimeSlot.label)
         : '';
+    const scheduledTimeLabel =
+      requiresOfflineScheduleSelection && selectedScheduleDay && selectedTimeSlot
+        ? `${selectedScheduleDay.label}, ${selectedTimeSlot.label}`
+        : undefined;
     const nextNotice = uiText.getServiceBookingNotice(
       selectedBookingMode,
       selectedServiceEntry.catalogService.name,
@@ -177,6 +181,7 @@ export const useProfessionalDetail = (professionalSlug: string | undefined) => {
         note: nextNotice,
         professionalId: professional.id,
         requestedMode: selectedBookingMode,
+        scheduledTimeLabel,
         serviceId: selectedServiceEntry.catalogService.id,
       });
     }

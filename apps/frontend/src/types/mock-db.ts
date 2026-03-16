@@ -235,13 +235,36 @@ export interface MediaPresetRow extends IndexedRow {
 }
 
 export interface AppointmentRow extends IndexedRow {
-  id: string;
+  areaId: string;
   consumerId: string;
+  customerFeedback?: AppointmentFeedbackRow | null;
+  id: string;
   professionalId: string;
-  serviceId: string;
+  recentActivity?: AppointmentRecentActivityRow | null;
+  requestChannel: string;
+  requestNote: string;
+  requestedAt: string;
+  requestedMode: ServiceDeliveryMode;
   status: AppointmentStatus;
+  serviceId: string;
   scheduledTimeLabel: string;
   totalPriceLabel: string;
+}
+
+export interface AppointmentRecentActivityRow {
+  channel: string;
+  dateLabel: string;
+  summary: string;
+  title: string;
+}
+
+export interface AppointmentFeedbackRow {
+  author: string;
+  dateLabel: string;
+  image: string;
+  quote: string;
+  rating: number;
+  role: string;
 }
 
 export interface ProfessionalRequestRow extends IndexedRow {
