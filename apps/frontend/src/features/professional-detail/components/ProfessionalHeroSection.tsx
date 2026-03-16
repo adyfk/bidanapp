@@ -11,6 +11,9 @@ import { useUiText } from '@/lib/ui-text';
 import type { Professional } from '@/types/catalog';
 
 interface ProfessionalHeroSectionProps {
+  genderLabel: string;
+  isFavorite: boolean;
+  onToggleFavorite: () => void;
   profCategory: string;
   professional: Professional;
   ratingLabel: string;
@@ -19,6 +22,9 @@ interface ProfessionalHeroSectionProps {
 }
 
 export const ProfessionalHeroSection = ({
+  genderLabel,
+  isFavorite,
+  onToggleFavorite,
   profCategory,
   professional,
   ratingLabel,
@@ -67,8 +73,19 @@ export const ProfessionalHeroSection = ({
             {APP_CONFIG.appName}
           </Link>
           <div className="flex items-center gap-2">
-            <IconButton icon={<Share2 className="h-5 w-5" />} className="text-gray-700 hover:bg-black/5" />
-            <IconButton icon={<Heart className="h-5 w-5" />} className="text-gray-700 hover:bg-black/5" />
+            <IconButton
+              icon={<Share2 className="h-5 w-5" />}
+              ariaLabel="Share professional profile"
+              className="text-gray-700 hover:bg-black/5"
+            />
+            <IconButton
+              icon={<Heart className={`h-5 w-5 ${isFavorite ? 'fill-current' : ''}`} />}
+              ariaLabel={
+                isFavorite ? `Remove ${professional.name} from favorites` : `Add ${professional.name} to favorites`
+              }
+              className={isFavorite ? 'text-pink-600 hover:bg-pink-50' : 'text-gray-700 hover:bg-black/5'}
+              onClick={onToggleFavorite}
+            />
           </div>
         </div>
       </div>
@@ -88,12 +105,20 @@ export const ProfessionalHeroSection = ({
                 className="mb-1 text-[11px] font-semibold uppercase tracking-[0.22em]"
                 style={{ color: APP_CONFIG.colors.primary }}
               >
-                {professional.badgeLabel}
+                {professional.badgeLabel || profCategory}
               </p>
               <h2 className="text-[22px] font-bold leading-tight text-gray-900">{professional.name}</h2>
-              <p className="mt-1 text-[14px] font-semibold" style={{ color: APP_CONFIG.colors.primary }}>
-                {professional.title}
-              </p>
+              <div className="mt-1 flex flex-wrap items-center gap-2">
+                <p className="text-[14px] font-semibold" style={{ color: APP_CONFIG.colors.primary }}>
+                  {professional.title}
+                </p>
+                <span
+                  className="rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide"
+                  style={{ backgroundColor: APP_CONFIG.colors.primaryLight, color: APP_CONFIG.colors.primary }}
+                >
+                  {genderLabel}
+                </span>
+              </div>
               <p className="mt-1 text-[12px] text-gray-500">
                 {profCategory} <span className="mx-1">•</span> {professional.location}
               </p>

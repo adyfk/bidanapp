@@ -3,7 +3,11 @@
 import { ChevronLeft, MessageCircle } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import { getStatusBannerClasses } from '@/features/appointments/lib/status';
+import {
+  getAppointmentStatusChipClassName,
+  getStatusBannerClasses,
+  isAppointmentChatAvailable,
+} from '@/features/appointments/lib/status';
 import { APP_CONFIG } from '@/lib/config';
 import { ACTIVE_USER_CONTEXT } from '@/lib/mock-db/runtime';
 import { useUiText } from '@/lib/ui-text';
@@ -17,13 +21,6 @@ interface AppointmentDetailSheetProps {
   onPayNow: () => void;
 }
 
-const getStatusChipClassName = (status: Appointment['status']) => {
-  if (status === 'completed') return 'bg-green-100 text-green-700';
-  if (status === 'requested') return 'bg-orange-100 text-orange-700';
-  if (status === 'approved_waiting_payment') return 'bg-blue-100 text-blue-700';
-  return 'bg-gray-100 text-gray-600';
-};
-
 export const AppointmentDetailSheet = ({
   appointment,
   onClose,
@@ -34,6 +31,7 @@ export const AppointmentDetailSheet = ({
   const t = useTranslations('Appointments');
   const uiText = useUiText();
   const statusBanner = uiText.appointmentStatusBanners[appointment.status];
+  const canChat = isAppointmentChatAvailable(appointment.status);
 
   return (
     <div className="fixed inset-y-0 left-1/2 z-[60] flex w-full max-w-md -translate-x-1/2 flex-col bg-gray-50 animate-in fade-in slide-in-from-bottom-4 duration-300">
@@ -60,7 +58,7 @@ export const AppointmentDetailSheet = ({
               <p className="text-[12px] font-bold text-green-500">{ACTIVE_USER_CONTEXT.onlineStatusLabel}</p>
             </div>
           </div>
-          {appointment.status !== 'completed' ? (
+          {canChat ? (
             <button
               type="button"
               onClick={onOpenChat}
@@ -78,7 +76,7 @@ export const AppointmentDetailSheet = ({
                 {uiText.appointmentFieldLabels.status}
               </p>
               <span
-                className={`rounded-[8px] px-2.5 py-1 text-[12px] font-bold uppercase tracking-wider ${getStatusChipClassName(appointment.status)}`}
+                className={`rounded-[8px] px-2.5 py-1 text-[12px] font-bold uppercase tracking-wider ${getAppointmentStatusChipClassName(appointment.status)}`}
               >
                 {t(`status.${appointment.status}`)}
               </span>

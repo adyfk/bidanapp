@@ -1,3 +1,4 @@
+import type { Appointment } from './appointments';
 import type { Area, GeoPoint, GlobalService, Professional } from './catalog';
 
 export interface ConsumerProfile {
@@ -23,6 +24,7 @@ export interface HomeFeedSnapshot {
   currentUser: ConsumerProfile;
   sharedContext: UserContext;
   featuredAppointment?: {
+    appointment: Appointment;
     dateLabel: string;
     timeLabel: string;
     professional: Professional;

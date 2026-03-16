@@ -11,8 +11,8 @@ import {
   MOCK_PROFESSIONALS,
   MOCK_SERVICES,
 } from '@/lib/mock-db/catalog';
-import { ACTIVE_USER_CONTEXT } from '@/lib/mock-db/runtime';
 import { useUiText } from '@/lib/ui-text';
+import { useProfessionalUserPreferences } from '@/lib/use-professional-user-preferences';
 import type { Professional, ServiceDeliveryMode } from '@/types/catalog';
 
 export interface ProfessionalTrustIndicator {
@@ -33,6 +33,7 @@ export const useProfessionalDetail = (professionalSlug: string | undefined) => {
   const [selectedBookingMode, setSelectedBookingMode] = useState<ServiceDeliveryMode | null>(null);
   const [selectedScheduleDayId, setSelectedScheduleDayId] = useState('');
   const [selectedTimeSlotId, setSelectedTimeSlotId] = useState('');
+  const { selectedAreaId, userLocation } = useProfessionalUserPreferences();
 
   const professional = MOCK_PROFESSIONALS.find((item) => item.slug === professionalSlug) || null;
   const profCategory = professional ? getProfessionalCategoryLabel(professional) || 'Professional' : 'Professional';
@@ -61,7 +62,7 @@ export const useProfessionalDetail = (professionalSlug: string | undefined) => {
   const selectedServiceEntry =
     offeredServices.find(({ serviceMapping }) => serviceMapping.serviceId === selectedService) || null;
   const coverageStatus = professional
-    ? getProfessionalCoverageStatus(professional, ACTIVE_USER_CONTEXT.userLocation, ACTIVE_USER_CONTEXT.area.id)
+    ? getProfessionalCoverageStatus(professional, userLocation, selectedAreaId)
     : null;
   const selectedAccessibleModes =
     selectedServiceEntry && professional && coverageStatus

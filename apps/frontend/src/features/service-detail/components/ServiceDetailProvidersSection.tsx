@@ -61,7 +61,7 @@ export const ServiceDetailProvidersSection = ({ onRequestBooking, providers }: S
                   className="mb-1 text-[11px] font-semibold uppercase tracking-wide"
                   style={{ color: APP_CONFIG.colors.primary }}
                 >
-                  {provider.badgeLabel}
+                  {provider.badgeLabel || provider.categoryLabel}
                 </p>
                 <p className="flex items-center text-[12px] font-medium text-gray-500">
                   <MapPin className="mr-1 h-3.5 w-3.5" /> {provider.location}

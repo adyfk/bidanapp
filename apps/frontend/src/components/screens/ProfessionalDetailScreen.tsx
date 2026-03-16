@@ -10,10 +10,12 @@ import { ProfessionalServicesSection } from '@/features/professional-detail/comp
 import { ProfessionalTrustSections } from '@/features/professional-detail/components/ProfessionalTrustSections';
 import { useProfessionalDetail } from '@/features/professional-detail/hooks/useProfessionalDetail';
 import { useUiText } from '@/lib/ui-text';
+import { useProfessionalUserPreferences } from '@/lib/use-professional-user-preferences';
 
 export const ProfessionalDetailScreen = ({ professionalSlug }: { professionalSlug?: string }) => {
   const t = useTranslations('Professional');
   const uiText = useUiText();
+  const { isFavorite, toggleFavorite } = useProfessionalUserPreferences();
   const profileCopy = uiText.professionalProfile;
   const trustIndicators = [
     {
@@ -83,6 +85,9 @@ export const ProfessionalDetailScreen = ({ professionalSlug }: { professionalSlu
       style={{ background: 'linear-gradient(180deg, #FFF7FB 0%, #FFFFFF 20%, #F9FAFB 100%)' }}
     >
       <ProfessionalHeroSection
+        genderLabel={uiText.getProfessionalGenderLabel(professional.gender)}
+        isFavorite={isFavorite(professional.id)}
+        onToggleFavorite={() => toggleFavorite(professional.id)}
         profCategory={profCategory}
         professional={professional}
         ratingLabel={t('rating')}

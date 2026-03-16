@@ -1,4 +1,5 @@
 import type { Route } from 'next';
+import type { AppointmentStatus } from '@/types/appointments';
 
 export const APP_ROUTES = {
   home: '/home' as Route,
@@ -10,6 +11,32 @@ export const APP_ROUTES = {
 
 export function professionalRoute(slug: string): Route {
   return `/p/${slug}` as Route;
+}
+
+export function activityRoute(appointmentId: string): Route {
+  return `/activity/${appointmentId}` as Route;
+}
+
+export function appointmentsRoute(
+  params: { tab?: 'active' | 'history'; status?: AppointmentStatus | 'all' } = {},
+): Route {
+  const query = new URLSearchParams();
+
+  if (params.tab) {
+    query.set('tab', params.tab);
+  }
+
+  if (params.status && params.status !== 'all') {
+    query.set('status', params.status);
+  }
+
+  const queryString = query.toString();
+
+  if (!queryString) {
+    return APP_ROUTES.appointments;
+  }
+
+  return `/appointments?${queryString}` as Route;
 }
 
 export function exploreRoute(params: { category?: string; q?: string } = {}): Route {

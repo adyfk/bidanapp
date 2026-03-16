@@ -1,6 +1,6 @@
 'use client';
 
-import { BadgeCheck, CalendarDays, User } from 'lucide-react';
+import { CalendarDays, User } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import {
@@ -14,8 +14,6 @@ import type { Professional } from '@/types/catalog';
 interface ProfessionalPracticeSectionsProps {
   profCategory: string;
   profileCopy: {
-    portfolioEntriesTitle: string;
-    portfolioStatsTitle: string;
     storiesTitle: string;
   };
   professional: Professional;
@@ -52,22 +50,6 @@ export const ProfessionalPracticeSections = ({
                 </div>
               </div>
               <p className="text-[12px] leading-relaxed text-gray-500">{story.note}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className={professionalSectionClassName}>
-        <ProfessionalSectionTitle icon={<BadgeCheck className="h-4 w-4" />} title={profileCopy.portfolioStatsTitle} />
-        <div className="grid grid-cols-2 gap-3">
-          {professional.portfolioStats.map((stat) => (
-            <div
-              key={stat.label}
-              className="rounded-[22px] bg-[#FCFCFC] px-4 py-4 shadow-[0_14px_26px_-24px_rgba(17,24,39,0.38)]"
-            >
-              <p className="text-[24px] font-bold leading-none text-gray-900">{stat.value}</p>
-              <p className="mt-2 text-[13px] font-semibold text-gray-900">{stat.label}</p>
-              <p className="mt-2 text-[11px] leading-relaxed text-gray-500">{stat.detail}</p>
             </div>
           ))}
         </div>

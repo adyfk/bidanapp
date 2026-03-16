@@ -48,8 +48,11 @@
     "serviceResultsCount": "{count} matching services",
     "serviceListTitle": "All services from this professional",
     "serviceSelected": "Selected",
+    "filterLabel": "Filter",
     "allCategories": "All categories",
     "allModes": "All modes",
+    "categoryFilterLabel": "Category",
+    "modeFilterLabel": "Mode",
     "resetServiceFilters": "Reset filters",
     "bookingFlowLabel": "Flow",
     "bookingFlowInstant": "Instant",
@@ -67,6 +70,8 @@
     "slotBooked": "Booked",
     "noFilteredServices": "No services match the current filters.",
     "noFilteredServicesHint": "Try another search term or reset the filters to see more services.",
+    "showServiceDetails": "View service details",
+    "hideServiceDetails": "Hide details",
     "makeAppointment": "Booking Request",
     "inquiryChat": "Tanya {professional}",
     "experience": "Years Exp."
@@ -74,24 +79,52 @@
   "Explore": {
     "title": "{professional}s",
     "yourLocation": "Your Location",
+    "changeLocation": "Change location",
     "searchPlaceholder": "Find {professional} by name or city...",
     "allExperts": "All Experts",
+    "allCategories": "All Categories",
     "topRated": "Top Rated",
     "availableToday": "Available Today",
+    "myFavorites": "My Favorites",
     "resultsFound": "{count} {count, plural, =1 {Result} other {Results}} Found",
     "noResults": "No results found",
     "tryAdjusting": "Try adjusting your filters or search term.",
     "filterTitle": "Filter {professional}s",
-    "sortBy": "Sort By",
+    "locationSection": "Point-Based Location",
+    "locationPointOnly": "Point based",
+    "locationPointHint": "Enter coordinates or use your current location. The nearest area will be derived from this coordinate point.",
+    "useCurrentLocation": "Use My Current Location",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "nearestArea": "Nearest area",
+    "city": "City / Regency",
+    "district": "District",
+    "province": "Province",
+    "postalCode": "Postal Code",
+    "country": "Country",
+    "formattedAddress": "Formatted address",
+    "invalidCoordinates": "Invalid coordinates. Use latitude -90..90 and longitude -180..180.",
+    "locationBrowserUnsupported": "This browser does not support location detection.",
+    "locationPermissionDenied": "Location permission was denied. Enable it in your browser.",
+    "locationUnavailable": "Location is currently unavailable from this device.",
+    "locationTimeout": "Location detection timed out.",
+    "locationFetchFailed": "Failed to detect the current location.",
+    "locationResolveFailed": "Failed to map coordinates to mock location details.",
+    "locationDummyHint": "Location detail is currently mocked in the frontend. It can be replaced by a reverse geocoding API later without changing the UI.",
+    "categorySection": "Category",
+    "availabilitySection": "Availability",
     "genderPreference": "Gender Preference",
+    "favoritesSection": "My Preferences",
     "reset": "Reset",
-    "applyFilters": "Apply Filters"
+    "applyFilters": "Apply Filters",
+    "resolvingLocation": "Resolving location..."
   },
   "Appointments": {
     "title": "Activity",
     "searchPlaceholder": "Search appointments...",
     "active": "Active",
     "history": "History",
+    "allStatuses": "All Statuses",
     "noAppointments": "No active appointments",
     "trySearching": "Try searching or book a new service.",
     "status": {
@@ -128,9 +161,118 @@
   "Profile": {
     "title": "Profile",
     "language": "Language",
-    "account": "Account Settings",
-    "aboutApp": "About BidanApp",
-    "logout": "Log Out"
+    "account": "Account Details",
+    "security": "Account Security",
+    "aboutApp": "About {appName}",
+    "logout": "Log Out",
+    "buttons": {
+      "close": "Close",
+      "editProfile": "Edit"
+    },
+    "careHub": {
+      "eyebrow": "Active Care",
+      "title": "Your family profile and care preferences",
+      "description": "Manage account details, family support, and follow-up rhythms so care feels more personal, organized, and safe.",
+      "areaLabel": "Active area",
+      "focusLabel": "Care focus",
+      "focusFallback": "No special focus has been saved yet.",
+      "supportLabel": "Family support",
+      "supportFallback": "Not added yet",
+      "activeFlowLabel": "Care flow",
+      "activeAppointment": "{service} with {professional} is currently part of your follow-up flow.",
+      "noActiveAppointment": "There is no active session yet. You can still prepare your preferences so the next session feels faster and more tailored.",
+      "activityStatus": "Care status"
+    },
+    "quickActions": {
+      "activityTitle": "Activity",
+      "activityDescription": "Review active sessions, progress, and family follow-up.",
+      "exploreTitle": "Find care",
+      "exploreDescription": "Discover midwives and follow-up services that fit home needs."
+    },
+    "menu": {
+      "languageDescription": "Switch between Bahasa Indonesia and English anytime.",
+      "accountDescription": "Primary contact, care focus, and family support.",
+      "securityDescription": "New password and account privacy controls."
+    },
+    "preferences": {
+      "title": "Care Preferences",
+      "description": "Align services with family communication, visit modes, and after-care reminders.",
+      "familyUpdatesLabel": "Share updates with family support",
+      "familyUpdatesEnabled": "Schedule summaries and follow-ups are shared.",
+      "familyUpdatesDisabled": "Updates stay with the primary account only.",
+      "remindersLabel": "Recovery and check-in reminders",
+      "remindersEnabled": "Follow-up reminders stay active for the family.",
+      "remindersDisabled": "No extra reminders are enabled.",
+      "privacyLabel": "Sensitive notes stay private",
+      "privacyEnabled": "Sensitive information is limited to the main account.",
+      "privacyDisabled": "Sensitive notes may appear in the family summary.",
+      "editButton": "Edit preferences"
+    },
+    "accountSheet": {
+      "title": "Account Details",
+      "description": "Complete your identity, care focus, and family contact so follow-up stays aligned.",
+      "identityTitle": "Primary info",
+      "nameLabel": "Full name",
+      "phoneLabel": "WhatsApp number",
+      "focusLabel": "Care focus",
+      "focusPlaceholder": "Example: home care, family education, routine follow-up",
+      "supportTitle": "Family support contact",
+      "supportDescription": "Add the one contact who is most relevant when care coordination is needed.",
+      "supportNameLabel": "Support contact name",
+      "supportRelationLabel": "Relationship",
+      "supportPhoneLabel": "Support contact number",
+      "supportPlaceholder": "Partner / parent / caregiver",
+      "modeTitle": "Preferred care modes",
+      "familyUpdatesToggle": "Share schedule updates with family support",
+      "remindersToggle": "Enable after-care and check-in reminders",
+      "privacyToggle": "Keep sensitive notes for the main account only",
+      "save": "Save details",
+      "success": "Profile details updated successfully.",
+      "errors": {
+        "nameRequired": "Full name is required.",
+        "phoneRequired": "WhatsApp number is required.",
+        "supportContactIncomplete": "Complete the family support name, relationship, and phone number."
+      }
+    },
+    "securitySheet": {
+      "title": "Change Password",
+      "description": "Account security matters to keep family data and care history private.",
+      "currentPasswordLabel": "Current password",
+      "newPasswordLabel": "New password",
+      "confirmPasswordLabel": "Confirm new password",
+      "helperTitle": "Security checklist",
+      "helperDescription": "Use a password that you can remember while still keeping access protected.",
+      "ruleMinLength": "At least 8 characters",
+      "ruleUppercase": "Includes 1 uppercase letter",
+      "ruleNumber": "Includes 1 number",
+      "ruleMatch": "Confirmation matches",
+      "save": "Update password",
+      "success": "Password updated successfully.",
+      "errors": {
+        "currentRequired": "Enter your current password first.",
+        "newPasswordWeak": "The new password does not meet the security rules.",
+        "confirmMismatch": "The password confirmation does not match."
+      }
+    },
+    "about": {
+      "eyebrow": "Product Vision",
+      "title": "{appName} is built for care that feels close, safe, and continuous.",
+      "description": "The profile page is more than an identity screen. It becomes the family control center for care preferences, caregiver support, and secure access.",
+      "continuityTitle": "Continuity of care",
+      "continuityDescription": "Brings home care, online follow-up, and service activity together so mothers and families do not start from zero in every session.",
+      "familyTitle": "Family-centered support",
+      "familyDescription": "Creates room for a support contact, shared updates, and realistic check-in rhythms at home.",
+      "trustTitle": "Trust and privacy",
+      "trustDescription": "Builds trust through stronger passwords, control over sensitive information, and a transparent experience.",
+      "researchTitle": "Research basis:",
+      "researchLabel": "this direction follows principles of continuous postnatal care, individualized care, and family support.",
+      "versionLabel": "Version {version}"
+    },
+    "modeLabels": {
+      "online": "Online",
+      "home_visit": "Home care",
+      "onsite": "Visit provider"
+    }
   },
   "UiText": {
     "terms": {
@@ -153,6 +295,7 @@
       "chatAutoReply": "Okay, I received your message.",
       "paymentSuccess": "Payment simulation successful",
       "chatSent": "Message sent in demo mode",
+      "chatUnavailable": "Chat is only available for active activities.",
       "reviewPhotoReady": "Review photo ready to upload: {fileName}",
       "reviewSuccessWithPhoto": "{successMessage} Photo: {fileName}."
     },
@@ -195,7 +338,6 @@
     },
     "professionalProfile": {
       "storiesTitle": "Activity stories",
-      "portfolioStatsTitle": "Practice footprint",
       "portfolioEntriesTitle": "Service portfolio",
       "galleryTitle": "Practice gallery",
       "testimonialsTitle": "Family testimonials",
@@ -210,13 +352,11 @@
       "recommendationLabel": "Recommends",
       "repeatClientsLabel": "Returning clients"
     },
+    "professionalGender": {
+      "female": "Female",
+      "male": "Male"
+    },
     "explore": {
-      "sortOptions": {
-        "recommended": "Recommended",
-        "nearestDistance": "Nearest Distance",
-        "highestRating": "Highest Rating",
-        "lowestPrice": "Lowest Price"
-      },
       "genderOptions": {
         "any": "Any",
         "female": "Female",

@@ -1,5 +1,5 @@
 import type { AppointmentStatus } from './appointments';
-import type { BookingFlow, ServiceDeliveryMode, TimeSlotStatus } from './catalog';
+import type { BookingFlow, ProfessionalGender, ServiceDeliveryMode, TimeSlotStatus } from './catalog';
 import type { ChatSender } from './chat';
 
 export interface IndexedRow {
@@ -11,6 +11,7 @@ export interface ProfessionalRow extends IndexedRow {
   slug: string;
   name: string;
   title: string;
+  gender: ProfessionalGender;
   location: string;
   rating: number;
   reviews: string;
@@ -52,14 +53,6 @@ export interface ProfessionalCoverageAreaRow extends IndexedRow {
   id: string;
   professionalId: string;
   areaId: string;
-}
-
-export interface ProfessionalPortfolioStatRow extends IndexedRow {
-  id: string;
-  professionalId: string;
-  label: string;
-  value: string;
-  detail: string;
 }
 
 export interface ProfessionalCredentialRow extends IndexedRow {
@@ -205,6 +198,7 @@ export interface HomeFeedSnapshotRow extends IndexedRow {
 export interface HomeFeedFeaturedAppointmentRow extends IndexedRow {
   id: string;
   homeFeedId: string;
+  appointmentId: string;
   dateLabel: string;
   timeLabel: string;
   professionalId: string;

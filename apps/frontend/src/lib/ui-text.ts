@@ -2,9 +2,8 @@
 
 import { useTranslations } from 'next-intl';
 import type { AppointmentStatus } from '@/types/appointments';
-import type { ServiceDeliveryMode } from '@/types/catalog';
+import type { ProfessionalGender, ServiceDeliveryMode } from '@/types/catalog';
 
-const SORT_OPTION_KEYS = ['recommended', 'nearestDistance', 'highestRating', 'lowestPrice'] as const;
 const GENDER_OPTION_KEYS = ['any', 'female', 'male'] as const;
 
 export const useUiText = () => {
@@ -26,8 +25,14 @@ export const useUiText = () => {
     expired: t('appointment.statusBanners.expired'),
   };
 
-  const exploreSortOptions = SORT_OPTION_KEYS.map((key) => t(`explore.sortOptions.${key}`));
-  const exploreGenderOptions = GENDER_OPTION_KEYS.map((key) => t(`explore.genderOptions.${key}`));
+  const professionalGenderLabels: Record<ProfessionalGender, string> = {
+    female: t('professionalGender.female'),
+    male: t('professionalGender.male'),
+  };
+  const exploreGenderOptions = GENDER_OPTION_KEYS.map((key) => ({
+    key,
+    label: t(`explore.genderOptions.${key}`),
+  }));
 
   return {
     booking: bookingMessages,
@@ -59,6 +64,7 @@ export const useUiText = () => {
     chatAutoReply: t('alerts.chatAutoReply'),
     paymentSuccessAlert: t('alerts.paymentSuccess'),
     chatSentAlert: t('alerts.chatSent'),
+    chatUnavailableAlert: t('alerts.chatUnavailable'),
     getReviewPhotoReadyNotice: (fileName: string) =>
       t('alerts.reviewPhotoReady', {
         fileName,
@@ -98,7 +104,6 @@ export const useUiText = () => {
     serviceHighlightsTitle: t('serviceDetail.highlightsTitle'),
     professionalProfile: {
       storiesTitle: t('professionalProfile.storiesTitle'),
-      portfolioStatsTitle: t('professionalProfile.portfolioStatsTitle'),
       portfolioEntriesTitle: t('professionalProfile.portfolioEntriesTitle'),
       galleryTitle: t('professionalProfile.galleryTitle'),
       testimonialsTitle: t('professionalProfile.testimonialsTitle'),
@@ -113,8 +118,8 @@ export const useUiText = () => {
       recommendationLabel: t('professionalProfile.recommendationLabel'),
       repeatClientsLabel: t('professionalProfile.repeatClientsLabel'),
     },
-    exploreSortOptions,
     exploreGenderOptions,
+    getProfessionalGenderLabel: (gender: ProfessionalGender) => professionalGenderLabels[gender],
     review: {
       title: t('review.title'),
       getTitleForProfessional: (professionalName: string) =>
