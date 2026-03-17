@@ -19,7 +19,7 @@ import { IconButton } from '@/components/ui/IconButton';
 import { PROFESSIONAL_REQUEST_STATUS_ORDER } from '@/features/professional-portal/lib/request-status';
 import { useRouter } from '@/i18n/routing';
 import { APP_CONFIG } from '@/lib/config';
-import { CHAT_THREADS, getChatThreadByProfessionalSlug } from '@/lib/mock-db/chat';
+import { CHAT_THREADS, getAppointmentChatThread, getChatThreadByProfessionalSlug } from '@/lib/mock-db/chat';
 import { ACTIVE_USER_CONTEXT } from '@/lib/mock-db/runtime';
 import { professionalRoute } from '@/lib/routes';
 import { useProfessionalPortal } from '@/lib/use-professional-portal';
@@ -39,7 +39,10 @@ export const ChatScreen = ({ professionalId }: { professionalId: string }) => {
   const latestStatusEvidence = customerRequest
     ? [...customerRequest.statusHistory].reverse().find((item) => item.status === customerRequest.status)
     : null;
-  const chatThread = getChatThreadByProfessionalSlug(professional?.slug || '') || CHAT_THREADS[0];
+  const chatThread =
+    (customerRequest?.appointmentId ? getAppointmentChatThread(customerRequest.appointmentId) : null) ||
+    getChatThreadByProfessionalSlug(professional?.slug || '') ||
+    CHAT_THREADS[0];
   const [messages, setMessages] = useState<ChatMessage[]>(() => chatThread.messages);
 
   useEffect(() => {

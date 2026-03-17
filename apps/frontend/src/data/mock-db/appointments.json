@@ -5,9 +5,21 @@
     "consumerId": "guest-primary",
     "professionalId": "3",
     "serviceId": "s6",
+    "areaId": "jakarta-selatan-kebayoran-baru",
+    "requestedMode": "home_visit",
+    "requestChannel": "Aplikasi pelanggan",
+    "requestNote": "Mohon fokus pada transfer kursi, latihan berdiri singkat, dan evaluasi gerak tangan kanan selama sesi rumah ini.",
+    "requestedAt": "2026-03-17T11:10:00+07:00",
     "status": "in_service",
     "scheduledTimeLabel": "Sedang berjalan, mulai 13:00 WIB",
-    "totalPriceLabel": "Rp 250.000"
+    "totalPriceLabel": "Rp 250.000",
+    "recentActivity": {
+      "dateLabel": "17 Mar 2026",
+      "title": "Sesi terapi motorik sedang berjalan",
+      "channel": "Home visit",
+      "summary": "Pendampingan latihan transfer kursi, berdiri mandiri, dan koreksi pola gerak tangan di rumah pelanggan."
+    },
+    "customerFeedback": null
   },
   {
     "index": 2,
@@ -15,9 +27,21 @@
     "consumerId": "guest-primary",
     "professionalId": "4",
     "serviceId": "s7",
+    "areaId": "depok-cimanggis",
+    "requestedMode": "home_visit",
+    "requestChannel": "Aplikasi pelanggan",
+    "requestNote": "Butuh pendampingan nifas dengan fokus pemulihan ibu, pembagian tugas keluarga, dan review keluhan utama sebelum kunjungan Senin pagi.",
+    "requestedAt": "2026-03-16T15:05:00+07:00",
     "status": "confirmed",
     "scheduledTimeLabel": "Senin, 08:00 WIB",
-    "totalPriceLabel": "Rp 175.000"
+    "totalPriceLabel": "Rp 175.000",
+    "recentActivity": {
+      "dateLabel": "16 Mar 2026",
+      "title": "Konfirmasi kunjungan nifas pagi",
+      "channel": "Home visit",
+      "summary": "Jadwal pemulihan ibu pasca persalinan sudah dikunci dengan daftar keluhan dan briefing untuk keluarga inti."
+    },
+    "customerFeedback": null
   },
   {
     "index": 3,
@@ -25,9 +49,21 @@
     "consumerId": "guest-primary",
     "professionalId": "1",
     "serviceId": "s10",
+    "areaId": "depok-sukmajaya",
+    "requestedMode": "online",
+    "requestChannel": "Aplikasi pelanggan",
+    "requestNote": "Minta kelas menyusui malam hari dengan materi latch dasar, pumping plan, dan ruang tanya jawab singkat untuk pasangan.",
+    "requestedAt": "2026-03-17T09:00:00+07:00",
     "status": "paid",
     "scheduledTimeLabel": "Hari ini, 19:30 WIB",
-    "totalPriceLabel": "Rp 90.000"
+    "totalPriceLabel": "Rp 90.000",
+    "recentActivity": {
+      "dateLabel": "17 Mar 2026",
+      "title": "Brief kelas menyusui malam",
+      "channel": "Online class",
+      "summary": "Materi pelekatan awal, pumping plan, dan reminder akses ruang kelas sudah disiapkan sebelum sesi malam."
+    },
+    "customerFeedback": null
   },
   {
     "index": 4,
@@ -35,9 +71,21 @@
     "consumerId": "guest-primary",
     "professionalId": "2",
     "serviceId": "s4",
+    "areaId": "jakarta-barat-kembangan",
+    "requestedMode": "home_visit",
+    "requestChannel": "Aplikasi pelanggan",
+    "requestNote": "Mohon bekam steril di rumah untuk fatigue recovery, dengan arahan after-care dan estimasi slot sore hari ini.",
+    "requestedAt": "2026-03-17T08:20:00+07:00",
     "status": "approved_waiting_payment",
     "scheduledTimeLabel": "Hari ini, 15:00 WIB",
-    "totalPriceLabel": "Rp 120.000"
+    "totalPriceLabel": "Rp 120.000",
+    "recentActivity": {
+      "dateLabel": "17 Mar 2026",
+      "title": "Persetujuan tindakan bekam terkirim",
+      "channel": "Customer app follow-up",
+      "summary": "Permintaan home visit bekam disetujui dan pelanggan sedang menyelesaikan pembayaran untuk mengunci slot sore."
+    },
+    "customerFeedback": null
   },
   {
     "index": 5,
@@ -45,9 +93,21 @@
     "consumerId": "guest-primary",
     "professionalId": "1",
     "serviceId": "s1",
+    "areaId": "depok-sukmajaya",
+    "requestedMode": "home_visit",
+    "requestChannel": "Aplikasi pelanggan",
+    "requestNote": "Perlu pijat bayi untuk newborn minggu depan, termasuk konfirmasi keamanan alat, rutinitas tidur, dan edukasi bonding touch.",
+    "requestedAt": "2026-03-17T07:15:00+07:00",
     "status": "requested",
     "scheduledTimeLabel": "Besok, 10:00 WIB",
-    "totalPriceLabel": "Rp 150.000"
+    "totalPriceLabel": "Rp 150.000",
+    "recentActivity": {
+      "dateLabel": "17 Mar 2026",
+      "title": "Permintaan pijat bayi baru masuk",
+      "channel": "Customer app intake",
+      "summary": "Profesional sedang meninjau kebutuhan newborn care, keamanan alat, dan kesiapan slot kunjungan untuk besok pagi."
+    },
+    "customerFeedback": null
   },
   {
     "index": 6,
@@ -55,9 +115,28 @@
     "consumerId": "guest-primary",
     "professionalId": "6",
     "serviceId": "s8",
+    "areaId": "depok-pancoran-mas",
+    "requestedMode": "online",
+    "requestChannel": "Aplikasi pelanggan",
+    "requestNote": "Butuh review milestone bayi 8 bulan, evaluasi jadwal makan-tidur, dan rencana stimulasi dua minggu ke depan.",
+    "requestedAt": "2026-03-15T08:30:00+07:00",
     "status": "completed",
     "scheduledTimeLabel": "Kemarin, 09:30 WIB",
-    "totalPriceLabel": "Rp 140.000"
+    "totalPriceLabel": "Rp 140.000",
+    "recentActivity": {
+      "dateLabel": "16 Mar 2026",
+      "title": "Review milestone bayi selesai",
+      "channel": "Video consultation",
+      "summary": "Sesi evaluasi tumbuh kembang ditutup dengan ringkasan milestone, feeding routine, dan catatan observasi dua minggu."
+    },
+    "customerFeedback": {
+      "author": "Raisa Putri",
+      "role": "Ibu bayi 8 bulan",
+      "rating": 5,
+      "dateLabel": "16 Mar 2026",
+      "quote": "Penjelasannya runtut, ada recap yang jelas, dan saya jadi lebih yakin menyusun stimulasi harian di rumah.",
+      "image": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop"
+    }
   },
   {
     "index": 7,
@@ -65,9 +144,21 @@
     "consumerId": "guest-primary",
     "professionalId": "5",
     "serviceId": "s9",
+    "areaId": "jakarta-barat-kembangan",
+    "requestedMode": "onsite",
+    "requestChannel": "Aplikasi pelanggan",
+    "requestNote": "Minta slot pijat refleksi sepulang kerja, tetapi pelanggan kemudian membatalkan karena jadwal kantor berubah mendadak.",
+    "requestedAt": "2026-03-12T15:20:00+07:00",
     "status": "cancelled",
     "scheduledTimeLabel": "12 Maret 2026, 18:00 WIB",
-    "totalPriceLabel": "Rp 105.000"
+    "totalPriceLabel": "Rp 105.000",
+    "recentActivity": {
+      "dateLabel": "12 Mar 2026",
+      "title": "Penutupan slot refleksi malam",
+      "channel": "Customer follow-up",
+      "summary": "Slot onsite malam dilepas kembali setelah pelanggan membatalkan booking dan meminta opsi reschedule di lain hari."
+    },
+    "customerFeedback": null
   },
   {
     "index": 8,
@@ -75,9 +166,21 @@
     "consumerId": "guest-primary",
     "professionalId": "4",
     "serviceId": "s1",
+    "areaId": "bandung-soreang",
+    "requestedMode": "home_visit",
+    "requestChannel": "Aplikasi pelanggan",
+    "requestNote": "Permintaan pijat bayi diajukan untuk area di luar coverage harian profesional, sehingga perlu peninjauan rute terlebih dahulu.",
+    "requestedAt": "2026-03-11T09:10:00+07:00",
     "status": "rejected",
     "scheduledTimeLabel": "11 Maret 2026, 11:00 WIB",
-    "totalPriceLabel": "Rp 145.000"
+    "totalPriceLabel": "Rp 145.000",
+    "recentActivity": {
+      "dateLabel": "11 Mar 2026",
+      "title": "Permintaan di luar area ditolak",
+      "channel": "Coverage review",
+      "summary": "Booking home visit tidak bisa diproses karena alamat pelanggan berada di luar cakupan operasional profesional pada hari tersebut."
+    },
+    "customerFeedback": null
   },
   {
     "index": 9,
@@ -85,8 +188,20 @@
     "consumerId": "guest-primary",
     "professionalId": "1",
     "serviceId": "s5",
+    "areaId": "depok-cimanggis",
+    "requestedMode": "online",
+    "requestChannel": "Aplikasi pelanggan",
+    "requestNote": "Meminta konsultasi laktasi malam dengan review pumping plan, tetapi pembayaran tidak diselesaikan sampai batas waktu berakhir.",
+    "requestedAt": "2026-03-10T18:40:00+07:00",
     "status": "expired",
     "scheduledTimeLabel": "10 Maret 2026, 20:00 WIB",
-    "totalPriceLabel": "Rp 200.000"
+    "totalPriceLabel": "Rp 200.000",
+    "recentActivity": {
+      "dateLabel": "10 Mar 2026",
+      "title": "Permintaan konsultasi kedaluwarsa",
+      "channel": "Payment follow-up",
+      "summary": "Slot konsultasi laktasi dilepas kembali setelah pelanggan tidak menyelesaikan pembayaran sebelum batas waktu."
+    },
+    "customerFeedback": null
   }
 ]

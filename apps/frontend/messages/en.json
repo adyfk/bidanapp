@@ -295,6 +295,69 @@
       "viewPublicProfile": "View public profile",
       "openCatalog": "Open customer catalog"
     },
+    "notifications": {
+      "eyebrow": "Update center",
+      "title": "Professional notifications",
+      "openAriaLabel": "Open professional notifications",
+      "heroDescriptionUnread": "You still have {count} updates to review so inbound requests, operational readiness, and service schedules stay organized.",
+      "heroDescriptionClear": "All professional updates are read. Use this screen to keep request-board and operational reminders in one place.",
+      "summary": {
+        "unread": "Unread",
+        "requests": "Request updates",
+        "operations": "Operational updates"
+      },
+      "filters": {
+        "all": "All",
+        "unread": "Unread",
+        "requests": "Request board",
+        "operations": "Operations"
+      },
+      "sections": {
+        "actionNeeded": "Action needed",
+        "monitoring": "Keep monitoring"
+      },
+      "types": {
+        "request": "Request",
+        "schedule": "Schedule",
+        "operations": "Operations"
+      },
+      "badges": {
+        "unread": "New",
+        "urgent": "Urgent"
+      },
+      "actions": {
+        "markAllRead": "Mark all read",
+        "openRequestBoard": "Open request board",
+        "reviewServices": "Review services",
+        "reviewCoverage": "Review coverage",
+        "openOverview": "Open overview"
+      },
+      "labels": {
+        "system": "System"
+      },
+      "emptyTitle": "No notifications match this filter",
+      "emptyDescription": "Switch back to all updates to review the latest request-board activity and operational reminders.",
+      "items": {
+        "newRequestTitle": "New request from {client}",
+        "newRequestBody": "{service} for {area} came in through {channel}. Review the client need and send an initial response before the queue slips.",
+        "quotedRequestTitle": "A quote still needs follow-up",
+        "quotedRequestBody": "{client}'s {service} case is already in the quoted stage. Recheck pricing, proof, and response expectations before the next follow-up.",
+        "scheduledRequestTitle": "A scheduled case needs monitoring",
+        "scheduledRequestBody": "{client} is already scheduled for {service}. Keep the visit details, reminders, and handoff channel ready.",
+        "completedRequestTitle": "Service recap has been saved",
+        "completedRequestBody": "{service} for {client} is completed. Review the customer summary and internal notes before considering the case fully wrapped.",
+        "profileReadinessTitle": "Portal readiness is not complete yet",
+        "profileReadinessBody": "The portal checklist is only {score}%. Complete identity, coverage, services, or proof-of-work so the public profile and operations feel tighter.",
+        "servicesMissingTitle": "No active services are visible yet",
+        "servicesMissingBody": "Activate at least one service so customers can see pricing, duration, and booking flow directly from your public profile.",
+        "featuredServiceTitle": "No featured service has been selected",
+        "featuredServiceBody": "Choose one featured service so the dashboard summary and public profile have a clear primary offer.",
+        "acceptingPausedTitle": "New client intake is currently paused",
+        "acceptingPausedBody": "The public profile is still visible, but new requests will not come in. Review the coverage settings if you want to reopen intake.",
+        "coverageMissingTitle": "Coverage area is not configured yet",
+        "coverageMissingBody": "Add at least one coverage area so home-visit requests and practice location data stay consistent across the portal."
+      }
+    },
     "tabs": {
       "overview": "Overview",
       "requests": "Requests",
