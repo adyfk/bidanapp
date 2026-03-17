@@ -201,6 +201,8 @@ export const RequestCard = ({
   getAreaLabel,
   getModeLabel,
   getServiceLabel,
+  htmlId,
+  isHighlighted,
   moveToLabel,
   onChangeStatus,
   priorityLabel,
@@ -231,6 +233,8 @@ export const RequestCard = ({
   getAreaLabel: (areaId: string) => string;
   getModeLabel: (mode: ProfessionalManagedRequest['requestedMode']) => string;
   getServiceLabel: (serviceId: string) => string;
+  htmlId?: string;
+  isHighlighted?: boolean;
   moveToLabel: string;
   onChangeStatus: (status: ProfessionalRequestStatus) => void;
   priorityLabel: string;
@@ -245,7 +249,12 @@ export const RequestCard = ({
   const nextStatus = getNextProfessionalRequestStatus(request.status);
 
   return (
-    <div className={surfaceCardPaddedClass}>
+    <div
+      id={htmlId}
+      className={`${surfaceCardPaddedClass} scroll-mt-28 ${
+        isHighlighted ? 'border-blue-200 shadow-[0_24px_70px_-42px_rgba(37,99,235,0.45)]' : ''
+      }`}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">

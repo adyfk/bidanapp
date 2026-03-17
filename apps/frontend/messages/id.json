@@ -295,6 +295,69 @@
       "viewPublicProfile": "Lihat profil publik",
       "openCatalog": "Buka katalog pelanggan"
     },
+    "notifications": {
+      "eyebrow": "Pusat update",
+      "title": "Notifikasi profesional",
+      "openAriaLabel": "Buka notifikasi profesional",
+      "heroDescriptionUnread": "Ada {count} update yang masih perlu ditinjau agar permintaan masuk, kesiapan operasional, dan jadwal layanan tetap rapi.",
+      "heroDescriptionClear": "Semua update profesional sudah terbaca. Gunakan layar ini untuk memantau request board dan pengingat operasional dari satu tempat.",
+      "summary": {
+        "unread": "Belum dibaca",
+        "requests": "Update request",
+        "operations": "Update operasional"
+      },
+      "filters": {
+        "all": "Semua",
+        "unread": "Belum dibaca",
+        "requests": "Request board",
+        "operations": "Operasional"
+      },
+      "sections": {
+        "actionNeeded": "Butuh tindakan",
+        "monitoring": "Perlu dipantau"
+      },
+      "types": {
+        "request": "Permintaan",
+        "schedule": "Jadwal",
+        "operations": "Operasional"
+      },
+      "badges": {
+        "unread": "Baru",
+        "urgent": "Urgent"
+      },
+      "actions": {
+        "markAllRead": "Tandai semua dibaca",
+        "openRequestBoard": "Buka request board",
+        "reviewServices": "Tinjau layanan",
+        "reviewCoverage": "Tinjau jangkauan",
+        "openOverview": "Buka ringkasan"
+      },
+      "labels": {
+        "system": "Sistem"
+      },
+      "emptyTitle": "Tidak ada notifikasi di filter ini",
+      "emptyDescription": "Coba tampilkan semua update untuk melihat permintaan terbaru dan pengingat operasional yang sedang aktif.",
+      "items": {
+        "newRequestTitle": "Permintaan baru dari {client}",
+        "newRequestBody": "{service} untuk area {area} masuk lewat {channel}. Cek kebutuhan klien dan beri respons awal agar antrean tetap terkendali.",
+        "quotedRequestTitle": "Penawaran menunggu tindak lanjut",
+        "quotedRequestBody": "Kasus {client} untuk {service} sudah masuk tahap penawaran. Pastikan harga, bukti, dan ekspektasi respons masih jelas sebelum follow-up berikutnya.",
+        "scheduledRequestTitle": "Kasus terjadwal perlu dipantau",
+        "scheduledRequestBody": "{client} sudah dijadwalkan untuk {service}. Pastikan detail kunjungan, reminder, dan kanal handoff tetap siap.",
+        "completedRequestTitle": "Rekap layanan sudah tersimpan",
+        "completedRequestBody": "{service} untuk {client} sudah selesai. Tinjau lagi ringkasan pelanggan dan catatan internal sebelum kasus dianggap benar-benar beres.",
+        "profileReadinessTitle": "Kelengkapan portal belum penuh",
+        "profileReadinessBody": "Checklist portal baru {score}%. Lengkapi identitas, jangkauan, layanan, atau bukti kerja agar profil publik dan operasional lebih meyakinkan.",
+        "servicesMissingTitle": "Belum ada layanan aktif di katalog",
+        "servicesMissingBody": "Aktifkan minimal satu layanan agar pelanggan bisa melihat harga, durasi, dan alur pemesanan langsung dari profil publik Anda.",
+        "featuredServiceTitle": "Belum ada layanan unggulan",
+        "featuredServiceBody": "Pilih satu layanan unggulan supaya kartu ringkasan dashboard dan profil publik punya fokus utama yang jelas.",
+        "acceptingPausedTitle": "Penerimaan klien baru sedang dimatikan",
+        "acceptingPausedBody": "Profil publik masih tampil, tetapi request baru tidak akan masuk. Tinjau ulang pengaturan jangkauan bila Anda ingin membuka intake lagi.",
+        "coverageMissingTitle": "Area jangkauan belum ditetapkan",
+        "coverageMissingBody": "Tambahkan minimal satu area jangkauan supaya request home visit dan titik praktik tampil konsisten di portal profesional."
+      }
+    },
     "tabs": {
       "overview": "Ringkasan",
       "requests": "Permintaan",

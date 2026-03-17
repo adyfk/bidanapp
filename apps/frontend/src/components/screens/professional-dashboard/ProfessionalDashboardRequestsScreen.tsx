@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { ProfessionalAccessScreen } from '@/components/screens/ProfessionalAccessScreen';
 import { ProfessionalPageSkeleton } from '@/components/screens/ProfessionalPageSkeleton';
 import { ProfessionalSetupScreen } from '@/components/screens/ProfessionalSetupScreen';
 import { validateProfessionalRequestStatusUpdate } from '@/features/professional-portal/lib/request-status';
+import { requestStatuses } from './helpers';
 import { ProfessionalDashboardRequestStatusDialog } from './ProfessionalDashboardRequestStatusDialog';
 import { ProfessionalDashboardRequestsTab } from './ProfessionalDashboardRequestsTab';
 import { ProfessionalDashboardShell } from './ProfessionalDashboardShell';
@@ -13,6 +15,12 @@ import { useDashboardDialogLifecycle } from './useDashboardDialogLifecycle';
 import { useProfessionalDashboardPageData } from './useProfessionalDashboardPageData';
 
 export const ProfessionalDashboardRequestsScreen = () => {
+  const searchParams = useSearchParams();
+  const requestedFilterParam = searchParams.get('status');
+  const requestedRequestId = searchParams.get('request');
+  const requestedFilter = requestStatuses.includes(requestedFilterParam as RequestFilter)
+    ? (requestedFilterParam as RequestFilter)
+    : 'new';
   const {
     activeCoverageAreas,
     activeProfessional,
@@ -31,10 +39,12 @@ export const ProfessionalDashboardRequestsScreen = () => {
     updateRequestStatus,
   } = useProfessionalDashboardPageData();
   const [notice, setNotice] = useState<string | null>(null);
-  const [requestFilter, setRequestFilter] = useState<RequestFilter>('new');
+  const [requestFilter, setRequestFilter] = useState<RequestFilter>(requestedFilter);
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
   const [statusError, setStatusError] = useState<string | null>(null);
-  const [selectedRequestId, setSelectedRequestId] = useState(portalState.requestBoard[0]?.id || '');
+  const [selectedRequestId, setSelectedRequestId] = useState(
+    requestedRequestId || portalState.requestBoard[0]?.id || '',
+  );
   const [statusDraft, setStatusDraft] = useState<RequestStatusDraft | null>(null);
   const priorityRank = {
     high: 0,
@@ -70,6 +80,40 @@ export const ProfessionalDashboardRequestsScreen = () => {
 
   useDashboardDialogLifecycle(isStatusDialogOpen, closeStatusDialog);
 
+  useEffect(() => {
+    setRequestFilter(requestedFilter);
+  }, [requestedFilter]);
+
+  useEffect(() => {
+    if (requestedRequestId) {
+      setSelectedRequestId(requestedRequestId);
+      return;
+    }
+
+    if (!selectedRequestId && portalState.requestBoard[0]?.id) {
+      setSelectedRequestId(portalState.requestBoard[0].id);
+    }
+  }, [portalState.requestBoard, requestedRequestId, selectedRequestId]);
+
+  useEffect(() => {
+    if (!requestedRequestId) {
+      return;
+    }
+
+    const target = document.getElementById(`professional-request-card-${requestedRequestId}`);
+
+    if (!target) {
+      return;
+    }
+
+    window.requestAnimationFrame(() => {
+      target.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    });
+  }, [requestedRequestId]);
+
   if (!hasMounted) {
     return <ProfessionalPageSkeleton />;
   }
@@ -102,6 +146,7 @@ export const ProfessionalDashboardRequestsScreen = () => {
         getServiceLabel={getServiceLabel}
         requestFilter={requestFilter}
         requestStatusCounts={requestStatusCounts}
+        selectedRequestId={selectedRequestId}
         setRequestFilter={setRequestFilter}
         onChangeStatus={(requestId, status) => {
           const request = portalState.requestBoard.find((currentRequest) => currentRequest.id === requestId);

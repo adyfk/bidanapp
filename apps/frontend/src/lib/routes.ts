@@ -3,6 +3,7 @@ import type { AppointmentStatus } from '@/types/appointments';
 
 export type CustomerAccessIntent = 'general' | 'activity' | 'profile' | 'booking' | 'notifications';
 export type ProfessionalAccessTab = 'login' | 'register';
+export type ProfessionalRequestRouteStatus = 'new' | 'quoted' | 'scheduled' | 'completed';
 export const PROFESSIONAL_DASHBOARD_TABS = [
   'overview',
   'requests',
@@ -18,6 +19,7 @@ export const APP_ROUTES = {
   customerAccess: '/auth/customer' as Route,
   professionalAccess: '/for-professionals' as Route,
   professionalDashboard: '/for-professionals/dashboard' as Route,
+  professionalNotifications: '/for-professionals/dashboard/notifications' as Route,
   professionalProfile: '/for-professionals/profile' as Route,
   professionalSetup: '/for-professionals/setup' as Route,
   home: '/home' as Route,
@@ -34,6 +36,28 @@ export function professionalRoute(slug: string): Route {
 
 export function professionalDashboardRoute(tab: ProfessionalDashboardTab = PROFESSIONAL_DASHBOARD_DEFAULT_TAB): Route {
   return `/for-professionals/dashboard/${tab}` as Route;
+}
+
+export function professionalDashboardRequestsRoute(
+  params: { requestId?: string; status?: ProfessionalRequestRouteStatus } = {},
+): Route {
+  const query = new URLSearchParams();
+
+  if (params.status) {
+    query.set('status', params.status);
+  }
+
+  if (params.requestId) {
+    query.set('request', params.requestId);
+  }
+
+  const queryString = query.toString();
+
+  if (!queryString) {
+    return professionalDashboardRoute('requests');
+  }
+
+  return `/for-professionals/dashboard/requests?${queryString}` as Route;
 }
 
 export function isProfessionalDashboardTab(value: string): value is ProfessionalDashboardTab {

@@ -14,13 +14,14 @@ import {
   professionalDashboardRoute,
   professionalRoute,
 } from '@/lib/routes';
+import { useProfessionalNotifications } from '@/lib/use-professional-notifications';
 import type { Professional } from '@/types/catalog';
 
 interface ProfessionalDashboardShellProps {
   activeCoverageAreaCount: number;
   activeProfessional: Professional;
   activeServiceCount: number;
-  activeTab: ProfessionalDashboardTab;
+  activeTab: ProfessionalDashboardTab | null;
   averageServicePriceLabel: string;
   children: ReactNode;
   clampedCompletionScore: number;
@@ -45,6 +46,7 @@ export const ProfessionalDashboardShell = ({
 }: ProfessionalDashboardShellProps) => {
   const router = useRouter();
   const t = useTranslations('ProfessionalPortal');
+  const { unreadCount } = useProfessionalNotifications();
   const locationLabel = headerLocationLabel || activeProfessional.location;
 
   return (
@@ -72,12 +74,16 @@ export const ProfessionalDashboardShell = ({
           </div>
           <button
             type="button"
-            aria-label={t('tabs.requests')}
-            onClick={() => router.push(professionalDashboardRoute('requests'))}
+            aria-label={t('notifications.openAriaLabel')}
+            onClick={() => router.push(APP_ROUTES.professionalNotifications)}
             className="relative flex h-11 w-11 items-center justify-center rounded-full border border-white bg-white text-gray-800 shadow-sm transition-colors hover:bg-gray-50"
           >
             <Bell className="h-5 w-5" />
-            <span className="absolute right-[9px] top-[9px] h-2.5 w-2.5 rounded-full border-2 border-white bg-rose-400" />
+            {unreadCount > 0 ? (
+              <span className="absolute -right-1 top-0 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-white bg-rose-500 px-1 text-[10px] font-bold text-white">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            ) : null}
           </button>
         </div>
       </div>

@@ -17,6 +17,7 @@ interface ProfessionalDashboardRequestsTabProps {
   onChangeStatus: (requestId: string, status: ProfessionalRequestStatus) => void;
   requestFilter: RequestFilter;
   requestStatusCounts: Record<ProfessionalRequestStatus, number>;
+  selectedRequestId?: string;
   setRequestFilter: (filter: RequestFilter) => void;
 }
 
@@ -28,6 +29,7 @@ export const ProfessionalDashboardRequestsTab = ({
   onChangeStatus,
   requestFilter,
   requestStatusCounts,
+  selectedRequestId,
   setRequestFilter,
 }: ProfessionalDashboardRequestsTabProps) => {
   const t = useTranslations('ProfessionalPortal');
@@ -93,6 +95,8 @@ export const ProfessionalDashboardRequestsTab = ({
               getAreaLabel={getAreaLabel}
               getModeLabel={getModeLabel}
               getServiceLabel={getServiceLabel}
+              htmlId={`professional-request-card-${request.id}`}
+              isHighlighted={selectedRequestId === request.id}
               moveToLabel={t('requests.moveTo')}
               priorityLabel={t(`requests.priority.${request.priority}`)}
               request={request}

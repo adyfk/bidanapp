@@ -24,3 +24,29 @@ export interface CustomerNotificationItem {
 export interface CustomerNotificationState extends CustomerNotificationItem {
   isUnread: boolean;
 }
+
+export type ProfessionalNotificationSection = 'actionNeeded' | 'monitoring';
+export type ProfessionalNotificationType = 'request' | 'schedule' | 'operations';
+export type ProfessionalNotificationActionKey =
+  | 'openRequestBoard'
+  | 'reviewServices'
+  | 'reviewCoverage'
+  | 'openOverview';
+
+export interface ProfessionalNotificationItem {
+  actionKey: ProfessionalNotificationActionKey;
+  badgeLabel?: string;
+  body: string;
+  href: Route;
+  id: string;
+  isUnreadByDefault: boolean;
+  isUrgent?: boolean;
+  section: ProfessionalNotificationSection;
+  timeLabel: string;
+  title: string;
+  type: ProfessionalNotificationType;
+}
+
+export interface ProfessionalNotificationState extends ProfessionalNotificationItem {
+  isUnread: boolean;
+}
