@@ -1,12 +1,22 @@
 import { PROFESSIONAL_REQUEST_STATUS_ORDER } from '@/features/professional-portal/lib/request-status';
 import type {
+  ProfessionalManagedActivityStory,
+  ProfessionalManagedCredential,
   ProfessionalManagedGalleryItem,
   ProfessionalManagedPortfolioEntry,
   ProfessionalManagedService,
   ProfessionalPortalState,
 } from '@/lib/use-professional-portal';
 import type { ProfessionalAvailabilityDay, ServiceDeliveryMode } from '@/types/catalog';
-import type { AvailabilityDraft, CoverageDraft, GalleryDraft, PortfolioDraft, ServiceDraft } from './types';
+import type {
+  ActivityStoryDraft,
+  AvailabilityDraft,
+  CoverageDraft,
+  CredentialDraft,
+  GalleryDraft,
+  PortfolioDraft,
+  ServiceDraft,
+} from './types';
 
 export const requestStatuses = PROFESSIONAL_REQUEST_STATUS_ORDER;
 export const deliveryModes: ServiceDeliveryMode[] = ['online', 'home_visit', 'onsite'];
@@ -130,6 +140,21 @@ export const toGalleryDraft = (item: ProfessionalManagedGalleryItem): GalleryDra
   image: item.image,
   isFeatured: item.isFeatured,
   label: item.label,
+});
+
+export const toCredentialDraft = (item: ProfessionalManagedCredential): CredentialDraft => ({
+  issuer: item.issuer,
+  note: item.note,
+  title: item.title,
+  year: item.year,
+});
+
+export const toActivityStoryDraft = (item: ProfessionalManagedActivityStory): ActivityStoryDraft => ({
+  capturedAt: item.capturedAt,
+  image: item.image,
+  location: item.location,
+  note: item.note,
+  title: item.title,
 });
 
 export const toCoverageDraft = (portalState: ProfessionalPortalState): CoverageDraft => ({

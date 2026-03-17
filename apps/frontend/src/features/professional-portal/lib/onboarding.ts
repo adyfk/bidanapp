@@ -321,8 +321,10 @@ export const createProfessionalOnboardingDraft = (
 ): ProfessionalPortalState => ({
   ...portalState,
   acceptingNewClients: false,
+  activityStories: [],
   autoApproveInstantBookings: false,
   coverageAreaIds: [],
+  credentials: [],
   galleryItems: [],
   homeVisitRadiusKm: 0,
   availabilityByMode: undefined,

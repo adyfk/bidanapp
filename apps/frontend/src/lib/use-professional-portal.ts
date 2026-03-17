@@ -8,7 +8,9 @@ import {
   type ProfessionalAccessDraft,
   type ProfessionalLifecycleReviewState,
   type ProfessionalLifecycleStatus,
+  type ProfessionalManagedActivityStory,
   type ProfessionalManagedAppointmentRecord,
+  type ProfessionalManagedCredential,
   type ProfessionalManagedGalleryItem,
   type ProfessionalManagedPortfolioEntry,
   type ProfessionalManagedRequest,
@@ -69,7 +71,9 @@ export type {
   ProfessionalAccessDraft,
   ProfessionalLifecycleReviewState,
   ProfessionalLifecycleStatus,
+  ProfessionalManagedActivityStory,
   ProfessionalManagedAppointmentRecord,
+  ProfessionalManagedCredential,
   ProfessionalManagedGalleryItem,
   ProfessionalManagedPortfolioEntry,
   ProfessionalManagedRequest,
@@ -181,6 +185,10 @@ const isProfessionalLifecycleStatus = (value: string): value is ProfessionalLife
 const professionalPortalCopyByLocale = {
   en: {
     defaults: {
+      credentialIssuer: 'Certification body',
+      credentialNote: 'Briefly explain what this credential covers for customers.',
+      credentialTitle: 'New credential',
+      credentialYear: '2026',
       galleryAlt: 'Professional gallery asset',
       galleryLabel: 'New asset',
       newAssetAlt: 'Professional asset',
@@ -192,6 +200,10 @@ const professionalPortalCopyByLocale = {
       requestClientName: 'New client',
       requestNote: 'New request note.',
       requestTodayLabel: 'Today',
+      storyCapturedAt: 'March 2026',
+      storyLocation: 'Practice location',
+      storyNote: 'Share one concrete moment that strengthens customer trust.',
+      storyTitle: 'New practice story',
     },
     requestBoard: {
       notes: {
@@ -267,6 +279,10 @@ const professionalPortalCopyByLocale = {
   },
   id: {
     defaults: {
+      credentialIssuer: 'Lembaga penerbit',
+      credentialNote: 'Jelaskan singkat cakupan kredensial ini untuk pelanggan.',
+      credentialTitle: 'Kredensial baru',
+      credentialYear: '2026',
       galleryAlt: 'Aset galeri profesional',
       galleryLabel: 'Aset baru',
       newAssetAlt: 'Aset profesional',
@@ -278,6 +294,10 @@ const professionalPortalCopyByLocale = {
       requestClientName: 'Klien baru',
       requestNote: 'Catatan permintaan baru.',
       requestTodayLabel: 'Hari ini',
+      storyCapturedAt: 'Maret 2026',
+      storyLocation: 'Titik layanan',
+      storyNote: 'Ceritakan satu momen nyata yang memperkuat kepercayaan pelanggan.',
+      storyTitle: 'Cerita praktik baru',
     },
     requestBoard: {
       notes: {
@@ -733,6 +753,18 @@ const buildDefaultGalleryItems = (professional: Professional | null): Profession
     isFeatured: index === 0,
   }));
 
+const buildDefaultCredentials = (professional: Professional | null): ProfessionalManagedCredential[] =>
+  (professional?.credentials || []).map((credential, index) => ({
+    ...credential,
+    id: `professional-credential-${professional?.id || 'template'}-${index + 1}`,
+  }));
+
+const buildDefaultActivityStories = (professional: Professional | null): ProfessionalManagedActivityStory[] =>
+  (professional?.activityStories || []).map((story, index) => ({
+    ...story,
+    id: `professional-story-${professional?.id || 'template'}-${index + 1}`,
+  }));
+
 const normalizeManagedServices = (services: ProfessionalManagedService[]): ProfessionalManagedService[] => {
   const normalizedServices = services.map((service, index) => ({
     ...service,
@@ -763,6 +795,20 @@ const normalizeManagedGalleryItems = (items: ProfessionalManagedGalleryItem[]): 
   }));
 };
 
+const normalizeManagedCredentials = (items: ProfessionalManagedCredential[]): ProfessionalManagedCredential[] =>
+  items.map((item, index) => ({
+    ...item,
+    index: index + 1,
+  }));
+
+const normalizeManagedActivityStories = (
+  items: ProfessionalManagedActivityStory[],
+): ProfessionalManagedActivityStory[] =>
+  items.map((item, index) => ({
+    ...item,
+    index: index + 1,
+  }));
+
 const buildDefaultPortalState = (professionalId = defaultProfessional?.id || ''): ProfessionalPortalState => {
   const professional = getProfessionalById(professionalId) || defaultProfessional;
   const primaryArea = professional?.coverage.areaIds[0] ? getAreaById(professional.coverage.areaIds[0]) : undefined;
@@ -770,10 +816,12 @@ const buildDefaultPortalState = (professionalId = defaultProfessional?.id || '')
   return {
     acceptingNewClients: professional?.availability.isAvailable ?? true,
     activeProfessionalId: professional?.id || '',
+    activityStories: buildDefaultActivityStories(professional),
     availabilityByMode: sanitizeAvailabilityByMode(professional?.availabilityByMode, professional?.availabilityByMode),
     autoApproveInstantBookings: (professional?.services || []).some((service) => service.bookingFlow === 'instant'),
     city: primaryArea?.city || professional?.location || '',
     coverageAreaIds: professional?.coverage.areaIds.slice(0, 3) || [],
+    credentials: buildDefaultCredentials(professional),
     coverageCenter: professional?.coverage.center || {
       latitude: -6.208763,
       longitude: 106.845599,
@@ -856,6 +904,42 @@ const sanitizeManagedGalleryItem = (
     index: typeof value.index === 'number' ? value.index : fallback?.index || 1,
     isFeatured: value.isFeatured ?? fallback?.isFeatured ?? false,
     label: value.label?.trim() || fallback?.label || copy.defaults.galleryLabel,
+  };
+};
+
+const sanitizeManagedCredential = (
+  value: Partial<ProfessionalManagedCredential>,
+  fallback?: ProfessionalManagedCredential,
+): ProfessionalManagedCredential => {
+  const copy = getProfessionalPortalCopy();
+
+  return {
+    id: value.id || fallback?.id || `professional-credential-${Date.now()}`,
+    index: typeof value.index === 'number' ? value.index : fallback?.index || 1,
+    issuer: value.issuer?.trim() || fallback?.issuer || copy.defaults.credentialIssuer,
+    note: value.note?.trim() || fallback?.note || copy.defaults.credentialNote,
+    title: value.title?.trim() || fallback?.title || copy.defaults.credentialTitle,
+    year: value.year?.trim() || fallback?.year || copy.defaults.credentialYear,
+  };
+};
+
+const sanitizeManagedActivityStory = (
+  value: Partial<ProfessionalManagedActivityStory>,
+  fallback?: ProfessionalManagedActivityStory,
+): ProfessionalManagedActivityStory => {
+  const copy = getProfessionalPortalCopy();
+
+  return {
+    capturedAt: value.capturedAt?.trim() || fallback?.capturedAt || copy.defaults.storyCapturedAt,
+    id: value.id || fallback?.id || `professional-story-${Date.now()}`,
+    image:
+      value.image?.trim() ||
+      fallback?.image ||
+      'https://images.unsplash.com/photo-1515377905703-c4788e51af15?q=80&w=800&auto=format&fit=crop',
+    index: typeof value.index === 'number' ? value.index : fallback?.index || 1,
+    location: value.location?.trim() || fallback?.location || copy.defaults.storyLocation,
+    note: value.note?.trim() || fallback?.note || copy.defaults.storyNote,
+    title: value.title?.trim() || fallback?.title || copy.defaults.storyTitle,
   };
 };
 
@@ -1144,6 +1228,8 @@ const sanitizePortalState = (value: Partial<ProfessionalPortalState> | null | un
   const professionalId = value?.activeProfessionalId || defaultProfessional?.id || '';
   const baseState = buildDefaultPortalState(professionalId);
   const rawServiceMap = new Map((value?.serviceConfigurations || []).map((item) => [item.serviceId, item]));
+  const activityStories = Array.isArray(value?.activityStories) ? value.activityStories : null;
+  const credentials = Array.isArray(value?.credentials) ? value.credentials : null;
   const portfolioEntries = Array.isArray(value?.portfolioEntries) ? value.portfolioEntries : null;
   const galleryItems = Array.isArray(value?.galleryItems) ? value.galleryItems : null;
   const requestBoard = sanitizeRequestBoard(
@@ -1157,10 +1243,20 @@ const sanitizePortalState = (value: Partial<ProfessionalPortalState> | null | un
   return {
     acceptingNewClients: value?.acceptingNewClients ?? baseState.acceptingNewClients,
     activeProfessionalId: professionalId,
+    activityStories: normalizeManagedActivityStories(
+      activityStories
+        ? activityStories.map((item, index) => sanitizeManagedActivityStory(item, baseState.activityStories[index]))
+        : baseState.activityStories,
+    ),
     availabilityByMode: sanitizeAvailabilityByMode(value?.availabilityByMode, baseState.availabilityByMode),
     autoApproveInstantBookings: value?.autoApproveInstantBookings ?? baseState.autoApproveInstantBookings,
     city: value?.city?.trim() || baseState.city,
     coverageAreaIds,
+    credentials: normalizeManagedCredentials(
+      credentials
+        ? credentials.map((item, index) => sanitizeManagedCredential(item, baseState.credentials[index]))
+        : baseState.credentials,
+    ),
     coverageCenter: sanitizeGeoPoint(value?.coverageCenter, baseState.coverageCenter),
     credentialNumber: value?.credentialNumber?.trim() || baseState.credentialNumber,
     displayName: value?.displayName?.trim() || baseState.displayName,
@@ -1370,6 +1466,21 @@ const mergeProfessionalWithPortalState = (
       index: index + 1,
       label: item.label,
     }));
+  const publicCredentials = portalState.credentials.map((item, index) => ({
+    index: index + 1,
+    issuer: item.issuer,
+    note: item.note,
+    title: item.title,
+    year: item.year,
+  }));
+  const publicActivityStories = portalState.activityStories.map((item, index) => ({
+    capturedAt: item.capturedAt,
+    image: item.image,
+    index: index + 1,
+    location: item.location,
+    note: item.note,
+    title: item.title,
+  }));
 
   return {
     ...professional,
@@ -1377,11 +1488,13 @@ const mergeProfessionalWithPortalState = (
     availability: {
       isAvailable: portalState.acceptingNewClients,
     },
+    activityStories: publicActivityStories,
     coverage: {
       areaIds: portalState.coverageAreaIds,
       center: portalState.coverageCenter,
       homeVisitRadiusKm: portalState.homeVisitRadiusKm,
     },
+    credentials: publicCredentials,
     experience: portalState.yearsExperience || professional.experience,
     gallery: publicGalleryItems,
     availabilityByMode: portalState.availabilityByMode,
@@ -1641,6 +1754,73 @@ export const useProfessionalPortal = () => {
     updatePortalStateWith((currentState) => ({
       ...currentState,
       galleryItems: currentState.galleryItems.filter((item) => item.id !== galleryId),
+    }));
+  };
+
+  const upsertCredential = (input: Partial<ProfessionalManagedCredential> & { id?: string }) => {
+    const existingCredential = input.id ? portalState.credentials.find((item) => item.id === input.id) : undefined;
+    const nextCredential = sanitizeManagedCredential(
+      {
+        ...input,
+        id:
+          input.id ||
+          existingCredential?.id ||
+          `professional-credential-${portalState.activeProfessionalId}-${Date.now()}`,
+        index: existingCredential?.index || portalState.credentials.length + 1,
+      },
+      existingCredential,
+    );
+
+    updatePortalStateWith((currentState) => ({
+      ...currentState,
+      credentials: normalizeManagedCredentials(
+        existingCredential
+          ? currentState.credentials.map((item) => (item.id === nextCredential.id ? nextCredential : item))
+          : [...currentState.credentials, nextCredential],
+      ),
+    }));
+
+    return nextCredential.id;
+  };
+
+  const deleteCredential = (credentialId: string) => {
+    updatePortalStateWith((currentState) => ({
+      ...currentState,
+      credentials: normalizeManagedCredentials(
+        currentState.credentials.filter((credential) => credential.id !== credentialId),
+      ),
+    }));
+  };
+
+  const upsertActivityStory = (input: Partial<ProfessionalManagedActivityStory> & { id?: string }) => {
+    const existingStory = input.id ? portalState.activityStories.find((item) => item.id === input.id) : undefined;
+    const nextStory = sanitizeManagedActivityStory(
+      {
+        ...input,
+        id: input.id || existingStory?.id || `professional-story-${portalState.activeProfessionalId}-${Date.now()}`,
+        index: existingStory?.index || portalState.activityStories.length + 1,
+      },
+      existingStory,
+    );
+
+    updatePortalStateWith((currentState) => ({
+      ...currentState,
+      activityStories: normalizeManagedActivityStories(
+        existingStory
+          ? currentState.activityStories.map((item) => (item.id === nextStory.id ? nextStory : item))
+          : [...currentState.activityStories, nextStory],
+      ),
+    }));
+
+    return nextStory.id;
+  };
+
+  const deleteActivityStory = (storyId: string) => {
+    updatePortalStateWith((currentState) => ({
+      ...currentState,
+      activityStories: normalizeManagedActivityStories(
+        currentState.activityStories.filter((story) => story.id !== storyId),
+      ),
     }));
   };
 
@@ -2097,6 +2277,8 @@ export const useProfessionalPortal = () => {
     createCustomerRequest,
     createGalleryItem,
     createPortfolioEntry,
+    deleteActivityStory,
+    deleteCredential,
     deleteGalleryItem,
     deletePortfolioEntry,
     getCustomerRequestForProfessional: (professionalId: string) => {
@@ -2122,6 +2304,8 @@ export const useProfessionalPortal = () => {
     saveGalleryItem,
     savePortfolioEntry,
     saveServiceConfiguration,
+    upsertActivityStory,
+    upsertCredential,
     startProfessionalLogin,
     startProfessionalRegistration,
     switchProfessionalProfile,

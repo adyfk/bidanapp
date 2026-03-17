@@ -58,12 +58,6 @@ export const ProfessionalDashboardServicesScreen = () => {
     }
   }, [portalState.serviceConfigurations, selectedServiceConfiguration]);
 
-  useEffect(() => {
-    if (selectedServiceConfiguration) {
-      setServiceDraft(toServiceDraft(selectedServiceConfiguration));
-    }
-  }, [selectedServiceConfiguration]);
-
   const closeServiceEditor = () => {
     if (selectedServiceConfiguration) {
       setServiceDraft(toServiceDraft(selectedServiceConfiguration));
@@ -92,6 +86,8 @@ export const ProfessionalDashboardServicesScreen = () => {
 
     if (nextService) {
       setServiceDraft(toServiceDraft(nextService));
+    } else {
+      setServiceDraft(null);
     }
 
     setIsServiceEditorOpen(true);

@@ -40,8 +40,10 @@ export const ProfessionalDashboardCoverageScreen = () => {
   const [coverageDraft, setCoverageDraft] = useState<CoverageDraft>(toCoverageDraft(portalState));
 
   useEffect(() => {
-    setCoverageDraft(toCoverageDraft(portalState));
-  }, [portalState]);
+    if (!isCoverageEditorOpen) {
+      setCoverageDraft(toCoverageDraft(portalState));
+    }
+  }, [isCoverageEditorOpen, portalState]);
 
   const closeCoverageEditor = () => {
     setCoverageDraft(toCoverageDraft(portalState));

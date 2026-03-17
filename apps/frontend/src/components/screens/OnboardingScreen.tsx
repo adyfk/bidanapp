@@ -64,7 +64,7 @@ export const OnboardingScreen = () => {
                 alt={ACTIVE_MEDIA_PRESET.onboardingHeroAlt}
                 fill
                 className="object-contain object-bottom"
-                sizes="(max-width: 768px) 100vw, 430px"
+                sizes="100vw"
                 priority
               />
             </div>

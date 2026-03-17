@@ -1,4 +1,6 @@
 import type {
+  ProfessionalManagedActivityStory,
+  ProfessionalManagedCredential,
   ProfessionalManagedPortfolioEntry,
   ProfessionalManagedService,
   ProfessionalRequestStatus,
@@ -38,6 +40,21 @@ export interface GalleryDraft {
   label: string;
 }
 
+export interface CredentialDraft {
+  issuer: string;
+  note: string;
+  title: string;
+  year: string;
+}
+
+export interface ActivityStoryDraft {
+  capturedAt: string;
+  image: string;
+  location: string;
+  note: string;
+  title: string;
+}
+
 export interface CoverageDraft {
   acceptingNewClients: boolean;
   autoApproveInstantBookings: boolean;
@@ -58,3 +75,6 @@ export interface RequestStatusDraft {
   evidenceUrl: string;
   nextStatus: ProfessionalRequestStatus;
 }
+
+export type ManagedCredentialId = ProfessionalManagedCredential['id'];
+export type ManagedActivityStoryId = ProfessionalManagedActivityStory['id'];

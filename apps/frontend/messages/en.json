@@ -635,9 +635,47 @@
     },
     "trust": {
       "credentials": "Credentials and compliance",
+      "credentialsDescription": "Add licenses, certifications, and training proof that customers should see on your public profile.",
       "feedback": "Feedback and service quality",
+      "feedbackDescription": "Customer-generated quality signals from reviews and completed appointments. These are not editable from the dashboard.",
       "testimonials": "Recent customer voices",
+      "testimonialsDescription": "Customer quotes stay read-only so the public trust layer remains auditable.",
+      "stories": "Practice stories and proof",
+      "storiesDescription": "Curate a few real moments from your practice so customers understand how you work before they book.",
       "customerSignals": "Customer trust signals",
+      "customerGeneratedBadge": "Customer generated",
+      "addCredentialButton": "Add credential",
+      "addStoryButton": "Add story",
+      "closeButton": "Close editor",
+      "saveButton": "Save trust entry",
+      "deleteButton": "Delete trust entry",
+      "emptyCredentialsTitle": "No credentials have been added yet.",
+      "emptyCredentialsDescription": "Start with the license, training, or certification that matters most for new customers.",
+      "emptyStoriesTitle": "No practice stories are visible yet.",
+      "emptyStoriesDescription": "Add one concise story so customers can see how your service is delivered in real situations.",
+      "credentialSaveSuccess": "Credential updated.",
+      "credentialDeleteSuccess": "Credential removed.",
+      "storySaveSuccess": "Practice story updated.",
+      "storyDeleteSuccess": "Practice story removed.",
+      "credentialEditor": {
+        "title": "Credential entry",
+        "fields": {
+          "title": "Credential title",
+          "issuer": "Issuer",
+          "year": "Year",
+          "note": "What customers should know"
+        }
+      },
+      "storyEditor": {
+        "title": "Practice story",
+        "fields": {
+          "title": "Story title",
+          "capturedAt": "Captured at",
+          "location": "Location label",
+          "image": "Image URL",
+          "note": "Story summary"
+        }
+      },
       "summary": {
         "recommendationRate": "Recommendation rate",
         "repeatClientRate": "Repeat clients"

@@ -2,6 +2,7 @@
 
 import { ArrowRight, BadgeCheck, ClipboardList, MapPin, Star, Wallet, X } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import {
   filterChipClass,
   insetSurfaceClass,
@@ -32,42 +33,55 @@ export const DashboardDialog = ({
   footer?: ReactNode;
   onClose: () => void;
   title: string;
-}) => (
-  <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/55 p-3 backdrop-blur-sm">
-    <button type="button" aria-label={closeLabel} tabIndex={-1} onClick={onClose} className="absolute inset-0" />
-    <div
-      role="dialog"
-      aria-modal="true"
-      className="relative flex max-h-[92vh] w-full max-w-md flex-col overflow-hidden rounded-[30px] border border-pink-100/80 bg-[linear-gradient(180deg,#FFF9FC_0%,#FFFFFF_100%)] shadow-[0_32px_100px_-32px_rgba(15,23,42,0.45)]"
-    >
-      <div className="flex items-start justify-between gap-4 border-b border-pink-100/80 px-4 py-4">
-        <div>
-          <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-slate-400">{eyebrow}</p>
-          <h2 className="mt-2 text-[22px] font-bold text-slate-900">{title}</h2>
-          {description ? (
-            <p className="mt-2 max-w-[42rem] text-[13px] leading-relaxed text-slate-500">{description}</p>
-          ) : null}
+}) => {
+  if (typeof document === 'undefined') {
+    return null;
+  }
+
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex items-end justify-center p-3 pointer-events-none">
+      <button
+        type="button"
+        aria-label={closeLabel}
+        tabIndex={-1}
+        onClick={onClose}
+        className="absolute inset-0 pointer-events-auto bg-slate-950/55 backdrop-blur-sm"
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        className="pointer-events-auto relative z-10 flex max-h-[92vh] w-full max-w-md flex-col overflow-hidden rounded-[30px] border border-pink-100/80 bg-[linear-gradient(180deg,#FFF9FC_0%,#FFFFFF_100%)] shadow-[0_32px_100px_-32px_rgba(15,23,42,0.45)]"
+      >
+        <div className="flex items-start justify-between gap-4 border-b border-pink-100/80 px-4 py-4">
+          <div>
+            <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-slate-400">{eyebrow}</p>
+            <h2 className="mt-2 text-[22px] font-bold text-slate-900">{title}</h2>
+            {description ? (
+              <p className="mt-2 max-w-[42rem] text-[13px] leading-relaxed text-slate-500">{description}</p>
+            ) : null}
+          </div>
+
+          <div className="flex items-start gap-2">
+            {badges ? <div className="flex flex-wrap justify-end gap-2">{badges}</div> : null}
+            <button
+              type="button"
+              aria-label={closeLabel}
+              onClick={onClose}
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
         </div>
 
-        <div className="flex items-start gap-2">
-          {badges ? <div className="flex flex-wrap justify-end gap-2">{badges}</div> : null}
-          <button
-            type="button"
-            aria-label={closeLabel}
-            onClick={onClose}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
+        <div className="overflow-y-auto px-4 py-4">{children}</div>
+
+        {footer ? <div className="border-t border-pink-100/80 bg-white px-4 py-4">{footer}</div> : null}
       </div>
-
-      <div className="overflow-y-auto px-4 py-4">{children}</div>
-
-      {footer ? <div className="border-t border-pink-100/80 bg-white px-4 py-4">{footer}</div> : null}
-    </div>
-  </div>
-);
+    </div>,
+    document.body,
+  );
+};
 
 export const SectionHeading = ({
   action,

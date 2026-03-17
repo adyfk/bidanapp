@@ -8,9 +8,11 @@ import type {
   BookingFlow,
   GeoPoint,
   ProfessionalAvailabilityDay,
+  ProfessionalCredential,
   ProfessionalGalleryItem,
   ProfessionalPortfolioEntry,
   ProfessionalService,
+  ProfessionalStory,
   ServiceDeliveryMode,
 } from '@/types/catalog';
 
@@ -72,6 +74,14 @@ export interface ProfessionalManagedGalleryItem extends ProfessionalGalleryItem 
   isFeatured: boolean;
 }
 
+export interface ProfessionalManagedCredential extends ProfessionalCredential {
+  id: string;
+}
+
+export interface ProfessionalManagedActivityStory extends ProfessionalStory {
+  id: string;
+}
+
 export interface ProfessionalManagedRequest {
   appointmentId: string;
   areaId: string;
@@ -116,10 +126,12 @@ export interface ProfessionalManagedAppointmentRecord {
 export interface ProfessionalPortalState {
   acceptingNewClients: boolean;
   activeProfessionalId: string;
+  activityStories: ProfessionalManagedActivityStory[];
   availabilityByMode?: Partial<Record<ServiceDeliveryMode, ProfessionalAvailabilityDay[]>>;
   autoApproveInstantBookings: boolean;
   city: string;
   coverageAreaIds: string[];
+  credentials: ProfessionalManagedCredential[];
   coverageCenter: GeoPoint;
   credentialNumber: string;
   displayName: string;

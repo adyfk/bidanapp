@@ -63,22 +63,10 @@ export const ProfessionalDashboardPortfolioScreen = () => {
   }, [portalState.portfolioEntries, selectedPortfolioEntry]);
 
   useEffect(() => {
-    if (selectedPortfolioEntry) {
-      setPortfolioDraft(toPortfolioDraft(selectedPortfolioEntry));
-    }
-  }, [selectedPortfolioEntry]);
-
-  useEffect(() => {
     if (!selectedGalleryItem && portalState.galleryItems[0]) {
       setSelectedGalleryId(portalState.galleryItems[0].id);
     }
   }, [portalState.galleryItems, selectedGalleryItem]);
-
-  useEffect(() => {
-    if (selectedGalleryItem) {
-      setGalleryDraft(toGalleryDraft(selectedGalleryItem));
-    }
-  }, [selectedGalleryItem]);
 
   const closePortfolioEditor = () => {
     if (selectedPortfolioEntry) {
@@ -125,6 +113,8 @@ export const ProfessionalDashboardPortfolioScreen = () => {
 
     if (nextEntry) {
       setPortfolioDraft(toPortfolioDraft(nextEntry));
+    } else {
+      setPortfolioDraft(null);
     }
 
     setIsPortfolioEditorOpen(true);
@@ -136,6 +126,8 @@ export const ProfessionalDashboardPortfolioScreen = () => {
 
     if (nextItem) {
       setGalleryDraft(toGalleryDraft(nextItem));
+    } else {
+      setGalleryDraft(null);
     }
 
     setIsGalleryEditorOpen(true);

@@ -36,8 +36,10 @@ export const ProfessionalDashboardAvailabilityScreen = () => {
   const [availabilityDraft, setAvailabilityDraft] = useState<AvailabilityDraft>(toAvailabilityDraft(portalState));
 
   useEffect(() => {
-    setAvailabilityDraft(toAvailabilityDraft(portalState));
-  }, [portalState]);
+    if (!isAvailabilityEditorOpen) {
+      setAvailabilityDraft(toAvailabilityDraft(portalState));
+    }
+  }, [isAvailabilityEditorOpen, portalState]);
 
   const closeAvailabilityEditor = () => {
     setAvailabilityDraft(toAvailabilityDraft(portalState));
@@ -100,7 +102,10 @@ export const ProfessionalDashboardAvailabilityScreen = () => {
       <ProfessionalDashboardAvailabilityTab
         availabilityDraft={availabilityDraft}
         getModeLabel={getModeLabel}
-        onEditAvailability={() => setIsAvailabilityEditorOpen(true)}
+        onEditAvailability={() => {
+          setAvailabilityDraft(toAvailabilityDraft(portalState));
+          setIsAvailabilityEditorOpen(true);
+        }}
         serviceConfigurations={portalState.serviceConfigurations}
       />
 
