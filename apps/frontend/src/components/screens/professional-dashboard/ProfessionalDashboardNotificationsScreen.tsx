@@ -5,7 +5,6 @@ import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { ProfessionalAccessScreen } from '@/components/screens/ProfessionalAccessScreen';
 import { ProfessionalPageSkeleton } from '@/components/screens/ProfessionalPageSkeleton';
-import { ProfessionalSetupScreen } from '@/components/screens/ProfessionalSetupScreen';
 import { surfaceCardPaddedClass } from '@/components/ui/tokens';
 import { ProfilePageHeader } from '@/features/profile/components/ProfilePagePrimitives';
 import { useRouter } from '@/i18n/routing';
@@ -44,7 +43,7 @@ const notificationTypeStyles: Record<
 export const ProfessionalDashboardNotificationsScreen = () => {
   const router = useRouter();
   const t = useTranslations('ProfessionalPortal');
-  const { activeProfessional, hasMounted, isProfessional, portalState } = useProfessionalDashboardPageData();
+  const { activeProfessional, hasMounted, isProfessional } = useProfessionalDashboardPageData();
   const { hasUnread, markAllAsRead, markAsRead, notifications, unreadCount } = useProfessionalNotifications();
   const [activeFilter, setActiveFilter] = useState<NotificationFilter>('all');
 
@@ -56,8 +55,8 @@ export const ProfessionalDashboardNotificationsScreen = () => {
     return <ProfessionalAccessScreen defaultTab="login" />;
   }
 
-  if (!portalState.onboardingCompleted || !activeProfessional) {
-    return <ProfessionalSetupScreen />;
+  if (!activeProfessional) {
+    return <ProfessionalAccessScreen defaultTab="login" />;
   }
 
   const filteredNotifications = notifications.filter((notification) => {

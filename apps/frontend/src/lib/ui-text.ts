@@ -61,7 +61,6 @@ export const useUiText = () => {
         timeLabel,
       }),
     booking: {
-      customerAppChannel: t('booking.customerAppChannel'),
       home_visit: bookingMessages.home_visit,
       online: bookingMessages.online,
       onsite: bookingMessages.onsite,
@@ -91,6 +90,10 @@ export const useUiText = () => {
     appointmentChatDayLabel: t('appointment.chatDayLabel'),
     appointmentChatInputPlaceholder: t('appointment.chatInputPlaceholder'),
     appointmentFieldLabels: {
+      duration: t('appointment.fieldLabels.duration'),
+      mode: t('appointment.fieldLabels.mode'),
+      note: t('appointment.fieldLabels.note'),
+      requestedAt: t('appointment.fieldLabels.requestedAt'),
       status: t('appointment.fieldLabels.status'),
       time: t('appointment.fieldLabels.time'),
       location: t('appointment.fieldLabels.location'),

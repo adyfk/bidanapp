@@ -48,7 +48,7 @@ export const ProfileSheetShell = ({
   onClose,
   title,
 }: ProfileSheetShellProps) => (
-  <div className="fixed inset-0 z-[80] flex items-end justify-center overflow-hidden sm:items-center">
+  <div className="fixed inset-0 z-[80] flex items-end justify-center overflow-hidden">
     <button
       type="button"
       aria-label={closeLabel}
@@ -56,8 +56,8 @@ export const ProfileSheetShell = ({
       onClick={onClose}
     />
 
-    <div className="relative z-10 flex max-h-[94vh] w-full max-w-md flex-col overflow-hidden rounded-t-[32px] bg-white shadow-2xl animate-in slide-in-from-bottom-full duration-300 sm:rounded-[32px]">
-      <div className="mx-auto mb-2 mt-4 h-1.5 w-12 rounded-full bg-gray-200 sm:hidden" />
+    <div className="relative z-10 flex max-h-[94vh] w-full max-w-md flex-col overflow-hidden rounded-t-[32px] bg-white shadow-2xl animate-in slide-in-from-bottom-full duration-300">
+      <div className="mx-auto mb-2 mt-4 h-1.5 w-12 rounded-full bg-gray-200" />
 
       <div className="flex items-start gap-3 border-b border-gray-100 px-5 pb-4 pt-2">
         <button

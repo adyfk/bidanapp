@@ -43,6 +43,9 @@ Primary backend demo reader:
 - UI wording stays in locale files, not in mock-db tables.
 - App branding and theme stay in code constants, not in mock-db tables.
 - Mock-db tables are dummy abstractions before PostgreSQL, not a CMS contract.
+- `appointments.json` is the transaction source of truth. Service/order data shown in appointment or professional request surfaces must come from immutable appointment snapshots, not from live catalog lookups.
+- Professional request boards are projections of appointment records, not a second transactional source of truth.
+- Deprecated local portal fields are removed with schema bumps instead of being migrated forever. When a deprecated structure is dropped, local professional portal snapshots are reset to the current source-of-truth model.
 - If backend response shapes change, regenerate `packages/sdk` from backend code instead of hand-editing generated artifacts.
 
 ## Migration Direction

@@ -6,12 +6,12 @@ import { useTranslations } from 'next-intl';
 import { Suspense, useEffect, useState } from 'react';
 import { ProfessionalCard } from '@/components/ui/ProfessionalCard';
 import {
+  blushInputShellClass,
+  blushSubtlePanelClass,
   filterChipClass,
   iconButtonSurfaceClass,
   insetSurfaceClass,
   mutedInputClass,
-  surfaceCardClass,
-  surfaceCardPaddedClass,
 } from '@/components/ui/tokens';
 import { APP_CONFIG } from '@/lib/config';
 import {
@@ -242,7 +242,7 @@ const ExploreContent = () => {
         <div className="space-y-6 px-6">
           <div className="flex gap-3">
             <div
-              className={`flex flex-1 items-center ${surfaceCardClass} rounded-full px-4 py-3 focus-within:border-blue-200 focus-within:ring-2 focus-within:ring-blue-100`}
+              className={`${blushInputShellClass} flex flex-1 items-center rounded-full px-4 py-3 focus-within:border-pink-100 focus-within:ring-2 focus-within:ring-pink-100`}
             >
               <Search className="mr-2 h-5 w-5 text-gray-400" />
               <input
@@ -284,7 +284,7 @@ const ExploreContent = () => {
                 {t('changeLocation')}
               </button>
             </div>
-            <div className={`${surfaceCardPaddedClass} mb-4`}>
+            <div className={`${blushSubtlePanelClass} mb-4 p-4`}>
               <p className="text-[12px] text-slate-500">{resolvedLocation.formattedAddress}</p>
               <p className="mt-2 text-[11px] text-slate-400">
                 {formatCoordinate(userLocation.latitude)}, {formatCoordinate(userLocation.longitude)}
@@ -319,7 +319,7 @@ const ExploreContent = () => {
       </div>
 
       {isFilterModalOpen ? (
-        <div className="absolute inset-0 z-50 flex items-end justify-center overflow-hidden sm:items-center">
+        <div className="absolute inset-0 z-50 flex items-end justify-center overflow-hidden">
           <button
             type="button"
             aria-label="Close filters"
@@ -327,8 +327,8 @@ const ExploreContent = () => {
             onClick={() => setIsFilterModalOpen(false)}
           />
 
-          <div className="relative z-10 flex max-h-[90vh] w-full max-w-md flex-col rounded-t-[32px] bg-white shadow-2xl animate-in slide-in-from-bottom-full duration-300 sm:rounded-[32px]">
-            <div className="mx-auto mb-2 mt-4 h-1.5 w-12 rounded-full bg-gray-200 sm:hidden" />
+          <div className="relative z-10 flex max-h-[90vh] w-full max-w-md flex-col rounded-t-[32px] bg-white shadow-2xl animate-in slide-in-from-bottom-full duration-300">
+            <div className="mx-auto mb-2 mt-4 h-1.5 w-12 rounded-full bg-gray-200" />
 
             <div className="flex items-center justify-between border-b border-gray-100 px-6 pb-4 pt-2">
               <h2 className="text-xl font-bold text-gray-900">

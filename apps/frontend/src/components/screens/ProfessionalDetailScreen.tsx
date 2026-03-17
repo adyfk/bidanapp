@@ -44,6 +44,7 @@ export const ProfessionalDetailScreen = ({ professionalSlug }: { professionalSlu
 
   const {
     canRequestBooking,
+    coverageStatus,
     customerRequest,
     getServiceName,
     notice,
@@ -52,7 +53,6 @@ export const ProfessionalDetailScreen = ({ professionalSlug }: { professionalSlu
     profCategory,
     requestBooking,
     requiresOfflineScheduleSelection,
-    selectedAccessibleModes,
     selectedBookingMode,
     selectedScheduleDay,
     selectedScheduleDayId,
@@ -119,14 +119,15 @@ export const ProfessionalDetailScreen = ({ professionalSlug }: { professionalSlu
         />
         <ProfessionalTrustSections profileCopy={profileCopy} professional={professional} />
         <ProfessionalServicesSection
+          availabilityByMode={professional.availabilityByMode}
+          coverageStatus={coverageStatus}
+          isProfessionalAvailable={professional.availability.isAvailable}
           offeredServices={offeredServices}
           onSelectBookingMode={setSelectedBookingMode}
           onSelectScheduleDay={setSelectedScheduleDayId}
           onSelectService={setSelectedService}
           onSelectTimeSlot={setSelectedTimeSlotId}
           profileCopy={profileCopy}
-          requiresOfflineScheduleSelection={requiresOfflineScheduleSelection}
-          selectedAccessibleModes={selectedAccessibleModes}
           selectedBookingMode={selectedBookingMode}
           selectedScheduleDayId={selectedScheduleDayId}
           selectedScheduleDays={selectedScheduleDays}

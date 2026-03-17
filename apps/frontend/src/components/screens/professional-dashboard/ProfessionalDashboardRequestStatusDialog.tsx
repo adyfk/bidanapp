@@ -65,7 +65,10 @@ export const ProfessionalDashboardRequestStatusDialog = ({
           </div>
 
           <div className="mt-4 flex flex-wrap gap-2">
-            <ServiceMetaChip label={t('requests.fields.service')} value={getServiceLabel(request.serviceId)} />
+            <ServiceMetaChip
+              label={t('requests.fields.service')}
+              value={request.serviceName || getServiceLabel(request.serviceId)}
+            />
             <ServiceMetaChip label={t('requests.fields.area')} value={getAreaLabel(request.areaId)} />
             <ServiceMetaChip label={t('requests.fields.budget')} value={request.budgetLabel} />
           </div>

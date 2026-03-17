@@ -4,7 +4,7 @@
     "label": "Instant booking",
     "description": "Booking langsung aktif tanpa tahap approval manual dari profesional.",
     "requiresApproval": false,
-    "requiresPaymentBeforeConfirmation": false
+    "requiresPaymentBeforeConfirmation": true
   },
   {
     "code": "request",

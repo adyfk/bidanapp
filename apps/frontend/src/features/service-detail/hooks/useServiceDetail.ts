@@ -8,7 +8,7 @@ import {
   MOCK_CATEGORIES,
   MOCK_SERVICES,
 } from '@/lib/mock-db/catalog';
-import { useUiText } from '@/lib/ui-text';
+import { professionalRoute } from '@/lib/routes';
 import { useProfessionalPortal } from '@/lib/use-professional-portal';
 import { useProfessionalUserPreferences } from '@/lib/use-professional-user-preferences';
 import type { ProfessionalService, ServiceDeliveryMode, ServiceModeFlags } from '@/types/catalog';
@@ -34,10 +34,9 @@ export interface ServiceProviderSummary {
 }
 
 export const useServiceDetail = (serviceId: string) => {
-  const uiText = useUiText();
   const [notice, setNotice] = useState<string | null>(null);
   const { selectedAreaId, userLocation } = useProfessionalUserPreferences();
-  const { createCustomerRequest, publicProfessionals } = useProfessionalPortal();
+  const { publicProfessionals } = useProfessionalPortal();
   const service = MOCK_SERVICES.find((item) => item.id === serviceId) || null;
   const categoryName = service
     ? MOCK_CATEGORIES.find((category) => category.id === service.categoryId)?.name || ''
@@ -88,29 +87,22 @@ export const useServiceDetail = (serviceId: string) => {
 
   const requestBooking = (provider?: ServiceProviderSummary) => {
     if (!service) {
-      return;
+      return null;
     }
 
     if (provider && !provider.canBook) {
-      return;
+      return null;
     }
 
-    const nextNotice = provider
-      ? uiText.getProviderBookingNotice(provider.defaultMode, provider.name)
-      : uiText.getBookingMessage(service.defaultMode);
-
     if (provider) {
-      createCustomerRequest({
-        budgetLabel: provider.providedServicePrice || 'Rp 0',
-        channel: uiText.booking.customerAppChannel,
-        note: nextNotice,
-        professionalId: provider.id,
-        requestedMode: provider.defaultMode,
+      setNotice(null);
+      return professionalRoute(provider.slug, {
+        mode: provider.defaultMode,
         serviceId: service.id,
       });
     }
 
-    setNotice(nextNotice);
+    return null;
   };
 
   return {

@@ -3,8 +3,7 @@
 import { useEffect, useState } from 'react';
 import { ProfessionalAccessScreen } from '@/components/screens/ProfessionalAccessScreen';
 import { ProfessionalPageSkeleton } from '@/components/screens/ProfessionalPageSkeleton';
-import { ProfessionalSetupScreen } from '@/components/screens/ProfessionalSetupScreen';
-import { parseInteger, toServiceDraft } from '@/components/screens/professional-dashboard/helpers';
+import { toServiceDraft } from '@/components/screens/professional-dashboard/helpers';
 import { ProfessionalDashboardServiceEditorDialog } from '@/components/screens/professional-dashboard/ProfessionalDashboardServiceEditorDialog';
 import { ProfessionalDashboardServicesTab } from '@/components/screens/professional-dashboard/ProfessionalDashboardServicesTab';
 import { ProfessionalDashboardShell } from '@/components/screens/professional-dashboard/ProfessionalDashboardShell';
@@ -17,6 +16,7 @@ export const ProfessionalDashboardServicesScreen = () => {
   const {
     activeCoverageAreas,
     activeProfessional,
+    activeReviewState,
     activeServiceConfigurations,
     activateTemplateService,
     archiveService,
@@ -28,9 +28,13 @@ export const ProfessionalDashboardServicesScreen = () => {
     hasMounted,
     getModeLabel,
     isProfessional,
+    onboardingState,
+    publishProfessionalProfile,
     portalState,
     saveServiceConfiguration,
     serviceTemplates,
+    simulateProfessionalAdminReview,
+    submitProfessionalProfileForReview,
     t,
   } = useProfessionalDashboardPageData();
   const [notice, setNotice] = useState<string | null>(null);
@@ -78,8 +82,8 @@ export const ProfessionalDashboardServicesScreen = () => {
     return <ProfessionalAccessScreen defaultTab="login" />;
   }
 
-  if (!portalState.onboardingCompleted || !activeProfessional) {
-    return <ProfessionalSetupScreen />;
+  if (!activeProfessional) {
+    return <ProfessionalAccessScreen defaultTab="login" />;
   }
 
   const openServiceEditor = (serviceId: string) => {
@@ -151,11 +155,9 @@ export const ProfessionalDashboardServicesScreen = () => {
       duration: serviceDraft.duration,
       featured: serviceDraft.featured,
       isActive: true,
-      leadTimeHours: parseInteger(serviceDraft.leadTimeHours, selectedServiceConfiguration.leadTimeHours),
       price: serviceDraft.price,
       serviceModes: serviceDraft.serviceModes,
       summary: serviceDraft.summary,
-      weeklyCapacity: parseInteger(serviceDraft.weeklyCapacity, selectedServiceConfiguration.weeklyCapacity),
     });
     setNotice(t('services.saveSuccess', { service: getServiceLabel(selectedServiceConfiguration.serviceId) }));
     setIsServiceEditorOpen(false);
@@ -171,7 +173,33 @@ export const ProfessionalDashboardServicesScreen = () => {
       clampedCompletionScore={clampedCompletionScore}
       headerLocationLabel={dashboardLocationLabel}
       notice={notice}
+      onboardingState={onboardingState}
       onDismissNotice={() => setNotice(null)}
+      onPublishProfile={() => {
+        if (!publishProfessionalProfile()) {
+          return;
+        }
+
+        setNotice(t('onboarding.publishSuccess'));
+      }}
+      onSimulateReview={(status) => {
+        if (!simulateProfessionalAdminReview(status)) {
+          return;
+        }
+
+        setNotice(
+          status === 'changes_requested' ? t('onboarding.demoRevisionSuccess') : t('onboarding.demoVerifySuccess'),
+        );
+      }}
+      onSubmitForReview={() => {
+        if (!submitProfessionalProfileForReview()) {
+          setNotice(t('onboarding.validationNotice'));
+          return;
+        }
+
+        setNotice(t('onboarding.submitSuccess'));
+      }}
+      reviewState={activeReviewState}
       responseTimeGoal={portalState.responseTimeGoal}
     >
       <ProfessionalDashboardServicesTab

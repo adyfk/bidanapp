@@ -7,7 +7,7 @@ import { CustomerAccessScreen } from '@/components/screens/CustomerAccessScreen'
 import { ProfilePageHeader } from '@/features/profile/components/ProfilePagePrimitives';
 import { useRouter } from '@/i18n/routing';
 import { APP_CONFIG } from '@/lib/config';
-import { APP_ROUTES, professionalDashboardRoute } from '@/lib/routes';
+import { APP_ROUTES } from '@/lib/routes';
 import { useCustomerNotifications } from '@/lib/use-customer-notifications';
 import { useViewerSession } from '@/lib/use-viewer-session';
 import type { CustomerNotificationState, CustomerNotificationType } from '@/types/notifications';
@@ -55,7 +55,7 @@ export const NotificationsScreen = () => {
 
   useEffect(() => {
     if (isProfessional) {
-      router.replace(professionalDashboardRoute('overview'));
+      router.replace(APP_ROUTES.professionalNotifications);
     }
   }, [isProfessional, router]);
 

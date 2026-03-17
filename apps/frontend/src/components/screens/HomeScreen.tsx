@@ -58,7 +58,7 @@ export const HomeScreen = () => {
   const customerActivityRoute = customerAccessRoute({ intent: 'activity', next: APP_ROUTES.appointments });
   const customerProfileRoute = customerAccessRoute({ intent: 'profile', next: APP_ROUTES.profile });
   const headerProfileRoute = isProfessional
-    ? professionalDashboardRoute('overview')
+    ? APP_ROUTES.professionalProfile
     : isCustomer
       ? APP_ROUTES.profile
       : customerProfileRoute;
@@ -196,9 +196,7 @@ export const HomeScreen = () => {
                 </button>
                 <button
                   type="button"
-                  onClick={() =>
-                    router.push(isProfessional ? professionalDashboardRoute('overview') : professionalAccessRoute())
-                  }
+                  onClick={() => router.push(professionalAccessRoute())}
                   className="w-full rounded-full bg-gray-100 py-3.5 text-[14px] font-bold text-gray-700 transition-colors hover:bg-gray-200"
                 >
                   {t('visitorActivitySecondaryCta')}

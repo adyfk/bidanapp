@@ -1,7 +1,13 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { surfaceCardPaddedClass } from '@/components/ui/tokens';
+import {
+  accentPrimaryButtonClass,
+  accentSoftPillClass,
+  darkPrimaryButtonClass,
+  neutralSoftPillClass,
+  softWhitePanelClass,
+} from '@/components/ui/tokens';
 import type { ProfessionalManagedService } from '@/lib/use-professional-portal';
 import type { ServiceDeliveryMode } from '@/types/catalog';
 import { deliveryModes, isServiceModeEnabled } from './helpers';
@@ -40,7 +46,7 @@ export const ProfessionalDashboardServicesTab = ({
         <MiniStatCard label={t('services.averagePriceLabel')} value={averageServicePriceLabel} />
       </div>
 
-      <div className={surfaceCardPaddedClass}>
+      <div className={`${softWhitePanelClass} p-4`}>
         <div>
           <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-slate-400">{t('services.title')}</p>
           <p className="mt-1 text-[13px] leading-relaxed text-slate-500">{t('services.description')}</p>
@@ -51,7 +57,7 @@ export const ProfessionalDashboardServicesTab = ({
             <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-slate-400">
               {t('services.activeLabel')}
             </p>
-            <span className="rounded-full bg-blue-50 px-3 py-1.5 text-[11px] font-semibold text-blue-700">
+            <span className={accentSoftPillClass}>
               {activeServices.length} {t('services.activeCount')}
             </span>
           </div>
@@ -66,10 +72,10 @@ export const ProfessionalDashboardServicesTab = ({
               return (
                 <article
                   key={service.serviceId}
-                  className={`rounded-[22px] border px-4 py-4 transition-all ${
+                  className={`rounded-[24px] border px-4 py-4 transition-all ${
                     selectedServiceId === service.serviceId && isServiceEditorOpen
-                      ? 'border-blue-500 bg-blue-50 shadow-[0_20px_36px_-30px_rgba(37,99,235,0.45)]'
-                      : 'border-slate-200 bg-white'
+                      ? 'border-pink-100 bg-[linear-gradient(180deg,#FFF7FB_0%,#FFFFFF_100%)] shadow-[0_20px_36px_-30px_rgba(236,72,153,0.35)]'
+                      : 'border-slate-200 bg-white shadow-[0_16px_34px_-28px_rgba(15,23,42,0.22)]'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3">
@@ -79,13 +85,9 @@ export const ProfessionalDashboardServicesTab = ({
                     </div>
 
                     <div className="flex flex-col items-end gap-2">
-                      <span className="rounded-full bg-emerald-100 px-3 py-1.5 text-[11px] font-semibold text-emerald-700">
-                        {t('services.activeBadge')}
-                      </span>
+                      <span className={accentSoftPillClass}>{t('services.activeBadge')}</span>
                       {service.featured ? (
-                        <span className="rounded-full bg-amber-100 px-3 py-1.5 text-[11px] font-semibold text-amber-700">
-                          {t('services.featuredBadge')}
-                        </span>
+                        <span className={neutralSoftPillClass}>{t('services.featuredBadge')}</span>
                       ) : null}
                     </div>
                   </div>
@@ -112,35 +114,30 @@ export const ProfessionalDashboardServicesTab = ({
                   </div>
 
                   <div className="mt-4 grid gap-3 border-t border-slate-200/80 pt-4">
-                    <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
-                      <div className="grid gap-1 text-[12px] text-slate-500">
-                        <p>
-                          {t('services.fields.capacity')}:{' '}
-                          <span className="font-semibold text-slate-700">
-                            {t('units.weeklyCapacity', { count: service.weeklyCapacity })}
-                          </span>
-                        </p>
-                        <p>
-                          {t('services.fields.leadTime')}:{' '}
-                          <span className="font-semibold text-slate-700">
-                            {t('units.hoursShort', { count: service.leadTimeHours })}
-                          </span>
-                        </p>
-                      </div>
+                    <div className={`${softWhitePanelClass} px-4 py-3`}>
+                      <p className="text-[12px] font-semibold text-slate-500">
+                        {t('services.availabilityNoteEyebrow')}
+                      </p>
+                      <p className="mt-2 text-[13px] font-semibold text-slate-900">
+                        {t('services.availabilityNoteTitle')}
+                      </p>
+                      <p className="mt-2 text-[12px] leading-relaxed text-slate-500">
+                        {t('services.availabilityNoteDescription')}
+                      </p>
                     </div>
 
                     <div className="grid gap-2">
                       <button
                         type="button"
                         onClick={() => onEditService(service.serviceId)}
-                        className="flex w-full items-center justify-center rounded-[18px] bg-slate-900 px-4 py-3 text-[13px] font-bold text-white"
+                        className={`${darkPrimaryButtonClass} flex w-full items-center justify-center`}
                       >
                         {t('services.editButton')}
                       </button>
                       <button
                         type="button"
                         onClick={() => onToggleActivation(service)}
-                        className="flex w-full items-center justify-center rounded-[18px] bg-slate-100 px-4 py-3 text-[13px] font-bold text-slate-700"
+                        className="flex w-full items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-3 text-[13px] font-bold text-slate-700 shadow-[inset_0_0_0_1px_rgba(226,232,240,1)]"
                       >
                         {t('services.archiveButton')}
                       </button>
@@ -157,66 +154,67 @@ export const ProfessionalDashboardServicesTab = ({
             <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-slate-400">
               {t('services.templateLibrary')}
             </p>
-            <span className="rounded-full bg-slate-100 px-3 py-1.5 text-[11px] font-semibold text-slate-600">
-              {templateServices.length}
-            </span>
+            <span className={neutralSoftPillClass}>{templateServices.length}</span>
           </div>
 
           <div className="mt-3 grid gap-3">
-            {templateServices.map((service) => (
-              <article
-                key={service.serviceId}
-                className={`rounded-[20px] border px-4 py-3.5 transition-all ${
-                  selectedServiceId === service.serviceId && isServiceEditorOpen
-                    ? 'border-blue-500 bg-blue-50 shadow-[0_20px_36px_-30px_rgba(37,99,235,0.45)]'
-                    : 'border-slate-200 bg-slate-50/80'
-                }`}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <h3 className="text-[15px] font-bold text-slate-900">{getServiceLabel(service.serviceId)}</h3>
-                    <p className="mt-1 line-clamp-2 text-[12px] leading-relaxed text-slate-600">{service.summary}</p>
+            {templateServices.map((service) => {
+              return (
+                <article
+                  key={service.serviceId}
+                  className={`rounded-[22px] border px-4 py-3.5 transition-all ${
+                    selectedServiceId === service.serviceId && isServiceEditorOpen
+                      ? 'border-pink-100 bg-[linear-gradient(180deg,#FFF7FB_0%,#FFFFFF_100%)] shadow-[0_20px_36px_-30px_rgba(236,72,153,0.35)]'
+                      : 'border-slate-200 bg-[linear-gradient(180deg,#FFFFFF_0%,#FFF8FC_100%)]'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <h3 className="text-[15px] font-bold text-slate-900">{getServiceLabel(service.serviceId)}</h3>
+                      <p className="mt-1 line-clamp-2 text-[12px] leading-relaxed text-slate-600">{service.summary}</p>
+                    </div>
+                    <span className={neutralSoftPillClass}>{t('services.templateBadge')}</span>
                   </div>
-                  <span className="rounded-full bg-slate-200 px-3 py-1.5 text-[11px] font-semibold text-slate-600">
-                    {t('services.templateBadge')}
-                  </span>
-                </div>
 
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <ServiceMetaChip label={t('services.fields.price')} value={service.price} />
-                  <ServiceMetaChip label={t('services.fields.duration')} value={service.duration} />
-                  <ServiceMetaChip label={t('services.fields.defaultMode')} value={getModeLabel(service.defaultMode)} />
-                </div>
-
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {deliveryModes.map((mode) => (
-                    <ServiceModeBadge
-                      key={mode}
-                      isActive={isServiceModeEnabled(service.serviceModes, mode)}
-                      isDefault={service.defaultMode === mode}
-                      label={getModeLabel(mode)}
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <ServiceMetaChip label={t('services.fields.price')} value={service.price} />
+                    <ServiceMetaChip label={t('services.fields.duration')} value={service.duration} />
+                    <ServiceMetaChip
+                      label={t('services.fields.defaultMode')}
+                      value={getModeLabel(service.defaultMode)}
                     />
-                  ))}
-                </div>
+                  </div>
 
-                <div className="mt-4 grid gap-2">
-                  <button
-                    type="button"
-                    onClick={() => onToggleActivation(service)}
-                    className="flex w-full items-center justify-center rounded-[18px] bg-blue-600 px-4 py-3 text-[13px] font-bold text-white"
-                  >
-                    {t('services.activateButton')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onEditService(service.serviceId)}
-                    className="flex w-full items-center justify-center rounded-[18px] bg-white px-4 py-3 text-[13px] font-bold text-slate-700"
-                  >
-                    {t('services.editButton')}
-                  </button>
-                </div>
-              </article>
-            ))}
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {deliveryModes.map((mode) => (
+                      <ServiceModeBadge
+                        key={mode}
+                        isActive={isServiceModeEnabled(service.serviceModes, mode)}
+                        isDefault={service.defaultMode === mode}
+                        label={getModeLabel(mode)}
+                      />
+                    ))}
+                  </div>
+
+                  <div className="mt-4 grid gap-2">
+                    <button
+                      type="button"
+                      onClick={() => onToggleActivation(service)}
+                      className={`${accentPrimaryButtonClass} flex w-full items-center justify-center`}
+                    >
+                      {t('services.activateButton')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onEditService(service.serviceId)}
+                      className={`${darkPrimaryButtonClass} flex w-full items-center justify-center`}
+                    >
+                      {t('services.editButton')}
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </div>
       </div>

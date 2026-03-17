@@ -1,0 +1,235 @@
+# Service To Appointment Flow
+
+Dokumen ini menjadi acuan tunggal untuk flow customer sampai profesional dari discovery layanan, booking, approval, pembayaran, delivery, sampai appointment selesai.
+
+## Gate sebelum bisa dibooking
+
+- Profesional mendaftar dan masuk dashboard pre-live dulu.
+- Profesional belum bisa tampil ke customer sebelum lifecycle onboarding selesai:
+  - `draft`
+  - `ready_for_review`
+  - `submitted`
+  - `changes_requested`
+  - `verified`
+  - `published`
+- Hanya profesional `published` yang boleh masuk katalog publik dan menerima booking customer.
+- Agar layanan benar-benar bookable, profesional juga harus memenuhi syarat operasional:
+  - minimal satu service offering aktif
+  - mode layanan yang diminta customer memang aktif
+  - coverage area dan radius valid untuk `home_visit`
+  - hari dan slot aktif tersedia untuk mode offline
+
+Referensi onboarding detail tetap ada di `docs/professional-onboarding-flow.md`. Dokumen ini melanjutkan lifecycle setelah profesional sudah melewati gate publish.
+
+## Prinsip utama
+
+- `appointments.json` adalah source of truth transaksi.
+- Request board profesional bukan tabel transaksi kedua. Ia hanyalah projection dari appointment record.
+- Data layanan saat order harus immutable. Harga, durasi, summary, mode, dan booking flow yang tampil di appointment lama tidak boleh berubah walaupun profesional mengubah offering sesudahnya.
+- CTA dari halaman service tidak boleh langsung membuat request. Semua order harus masuk lewat composer di halaman profesional agar validasi mode, coverage, dan slot selalu sama.
+- `availabilityByMode` di dashboard profesional adalah source of truth slot offline yang boleh dilihat customer. Customer tidak boleh melihat slot di luar konfigurasi aktif profesional.
+
+## Source Of Truth
+
+### Catalog dan offering
+
+- `services.json`
+  Master global service.
+- `professional_service_offerings.json`
+  Harga, durasi, booking flow, dan mode aktif per profesional.
+- `professional_availability_schedule_days.json`
+  Hari booking global per profesional untuk mode offline.
+- `professional_availability_time_slots.json`
+  Slot booking global per profesional untuk setiap hari offline.
+
+### Transaction
+
+- `appointments.json`
+  Menyimpan order final beserta snapshot immutable:
+  - `serviceSnapshot`
+  - `scheduleSnapshot`
+  - `timeline`
+  - `serviceOfferingId`
+  - `bookingFlow`
+
+## Flow customer ke profesional
+
+### 1. Service discovery
+
+1. Customer membuka katalog service.
+2. Sistem mencari profesional yang punya `professional_service_offerings` untuk service itu.
+3. Sistem menghitung mode yang valid:
+   - `online`: selalu bisa bila offering mendukung.
+   - `home_visit`: hanya muncul bila area customer ada di coverage dan masih masuk radius.
+   - `onsite`: hanya butuh offering offline aktif.
+4. CTA dari service detail hanya melakukan deep-link ke halaman profesional dengan `service` dan `mode` yang sudah dipreselect.
+
+### 2. Professional booking composer
+
+1. Halaman profesional menerima preselect `service` dan `mode`.
+2. User memilih layanan dari daftar.
+3. Sistem membuka dialog konfigurasi layanan.
+4. Customer memilih atau mengubah mode yang masih valid.
+5. Jika mode offline:
+   - customer wajib memilih hari
+   - customer wajib memilih slot
+6. Setelah dialog disimpan, resume booking baru muncul di atas search dan sticky booking bar.
+7. Composer membuat satu payload order:
+   - `professionalId`
+   - `serviceId`
+   - `serviceOfferingId`
+   - `requestedMode`
+   - `scheduleDayId?`
+   - `timeSlotId?`
+   - `scheduledTimeLabel`
+   - `note`
+
+Catatan:
+
+- `requestChannel` sengaja tidak disimpan di transaksi appointment karena sistem bisnis saat ini hanya punya satu entry path customer, yaitu app customer.
+- Jika nanti benar-benar ada order omnichannel seperti admin-assisted atau WhatsApp-assisted, tambahkan field provenance baru seperti `orderSource` hanya saat alur operasionalnya memang berbeda dan perlu diaudit.
+
+### 2a. Professional slot management
+
+1. Profesional mengatur slot di dashboard profesional, di tab global `Booking Hours`.
+2. Slot hanya relevan untuk mode offline:
+   - `home_visit`
+   - `onsite`
+3. Profesional dapat mengelola:
+   - hari layanan
+   - jam slot
+   - status slot
+4. Slot ini berlaku ke semua layanan yang memakai mode offline terkait.
+5. Perubahan slot hanya memengaruhi order berikutnya. Appointment yang sudah dibuat tetap menyimpan `scheduleSnapshot` immutable saat order.
+
+### 3. Appointment creation
+
+Saat tombol booking dikirim:
+
+1. Sistem membaca `service` global dan `professional_service_offering` yang aktif saat itu.
+2. Sistem membentuk `serviceSnapshot` immutable:
+   - nama layanan
+   - category
+   - description
+   - short description
+   - image
+   - cover image
+   - tags
+   - highlights
+   - service modes
+   - default mode
+   - booking flow
+   - service offering id
+   - duration saat order
+   - price saat order
+   - summary saat order
+3. Sistem membentuk `scheduleSnapshot` immutable:
+   - `requiresSchedule`
+   - `scheduledTimeLabel`
+   - `dateIso?`
+   - `scheduleDayId?`
+   - `scheduleDayLabel?`
+   - `timeSlotId?`
+   - `timeSlotLabel?`
+4. Sistem membuat `timeline` awal sesuai booking flow.
+
+## Booking flow matrix
+
+### Request flow
+
+- Entry state: `requested`
+- Profesional review dulu.
+- Setelah approve: `approved_waiting_payment`
+- Setelah bayar: `paid`
+- Setelah jadwal dikunci: `confirmed`
+- Saat sesi mulai: `in_service`
+- Setelah selesai: `completed`
+
+### Instant flow
+
+- Entry state: `approved_waiting_payment`
+- Tidak ada approval manual profesional.
+- Tetap wajib menunggu pembayaran sebelum bisa masuk `confirmed`.
+- Setelah bayar: `paid`
+- Setelah jadwal dikunci: `confirmed`
+- Saat sesi mulai: `in_service`
+- Setelah selesai: `completed`
+
+## Transition rules
+
+### Customer-side terminal / exception
+
+- `rejected`
+  Hanya valid dari `requested`.
+- `expired`
+  Hanya valid pada tahap menunggu pembayaran.
+- `cancelled`
+  Hanya valid sebelum `completed`.
+
+### Professional-side projection
+
+Projection request board:
+
+- `requested` -> `new`
+- `approved_waiting_payment` / `paid` -> `quoted`
+- `confirmed` / `in_service` -> `scheduled`
+- `completed` / `cancelled` / `rejected` / `expired` -> `completed`
+
+Rule penting:
+
+- Profesional tidak boleh memindahkan `quoted -> scheduled` bila customer masih `approved_waiting_payment`.
+- Timeline appointment tetap mencatat event pembayaran walaupun request board tetap berada di status `quoted`.
+
+## Data invariants
+
+- Appointment detail dan appointment list wajib membaca data service dari `serviceSnapshot`, bukan `services.json`.
+- Professional request cards wajib membaca nama/summary service dari appointment projection, bukan lookup katalog live.
+- Perubahan harga atau durasi di dashboard profesional tidak boleh mengubah appointment yang sudah pernah dibuat.
+- Satu order selalu menghasilkan satu appointment record baru. Riwayat order lama tidak ditimpa.
+
+## Case coverage
+
+### Online
+
+- Tidak butuh coverage area.
+- Tidak butuh `scheduleDayId` atau `timeSlotId`.
+- Tetap boleh menyimpan `scheduledTimeLabel` bila ada slot waktu live class atau session window.
+
+### Home visit
+
+- Wajib lolos coverage area.
+- Wajib lolos radius home visit.
+- Wajib pilih hari dan slot offline.
+
+### Onsite
+
+- Tidak butuh coverage radius customer.
+- Tetap wajib pilih hari dan slot offline.
+
+## Fixture matrix
+
+Fixture mock yang saat ini dipakai untuk menjaga alignment flow:
+
+- `online + instant` -> `apt-003`, `apt-006`, `apt-009`
+- `online + request` -> `apt-010`
+- `home_visit + instant` -> `apt-011`
+- `home_visit + request` -> `apt-001`, `apt-002`, `apt-004`, `apt-005`, `apt-008`
+- `onsite + instant` -> `apt-007`
+- `onsite + request` -> `apt-012`
+
+Integrity contract untuk fixture ini dijaga oleh `apps/frontend/tests/appointment-flow-contract.test.mjs`.
+
+## UI alignment
+
+- Service detail: discovery only.
+- Professional detail: booking composer tunggal.
+- Appointments screen: tampilkan `serviceSnapshot`, `scheduleSnapshot`, `requestNote`, dan status transaction.
+- Professional dashboard requests: tampilkan projection dari appointment timeline.
+
+## Arah backend
+
+Saat mock ini dipindah ke backend, kontrak minimal yang harus dipertahankan:
+
+- appointment create request harus cukup untuk membentuk snapshot immutable
+- appointment response harus mengembalikan snapshot immutable
+- projection request board profesional sebaiknya dibangun dari appointment event/timeline, bukan disimpan sebagai tabel transaksi terpisah

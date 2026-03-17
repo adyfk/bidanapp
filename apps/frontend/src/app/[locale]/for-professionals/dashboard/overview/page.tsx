@@ -1,5 +1,7 @@
-import { ProfessionalDashboardOverviewScreen } from '@/components/screens/professional-dashboard/ProfessionalDashboardOverviewScreen';
+import type { Route } from 'next';
+import { redirect } from 'next/navigation';
 
-export default function ProfessionalDashboardOverviewPage() {
-  return <ProfessionalDashboardOverviewScreen />;
+export default async function ProfessionalDashboardOverviewPage(props: { params: Promise<{ locale: string }> }) {
+  const params = await props.params;
+  redirect(`/${params.locale}/for-professionals/dashboard/requests` as Route);
 }

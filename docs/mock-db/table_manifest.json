@@ -121,13 +121,13 @@
   },
   {
     "index": 25,
-    "fileName": "professional_service_schedule_days.json",
-    "rowCount": 80
+    "fileName": "professional_availability_schedule_days.json",
+    "rowCount": 36
   },
   {
     "index": 26,
-    "fileName": "professional_service_time_slots.json",
-    "rowCount": 320
+    "fileName": "professional_availability_time_slots.json",
+    "rowCount": 144
   },
   {
     "index": 27,
@@ -167,12 +167,12 @@
   {
     "index": 34,
     "fileName": "appointments.json",
-    "rowCount": 9
+    "rowCount": 12
   },
   {
     "index": 35,
     "fileName": "chat_threads.json",
-    "rowCount": 12
+    "rowCount": 15
   },
   {
     "index": 36,

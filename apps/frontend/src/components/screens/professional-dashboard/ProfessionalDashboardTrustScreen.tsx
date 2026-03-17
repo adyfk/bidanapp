@@ -1,8 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import { ProfessionalAccessScreen } from '@/components/screens/ProfessionalAccessScreen';
 import { ProfessionalPageSkeleton } from '@/components/screens/ProfessionalPageSkeleton';
-import { ProfessionalSetupScreen } from '@/components/screens/ProfessionalSetupScreen';
 import { ProfessionalDashboardShell } from './ProfessionalDashboardShell';
 import { ProfessionalDashboardTrustTab } from './ProfessionalDashboardTrustTab';
 import { useProfessionalDashboardPageData } from './useProfessionalDashboardPageData';
@@ -11,6 +11,7 @@ export const ProfessionalDashboardTrustScreen = () => {
   const {
     activeCoverageAreas,
     activeProfessional,
+    activeReviewState,
     activeServiceConfigurations,
     averageServicePriceLabel,
     clampedCompletionScore,
@@ -18,9 +19,15 @@ export const ProfessionalDashboardTrustScreen = () => {
     getServiceLabel,
     hasMounted,
     isProfessional,
+    onboardingState,
+    publishProfessionalProfile,
     portalState,
     publicPortfolioEntries,
+    simulateProfessionalAdminReview,
+    submitProfessionalProfileForReview,
+    t,
   } = useProfessionalDashboardPageData();
+  const [notice, setNotice] = useState<string | null>(null);
 
   if (!hasMounted) {
     return <ProfessionalPageSkeleton />;
@@ -30,8 +37,8 @@ export const ProfessionalDashboardTrustScreen = () => {
     return <ProfessionalAccessScreen defaultTab="login" />;
   }
 
-  if (!portalState.onboardingCompleted || !activeProfessional) {
-    return <ProfessionalSetupScreen />;
+  if (!activeProfessional) {
+    return <ProfessionalAccessScreen defaultTab="login" />;
   }
 
   return (
@@ -43,6 +50,34 @@ export const ProfessionalDashboardTrustScreen = () => {
       averageServicePriceLabel={averageServicePriceLabel}
       clampedCompletionScore={clampedCompletionScore}
       headerLocationLabel={dashboardLocationLabel}
+      notice={notice}
+      onboardingState={onboardingState}
+      onDismissNotice={() => setNotice(null)}
+      onPublishProfile={() => {
+        if (!publishProfessionalProfile()) {
+          return;
+        }
+
+        setNotice(t('onboarding.publishSuccess'));
+      }}
+      onSimulateReview={(status) => {
+        if (!simulateProfessionalAdminReview(status)) {
+          return;
+        }
+
+        setNotice(
+          status === 'changes_requested' ? t('onboarding.demoRevisionSuccess') : t('onboarding.demoVerifySuccess'),
+        );
+      }}
+      onSubmitForReview={() => {
+        if (!submitProfessionalProfileForReview()) {
+          setNotice(t('onboarding.validationNotice'));
+          return;
+        }
+
+        setNotice(t('onboarding.submitSuccess'));
+      }}
+      reviewState={activeReviewState}
       responseTimeGoal={portalState.responseTimeGoal}
     >
       <ProfessionalDashboardTrustTab

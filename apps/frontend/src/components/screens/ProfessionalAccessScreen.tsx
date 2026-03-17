@@ -132,7 +132,7 @@ export const ProfessionalAccessScreen = ({ defaultTab = 'login' }: ProfessionalA
       phone: registerPhone.trim(),
       professionalId: selectedProfessionalId,
     });
-    router.push(APP_ROUTES.professionalSetup);
+    router.push(APP_ROUTES.professionalDashboard);
   };
 
   const handleRecovery = () => {

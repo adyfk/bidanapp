@@ -2,13 +2,20 @@
 
 import { ChevronLeft, MessageCircle } from 'lucide-react';
 import Image from 'next/image';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import {
+  accentPrimaryButtonClass,
+  accentSoftPillClass,
+  blushSubtlePanelClass,
+  neutralSoftPillClass,
+  softMetricTileClass,
+  softWhitePanelClass,
+} from '@/components/ui/tokens';
 import {
   getAppointmentStatusChipClassName,
   getStatusBannerClasses,
   isAppointmentChatAvailable,
 } from '@/features/appointments/lib/status';
-import { APP_CONFIG } from '@/lib/config';
 import { ACTIVE_USER_CONTEXT } from '@/lib/mock-db/runtime';
 import { useUiText } from '@/lib/ui-text';
 import type { Appointment } from '@/types/appointments';
@@ -29,9 +36,24 @@ export const AppointmentDetailSheet = ({
   onPayNow,
 }: AppointmentDetailSheetProps) => {
   const t = useTranslations('Appointments');
+  const professionalT = useTranslations('Professional');
+  const profileT = useTranslations('Profile');
+  const locale = useLocale();
   const uiText = useUiText();
   const statusBanner = uiText.appointmentStatusBanners[appointment.status];
   const canChat = isAppointmentChatAvailable(appointment.status);
+  const modeLabel =
+    appointment.requestedMode === 'online'
+      ? profileT('modeLabels.online')
+      : appointment.requestedMode === 'home_visit'
+        ? profileT('modeLabels.home_visit')
+        : profileT('modeLabels.onsite');
+  const bookingFlowLabel =
+    appointment.bookingFlow === 'instant' ? professionalT('bookingFlowInstant') : professionalT('bookingFlowRequest');
+  const requestedAtLabel = new Intl.DateTimeFormat(locale === 'id' ? 'id-ID' : 'en-US', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(new Date(appointment.requestedAt));
 
   return (
     <div className="fixed inset-y-0 left-1/2 z-[60] flex w-full max-w-md -translate-x-1/2 flex-col bg-gray-50 animate-in fade-in slide-in-from-bottom-4 duration-300">
@@ -43,7 +65,7 @@ export const AppointmentDetailSheet = ({
       </div>
 
       <div className="custom-scrollbar flex-1 overflow-y-auto p-5 pb-24">
-        <div className="mb-4 flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+        <div className={`${softWhitePanelClass} mb-4 flex items-center justify-between p-5`}>
           <div className="flex items-center gap-4">
             <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-full bg-gray-100">
               <Image
@@ -69,17 +91,23 @@ export const AppointmentDetailSheet = ({
           ) : null}
         </div>
 
-        <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+        <div className={`${softWhitePanelClass} p-5`}>
           <div className="space-y-4">
             <div>
               <p className="mb-1.5 text-[11px] font-bold uppercase tracking-widest text-gray-400">
                 {uiText.appointmentFieldLabels.status}
               </p>
-              <span
-                className={`rounded-[8px] px-2.5 py-1 text-[12px] font-bold uppercase tracking-wider ${getAppointmentStatusChipClassName(appointment.status)}`}
-              >
-                {t(`status.${appointment.status}`)}
-              </span>
+              <div className="flex flex-wrap gap-2">
+                <span
+                  className={`rounded-[8px] px-2.5 py-1 text-[12px] font-bold uppercase tracking-wider ${getAppointmentStatusChipClassName(appointment.status)}`}
+                >
+                  {t(`status.${appointment.status}`)}
+                </span>
+                <span className={neutralSoftPillClass}>{modeLabel}</span>
+                <span className={appointment.bookingFlow === 'instant' ? accentSoftPillClass : neutralSoftPillClass}>
+                  {bookingFlowLabel}
+                </span>
+              </div>
             </div>
             <div>
               <p className="mb-1 text-[11px] font-bold uppercase tracking-widest text-gray-400">
@@ -98,9 +126,42 @@ export const AppointmentDetailSheet = ({
                 {uiText.appointmentFieldLabels.service}
               </p>
               <p className="text-[14px] font-semibold text-gray-900">{appointment.service.name}</p>
+              <p className="mt-1 text-[12px] font-medium text-pink-600">{appointment.service.summary}</p>
               <p className="mt-0.5 text-[12px] leading-relaxed text-gray-500">{appointment.service.description}</p>
             </div>
-            <div className="mt-2 flex items-center justify-between border-t border-gray-50 pt-4">
+            <div className="grid gap-3">
+              <div className={softMetricTileClass}>
+                <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400">
+                  {uiText.appointmentFieldLabels.mode}
+                </p>
+                <p className="mt-1 text-[13px] font-semibold text-gray-900">{modeLabel}</p>
+              </div>
+              <div className={softMetricTileClass}>
+                <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400">
+                  {uiText.appointmentFieldLabels.duration}
+                </p>
+                <p className="mt-1 text-[13px] font-semibold text-gray-900">{appointment.service.durationLabel}</p>
+              </div>
+              <div className={softMetricTileClass}>
+                <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400">
+                  {uiText.appointmentFieldLabels.requestedAt}
+                </p>
+                <p className="mt-1 text-[13px] font-semibold text-gray-900">{requestedAtLabel}</p>
+              </div>
+              <div className={softMetricTileClass}>
+                <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400">
+                  {professionalT('bookingFlowLabel')}
+                </p>
+                <p className="mt-1 text-[13px] font-semibold text-gray-900">{bookingFlowLabel}</p>
+              </div>
+              <div className={softMetricTileClass}>
+                <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400">
+                  {uiText.appointmentFieldLabels.note}
+                </p>
+                <p className="mt-1 text-[13px] leading-relaxed text-gray-700">{appointment.requestNote}</p>
+              </div>
+            </div>
+            <div className={`${blushSubtlePanelClass} mt-2 flex items-center justify-between p-4`}>
               <p className="text-[13px] font-bold text-gray-500">{uiText.appointmentFieldLabels.totalPayment}</p>
               <p className="text-right text-[16px] font-bold text-pink-600">{appointment.totalPrice}</p>
             </div>
@@ -121,8 +182,7 @@ export const AppointmentDetailSheet = ({
             <button
               type="button"
               onClick={onPayNow}
-              className="flex-1 rounded-xl py-3.5 text-[14px] font-bold text-white shadow-md shadow-pink-500/20 transition-transform active:scale-95"
-              style={{ backgroundColor: APP_CONFIG.colors.primary }}
+              className={`${accentPrimaryButtonClass} flex-1 py-3.5 text-[14px]`}
             >
               {uiText.appointmentActionLabels.payNow}
             </button>

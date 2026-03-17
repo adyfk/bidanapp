@@ -5,6 +5,12 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { IconButton } from '@/components/ui/IconButton';
+import {
+  blushInputShellClass,
+  darkPrimaryButtonClass,
+  neutralSoftPillClass,
+  softWhitePanelClass,
+} from '@/components/ui/tokens';
 import { useRouter } from '@/i18n/routing';
 import { APP_CONFIG } from '@/lib/config';
 import { MOCK_CATEGORIES, MOCK_SERVICES } from '@/lib/mock-db/catalog';
@@ -98,7 +104,7 @@ export const ServicesScreen = () => {
 
       <div className="px-6 py-6 space-y-7">
         {/* Search Bar */}
-        <div className="bg-white rounded-full flex items-center px-4 py-3 shadow-sm border border-gray-100">
+        <div className={`${blushInputShellClass} flex items-center rounded-full px-4 py-3`}>
           <Search className="w-5 h-5 text-gray-400 mr-2" />
           <input
             type="text"
@@ -157,7 +163,7 @@ export const ServicesScreen = () => {
                     router.push(exploreRoute({ category: svc.categoryId, q: svc.name }));
                   }
                 }}
-                className="bg-white rounded-[24px] p-5 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-all active:scale-[0.98]"
+                className={`${softWhitePanelClass} cursor-pointer p-5 transition-all active:scale-[0.98] hover:shadow-[0_18px_34px_-24px_rgba(17,24,39,0.28)]`}
                 role="button"
                 tabIndex={0}
               >
@@ -185,21 +191,18 @@ export const ServicesScreen = () => {
 
                 <div className="flex flex-wrap gap-2 mb-4">
                   {svc.tags.slice(0, 3).map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-2.5 py-1 rounded-full text-[11px] font-medium bg-gray-50 text-gray-500 border border-gray-100"
-                    >
+                    <span key={tag} className={neutralSoftPillClass}>
                       {tag}
                     </span>
                   ))}
                 </div>
 
-                <div className="pt-3 border-t border-gray-50 flex items-center gap-4 text-[13px] text-gray-600 font-medium">
+                <div className="flex items-center gap-4 border-t border-gray-50 pt-3 text-[13px] font-medium text-gray-600">
                   <div className="flex items-center">
                     <Clock className="w-4 h-4 mr-1.5 text-gray-400" />
                     {formatDurationRange(svc.providers.map((p) => p.duration))}
                   </div>
-                  <div className="flex items-center font-bold" style={{ color: APP_CONFIG.colors.primary }}>
+                  <div className={`${darkPrimaryButtonClass} gap-1.5 px-3 py-2 text-[11px]`}>
                     <Tag className="w-4 h-4 mr-1.5 opacity-50" />
                     {formatPriceRange(svc.providers.map((p) => p.price))}
                   </div>

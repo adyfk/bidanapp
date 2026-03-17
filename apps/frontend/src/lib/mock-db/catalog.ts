@@ -1,5 +1,7 @@
 import areasData from '@/data/mock-db/areas.json';
 import professionalActivityStoriesData from '@/data/mock-db/professional_activity_stories.json';
+import professionalAvailabilityScheduleDaysData from '@/data/mock-db/professional_availability_schedule_days.json';
+import professionalAvailabilityTimeSlotsData from '@/data/mock-db/professional_availability_time_slots.json';
 import professionalCoverageAreasData from '@/data/mock-db/professional_coverage_areas.json';
 import professionalCoveragePoliciesData from '@/data/mock-db/professional_coverage_policies.json';
 import professionalCredentialsData from '@/data/mock-db/professional_credentials.json';
@@ -11,8 +13,6 @@ import professionalLanguagesData from '@/data/mock-db/professional_languages.jso
 import professionalPortfolioEntriesData from '@/data/mock-db/professional_portfolio_entries.json';
 import professionalPracticeLocationsData from '@/data/mock-db/professional_practice_locations.json';
 import professionalServiceOfferingsData from '@/data/mock-db/professional_service_offerings.json';
-import professionalServiceScheduleDaysData from '@/data/mock-db/professional_service_schedule_days.json';
-import professionalServiceTimeSlotsData from '@/data/mock-db/professional_service_time_slots.json';
 import professionalSpecialtiesData from '@/data/mock-db/professional_specialties.json';
 import professionalTestimonialsData from '@/data/mock-db/professional_testimonials.json';
 import professionalsData from '@/data/mock-db/professionals.json';
@@ -24,15 +24,17 @@ import type {
   GeoPoint,
   GlobalService,
   Professional,
+  ProfessionalAvailabilityDay,
+  ProfessionalAvailabilityTimeSlot,
   ProfessionalService,
-  ProfessionalServiceScheduleDay,
-  ProfessionalServiceTimeSlot,
   ServiceDeliveryMode,
   ServiceModeFlags,
   TimeSlotStatus,
 } from '@/types/catalog';
 import type {
   ProfessionalActivityStoryRow,
+  ProfessionalAvailabilityDayRow,
+  ProfessionalAvailabilityTimeSlotRow,
   ProfessionalCoverageAreaRow,
   ProfessionalCoveragePolicyRow,
   ProfessionalCredentialRow,
@@ -45,8 +47,6 @@ import type {
   ProfessionalPracticeLocationRow,
   ProfessionalRow,
   ProfessionalServiceOfferingRow,
-  ProfessionalServiceScheduleDayRow,
-  ProfessionalServiceTimeSlotRow,
   ProfessionalTestimonialRow,
 } from '@/types/mock-db';
 import { APPOINTMENT_ROWS } from './appointment-records';
@@ -92,11 +92,13 @@ const professionalFeedbackMetrics = sortByIndex(professionalFeedbackMetricsData 
 const professionalFeedbackBreakdowns = sortByIndex(
   professionalFeedbackBreakdownsData as ProfessionalFeedbackBreakdownRow[],
 );
-const professionalServiceOfferings = sortByIndex(professionalServiceOfferingsData as ProfessionalServiceOfferingRow[]);
-const professionalServiceScheduleDays = sortByIndex(
-  professionalServiceScheduleDaysData as ProfessionalServiceScheduleDayRow[],
+const professionalAvailabilityScheduleDays = sortByIndex(
+  professionalAvailabilityScheduleDaysData as ProfessionalAvailabilityDayRow[],
 );
-const professionalServiceTimeSlots = sortByIndex(professionalServiceTimeSlotsData as ProfessionalServiceTimeSlotRow[]);
+const professionalAvailabilityTimeSlots = sortByIndex(
+  professionalAvailabilityTimeSlotsData as ProfessionalAvailabilityTimeSlotRow[],
+);
+const professionalServiceOfferings = sortByIndex(professionalServiceOfferingsData as ProfessionalServiceOfferingRow[]);
 
 const specialtyRowsByProfessionalId = groupBy(professionalSpecialties, (row) => row.professionalId);
 const languageRowsByProfessionalId = groupBy(professionalLanguages, (row) => row.professionalId);
@@ -111,9 +113,9 @@ const testimonialRowsByProfessionalId = groupBy(professionalTestimonials, (row) 
 const feedbackSummaryByProfessionalId = new Map(professionalFeedbackSummaries.map((row) => [row.professionalId, row]));
 const feedbackMetricRowsByProfessionalId = groupBy(professionalFeedbackMetrics, (row) => row.professionalId);
 const feedbackBreakdownRowsByProfessionalId = groupBy(professionalFeedbackBreakdowns, (row) => row.professionalId);
+const availabilityDayRowsByProfessionalId = groupBy(professionalAvailabilityScheduleDays, (row) => row.professionalId);
 const serviceOfferingRowsByProfessionalId = groupBy(professionalServiceOfferings, (row) => row.professionalId);
-const scheduleDayRowsByOfferingId = groupBy(professionalServiceScheduleDays, (row) => row.serviceOfferingId);
-const timeSlotRowsByScheduleDayId = groupBy(professionalServiceTimeSlots, (row) => row.scheduleDayId);
+const availabilityTimeSlotRowsByScheduleDayId = groupBy(professionalAvailabilityTimeSlots, (row) => row.scheduleDayId);
 const appointmentRecentActivitiesByProfessionalId = groupBy(
   APPOINTMENT_ROWS.flatMap((appointmentRow) =>
     appointmentRow.recentActivity
@@ -155,7 +157,9 @@ const buildServiceModes = (offering: ProfessionalServiceOfferingRow): ServiceMod
   onsite: offering.supportsOnsite,
 });
 
-const hydrateTimeSlot = (timeSlotRow: ProfessionalServiceTimeSlotRow): ProfessionalServiceTimeSlot => ({
+const hydrateAvailabilityTimeSlot = (
+  timeSlotRow: ProfessionalAvailabilityTimeSlotRow,
+): ProfessionalAvailabilityTimeSlot => ({
   index: timeSlotRow.index,
   id: timeSlotRow.id,
   label: timeSlotRow.label,
@@ -163,28 +167,37 @@ const hydrateTimeSlot = (timeSlotRow: ProfessionalServiceTimeSlotRow): Professio
   status: timeSlotRow.status as TimeSlotStatus,
 });
 
-const hydrateScheduleDay = (scheduleDayRow: ProfessionalServiceScheduleDayRow): ProfessionalServiceScheduleDay => ({
+const hydrateAvailabilityDay = (scheduleDayRow: ProfessionalAvailabilityDayRow): ProfessionalAvailabilityDay => ({
   index: scheduleDayRow.index,
   id: scheduleDayRow.id,
   label: scheduleDayRow.label,
   dateIso: scheduleDayRow.dateIso,
-  slots: sortByIndex(timeSlotRowsByScheduleDayId.get(scheduleDayRow.id) || []).map(hydrateTimeSlot),
+  slots: sortByIndex(availabilityTimeSlotRowsByScheduleDayId.get(scheduleDayRow.id) || []).map(
+    hydrateAvailabilityTimeSlot,
+  ),
 });
 
-const hydrateProfessionalService = (offering: ProfessionalServiceOfferingRow): ProfessionalService => {
-  const scheduleRows = sortByIndex(scheduleDayRowsByOfferingId.get(offering.id) || []);
-  const scheduleByMode: Partial<Record<ServiceDeliveryMode, ProfessionalServiceScheduleDay[]>> = {};
+const hydrateProfessionalAvailabilityByMode = (
+  professionalId: string,
+): Partial<Record<ServiceDeliveryMode, ProfessionalAvailabilityDay[]>> | undefined => {
+  const availabilityRows = sortByIndex(availabilityDayRowsByProfessionalId.get(professionalId) || []);
+  const availabilityByMode: Partial<Record<ServiceDeliveryMode, ProfessionalAvailabilityDay[]>> = {};
 
   for (const mode of ['home_visit', 'onsite'] as const) {
-    const modeRows = scheduleRows.filter((row) => row.mode === mode);
+    const modeRows = availabilityRows.filter((row) => row.mode === mode);
 
     if (modeRows.length > 0) {
-      scheduleByMode[mode] = modeRows.map(hydrateScheduleDay);
+      availabilityByMode[mode] = modeRows.map(hydrateAvailabilityDay);
     }
   }
 
+  return Object.keys(availabilityByMode).length > 0 ? availabilityByMode : undefined;
+};
+
+const hydrateProfessionalService = (offering: ProfessionalServiceOfferingRow): ProfessionalService => {
   return {
     index: offering.index,
+    id: offering.id,
     serviceId: offering.serviceId,
     duration: offering.duration,
     price: offering.price,
@@ -192,7 +205,6 @@ const hydrateProfessionalService = (offering: ProfessionalServiceOfferingRow): P
     defaultMode: offering.defaultMode,
     bookingFlow: offering.bookingFlow,
     summary: offering.summary || undefined,
-    scheduleByMode: Object.keys(scheduleByMode).length > 0 ? scheduleByMode : undefined,
   };
 };
 
@@ -333,6 +345,7 @@ export const MOCK_PROFESSIONALS: Professional[] = professionals.map((professiona
         summary: row.summary,
       }),
     ),
+    availabilityByMode: hydrateProfessionalAvailabilityByMode(professionalRow.id),
     services: sortByIndex(serviceOfferingRowsByProfessionalId.get(professionalRow.id) || []).map(
       hydrateProfessionalService,
     ),
@@ -482,13 +495,13 @@ export const getAccessibleServiceModes = (
     return true;
   });
 
-export const getProfessionalServiceScheduleDays = (
-  serviceMapping: ProfessionalService,
+export const getProfessionalAvailabilityScheduleDays = (
+  professional: Pick<Professional, 'availabilityByMode'>,
   mode: ServiceDeliveryMode,
-): ProfessionalServiceScheduleDay[] => {
+): ProfessionalAvailabilityDay[] => {
   if (mode === 'online') {
     return [];
   }
 
-  return sortByIndex(serviceMapping.scheduleByMode?.[mode] || []);
+  return sortByIndex(professional.availabilityByMode?.[mode] || []);
 };

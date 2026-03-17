@@ -70,17 +70,17 @@ export interface GlobalService {
 
 export interface ProfessionalService {
   index: number;
+  id: string;
   serviceId: string;
   duration: string;
   price: string;
   serviceModes: ServiceModeFlags;
   defaultMode: ServiceDeliveryMode;
   bookingFlow: BookingFlow;
-  scheduleByMode?: Partial<Record<ServiceDeliveryMode, ProfessionalServiceScheduleDay[]>>;
   summary?: string;
 }
 
-export interface ProfessionalServiceTimeSlot {
+export interface ProfessionalAvailabilityTimeSlot {
   index: number;
   id: string;
   label: string;
@@ -88,12 +88,12 @@ export interface ProfessionalServiceTimeSlot {
   status: TimeSlotStatus;
 }
 
-export interface ProfessionalServiceScheduleDay {
+export interface ProfessionalAvailabilityDay {
   index: number;
   id: string;
   label: string;
   dateIso: string;
-  slots: ProfessionalServiceTimeSlot[];
+  slots: ProfessionalAvailabilityTimeSlot[];
 }
 
 export interface ProfessionalCredential {
@@ -218,5 +218,6 @@ export interface Professional {
   feedbackMetrics: ProfessionalFeedbackMetric[];
   feedbackBreakdown: ProfessionalFeedbackBreakdown[];
   recentActivities: ProfessionalRecentActivity[];
+  availabilityByMode?: Partial<Record<ServiceDeliveryMode, ProfessionalAvailabilityDay[]>>;
   services: ProfessionalService[];
 }

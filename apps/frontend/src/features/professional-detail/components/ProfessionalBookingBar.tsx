@@ -3,10 +3,19 @@
 import { CalendarDays, Clock3 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { InlineFeedbackNotice } from '@/components/ui/InlineFeedbackNotice';
+import {
+  accentPrimaryButtonClass,
+  accentSoftPillClass,
+  blushSubtlePanelClass,
+  neutralSoftPillClass,
+} from '@/components/ui/tokens';
 import type { ProfessionalServiceEntry } from '@/features/professional-detail/hooks/useProfessionalDetail';
-import { APP_CONFIG } from '@/lib/config';
 import { getCategoryById } from '@/lib/mock-db/catalog';
-import type { ProfessionalServiceScheduleDay, ProfessionalServiceTimeSlot, ServiceDeliveryMode } from '@/types/catalog';
+import type {
+  ProfessionalAvailabilityDay,
+  ProfessionalAvailabilityTimeSlot,
+  ServiceDeliveryMode,
+} from '@/types/catalog';
 
 interface ProfessionalBookingBarProps {
   canRequestBooking: boolean;
@@ -16,9 +25,9 @@ interface ProfessionalBookingBarProps {
   onRequestBooking: () => void;
   requiresOfflineScheduleSelection: boolean;
   selectedBookingMode: ServiceDeliveryMode | null;
-  selectedScheduleDay: ProfessionalServiceScheduleDay | null;
+  selectedScheduleDay: ProfessionalAvailabilityDay | null;
   selectedServiceEntry: ProfessionalServiceEntry | null;
-  selectedTimeSlot: ProfessionalServiceTimeSlot | null;
+  selectedTimeSlot: ProfessionalAvailabilityTimeSlot | null;
 }
 
 type ProfessionalTranslations = ReturnType<typeof useTranslations>;
@@ -61,19 +70,21 @@ export const ProfessionalBookingBar = ({
         {notice ? <InlineFeedbackNotice message={notice} onDismiss={onDismissNotice} /> : null}
 
         {selectedServiceEntry ? (
-          <div className="rounded-[20px] px-4 py-3" style={{ backgroundColor: APP_CONFIG.colors.primaryLight }}>
+          <div className={`${blushSubtlePanelClass} p-4`}>
             <div className="mb-2 flex items-center justify-between gap-3">
-              <div>
-                <p
-                  className="text-[11px] font-semibold uppercase tracking-wide"
-                  style={{ color: APP_CONFIG.colors.primary }}
-                >
-                  {getCategoryById(selectedServiceEntry.catalogService.categoryId)?.name ||
-                    selectedServiceEntry.catalogService.name}
-                </p>
-                <p className="mt-1 text-[14px] font-bold text-gray-900">{selectedServiceEntry.catalogService.name}</p>
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className={accentSoftPillClass}>
+                    {getCategoryById(selectedServiceEntry.catalogService.categoryId)?.name ||
+                      selectedServiceEntry.catalogService.name}
+                  </span>
+                  {selectedBookingMode ? (
+                    <span className={neutralSoftPillClass}>{getModeLabel(t, selectedBookingMode)}</span>
+                  ) : null}
+                </div>
+                <p className="mt-3 text-[14px] font-bold text-gray-900">{selectedServiceEntry.catalogService.name}</p>
                 {selectedBookingMode ? (
-                  <p className="mt-1 text-[12px] font-medium text-gray-500">{getModeLabel(t, selectedBookingMode)}</p>
+                  <p className="mt-1 text-[12px] font-medium text-gray-500">{t('selectionResumeReadyDescription')}</p>
                 ) : null}
               </div>
               <div className="text-right">
@@ -88,7 +99,7 @@ export const ProfessionalBookingBar = ({
             </p>
 
             {requiresOfflineScheduleSelection ? (
-              <div className="mt-3 rounded-[16px] bg-white/70 px-3 py-2.5">
+              <div className="mt-3 rounded-[18px] bg-white/75 px-3 py-3 shadow-[inset_0_0_0_1px_rgba(229,231,235,1)]">
                 {selectedScheduleDay && selectedTimeSlot ? (
                   <div className="space-y-1">
                     <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
@@ -111,14 +122,19 @@ export const ProfessionalBookingBar = ({
               </div>
             ) : null}
           </div>
-        ) : null}
+        ) : (
+          <div className="rounded-[20px] border border-dashed border-gray-200 bg-gray-50 px-4 py-3">
+            <p className="text-[13px] font-bold text-gray-900">{t('selectionEmptyTitle')}</p>
+            <p className="mt-1 text-[12px] leading-relaxed text-gray-500">{t('selectionEmptyDescription')}</p>
+          </div>
+        )}
       </div>
 
       <button
         type="button"
-        className="w-full rounded-full py-4 text-[15px] font-bold text-white transition-transform active:scale-[0.98]"
+        className={`${accentPrimaryButtonClass} w-full py-4 text-[15px]`}
         style={{
-          backgroundColor: canRequestBooking ? APP_CONFIG.colors.primary : '#D1D5DB',
+          background: canRequestBooking ? undefined : '#D1D5DB',
           boxShadow: canRequestBooking ? '0 12px 28px rgba(233, 30, 140, 0.28)' : 'none',
         }}
         onClick={onRequestBooking}
