@@ -1,12 +1,10 @@
 'use client';
 
-import { CalendarClock, MapPin, Navigation, ShieldCheck } from 'lucide-react';
+import { MapPin, Navigation, ShieldCheck } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 import {
-  accentPrimaryButtonClass,
   accentSoftPillClass,
-  blushPanelClass,
   blushSubtlePanelClass,
   darkPrimaryButtonClass,
   neutralSoftPillClass,
@@ -14,17 +12,16 @@ import {
   softWhitePanelClass,
 } from '@/components/ui/tokens';
 import type { ProfessionalManagedService } from '@/lib/use-professional-portal';
-import type { ProfessionalAvailabilityDay, ServiceDeliveryMode } from '@/types/catalog';
+import type { OfflineServiceDeliveryMode, ProfessionalAvailabilityRules, ServiceDeliveryMode } from '@/types/catalog';
 import { buildManagedServicesAvailabilitySummary } from './helpers';
-import { SectionHeading, ServiceModeBadge, SwitchStatusRow } from './ProfessionalDashboardShared';
+import { DashboardHeroPanel, SectionHeading, ServiceModeBadge, SwitchStatusRow } from './ProfessionalDashboardShared';
 import type { CoverageDraft } from './types';
 
 interface ProfessionalDashboardCoverageTabProps {
-  availabilityByMode?: Partial<Record<ServiceDeliveryMode, ProfessionalAvailabilityDay[]>>;
+  availabilityRulesByMode?: Partial<Record<OfflineServiceDeliveryMode, ProfessionalAvailabilityRules>>;
   coverageDraft: CoverageDraft;
   getAreaLabel: (areaId: string) => string;
   getModeLabel: (mode: ServiceDeliveryMode) => string;
-  onManageAvailability: () => void;
   onEditCoverage: () => void;
   serviceConfigurations: ProfessionalManagedService[];
 }
@@ -44,11 +41,10 @@ const CoverageGroup = ({ children, label }: { children: ReactNode; label: string
 );
 
 export const ProfessionalDashboardCoverageTab = ({
-  availabilityByMode,
+  availabilityRulesByMode,
   coverageDraft,
   getAreaLabel,
   getModeLabel,
-  onManageAvailability,
   onEditCoverage,
   serviceConfigurations,
 }: ProfessionalDashboardCoverageTabProps) => {
@@ -56,23 +52,21 @@ export const ProfessionalDashboardCoverageTab = ({
   const practiceTitle = coverageDraft.practiceLabel || coverageDraft.city || t('coverage.fields.practiceLabel');
   const practiceAddress = coverageDraft.practiceAddress || t('coverage.emptyPracticeAddress');
   const publicBio = coverageDraft.publicBio || t('coverage.emptyPublicBio');
-  const availabilitySummary = buildManagedServicesAvailabilitySummary(serviceConfigurations, availabilityByMode);
+  const availabilitySummary = buildManagedServicesAvailabilitySummary(serviceConfigurations, availabilityRulesByMode);
 
   return (
     <section className="space-y-5">
-      <div className={`${blushPanelClass} space-y-5 p-4`}>
-        <SectionHeading
-          icon={<MapPin className="h-5 w-5" />}
-          eyebrow={t('coverage.title')}
-          title={practiceTitle}
-          description={practiceAddress}
-          action={
-            <button type="button" onClick={onEditCoverage} className={darkPrimaryButtonClass}>
-              {t('coverage.editButton')}
-            </button>
-          }
-        />
-
+      <DashboardHeroPanel
+        icon={<MapPin className="h-5 w-5" />}
+        eyebrow={t('coverage.title')}
+        title={practiceTitle}
+        description={practiceAddress}
+        action={
+          <button type="button" onClick={onEditCoverage} className={`${darkPrimaryButtonClass} w-full`}>
+            {t('coverage.editButton')}
+          </button>
+        }
+      >
         <div className={`${blushSubtlePanelClass} px-4 py-4`}>
           <div className="flex flex-wrap gap-2">
             <span className={accentSoftPillClass}>{t('coverage.city')}</span>
@@ -96,7 +90,7 @@ export const ProfessionalDashboardCoverageTab = ({
             />
           </div>
         </div>
-      </div>
+      </DashboardHeroPanel>
 
       <div className={`${softWhitePanelClass} space-y-4 p-4`}>
         <SectionHeading
@@ -130,58 +124,6 @@ export const ProfessionalDashboardCoverageTab = ({
             <p className="text-[13px] leading-relaxed text-slate-500">{t('coverage.emptyAreaSelection')}</p>
           )}
         </CoverageGroup>
-      </div>
-
-      <div className={`${blushSubtlePanelClass} space-y-4 p-4`}>
-        <SectionHeading
-          icon={<CalendarClock className="h-5 w-5" />}
-          title={t('coverage.availabilityTitle')}
-          description={t('coverage.availabilityDescription')}
-          action={
-            <button type="button" onClick={onManageAvailability} className={accentPrimaryButtonClass}>
-              {t('coverage.manageAvailabilityButton')}
-            </button>
-          }
-        />
-
-        <div className="grid grid-cols-2 gap-3">
-          <SummaryTile
-            label={t('coverage.availabilityMetrics.activeServices')}
-            value={String(availabilitySummary.activeServiceCount)}
-          />
-          <SummaryTile
-            label={t('coverage.availabilityMetrics.activeModes')}
-            value={String(availabilitySummary.activeModes.length)}
-          />
-          <SummaryTile
-            label={t('coverage.availabilityMetrics.scheduleDays')}
-            value={String(availabilitySummary.totalBookableDayCount)}
-          />
-          <SummaryTile
-            label={t('coverage.availabilityMetrics.slots')}
-            value={String(availabilitySummary.totalBookableSlotCount)}
-          />
-        </div>
-
-        <div className={`${softWhitePanelClass} px-4 py-4`}>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-pink-500">
-            {t('coverage.serviceSettingsEyebrow')}
-          </p>
-          <p className="mt-2 text-[14px] font-bold text-slate-900">{t('coverage.serviceSettingsTitle')}</p>
-          <p className="mt-2 text-[13px] leading-relaxed text-slate-600">
-            {availabilitySummary.activeServiceCount > 0
-              ? t('coverage.serviceSettingsHint')
-              : t('coverage.emptyAvailability')}
-          </p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <span className={neutralSoftPillClass}>
-              {availabilitySummary.instantServiceCount} {t('coverage.instantServicesLabel')}
-            </span>
-            <span className={neutralSoftPillClass}>
-              {availabilitySummary.requestServiceCount} {t('coverage.requestServicesLabel')}
-            </span>
-          </div>
-        </div>
       </div>
 
       <div className="space-y-4">

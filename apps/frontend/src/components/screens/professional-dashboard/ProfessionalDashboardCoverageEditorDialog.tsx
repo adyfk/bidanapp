@@ -146,14 +146,6 @@ export const ProfessionalDashboardCoverageEditorDialog = ({
               ))}
             </div>
           </div>
-
-          <div className={`${blushSubtlePanelClass} px-4 py-4`}>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-pink-500">
-              {t('coverage.serviceSettingsEyebrow')}
-            </p>
-            <p className="mt-2 text-[14px] font-bold text-slate-900">{t('coverage.serviceSettingsTitle')}</p>
-            <p className="mt-2 text-[13px] leading-relaxed text-slate-600">{t('coverage.serviceSettingsHint')}</p>
-          </div>
         </div>
       </div>
     </DashboardDialog>

@@ -1,5 +1,6 @@
 'use client';
 
+import { Layers3 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import {
   accentPrimaryButtonClass,
@@ -11,7 +12,13 @@ import {
 import type { ProfessionalManagedService } from '@/lib/use-professional-portal';
 import type { ServiceDeliveryMode } from '@/types/catalog';
 import { deliveryModes, isServiceModeEnabled } from './helpers';
-import { MiniStatCard, ServiceMetaChip, ServiceMetricTile, ServiceModeBadge } from './ProfessionalDashboardShared';
+import {
+  DashboardHeroPanel,
+  MiniStatCard,
+  ServiceMetaChip,
+  ServiceMetricTile,
+  ServiceModeBadge,
+} from './ProfessionalDashboardShared';
 
 interface ProfessionalDashboardServicesTabProps {
   averageServicePriceLabel: string;
@@ -46,13 +53,14 @@ export const ProfessionalDashboardServicesTab = ({
         <MiniStatCard label={t('services.averagePriceLabel')} value={averageServicePriceLabel} />
       </div>
 
+      <DashboardHeroPanel
+        icon={<Layers3 className="h-5 w-5" />}
+        title={t('services.title')}
+        description={t('services.description')}
+      />
+
       <div className={`${softWhitePanelClass} p-4`}>
         <div>
-          <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-slate-400">{t('services.title')}</p>
-          <p className="mt-1 text-[13px] leading-relaxed text-slate-500">{t('services.description')}</p>
-        </div>
-
-        <div className="mt-5">
           <div className="flex items-center justify-between gap-3">
             <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-slate-400">
               {t('services.activeLabel')}

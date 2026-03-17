@@ -9,24 +9,59 @@ const frontendDir = resolve(__dirname, '..');
 
 const readJson = async (relativePath) => JSON.parse(await readFile(resolve(frontendDir, relativePath), 'utf8'));
 
-const [appointments, areas, bookingFlows, offerings, scheduleDays, services, timeSlots] = await Promise.all([
+const [
+  appointments,
+  areas,
+  bookingFlows,
+  dateOverrides,
+  offerings,
+  runtimeSelections,
+  services,
+  weeklyHours,
+  availabilityPolicies,
+] = await Promise.all([
   readJson('src/data/mock-db/appointments.json'),
   readJson('src/data/mock-db/areas.json'),
   readJson('src/data/mock-db/reference_booking_flows.json'),
+  readJson('src/data/mock-db/professional_availability_date_overrides.json'),
   readJson('src/data/mock-db/professional_service_offerings.json'),
-  readJson('src/data/mock-db/professional_availability_schedule_days.json'),
+  readJson('src/data/mock-db/app_runtime_selections.json'),
   readJson('src/data/mock-db/services.json'),
-  readJson('src/data/mock-db/professional_availability_time_slots.json'),
+  readJson('src/data/mock-db/professional_availability_weekly_hours.json'),
+  readJson('src/data/mock-db/professional_availability_policies.json'),
 ]);
 
 const areasById = new Map(areas.map((area) => [area.id, area]));
 const bookingFlowsByCode = new Map(bookingFlows.map((flow) => [flow.code, flow]));
+const dateOverrideByProfessionalModeAndDate = new Map(
+  dateOverrides.map((override) => [`${override.professionalId}:${override.mode}:${override.dateIso}`, override]),
+);
 const offeringsById = new Map(offerings.map((offering) => [offering.id, offering]));
-const scheduleDaysById = new Map(scheduleDays.map((scheduleDay) => [scheduleDay.id, scheduleDay]));
+const availabilityPoliciesByProfessionalMode = new Map(
+  availabilityPolicies.map((policy) => [`${policy.professionalId}:${policy.mode}`, policy]),
+);
 const servicesById = new Map(services.map((service) => [service.id, service]));
-const timeSlotsById = new Map(timeSlots.map((timeSlot) => [timeSlot.id, timeSlot]));
+const weeklyHoursByProfessionalModeAndWeekday = new Map(
+  weeklyHours.map((row) => [`${row.professionalId}:${row.mode}:${row.weekday}`, row]),
+);
+const allowedMinimumNoticeHours = new Set([4, 12, 24, 48]);
 
 const parsePriceLabel = (priceLabel) => Number.parseInt(String(priceLabel).replace(/\D/g, ''), 10) || 0;
+const parseTimeLabelToMinutes = (timeLabel) => {
+  const match = String(timeLabel).match(/(\d{2}):(\d{2})/);
+
+  if (!match) {
+    return null;
+  }
+
+  return Number.parseInt(match[1], 10) * 60 + Number.parseInt(match[2], 10);
+};
+const extractTimeLabel = (value) => String(value).match(/(\d{2}:\d{2})/)?.[1] || null;
+const getWeekdayKey = (dateIso) => {
+  const weekdayIndex = new Date(`${dateIso}T00:00:00Z`).getUTCDay();
+
+  return ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][weekdayIndex];
+};
 
 const isModeSupportedByOffering = (offering, mode) =>
   (mode === 'online' && offering.supportsOnline) ||
@@ -181,71 +216,40 @@ test('appointment schedule snapshots respect mode and seeded slot rules', () => 
       continue;
     }
 
-    if (appointment.scheduleSnapshot.scheduleDayId) {
-      const scheduleDay = scheduleDaysById.get(appointment.scheduleSnapshot.scheduleDayId);
+    assert.ok(appointment.scheduleSnapshot.dateIso, `Offline appointment needs dateIso for ${appointment.id}`);
+    const dateIso = appointment.scheduleSnapshot.dateIso;
+    const override = dateOverrideByProfessionalModeAndDate.get(
+      `${appointment.professionalId}:${appointment.requestedMode}:${dateIso}`,
+    );
+    const weeklyWindow = weeklyHoursByProfessionalModeAndWeekday.get(
+      `${appointment.professionalId}:${appointment.requestedMode}:${getWeekdayKey(dateIso)}`,
+    );
 
-      assert.ok(
-        scheduleDay,
-        `Missing schedule day ${appointment.scheduleSnapshot.scheduleDayId} for ${appointment.id}`,
-      );
-      assert.equal(
-        scheduleDay.professionalId,
-        appointment.professionalId,
-        `Schedule day professional mismatch for ${appointment.id}`,
-      );
-      assert.equal(scheduleDay.mode, appointment.requestedMode, `Schedule day mode mismatch for ${appointment.id}`);
+    assert.ok(
+      override || weeklyWindow,
+      `Missing weekly hours or date override for ${appointment.professionalId}:${appointment.requestedMode}:${dateIso}`,
+    );
+    assert.equal(override?.isClosed === true, false, `Closed special date cannot have appointment ${appointment.id}`);
 
-      if (appointment.scheduleSnapshot.dateIso) {
-        assert.equal(
-          scheduleDay.dateIso,
-          appointment.scheduleSnapshot.dateIso,
-          `Schedule date mismatch for ${appointment.id}`,
-        );
-      }
+    const startTime = override?.startTime || weeklyWindow?.startTime;
+    const endTime = override?.endTime || weeklyWindow?.endTime;
+    const bookedTimeLabel =
+      appointment.scheduleSnapshot.timeSlotLabel || extractTimeLabel(appointment.scheduledTimeLabel);
 
-      if (appointment.scheduleSnapshot.scheduleDayLabel) {
-        assert.equal(
-          scheduleDay.label,
-          appointment.scheduleSnapshot.scheduleDayLabel,
-          `Schedule day label mismatch for ${appointment.id}`,
-        );
-      }
-    } else {
-      assert.ok(
-        appointment.scheduleSnapshot.dateIso || appointment.scheduleSnapshot.scheduleDayLabel,
-        `Offline appointment needs date context when scheduleDayId is absent for ${appointment.id}`,
-      );
-    }
+    assert.ok(startTime && endTime, `Missing applicable working hours for ${appointment.id}`);
+    assert.ok(bookedTimeLabel, `Missing appointment time label for ${appointment.id}`);
 
-    if (appointment.scheduleSnapshot.timeSlotId) {
-      const timeSlot = timeSlotsById.get(appointment.scheduleSnapshot.timeSlotId);
+    const bookedMinutes = parseTimeLabelToMinutes(bookedTimeLabel);
+    const startMinutes = parseTimeLabelToMinutes(startTime);
+    const endMinutes = parseTimeLabelToMinutes(endTime);
 
-      assert.ok(timeSlot, `Missing time slot ${appointment.scheduleSnapshot.timeSlotId} for ${appointment.id}`);
-      assert.equal(
-        timeSlot.professionalId,
-        appointment.professionalId,
-        `Time slot professional mismatch for ${appointment.id}`,
-      );
-      assert.equal(timeSlot.mode, appointment.requestedMode, `Time slot mode mismatch for ${appointment.id}`);
-      assert.equal(
-        timeSlot.scheduleDayId,
-        appointment.scheduleSnapshot.scheduleDayId,
-        `Time slot schedule day mismatch for ${appointment.id}`,
-      );
-
-      if (appointment.scheduleSnapshot.timeSlotLabel) {
-        assert.equal(
-          timeSlot.label,
-          appointment.scheduleSnapshot.timeSlotLabel,
-          `Time slot label mismatch for ${appointment.id}`,
-        );
-      }
-    } else {
-      assert.ok(
-        appointment.scheduleSnapshot.timeSlotLabel,
-        `Offline appointment needs time context when timeSlotId is absent for ${appointment.id}`,
-      );
-    }
+    assert.notEqual(bookedMinutes, null, `Invalid booked time label for ${appointment.id}`);
+    assert.notEqual(startMinutes, null, `Invalid start time for ${appointment.id}`);
+    assert.notEqual(endMinutes, null, `Invalid end time for ${appointment.id}`);
+    assert.ok(
+      bookedMinutes >= startMinutes && bookedMinutes < endMinutes,
+      `Booked time ${bookedTimeLabel} falls outside working hours for ${appointment.id}`,
+    );
   }
 });
 
@@ -304,5 +308,28 @@ test('appointment seeds cover the full delivery-mode and booking-flow matrix', (
     [...presentMatrix].sort(),
     [...expectedMatrix].sort(),
     'Appointment seeds should include every supported mode x booking-flow case',
+  );
+});
+
+test('availability policies exist for every seeded offline availability mode', () => {
+  const availabilityCombos = new Set(
+    [...weeklyHours, ...dateOverrides].map((row) => `${row.professionalId}:${row.mode}`),
+  );
+
+  for (const combo of availabilityCombos) {
+    const policy = availabilityPoliciesByProfessionalMode.get(combo);
+
+    assert.ok(policy, `Missing availability policy for ${combo}`);
+    assert.ok(
+      allowedMinimumNoticeHours.has(policy.minimumNoticeHours),
+      `Unexpected minimumNoticeHours ${policy.minimumNoticeHours} for ${combo}`,
+    );
+  }
+
+  assert.equal(runtimeSelections.length > 0, true, 'Missing app runtime selection seed');
+  assert.match(
+    runtimeSelections[0].currentDateTimeIso,
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/,
+    'Runtime clock seed must expose a stable currentDateTimeIso',
   );
 });

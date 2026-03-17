@@ -3,7 +3,7 @@
 import { useSearchParams } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import { useTransition } from 'react';
-import { usePathname, useRouter } from '@/i18n/routing';
+import { type routing, usePathname, useRouter } from '@/i18n/routing';
 
 interface LanguageSwitcherProps {
   variant?: 'light' | 'dark';
@@ -16,7 +16,7 @@ export const LanguageSwitcher = ({ variant = 'light' }: LanguageSwitcherProps) =
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const toggleLocale = (nextLocale: string) => {
+  const toggleLocale = (nextLocale: (typeof routing.locales)[number]) => {
     if (locale === nextLocale) return;
 
     const query = searchParams.toString();

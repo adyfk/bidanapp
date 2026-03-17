@@ -1,11 +1,11 @@
 'use client';
 
-import { ArrowRight, ImagePlus, Plus } from 'lucide-react';
+import { ArrowRight, CalendarDays, ImagePlus, Plus } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import { surfaceCardPaddedClass } from '@/components/ui/tokens';
+import { accentPrimaryButtonClass, surfaceCardPaddedClass } from '@/components/ui/tokens';
 import type { ProfessionalManagedGalleryItem, ProfessionalManagedPortfolioEntry } from '@/lib/use-professional-portal';
-import { MiniStatCard, ServiceMetaChip } from './ProfessionalDashboardShared';
+import { MiniStatCard, ServiceMetaChip, StackedSectionHeading } from './ProfessionalDashboardShared';
 
 interface ProfessionalDashboardPortfolioTabProps {
   galleryItems: ProfessionalManagedGalleryItem[];
@@ -37,8 +37,6 @@ export const ProfessionalDashboardPortfolioTab = ({
   selectedPortfolioId,
 }: ProfessionalDashboardPortfolioTabProps) => {
   const t = useTranslations('ProfessionalPortal');
-  const sectionActionButtonClass =
-    'inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-[18px] border border-blue-200 bg-blue-50 px-4 py-3 text-[13px] font-bold text-blue-700 transition-all hover:border-blue-300 hover:bg-blue-100';
   const cardActionButtonClass = (isSelected: boolean) =>
     `flex min-h-11 w-full items-center justify-between rounded-[16px] border px-4 py-3 text-[13px] font-bold transition-all ${
       isSelected
@@ -61,17 +59,18 @@ export const ProfessionalDashboardPortfolioTab = ({
 
       <div className="grid gap-4">
         <div className={surfaceCardPaddedClass}>
-          <div className="space-y-4 border-b border-slate-200/80 pb-4">
-            <div>
-              <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                {t('portfolio.title')}
-              </p>
-              <p className="mt-1 text-[13px] leading-relaxed text-slate-500">{t('portfolio.description')}</p>
-            </div>
-            <button type="button" onClick={onAddPortfolio} className={sectionActionButtonClass}>
-              <Plus className="h-4 w-4" />
-              {t('portfolio.addButton')}
-            </button>
+          <div className="border-b border-slate-200/80 pb-4">
+            <StackedSectionHeading
+              icon={<CalendarDays className="h-5 w-5" />}
+              title={t('portfolio.title')}
+              description={t('portfolio.description')}
+              action={
+                <button type="button" onClick={onAddPortfolio} className={`${accentPrimaryButtonClass} w-full`}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  {t('portfolio.addButton')}
+                </button>
+              }
+            />
           </div>
 
           <div className="mt-5 grid gap-3">
@@ -131,17 +130,18 @@ export const ProfessionalDashboardPortfolioTab = ({
         </div>
 
         <div className={surfaceCardPaddedClass}>
-          <div className="space-y-4 border-b border-slate-200/80 pb-4">
-            <div>
-              <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                {t('portfolio.galleryTitle')}
-              </p>
-              <p className="mt-1 text-[13px] leading-relaxed text-slate-500">{t('portfolio.galleryDescription')}</p>
-            </div>
-            <button type="button" onClick={onAddGallery} className={sectionActionButtonClass}>
-              <ImagePlus className="h-4 w-4" />
-              {t('portfolio.galleryAddButton')}
-            </button>
+          <div className="border-b border-slate-200/80 pb-4">
+            <StackedSectionHeading
+              icon={<ImagePlus className="h-5 w-5" />}
+              title={t('portfolio.galleryTitle')}
+              description={t('portfolio.galleryDescription')}
+              action={
+                <button type="button" onClick={onAddGallery} className={`${accentPrimaryButtonClass} w-full`}>
+                  <ImagePlus className="mr-2 h-4 w-4" />
+                  {t('portfolio.galleryAddButton')}
+                </button>
+              }
+            />
           </div>
 
           <div className="mt-5 grid gap-3">

@@ -4,6 +4,7 @@ import { ArrowRight, BadgeCheck, ClipboardList, MapPin, Star, Wallet, X } from '
 import type { ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import {
+  blushPanelClass,
   filterChipClass,
   insetSurfaceClass,
   neutralSoftPillClass,
@@ -39,7 +40,7 @@ export const DashboardDialog = ({
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-end justify-center p-3 pointer-events-none">
+    <div className="pointer-events-none fixed inset-0 z-50 flex items-end justify-center p-2">
       <button
         type="button"
         aria-label={closeLabel}
@@ -50,12 +51,12 @@ export const DashboardDialog = ({
       <div
         role="dialog"
         aria-modal="true"
-        className="pointer-events-auto relative z-10 flex max-h-[92vh] w-full max-w-md flex-col overflow-hidden rounded-[30px] border border-pink-100/80 bg-[linear-gradient(180deg,#FFF9FC_0%,#FFFFFF_100%)] shadow-[0_32px_100px_-32px_rgba(15,23,42,0.45)]"
+        className="pointer-events-auto relative z-10 flex max-h-[94vh] w-full max-w-md flex-col overflow-hidden rounded-[32px] border border-pink-100/80 bg-[linear-gradient(180deg,#FFF9FC_0%,#FFFFFF_100%)] shadow-[0_32px_100px_-32px_rgba(15,23,42,0.45)]"
       >
-        <div className="flex items-start justify-between gap-4 border-b border-pink-100/80 px-4 py-4">
+        <div className="flex items-start justify-between gap-4 border-b border-pink-100/80 px-5 py-5">
           <div>
             <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-slate-400">{eyebrow}</p>
-            <h2 className="mt-2 text-[22px] font-bold text-slate-900">{title}</h2>
+            <h2 className="mt-2 text-[20px] font-bold leading-tight text-slate-900">{title}</h2>
             {description ? (
               <p className="mt-2 max-w-[42rem] text-[13px] leading-relaxed text-slate-500">{description}</p>
             ) : null}
@@ -67,16 +68,20 @@ export const DashboardDialog = ({
               type="button"
               aria-label={closeLabel}
               onClick={onClose}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50"
             >
               <X className="h-5 w-5" />
             </button>
           </div>
         </div>
 
-        <div className="overflow-y-auto px-4 py-4">{children}</div>
+        <div className="overflow-y-auto px-5 py-5">{children}</div>
 
-        {footer ? <div className="border-t border-pink-100/80 bg-white px-4 py-4">{footer}</div> : null}
+        {footer ? (
+          <div className="border-t border-pink-100/80 bg-white px-5 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+            {footer}
+          </div>
+        ) : null}
       </div>
     </div>,
     document.body,
@@ -112,6 +117,46 @@ export const SectionHeading = ({
       </div>
     </div>
     {action ? <div className="flex-shrink-0">{action}</div> : null}
+  </div>
+);
+
+export const StackedSectionHeading = ({
+  action,
+  description,
+  eyebrow,
+  icon,
+  title,
+}: {
+  action?: ReactNode;
+  description?: string;
+  eyebrow?: string;
+  icon?: ReactNode;
+  title: string;
+}) => (
+  <div className="space-y-4">
+    <SectionHeading description={description} eyebrow={eyebrow} icon={icon} title={title} />
+    {action ? <div>{action}</div> : null}
+  </div>
+);
+
+export const DashboardHeroPanel = ({
+  action,
+  children,
+  description,
+  eyebrow,
+  icon,
+  title,
+}: {
+  action?: ReactNode;
+  children?: ReactNode;
+  description?: string;
+  eyebrow?: string;
+  icon?: ReactNode;
+  title: string;
+}) => (
+  <div className={`${blushPanelClass} space-y-4 p-4`}>
+    <StackedSectionHeading action={action} description={description} eyebrow={eyebrow} icon={icon} title={title} />
+    {children ? <div className="space-y-4">{children}</div> : null}
   </div>
 );
 

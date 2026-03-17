@@ -7,6 +7,7 @@
     "entryTables": ["app_runtime_selections.json", "home_feed_snapshots.json", "user_contexts.json"],
     "steps": [
       "Pilih runtime aktif dari app_runtime_selections",
+      "Gunakan currentDateTimeIso sebagai runtime clock mock yang stabil",
       "Ambil consumer dan user context aktif",
       "Hydrate home_feed_snapshots",
       "Join popular services dan nearby professionals",
@@ -38,16 +39,17 @@
     "id": "flow-booking-request",
     "index": 3,
     "name": "Booking Request",
-    "goal": "Membentuk appointment immutable dari pilihan service, offering profesional, mode, dan slot.",
+    "goal": "Membentuk appointment immutable dari pilihan service, offering profesional, mode, dan jam kerja profesional.",
     "entryTables": [
-      "professional_availability_schedule_days.json",
-      "professional_availability_time_slots.json",
+      "professional_availability_weekly_hours.json",
+      "professional_availability_policies.json",
+      "professional_availability_date_overrides.json",
       "appointments.json",
       "reference_booking_flows.json"
     ],
     "steps": [
       "Buat order hanya dari composer halaman profesional agar validasi selalu konsisten",
-      "Pilih hari dan slot jika mode offline",
+      "Pilih hari dan jam yang dihasilkan dari weekly hours, minimum notice policy, dan special-date overrides jika mode offline",
       "Cek bookingFlow di professional_service_offerings",
       "Simpan serviceSnapshot, scheduleSnapshot, dan timeline awal ke appointments.json",
       "Masuk ke status requested untuk request flow atau approved_waiting_payment untuk instant flow"

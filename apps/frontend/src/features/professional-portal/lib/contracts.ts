@@ -7,7 +7,8 @@ import type {
 import type {
   BookingFlow,
   GeoPoint,
-  ProfessionalAvailabilityDay,
+  OfflineServiceDeliveryMode,
+  ProfessionalAvailabilityRules,
   ProfessionalCredential,
   ProfessionalGalleryItem,
   ProfessionalPortfolioEntry,
@@ -16,7 +17,7 @@ import type {
   ServiceDeliveryMode,
 } from '@/types/catalog';
 
-export const PROFESSIONAL_PORTAL_SCHEMA_VERSION = 8;
+export const PROFESSIONAL_PORTAL_SCHEMA_VERSION = 9;
 
 export const PROFESSIONAL_PORTAL_API_ENDPOINTS = {
   coverage: '/professionals/me/coverage',
@@ -127,7 +128,7 @@ export interface ProfessionalPortalState {
   acceptingNewClients: boolean;
   activeProfessionalId: string;
   activityStories: ProfessionalManagedActivityStory[];
-  availabilityByMode?: Partial<Record<ServiceDeliveryMode, ProfessionalAvailabilityDay[]>>;
+  availabilityRulesByMode?: Partial<Record<OfflineServiceDeliveryMode, ProfessionalAvailabilityRules>>;
   autoApproveInstantBookings: boolean;
   city: string;
   coverageAreaIds: string[];

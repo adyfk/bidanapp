@@ -16,7 +16,7 @@ Folder ini adalah abstraksi dummy database sebelum migrasi ke PostgreSQL. Semua 
 - Konfigurasi aplikasi seperti branding dan theme tidak disimpan di `mock-db`.
   Wording UI hidup di locale file, sedangkan constant code hanya menyimpan config non-domain yang memang statis.
 - `app_runtime_selections.json`
-  Menyimpan pointer ke seed aktif yang dipakai aplikasi saat boot: consumer aktif, context aktif, home feed aktif, dan media preset aktif.
+  Menyimpan pointer ke seed aktif yang dipakai aplikasi saat boot: consumer aktif, context aktif, home feed aktif, media preset aktif, dan runtime clock mock yang dipakai untuk filter availability.
 - `app_section_configs.json`
   Menyimpan konfigurasi section-level untuk halaman seperti home, misalnya kategori yang ditampilkan atau profesional unggulan.
 
@@ -53,10 +53,12 @@ Folder ini adalah abstraksi dummy database sebelum migrasi ke PostgreSQL. Semua 
   Join table coverage area. Satu profesional bisa melayani beberapa area.
 - `professional_service_offerings.json`
   Join table profesional ke layanan. Di sinilah harga, durasi, mode aktif, default mode, booking flow, dan summary per profesional disimpan.
-- `professional_availability_schedule_days.json`
-  Hari booking global per profesional dan mode offline. Ini menjadi source of truth tunggal untuk jadwal customer-facing.
-- `professional_availability_time_slots.json`
-  Slot waktu per hari booking profesional. Ini adalah kandidat tabel `availability_slots` dengan foreign key ke `availability_days`.
+- `professional_availability_weekly_hours.json`
+  Jam kerja mingguan global per profesional dan mode offline. Ini menjadi source of truth tunggal untuk availability customer-facing.
+- `professional_availability_policies.json`
+  Policy availability global per profesional dan mode offline, misalnya `minimumNoticeHours` untuk menutup booking yang terlalu mepet tanpa menduplikasi aturan per hari.
+- `professional_availability_date_overrides.json`
+  Tanggal khusus untuk libur atau jam custom sementara. Ini adalah kandidat tabel `availability_overrides`.
 
 ### Trust, portfolio, dan social proof profesional
 
@@ -119,8 +121,9 @@ Folder ini adalah abstraksi dummy database sebelum migrasi ke PostgreSQL. Semua 
 
 - `services` 1:N `professional_service_offerings`
 - `professionals` 1:N `professional_service_offerings`
-- `professionals` 1:N `professional_availability_schedule_days`
-- `professional_availability_schedule_days` 1:N `professional_availability_time_slots`
+- `professionals` 1:N `professional_availability_weekly_hours`
+- `professionals` 1:N `professional_availability_policies`
+- `professionals` 1:N `professional_availability_date_overrides`
 - `professionals` 1:N hampir semua tabel trust dan portofolio
 - `areas` 1:N `user_contexts`
 - `areas` N:M `professionals` melalui `professional_coverage_areas`
@@ -132,7 +135,7 @@ Folder ini adalah abstraksi dummy database sebelum migrasi ke PostgreSQL. Semua 
 
 ### 1. Discovery dan home feed
 
-1. Aplikasi membaca `app_runtime_selections.json` untuk memilih consumer dan context aktif.
+1. Aplikasi membaca `app_runtime_selections.json` untuk memilih consumer, context aktif, dan runtime clock mock.
 2. `home_feed_snapshots.json` menentukan komposisi feed yang harus dipakai.
 3. Join table `home_feed_popular_services.json` dan `home_feed_nearby_professionals.json` menyusun isi kartu home.
 4. `app_section_configs.json` menjadi override tambahan untuk urutan kategori atau profesional unggulan.
@@ -150,12 +153,13 @@ Folder ini adalah abstraksi dummy database sebelum migrasi ke PostgreSQL. Semua 
 
 1. Consumer memilih `service`, `professional`, dan `delivery mode`.
 2. CTA dari service detail tidak langsung membuat request. CTA selalu diarahkan ke halaman profesional agar semua booking memakai composer yang sama.
-3. Jika mode offline, sistem membaca `professional_availability_schedule_days` lalu `professional_availability_time_slots`.
-4. Saat order dibuat, sistem menyimpan `serviceSnapshot`, `scheduleSnapshot`, dan `timeline` awal langsung ke `appointments.json`.
-5. Jika offering memakai `bookingFlow = request`, booking masuk state `requested`.
-6. Jika offering memakai `bookingFlow = instant`, booking langsung masuk `approved_waiting_payment` tanpa approval manual, tetapi tetap menunggu pembayaran.
-7. Setelah pembayaran berhasil, booking masuk `paid`, lalu `confirmed`, lalu `in_service`.
-8. Setelah layanan selesai, booking masuk `completed`.
+3. Jika mode offline, sistem membaca `professional_availability_weekly_hours`, `professional_availability_policies`, lalu menerapkan `professional_availability_date_overrides` untuk membentuk opsi booking customer.
+4. `minimumNoticeHours` dari policy akan memfilter slot yang terlalu dekat dengan runtime clock aktif.
+5. Saat order dibuat, sistem menyimpan `serviceSnapshot`, `scheduleSnapshot`, dan `timeline` awal langsung ke `appointments.json`.
+6. Jika offering memakai `bookingFlow = request`, booking masuk state `requested`.
+7. Jika offering memakai `bookingFlow = instant`, booking langsung masuk `approved_waiting_payment` tanpa approval manual, tetapi tetap menunggu pembayaran.
+8. Setelah pembayaran berhasil, booking masuk `paid`, lalu `confirmed`, lalu `in_service`.
+9. Setelah layanan selesai, booking masuk `completed`.
 
 ### 4. Payment dan closure
 
@@ -235,7 +239,9 @@ Folder ini adalah abstraksi dummy database sebelum migrasi ke PostgreSQL. Semua 
   - `appointments.professionalId`
   - `appointments.status`
   - `chat_messages.threadId`
-  - `professional_availability_time_slots.scheduleDayId`
+  - `professional_availability_weekly_hours.professionalId`
+  - `professional_availability_policies.professionalId`
+  - `professional_availability_date_overrides.professionalId`
 - Pertimbangkan unique constraint pada:
   - `(professionalId, serviceId)` di `professional_service_offerings`
   - `(professionalId, areaId)` di `professional_coverage_areas`

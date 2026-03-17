@@ -27,7 +27,7 @@ Referensi onboarding detail tetap ada di `docs/professional-onboarding-flow.md`.
 - Request board profesional bukan tabel transaksi kedua. Ia hanyalah projection dari appointment record.
 - Data layanan saat order harus immutable. Harga, durasi, summary, mode, dan booking flow yang tampil di appointment lama tidak boleh berubah walaupun profesional mengubah offering sesudahnya.
 - CTA dari halaman service tidak boleh langsung membuat request. Semua order harus masuk lewat composer di halaman profesional agar validasi mode, coverage, dan slot selalu sama.
-- `availabilityByMode` di dashboard profesional adalah source of truth slot offline yang boleh dilihat customer. Customer tidak boleh melihat slot di luar konfigurasi aktif profesional.
+- `availabilityRulesByMode` di dashboard profesional adalah source of truth jam kerja offline yang boleh dilihat customer. Customer tidak boleh melihat tanggal atau jam di luar aturan mingguan dan penyesuaian hari khusus yang aktif.
 
 ## Source Of Truth
 
@@ -37,10 +37,12 @@ Referensi onboarding detail tetap ada di `docs/professional-onboarding-flow.md`.
   Master global service.
 - `professional_service_offerings.json`
   Harga, durasi, booking flow, dan mode aktif per profesional.
-- `professional_availability_schedule_days.json`
-  Hari booking global per profesional untuk mode offline.
-- `professional_availability_time_slots.json`
-  Slot booking global per profesional untuk setiap hari offline.
+- `professional_availability_weekly_hours.json`
+  Jam kerja mingguan global per profesional untuk mode offline.
+- `professional_availability_policies.json`
+  Policy availability per profesional dan mode, termasuk `minimumNoticeHours` untuk memfilter booking yang terlalu mepet.
+- `professional_availability_date_overrides.json`
+  Hari khusus untuk libur atau jam custom yang sementara menggantikan jam mingguan.
 
 ### Transaction
 
@@ -89,18 +91,18 @@ Catatan:
 - `requestChannel` sengaja tidak disimpan di transaksi appointment karena sistem bisnis saat ini hanya punya satu entry path customer, yaitu app customer.
 - Jika nanti benar-benar ada order omnichannel seperti admin-assisted atau WhatsApp-assisted, tambahkan field provenance baru seperti `orderSource` hanya saat alur operasionalnya memang berbeda dan perlu diaudit.
 
-### 2a. Professional slot management
+### 2a. Professional availability management
 
-1. Profesional mengatur slot di dashboard profesional, di tab global `Booking Hours`.
-2. Slot hanya relevan untuk mode offline:
+1. Profesional mengatur availability global di dashboard profesional, di tab `Booking Hours`.
+2. Availability hanya relevan untuk mode offline:
    - `home_visit`
    - `onsite`
 3. Profesional dapat mengelola:
-   - hari layanan
-   - jam slot
-   - status slot
-4. Slot ini berlaku ke semua layanan yang memakai mode offline terkait.
-5. Perubahan slot hanya memengaruhi order berikutnya. Appointment yang sudah dibuat tetap menyimpan `scheduleSnapshot` immutable saat order.
+   - hari kerja mingguan
+   - `minimumNoticeHours` seperti `4 jam`, `12 jam`, atau `H-1`
+   - hari khusus untuk libur atau jam custom sementara
+4. Sistem otomatis menghasilkan pilihan tanggal dan jam customer dari aturan ini.
+5. Appointment yang sudah dibuat tetap menyimpan `scheduleSnapshot` immutable saat order, jadi perubahan availability hanya memengaruhi order berikutnya.
 
 ### 3. Appointment creation
 

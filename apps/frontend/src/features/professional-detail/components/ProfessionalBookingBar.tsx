@@ -2,6 +2,7 @@
 
 import { CalendarDays, Clock3 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
+import type { Messages, _Translator as Translator } from 'use-intl/core';
 import { InlineFeedbackNotice } from '@/components/ui/InlineFeedbackNotice';
 import {
   accentPrimaryButtonClass,
@@ -30,7 +31,7 @@ interface ProfessionalBookingBarProps {
   selectedTimeSlot: ProfessionalAvailabilityTimeSlot | null;
 }
 
-type ProfessionalTranslations = ReturnType<typeof useTranslations>;
+type ProfessionalTranslations = Translator<Messages, 'Professional'>;
 
 const getModeLabel = (t: ProfessionalTranslations, mode: ServiceDeliveryMode) => {
   if (mode === 'online') {

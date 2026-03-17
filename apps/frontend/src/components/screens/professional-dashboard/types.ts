@@ -5,7 +5,7 @@ import type {
   ProfessionalManagedService,
   ProfessionalRequestStatus,
 } from '@/lib/use-professional-portal';
-import type { ProfessionalAvailabilityDay, ServiceDeliveryMode } from '@/types/catalog';
+import type { OfflineServiceDeliveryMode, ProfessionalAvailabilityRules, ServiceDeliveryMode } from '@/types/catalog';
 
 export type RequestFilter = ProfessionalRequestStatus;
 
@@ -20,7 +20,7 @@ export interface ServiceDraft {
 }
 
 export interface AvailabilityDraft {
-  availabilityByMode?: Partial<Record<ServiceDeliveryMode, ProfessionalAvailabilityDay[]>>;
+  availabilityRulesByMode?: Partial<Record<OfflineServiceDeliveryMode, ProfessionalAvailabilityRules>>;
 }
 
 export interface PortfolioDraft {

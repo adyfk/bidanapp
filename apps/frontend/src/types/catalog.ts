@@ -1,7 +1,16 @@
 export type ServiceDeliveryMode = 'online' | 'home_visit' | 'onsite';
+export type OfflineServiceDeliveryMode = Exclude<ServiceDeliveryMode, 'online'>;
 export type BookingFlow = 'instant' | 'request';
 export type TimeSlotStatus = 'available' | 'limited' | 'booked';
 export type ProfessionalGender = 'female' | 'male';
+export type ProfessionalAvailabilityWeekday =
+  | 'monday'
+  | 'tuesday'
+  | 'wednesday'
+  | 'thursday'
+  | 'friday'
+  | 'saturday'
+  | 'sunday';
 
 export interface GeoPoint {
   latitude: number;
@@ -94,6 +103,33 @@ export interface ProfessionalAvailabilityDay {
   label: string;
   dateIso: string;
   slots: ProfessionalAvailabilityTimeSlot[];
+}
+
+export interface ProfessionalWeeklyAvailabilityWindow {
+  endTime: string;
+  id: string;
+  index: number;
+  isEnabled: boolean;
+  slotIntervalMinutes: number;
+  startTime: string;
+  weekday: ProfessionalAvailabilityWeekday;
+}
+
+export interface ProfessionalAvailabilityDateOverride {
+  dateIso: string;
+  endTime?: string;
+  id: string;
+  index: number;
+  isClosed: boolean;
+  note?: string;
+  slotIntervalMinutes?: number;
+  startTime?: string;
+}
+
+export interface ProfessionalAvailabilityRules {
+  dateOverrides: ProfessionalAvailabilityDateOverride[];
+  minimumNoticeHours: number;
+  weeklyHours: ProfessionalWeeklyAvailabilityWindow[];
 }
 
 export interface ProfessionalCredential {
@@ -218,6 +254,6 @@ export interface Professional {
   feedbackMetrics: ProfessionalFeedbackMetric[];
   feedbackBreakdown: ProfessionalFeedbackBreakdown[];
   recentActivities: ProfessionalRecentActivity[];
-  availabilityByMode?: Partial<Record<ServiceDeliveryMode, ProfessionalAvailabilityDay[]>>;
+  availabilityRulesByMode?: Partial<Record<OfflineServiceDeliveryMode, ProfessionalAvailabilityRules>>;
   services: ProfessionalService[];
 }

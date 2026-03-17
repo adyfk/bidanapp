@@ -52,7 +52,7 @@ Section yang dipakai dari fitur existing:
 - `Profile`: identitas, credential, bio, pengalaman
 - `Coverage`: area, alamat praktik, target respons
 - `Services`: minimal 1 layanan aktif + 1 layanan unggulan
-- `Booking Hours`: minimal 1 hari dan slot bila mode offline aktif
+- `Booking Hours`: minimal 1 hari kerja mingguan bila mode offline aktif, plus atur batas booking terakhir sesuai operasional
 - `Portfolio`: minimal 1 portofolio publik
 
 Catatan:
@@ -181,7 +181,7 @@ Blocking untuk submit:
 - jika home visit aktif: radius home visit
 - minimal 1 layanan aktif yang sudah terisi
 - minimal 1 mode layanan aktif dari konfigurasi layanan
-- jika layanan offline aktif: minimal 1 hari dan slot bookable pada mode yang dibuka
+- jika layanan offline aktif: minimal 1 hari kerja mingguan pada mode yang dibuka
 - 1 layanan unggulan
 - minimal 1 portofolio publik
 
@@ -192,8 +192,8 @@ Recommended, tetapi tidak memblok submit:
 Catatan domain:
 
 - `Coverage` hanya menyimpan jangkauan, titik pusat, alamat praktik, dan switch operasional.
-- mode layanan aktif tetap melekat di layanan, sedangkan slot waktu offline dikelola global di `availabilityByMode` agar mock-data tidak redundan.
-- source of truth untuk waktu booking ada di `availabilityByMode`, bukan di tiap service configuration.
+- mode layanan aktif tetap melekat di layanan, sedangkan jam kerja offline dikelola global di `availabilityRulesByMode` agar mock-data tidak redundan.
+- source of truth untuk waktu booking ada di `availabilityRulesByMode`, termasuk `minimumNoticeHours`, bukan di tiap service configuration.
 
 ## Strategi Mock Yang Tidak Redundan
 

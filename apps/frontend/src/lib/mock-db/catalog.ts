@@ -1,7 +1,8 @@
 import areasData from '@/data/mock-db/areas.json';
 import professionalActivityStoriesData from '@/data/mock-db/professional_activity_stories.json';
-import professionalAvailabilityScheduleDaysData from '@/data/mock-db/professional_availability_schedule_days.json';
-import professionalAvailabilityTimeSlotsData from '@/data/mock-db/professional_availability_time_slots.json';
+import professionalAvailabilityDateOverridesData from '@/data/mock-db/professional_availability_date_overrides.json';
+import professionalAvailabilityPoliciesData from '@/data/mock-db/professional_availability_policies.json';
+import professionalAvailabilityWeeklyHoursData from '@/data/mock-db/professional_availability_weekly_hours.json';
 import professionalCoverageAreasData from '@/data/mock-db/professional_coverage_areas.json';
 import professionalCoveragePoliciesData from '@/data/mock-db/professional_coverage_policies.json';
 import professionalCredentialsData from '@/data/mock-db/professional_credentials.json';
@@ -18,23 +19,36 @@ import professionalTestimonialsData from '@/data/mock-db/professional_testimonia
 import professionalsData from '@/data/mock-db/professionals.json';
 import serviceCategoriesData from '@/data/mock-db/service_categories.json';
 import servicesData from '@/data/mock-db/services.json';
+import {
+  DEFAULT_BOOKING_WINDOW_DAYS,
+  DEFAULT_BOOKING_WINDOW_START_ISO,
+  generateAvailabilityScheduleDays,
+  normalizeAvailabilityRulesByMode,
+  OFFLINE_SERVICE_MODES,
+} from '@/lib/availability-rules';
+import { ACTIVE_RUNTIME_CLOCK_ISO } from '@/lib/mock-db/runtime-selection';
+import type { AppointmentStatus } from '@/types/appointments';
 import type {
   Area,
   Category,
   GeoPoint,
   GlobalService,
+  OfflineServiceDeliveryMode,
   Professional,
-  ProfessionalAvailabilityDay,
-  ProfessionalAvailabilityTimeSlot,
+  ProfessionalAvailabilityDateOverride,
+  ProfessionalAvailabilityRules,
+  ProfessionalAvailabilityWeekday,
   ProfessionalService,
+  ProfessionalWeeklyAvailabilityWindow,
   ServiceDeliveryMode,
   ServiceModeFlags,
   TimeSlotStatus,
 } from '@/types/catalog';
 import type {
   ProfessionalActivityStoryRow,
-  ProfessionalAvailabilityDayRow,
-  ProfessionalAvailabilityTimeSlotRow,
+  ProfessionalAvailabilityDateOverrideRow,
+  ProfessionalAvailabilityPolicyRow,
+  ProfessionalAvailabilityWeeklyHoursRow,
   ProfessionalCoverageAreaRow,
   ProfessionalCoveragePolicyRow,
   ProfessionalCredentialRow,
@@ -92,11 +106,14 @@ const professionalFeedbackMetrics = sortByIndex(professionalFeedbackMetricsData 
 const professionalFeedbackBreakdowns = sortByIndex(
   professionalFeedbackBreakdownsData as ProfessionalFeedbackBreakdownRow[],
 );
-const professionalAvailabilityScheduleDays = sortByIndex(
-  professionalAvailabilityScheduleDaysData as ProfessionalAvailabilityDayRow[],
+const professionalAvailabilityWeeklyHours = sortByIndex(
+  professionalAvailabilityWeeklyHoursData as ProfessionalAvailabilityWeeklyHoursRow[],
 );
-const professionalAvailabilityTimeSlots = sortByIndex(
-  professionalAvailabilityTimeSlotsData as ProfessionalAvailabilityTimeSlotRow[],
+const professionalAvailabilityPolicies = sortByIndex(
+  professionalAvailabilityPoliciesData as ProfessionalAvailabilityPolicyRow[],
+);
+const professionalAvailabilityDateOverrides = sortByIndex(
+  professionalAvailabilityDateOverridesData as ProfessionalAvailabilityDateOverrideRow[],
 );
 const professionalServiceOfferings = sortByIndex(professionalServiceOfferingsData as ProfessionalServiceOfferingRow[]);
 
@@ -113,9 +130,16 @@ const testimonialRowsByProfessionalId = groupBy(professionalTestimonials, (row) 
 const feedbackSummaryByProfessionalId = new Map(professionalFeedbackSummaries.map((row) => [row.professionalId, row]));
 const feedbackMetricRowsByProfessionalId = groupBy(professionalFeedbackMetrics, (row) => row.professionalId);
 const feedbackBreakdownRowsByProfessionalId = groupBy(professionalFeedbackBreakdowns, (row) => row.professionalId);
-const availabilityDayRowsByProfessionalId = groupBy(professionalAvailabilityScheduleDays, (row) => row.professionalId);
+const availabilityWeeklyHourRowsByProfessionalId = groupBy(
+  professionalAvailabilityWeeklyHours,
+  (row) => row.professionalId,
+);
+const availabilityPolicyRowsByProfessionalId = groupBy(professionalAvailabilityPolicies, (row) => row.professionalId);
+const availabilityDateOverrideRowsByProfessionalId = groupBy(
+  professionalAvailabilityDateOverrides,
+  (row) => row.professionalId,
+);
 const serviceOfferingRowsByProfessionalId = groupBy(professionalServiceOfferings, (row) => row.professionalId);
-const availabilityTimeSlotRowsByScheduleDayId = groupBy(professionalAvailabilityTimeSlots, (row) => row.scheduleDayId);
 const appointmentRecentActivitiesByProfessionalId = groupBy(
   APPOINTMENT_ROWS.flatMap((appointmentRow) =>
     appointmentRow.recentActivity
@@ -147,7 +171,8 @@ const appointmentTestimonialsByProfessionalId = groupBy(
 );
 
 export const SERVICE_DELIVERY_MODE_ORDER: ServiceDeliveryMode[] = ['online', 'home_visit', 'onsite'];
-export const isOfflineServiceMode = (mode: ServiceDeliveryMode) => mode !== 'online';
+export const isOfflineServiceMode = (mode: ServiceDeliveryMode): mode is OfflineServiceDeliveryMode =>
+  mode !== 'online';
 
 const isDefined = <T>(value: T | undefined): value is T => value !== undefined;
 
@@ -157,41 +182,106 @@ const buildServiceModes = (offering: ProfessionalServiceOfferingRow): ServiceMod
   onsite: offering.supportsOnsite,
 });
 
-const hydrateAvailabilityTimeSlot = (
-  timeSlotRow: ProfessionalAvailabilityTimeSlotRow,
-): ProfessionalAvailabilityTimeSlot => ({
-  index: timeSlotRow.index,
-  id: timeSlotRow.id,
-  label: timeSlotRow.label,
-  note: timeSlotRow.note || undefined,
-  status: timeSlotRow.status as TimeSlotStatus,
+const hydrateWeeklyAvailabilityWindow = (
+  weeklyHoursRow: ProfessionalAvailabilityWeeklyHoursRow,
+): ProfessionalWeeklyAvailabilityWindow => ({
+  endTime: weeklyHoursRow.endTime,
+  id: weeklyHoursRow.id,
+  index: weeklyHoursRow.index,
+  isEnabled: true,
+  slotIntervalMinutes: weeklyHoursRow.slotIntervalMinutes,
+  startTime: weeklyHoursRow.startTime,
+  weekday: weeklyHoursRow.weekday as ProfessionalAvailabilityWeekday,
 });
 
-const hydrateAvailabilityDay = (scheduleDayRow: ProfessionalAvailabilityDayRow): ProfessionalAvailabilityDay => ({
-  index: scheduleDayRow.index,
-  id: scheduleDayRow.id,
-  label: scheduleDayRow.label,
-  dateIso: scheduleDayRow.dateIso,
-  slots: sortByIndex(availabilityTimeSlotRowsByScheduleDayId.get(scheduleDayRow.id) || []).map(
-    hydrateAvailabilityTimeSlot,
-  ),
+const hydrateAvailabilityDateOverride = (
+  dateOverrideRow: ProfessionalAvailabilityDateOverrideRow,
+): ProfessionalAvailabilityDateOverride => ({
+  dateIso: dateOverrideRow.dateIso,
+  endTime: dateOverrideRow.endTime || undefined,
+  id: dateOverrideRow.id,
+  index: dateOverrideRow.index,
+  isClosed: dateOverrideRow.isClosed,
+  note: dateOverrideRow.note || undefined,
+  slotIntervalMinutes: dateOverrideRow.slotIntervalMinutes || undefined,
+  startTime: dateOverrideRow.startTime || undefined,
 });
 
-const hydrateProfessionalAvailabilityByMode = (
+const hydrateProfessionalAvailabilityRulesByMode = (
   professionalId: string,
-): Partial<Record<ServiceDeliveryMode, ProfessionalAvailabilityDay[]>> | undefined => {
-  const availabilityRows = sortByIndex(availabilityDayRowsByProfessionalId.get(professionalId) || []);
-  const availabilityByMode: Partial<Record<ServiceDeliveryMode, ProfessionalAvailabilityDay[]>> = {};
+): Partial<Record<OfflineServiceDeliveryMode, ProfessionalAvailabilityRules>> | undefined => {
+  const weeklyHoursRows = sortByIndex(availabilityWeeklyHourRowsByProfessionalId.get(professionalId) || []);
+  const availabilityPolicyRows = sortByIndex(availabilityPolicyRowsByProfessionalId.get(professionalId) || []);
+  const dateOverrideRows = sortByIndex(availabilityDateOverrideRowsByProfessionalId.get(professionalId) || []);
+  const availabilityRulesByMode: Partial<Record<OfflineServiceDeliveryMode, ProfessionalAvailabilityRules>> = {};
 
-  for (const mode of ['home_visit', 'onsite'] as const) {
-    const modeRows = availabilityRows.filter((row) => row.mode === mode);
+  for (const mode of OFFLINE_SERVICE_MODES) {
+    const availabilityPolicy = availabilityPolicyRows.find((row) => row.mode === mode);
+    const normalizedRuleSet = normalizeAvailabilityRulesByMode(
+      {
+        [mode]: {
+          dateOverrides: dateOverrideRows.filter((row) => row.mode === mode).map(hydrateAvailabilityDateOverride),
+          minimumNoticeHours: availabilityPolicy?.minimumNoticeHours,
+          weeklyHours: weeklyHoursRows.filter((row) => row.mode === mode).map(hydrateWeeklyAvailabilityWindow),
+        },
+      },
+      undefined,
+    )?.[mode];
 
-    if (modeRows.length > 0) {
-      availabilityByMode[mode] = modeRows.map(hydrateAvailabilityDay);
+    if (normalizedRuleSet) {
+      availabilityRulesByMode[mode] = normalizedRuleSet;
     }
   }
 
-  return Object.keys(availabilityByMode).length > 0 ? availabilityByMode : undefined;
+  return Object.keys(availabilityRulesByMode).length > 0 ? availabilityRulesByMode : undefined;
+};
+
+const activeSlotBlockingStatuses: AppointmentStatus[] = ['confirmed', 'in_service'];
+const tentativeSlotBlockingStatuses: AppointmentStatus[] = ['requested', 'approved_waiting_payment', 'paid'];
+
+const extractScheduleTimeLabel = (scheduledTimeLabel: string) => scheduledTimeLabel.match(/(\d{2}:\d{2})/)?.[1];
+
+const appointmentSlotOccupancyByKey = groupBy(
+  APPOINTMENT_ROWS.flatMap((appointmentRow) => {
+    if (!isOfflineServiceMode(appointmentRow.requestedMode)) {
+      return [];
+    }
+
+    const dateIso = appointmentRow.scheduleSnapshot.dateIso;
+    const timeLabel =
+      appointmentRow.scheduleSnapshot.timeSlotLabel || extractScheduleTimeLabel(appointmentRow.scheduledTimeLabel);
+
+    if (!dateIso || !timeLabel) {
+      return [];
+    }
+
+    return [
+      {
+        key: `${appointmentRow.professionalId}:${appointmentRow.requestedMode}:${dateIso}:${timeLabel}`,
+        status: appointmentRow.status,
+      },
+    ];
+  }),
+  (entry) => entry.key,
+);
+
+const getGeneratedSlotStatus = (
+  professionalId: string,
+  mode: OfflineServiceDeliveryMode,
+  dateIso: string,
+  timeLabel: string,
+): TimeSlotStatus => {
+  const occupancyEntries = appointmentSlotOccupancyByKey.get(`${professionalId}:${mode}:${dateIso}:${timeLabel}`) || [];
+
+  if (occupancyEntries.some((entry) => activeSlotBlockingStatuses.includes(entry.status))) {
+    return 'booked';
+  }
+
+  if (occupancyEntries.some((entry) => tentativeSlotBlockingStatuses.includes(entry.status))) {
+    return 'limited';
+  }
+
+  return 'available';
 };
 
 const hydrateProfessionalService = (offering: ProfessionalServiceOfferingRow): ProfessionalService => {
@@ -345,7 +435,7 @@ export const MOCK_PROFESSIONALS: Professional[] = professionals.map((professiona
         summary: row.summary,
       }),
     ),
-    availabilityByMode: hydrateProfessionalAvailabilityByMode(professionalRow.id),
+    availabilityRulesByMode: hydrateProfessionalAvailabilityRulesByMode(professionalRow.id),
     services: sortByIndex(serviceOfferingRowsByProfessionalId.get(professionalRow.id) || []).map(
       hydrateProfessionalService,
     ),
@@ -496,12 +586,23 @@ export const getAccessibleServiceModes = (
   });
 
 export const getProfessionalAvailabilityScheduleDays = (
-  professional: Pick<Professional, 'availabilityByMode'>,
+  professional: Pick<Professional, 'availabilityRulesByMode' | 'id'>,
   mode: ServiceDeliveryMode,
-): ProfessionalAvailabilityDay[] => {
-  if (mode === 'online') {
+  days = DEFAULT_BOOKING_WINDOW_DAYS,
+  startDateIso = DEFAULT_BOOKING_WINDOW_START_ISO,
+  referenceDateTimeIso = ACTIVE_RUNTIME_CLOCK_ISO,
+) => {
+  if (!isOfflineServiceMode(mode)) {
     return [];
   }
 
-  return sortByIndex(professional.availabilityByMode?.[mode] || []);
+  return generateAvailabilityScheduleDays({
+    days,
+    getSlotStatus: (dateIso, timeLabel) => getGeneratedSlotStatus(professional.id, mode, dateIso, timeLabel),
+    mode,
+    professionalId: professional.id,
+    referenceDateTimeIso,
+    ruleSet: professional.availabilityRulesByMode?.[mode],
+    startDateIso,
+  });
 };

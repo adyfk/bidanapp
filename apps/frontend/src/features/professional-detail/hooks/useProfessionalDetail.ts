@@ -15,7 +15,22 @@ import { useUiText } from '@/lib/ui-text';
 import { useProfessionalPortal } from '@/lib/use-professional-portal';
 import { useProfessionalUserPreferences } from '@/lib/use-professional-user-preferences';
 import { useViewerSession } from '@/lib/use-viewer-session';
-import type { Professional, ServiceDeliveryMode } from '@/types/catalog';
+import type { Professional, ProfessionalAvailabilityDay, ServiceDeliveryMode } from '@/types/catalog';
+
+const getDetailLocale = () => {
+  if (typeof document !== 'undefined' && document.documentElement.lang.toLowerCase().startsWith('id')) {
+    return 'id-ID';
+  }
+
+  return 'en-US';
+};
+
+const formatScheduleSelectionLabel = (dateIso: string, timeLabel: string) =>
+  `${new Intl.DateTimeFormat(getDetailLocale(), {
+    day: 'numeric',
+    month: 'short',
+    weekday: 'short',
+  }).format(new Date(`${dateIso}T00:00:00`))}, ${timeLabel}`;
 
 export interface ProfessionalTrustIndicator {
   icon: React.ReactNode;
@@ -88,6 +103,12 @@ export const useProfessionalDetail = (professionalSlug: string | undefined) => {
   const coverageStatus = professional
     ? getProfessionalCoverageStatus(professional, userLocation, selectedAreaId)
     : null;
+  const scheduleDaysByMode: Partial<Record<ServiceDeliveryMode, ProfessionalAvailabilityDay[]>> = professional
+    ? {
+        home_visit: getProfessionalAvailabilityScheduleDays(professional, 'home_visit'),
+        onsite: getProfessionalAvailabilityScheduleDays(professional, 'onsite'),
+      }
+    : {};
   const selectedAccessibleModes =
     selectedServiceEntry && professional && coverageStatus
       ? getAccessibleServiceModes(
@@ -97,7 +118,7 @@ export const useProfessionalDetail = (professionalSlug: string | undefined) => {
         ).filter(
           (mode) =>
             !isOfflineServiceMode(mode) ||
-            getProfessionalAvailabilityScheduleDays(professional, mode).some((scheduleDay) =>
+            (scheduleDaysByMode[mode] || []).some((scheduleDay) =>
               scheduleDay.slots.some((slot) => slot.status !== 'booked'),
             ),
         )
@@ -131,7 +152,7 @@ export const useProfessionalDetail = (professionalSlug: string | undefined) => {
 
   const selectedScheduleDays =
     selectedServiceEntry && professional && selectedBookingMode && isOfflineServiceMode(selectedBookingMode)
-      ? getProfessionalAvailabilityScheduleDays(professional, selectedBookingMode)
+      ? scheduleDaysByMode[selectedBookingMode] || []
       : [];
   const selectedScheduleDay =
     selectedScheduleDays.find((scheduleDay) => scheduleDay.id === selectedScheduleDayId) || null;
@@ -198,7 +219,7 @@ export const useProfessionalDetail = (professionalSlug: string | undefined) => {
         : '';
     const scheduledTimeLabel =
       requiresOfflineScheduleSelection && selectedScheduleDay && selectedTimeSlot
-        ? `${selectedScheduleDay.label}, ${selectedTimeSlot.label}`
+        ? formatScheduleSelectionLabel(selectedScheduleDay.dateIso, selectedTimeSlot.label)
         : undefined;
     const nextNotice = uiText.getServiceBookingNotice(
       selectedBookingMode,
@@ -240,6 +261,7 @@ export const useProfessionalDetail = (professionalSlug: string | undefined) => {
     profCategory,
     requestBooking,
     requiresOfflineScheduleSelection,
+    scheduleDaysByMode,
     selectedAccessibleModes,
     selectedBookingMode,
     selectedScheduleDay,

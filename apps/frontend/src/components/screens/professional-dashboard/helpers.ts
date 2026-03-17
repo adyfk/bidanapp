@@ -1,4 +1,11 @@
 import { PROFESSIONAL_REQUEST_STATUS_ORDER } from '@/features/professional-portal/lib/request-status';
+import {
+  cloneAvailabilityRulesByMode,
+  countDateOverrides,
+  countEnabledWeeklyHours,
+  formatMinimumNoticeLabel,
+  OFFLINE_SERVICE_MODES,
+} from '@/lib/availability-rules';
 import type {
   ProfessionalManagedActivityStory,
   ProfessionalManagedCredential,
@@ -7,7 +14,7 @@ import type {
   ProfessionalManagedService,
   ProfessionalPortalState,
 } from '@/lib/use-professional-portal';
-import type { ProfessionalAvailabilityDay, ServiceDeliveryMode } from '@/types/catalog';
+import type { OfflineServiceDeliveryMode, ServiceDeliveryMode } from '@/types/catalog';
 import type {
   ActivityStoryDraft,
   AvailabilityDraft,
@@ -20,7 +27,7 @@ import type {
 
 export const requestStatuses = PROFESSIONAL_REQUEST_STATUS_ORDER;
 export const deliveryModes: ServiceDeliveryMode[] = ['online', 'home_visit', 'onsite'];
-export const offlineDeliveryModes: ServiceDeliveryMode[] = ['home_visit', 'onsite'];
+export const offlineDeliveryModes: OfflineServiceDeliveryMode[] = OFFLINE_SERVICE_MODES;
 
 export const isServiceModeEnabled = (
   serviceModes: ProfessionalManagedService['serviceModes'],
@@ -37,50 +44,6 @@ export const isServiceModeEnabled = (
   return serviceModes.onsite;
 };
 
-export const cloneAvailabilityDays = (scheduleDays?: ProfessionalAvailabilityDay[]) =>
-  (scheduleDays || []).map((scheduleDay) => ({
-    ...scheduleDay,
-    slots: scheduleDay.slots.map((slot) => ({ ...slot })),
-  }));
-
-export const cloneAvailabilityByMode = (
-  availabilityByMode?: Partial<Record<ServiceDeliveryMode, ProfessionalAvailabilityDay[]>>,
-) => {
-  const nextAvailabilityByMode: Partial<Record<ServiceDeliveryMode, ProfessionalAvailabilityDay[]>> = {};
-
-  for (const mode of deliveryModes) {
-    const scheduleDays = availabilityByMode?.[mode];
-
-    if (scheduleDays && scheduleDays.length > 0) {
-      nextAvailabilityByMode[mode] = cloneAvailabilityDays(scheduleDays);
-    }
-  }
-
-  return nextAvailabilityByMode;
-};
-
-export const normalizeAvailabilityDays = (scheduleDays: ProfessionalAvailabilityDay[]) =>
-  scheduleDays.map((scheduleDay, scheduleDayIndex) => ({
-    ...scheduleDay,
-    index: scheduleDayIndex + 1,
-    slots: scheduleDay.slots.map((slot, slotIndex) => ({
-      ...slot,
-      index: slotIndex + 1,
-    })),
-  }));
-
-export const countScheduleSlots = (scheduleDays?: ProfessionalAvailabilityDay[]) =>
-  (scheduleDays || []).reduce((totalSlots, scheduleDay) => totalSlots + scheduleDay.slots.length, 0);
-
-export const countBookableScheduleDays = (scheduleDays?: ProfessionalAvailabilityDay[]) =>
-  (scheduleDays || []).filter((scheduleDay) => scheduleDay.slots.length > 0).length;
-
-export const countBookableScheduleSlots = (scheduleDays?: ProfessionalAvailabilityDay[]) =>
-  (scheduleDays || []).reduce(
-    (totalSlots, scheduleDay) => totalSlots + (scheduleDay.slots.length > 0 ? scheduleDay.slots.length : 0),
-    0,
-  );
-
 export const getManagedServiceModes = (
   serviceConfigurations: Pick<ProfessionalManagedService, 'isActive' | 'serviceModes'>[],
 ) =>
@@ -90,22 +53,32 @@ export const getManagedServiceModes = (
 
 export const buildManagedServicesAvailabilitySummary = (
   serviceConfigurations: Pick<ProfessionalManagedService, 'bookingFlow' | 'isActive' | 'serviceModes'>[],
-  availabilityByMode?: Partial<Record<ServiceDeliveryMode, ProfessionalAvailabilityDay[]>>,
+  availabilityRulesByMode?: AvailabilityDraft['availabilityRulesByMode'],
 ) => {
   const activeServices = serviceConfigurations.filter((service) => service.isActive);
   const activeModes = getManagedServiceModes(activeServices);
+  const minimumNoticeValues = offlineDeliveryModes
+    .map((mode) => availabilityRulesByMode?.[mode]?.minimumNoticeHours)
+    .filter((value): value is number => typeof value === 'number');
+  const minimumNoticeLabel =
+    minimumNoticeValues.length === 0
+      ? null
+      : minimumNoticeValues.every((value) => value === minimumNoticeValues[0])
+        ? formatMinimumNoticeLabel(minimumNoticeValues[0])
+        : `${formatMinimumNoticeLabel(Math.min(...minimumNoticeValues))} - ${formatMinimumNoticeLabel(Math.max(...minimumNoticeValues))}`;
 
   return {
     activeModes,
     activeServiceCount: activeServices.length,
     instantServiceCount: activeServices.filter((service) => service.bookingFlow === 'instant').length,
+    minimumNoticeLabel,
     requestServiceCount: activeServices.filter((service) => service.bookingFlow === 'request').length,
     totalBookableDayCount: offlineDeliveryModes.reduce(
-      (totalDays, mode) => totalDays + countBookableScheduleDays(availabilityByMode?.[mode]),
+      (totalDays, mode) => totalDays + countEnabledWeeklyHours(availabilityRulesByMode?.[mode]),
       0,
     ),
     totalBookableSlotCount: offlineDeliveryModes.reduce(
-      (totalSlots, mode) => totalSlots + countBookableScheduleSlots(availabilityByMode?.[mode]),
+      (totalSlots, mode) => totalSlots + countDateOverrides(availabilityRulesByMode?.[mode]),
       0,
     ),
   };
@@ -122,7 +95,7 @@ export const toServiceDraft = (service: ProfessionalManagedService): ServiceDraf
 });
 
 export const toAvailabilityDraft = (portalState: ProfessionalPortalState): AvailabilityDraft => ({
-  availabilityByMode: cloneAvailabilityByMode(portalState.availabilityByMode),
+  availabilityRulesByMode: cloneAvailabilityRulesByMode(portalState.availabilityRulesByMode),
 });
 
 export const toPortfolioDraft = (entry: ProfessionalManagedPortfolioEntry): PortfolioDraft => ({

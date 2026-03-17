@@ -1,4 +1,5 @@
-import type { ServiceDeliveryMode } from '@/types/catalog';
+import { OFFLINE_SERVICE_MODES } from '@/lib/availability-rules';
+import type { OfflineServiceDeliveryMode, ServiceDeliveryMode } from '@/types/catalog';
 import type {
   ProfessionalLifecycleReviewState,
   ProfessionalLifecycleStatus,
@@ -74,7 +75,7 @@ const hasConfiguredActiveService = (serviceConfigurations: ProfessionalManagedSe
 const hasFeaturedActiveService = (serviceConfigurations: ProfessionalManagedService[]) =>
   serviceConfigurations.some((service) => service.isActive && service.featured);
 
-const offlineDeliveryModes: ServiceDeliveryMode[] = ['home_visit', 'onsite'];
+const offlineDeliveryModes: ServiceDeliveryMode[] = OFFLINE_SERVICE_MODES;
 
 const isManagedServiceModeEnabled = (service: ProfessionalManagedService, mode: ServiceDeliveryMode) => {
   if (mode === 'online') {
@@ -96,12 +97,15 @@ const getActiveServiceModes = (serviceConfigurations: ProfessionalManagedService
 const hasOfflineAvailabilityConfigured = (
   portalState: ProfessionalPortalState,
   activeServiceModes: ServiceDeliveryMode[],
-) =>
-  offlineDeliveryModes
-    .filter((mode) => activeServiceModes.includes(mode))
-    .every((mode) =>
-      (portalState.availabilityByMode?.[mode] || []).some((scheduleDay) => scheduleDay.slots.length > 0),
-    );
+) => {
+  const activeOfflineModes = offlineDeliveryModes.filter((mode): mode is OfflineServiceDeliveryMode =>
+    activeServiceModes.includes(mode),
+  );
+
+  return activeOfflineModes.every((mode) =>
+    (portalState.availabilityRulesByMode?.[mode]?.weeklyHours || []).some((window) => window.isEnabled),
+  );
+};
 
 const buildTasks = (portalState: ProfessionalPortalState): ProfessionalOnboardingTask[] => {
   const activeServiceModes = getActiveServiceModes(portalState.serviceConfigurations);
@@ -327,7 +331,7 @@ export const createProfessionalOnboardingDraft = (
   credentials: [],
   galleryItems: [],
   homeVisitRadiusKm: 0,
-  availabilityByMode: undefined,
+  availabilityRulesByMode: undefined,
   portfolioEntries: [],
   practiceAddress: '',
   practiceLabel: '',

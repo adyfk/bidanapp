@@ -32,10 +32,12 @@ import {
   getProfessionalPortalRepository,
 } from '@/features/professional-portal/lib/repository';
 import { validateProfessionalRequestStatusUpdate } from '@/features/professional-portal/lib/request-status';
+import { normalizeAvailabilityRulesByMode } from '@/lib/availability-rules';
 import { getAppointmentRowsByProfessionalId } from '@/lib/mock-db/appointment-records';
 import { appointmentPriceLabelToNumber, createHydratedAppointment } from '@/lib/mock-db/appointments';
 import {
   getAreaById,
+  getProfessionalAvailabilityScheduleDays,
   getProfessionalById,
   getProfessionalCategoryLabel,
   MOCK_CATEGORIES,
@@ -56,8 +58,7 @@ import type {
   BookingFlow,
   GeoPoint,
   Professional,
-  ProfessionalAvailabilityDay,
-  ProfessionalAvailabilityTimeSlot,
+  ProfessionalAvailabilityRules,
   ProfessionalGalleryItem,
   ProfessionalService,
   ServiceDeliveryMode,
@@ -417,93 +418,10 @@ const sanitizeServiceModes = (value: unknown, fallback: ServiceModeFlags): Servi
   };
 };
 
-const sanitizeAvailabilityTimeSlot = (
-  value: Partial<ProfessionalAvailabilityTimeSlot> | null | undefined,
-  fallback: ProfessionalAvailabilityTimeSlot,
-): ProfessionalAvailabilityTimeSlot => ({
-  id: value?.id?.trim() || fallback.id,
-  index: typeof value?.index === 'number' ? value.index : fallback.index,
-  label: value?.label?.trim() || fallback.label,
-  note: value?.note?.trim() || fallback.note,
-  status:
-    value?.status === 'available' || value?.status === 'limited' || value?.status === 'booked'
-      ? value.status
-      : fallback.status,
-});
-
-const sanitizeAvailabilityDay = (
-  value: Partial<ProfessionalAvailabilityDay> | null | undefined,
-  fallback: ProfessionalAvailabilityDay,
-): ProfessionalAvailabilityDay => ({
-  dateIso: value?.dateIso?.trim() || fallback.dateIso,
-  id: value?.id?.trim() || fallback.id,
-  index: typeof value?.index === 'number' ? value.index : fallback.index,
-  label: value?.label?.trim() || fallback.label,
-  slots: Array.isArray(value?.slots)
-    ? value.slots.map((slot, index) =>
-        sanitizeAvailabilityTimeSlot(
-          slot,
-          fallback.slots[index] || {
-            id: `${value?.id || fallback.id}-slot-${index + 1}`,
-            index: index + 1,
-            label: '08:00',
-            status: 'available',
-          },
-        ),
-      )
-    : fallback.slots,
-});
-
-const normalizeAvailabilityDays = (scheduleDays: ProfessionalAvailabilityDay[]) =>
-  scheduleDays.map((scheduleDay, scheduleDayIndex) => ({
-    ...scheduleDay,
-    index: scheduleDayIndex + 1,
-    slots: scheduleDay.slots.map((slot, slotIndex) => ({
-      ...slot,
-      index: slotIndex + 1,
-    })),
-  }));
-
-const sanitizeAvailabilityByMode = (
+const sanitizeAvailabilityRulesByMode = (
   value: unknown,
-  fallback: Partial<Record<ServiceDeliveryMode, ProfessionalAvailabilityDay[]>> | undefined,
-) => {
-  const nextAvailabilityByMode: Partial<Record<ServiceDeliveryMode, ProfessionalAvailabilityDay[]>> = {};
-
-  for (const mode of ['home_visit', 'onsite'] as const) {
-    const fallbackDays = fallback?.[mode] || [];
-    const rawDays =
-      value && typeof value === 'object' && mode in value
-        ? (value as Partial<Record<ServiceDeliveryMode, unknown>>)[mode]
-        : undefined;
-
-    if (!Array.isArray(rawDays)) {
-      if (fallbackDays.length > 0) {
-        nextAvailabilityByMode[mode] = normalizeAvailabilityDays(fallbackDays);
-      }
-      continue;
-    }
-
-    const sanitizedDays = rawDays.map((day, index) =>
-      sanitizeAvailabilityDay(
-        typeof day === 'object' && day ? (day as Partial<ProfessionalAvailabilityDay>) : undefined,
-        fallbackDays[index] || {
-          dateIso: '',
-          id: `${mode}-day-${index + 1}`,
-          index: index + 1,
-          label: '',
-          slots: [],
-        },
-      ),
-    );
-
-    if (sanitizedDays.length > 0) {
-      nextAvailabilityByMode[mode] = normalizeAvailabilityDays(sanitizedDays);
-    }
-  }
-
-  return Object.keys(nextAvailabilityByMode).length > 0 ? nextAvailabilityByMode : undefined;
-};
+  fallback?: Partial<Record<'home_visit' | 'onsite', ProfessionalAvailabilityRules>>,
+) => normalizeAvailabilityRulesByMode(value, fallback);
 
 const serviceDefaultsByServiceId = new Map<string, ProfessionalService>();
 
@@ -817,7 +735,10 @@ const buildDefaultPortalState = (professionalId = defaultProfessional?.id || '')
     acceptingNewClients: professional?.availability.isAvailable ?? true,
     activeProfessionalId: professional?.id || '',
     activityStories: buildDefaultActivityStories(professional),
-    availabilityByMode: sanitizeAvailabilityByMode(professional?.availabilityByMode, professional?.availabilityByMode),
+    availabilityRulesByMode: sanitizeAvailabilityRulesByMode(
+      professional?.availabilityRulesByMode,
+      professional?.availabilityRulesByMode,
+    ),
     autoApproveInstantBookings: (professional?.services || []).some((service) => service.bookingFlow === 'instant'),
     city: primaryArea?.city || professional?.location || '',
     coverageAreaIds: professional?.coverage.areaIds.slice(0, 3) || [],
@@ -1248,7 +1169,10 @@ const sanitizePortalState = (value: Partial<ProfessionalPortalState> | null | un
         ? activityStories.map((item, index) => sanitizeManagedActivityStory(item, baseState.activityStories[index]))
         : baseState.activityStories,
     ),
-    availabilityByMode: sanitizeAvailabilityByMode(value?.availabilityByMode, baseState.availabilityByMode),
+    availabilityRulesByMode: sanitizeAvailabilityRulesByMode(
+      value?.availabilityRulesByMode,
+      baseState.availabilityRulesByMode,
+    ),
     autoApproveInstantBookings: value?.autoApproveInstantBookings ?? baseState.autoApproveInstantBookings,
     city: value?.city?.trim() || baseState.city,
     coverageAreaIds,
@@ -1497,7 +1421,7 @@ const mergeProfessionalWithPortalState = (
     credentials: publicCredentials,
     experience: portalState.yearsExperience || professional.experience,
     gallery: publicGalleryItems,
-    availabilityByMode: portalState.availabilityByMode,
+    availabilityRulesByMode: portalState.availabilityRulesByMode,
     location: portalState.practiceLabel || professional.location,
     name: portalState.displayName || professional.name,
     portfolioEntries: publicPortfolioEntries,
@@ -1831,12 +1755,15 @@ export const useProfessionalPortal = () => {
     }));
   };
 
-  const saveAvailabilityByMode = (
-    availabilityByMode?: Partial<Record<ServiceDeliveryMode, ProfessionalAvailabilityDay[]>>,
+  const saveAvailabilityRulesByMode = (
+    availabilityRulesByMode?: Partial<Record<'home_visit' | 'onsite', ProfessionalAvailabilityRules>>,
   ) => {
     updatePortalStateWith((currentState) => ({
       ...currentState,
-      availabilityByMode: sanitizeAvailabilityByMode(availabilityByMode, currentState.availabilityByMode),
+      availabilityRulesByMode: sanitizeAvailabilityRulesByMode(
+        availabilityRulesByMode,
+        currentState.availabilityRulesByMode,
+      ),
     }));
   };
 
@@ -1959,7 +1886,9 @@ export const useProfessionalPortal = () => {
     }
 
     const requiresSchedule = requestedMode !== 'online';
-    const availabilityDays = requiresSchedule ? professional.availabilityByMode?.[requestedMode] || [] : [];
+    const availabilityDays = requiresSchedule
+      ? getProfessionalAvailabilityScheduleDays(professional, requestedMode)
+      : [];
     const selectedScheduleDay =
       requiresSchedule && scheduleDayId
         ? availabilityDays.find((scheduleDay) => scheduleDay.id === scheduleDayId) || null
@@ -2299,7 +2228,7 @@ export const useProfessionalPortal = () => {
       );
     },
     markCustomerAppointmentPaid,
-    saveAvailabilityByMode,
+    saveAvailabilityRulesByMode,
     saveBusinessSettings,
     saveGalleryItem,
     savePortfolioEntry,

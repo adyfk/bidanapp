@@ -1,4 +1,3 @@
-import appRuntimeSelectionsData from '@/data/mock-db/app_runtime_selections.json';
 import appSectionConfigsData from '@/data/mock-db/app_section_configs.json';
 import consumersData from '@/data/mock-db/consumers.json';
 import homeFeedFeaturedAppointmentsData from '@/data/mock-db/home_feed_featured_appointments.json';
@@ -11,7 +10,6 @@ import { getAppointmentById } from '@/lib/mock-db/appointments';
 import { getAreaById, getProfessionalById, getServiceById } from '@/lib/mock-db/catalog';
 import type { ConsumerProfile, HomeFeedSnapshot, MediaPreset, UserContext } from '@/types/app-state';
 import type {
-  AppRuntimeSelectionRow,
   AppSectionConfigRow,
   ConsumerRow,
   HomeFeedFeaturedAppointmentRow,
@@ -21,6 +19,7 @@ import type {
   MediaPresetRow,
   UserContextRow,
 } from '@/types/mock-db';
+import { ACTIVE_RUNTIME_SELECTION } from './runtime-selection';
 import { getRequiredItem, sortByIndex } from './utils';
 
 const groupBy = <T, K>(items: T[], getKey: (item: T) => K) => {
@@ -40,7 +39,6 @@ const groupBy = <T, K>(items: T[], getKey: (item: T) => K) => {
   return grouped;
 };
 
-const appRuntimeSelections = appRuntimeSelectionsData as AppRuntimeSelectionRow[];
 const consumerRows = sortByIndex(consumersData as ConsumerRow[]);
 const userContextRows = sortByIndex(userContextsData as UserContextRow[]);
 const homeFeedRows = sortByIndex(homeFeedSnapshotsData as HomeFeedSnapshotRow[]);
@@ -132,8 +130,6 @@ const hydratedHomeFeedsById = new Map(
 
 const mediaPresetsById = new Map(mediaPresetRows.map((preset) => [preset.id, preset as MediaPreset]));
 
-const activeAppRuntime = getRequiredItem(appRuntimeSelections[0], 'app_runtime_selections[0]');
-
 export const APP_SECTION_CONFIG = {
   homeCategoryIds: appSectionConfigRows
     .filter((row) => row.section === 'home' && row.configKey === 'homeCategoryIds' && row.entityType === 'category')
@@ -141,21 +137,21 @@ export const APP_SECTION_CONFIG = {
 };
 
 export const ACTIVE_CONSUMER = getRequiredItem(
-  hydratedConsumersById.get(activeAppRuntime.currentConsumerId),
-  `app_runtime_selections.${activeAppRuntime.id}.currentConsumerId -> ${activeAppRuntime.currentConsumerId}`,
+  hydratedConsumersById.get(ACTIVE_RUNTIME_SELECTION.currentConsumerId),
+  `app_runtime_selections.${ACTIVE_RUNTIME_SELECTION.id}.currentConsumerId -> ${ACTIVE_RUNTIME_SELECTION.currentConsumerId}`,
 );
 
 export const ACTIVE_USER_CONTEXT = getRequiredItem(
-  hydratedUserContextsById.get(activeAppRuntime.currentUserContextId),
-  `app_runtime_selections.${activeAppRuntime.id}.currentUserContextId -> ${activeAppRuntime.currentUserContextId}`,
+  hydratedUserContextsById.get(ACTIVE_RUNTIME_SELECTION.currentUserContextId),
+  `app_runtime_selections.${ACTIVE_RUNTIME_SELECTION.id}.currentUserContextId -> ${ACTIVE_RUNTIME_SELECTION.currentUserContextId}`,
 );
 
 export const ACTIVE_HOME_FEED = getRequiredItem(
-  hydratedHomeFeedsById.get(activeAppRuntime.activeHomeFeedId),
-  `app_runtime_selections.${activeAppRuntime.id}.activeHomeFeedId -> ${activeAppRuntime.activeHomeFeedId}`,
+  hydratedHomeFeedsById.get(ACTIVE_RUNTIME_SELECTION.activeHomeFeedId),
+  `app_runtime_selections.${ACTIVE_RUNTIME_SELECTION.id}.activeHomeFeedId -> ${ACTIVE_RUNTIME_SELECTION.activeHomeFeedId}`,
 );
 
 export const ACTIVE_MEDIA_PRESET = getRequiredItem(
-  mediaPresetsById.get(activeAppRuntime.activeMediaPresetId),
-  `app_runtime_selections.${activeAppRuntime.id}.activeMediaPresetId -> ${activeAppRuntime.activeMediaPresetId}`,
+  mediaPresetsById.get(ACTIVE_RUNTIME_SELECTION.activeMediaPresetId),
+  `app_runtime_selections.${ACTIVE_RUNTIME_SELECTION.id}.activeMediaPresetId -> ${ACTIVE_RUNTIME_SELECTION.activeMediaPresetId}`,
 );

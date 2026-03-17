@@ -26,7 +26,7 @@ export const ProfessionalDashboardAvailabilityScreen = () => {
     onboardingState,
     portalState,
     publishProfessionalProfile,
-    saveAvailabilityByMode,
+    saveAvailabilityRulesByMode,
     simulateProfessionalAdminReview,
     submitProfessionalProfileForReview,
     t,
@@ -116,7 +116,7 @@ export const ProfessionalDashboardAvailabilityScreen = () => {
           onChangeDraft={setAvailabilityDraft}
           onClose={closeAvailabilityEditor}
           onSave={() => {
-            saveAvailabilityByMode(availabilityDraft.availabilityByMode);
+            saveAvailabilityRulesByMode(availabilityDraft.availabilityRulesByMode);
             setNotice(t('availability.saveSuccess'));
             setIsAvailabilityEditorOpen(false);
           }}

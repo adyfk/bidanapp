@@ -4,7 +4,7 @@
     "tableName": "app_runtime_selections.json",
     "group": "runtime",
     "entityKind": "runtime_pointer",
-    "description": "Pointer ke seed aktif saat aplikasi boot.",
+    "description": "Pointer ke seed aktif saat aplikasi boot, termasuk runtime clock mock.",
     "keyRelations": [
       "currentConsumerId -> consumers.id",
       "currentUserContextId -> user_contexts.id",
@@ -134,22 +134,19 @@
   },
   {
     "index": 17,
-    "tableName": "professional_availability_schedule_days.json",
+    "tableName": "professional_availability_weekly_hours.json",
     "group": "catalog",
-    "entityKind": "schedule_parent",
-    "description": "Hari booking global profesional untuk mode offline.",
+    "entityKind": "availability_rules",
+    "description": "Jam kerja mingguan global profesional untuk mode offline.",
     "keyRelations": ["professionalId -> professionals.id", "mode -> reference_service_delivery_modes.code"]
   },
   {
     "index": 18,
-    "tableName": "professional_availability_time_slots.json",
+    "tableName": "professional_availability_date_overrides.json",
     "group": "catalog",
-    "entityKind": "schedule_child",
-    "description": "Slot booking global profesional untuk setiap hari offline.",
-    "keyRelations": [
-      "scheduleDayId -> professional_availability_schedule_days.id",
-      "professionalId -> professionals.id"
-    ]
+    "entityKind": "availability_override",
+    "description": "Tanggal khusus profesional untuk libur atau jam custom yang menimpa jam mingguan.",
+    "keyRelations": ["professionalId -> professionals.id", "mode -> reference_service_delivery_modes.code"]
   },
   {
     "index": 19,
@@ -318,5 +315,13 @@
     "entityKind": "audit_manifest",
     "description": "Audit jumlah row per tabel hasil generator.",
     "keyRelations": []
+  },
+  {
+    "index": 40,
+    "tableName": "professional_availability_policies.json",
+    "group": "catalog",
+    "entityKind": "availability_policy",
+    "description": "Policy availability global per profesional dan mode, termasuk minimum notice booking.",
+    "keyRelations": ["professionalId -> professionals.id", "mode -> reference_service_delivery_modes.code"]
   }
 ]

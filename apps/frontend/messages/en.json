@@ -1,7 +1,4 @@
 {
-  "Index": {
-    "title": "Welcome to BidanApp"
-  },
   "Home": {
     "location": "Location",
     "searchPlaceholder": "Search {service} or {category}...",
@@ -111,7 +108,7 @@
     "title": "Notifications",
     "eyebrow": "Customer updates",
     "heroTitle": "Track customer updates without losing context",
-    "heroDescriptionUnread": "You still have {count} notifications to open so schedules, chat, and payments stay in sync.",
+    "heroDescriptionUnread": "You still have {count, number} notifications to open so schedules, chat, and payments stay in sync.",
     "heroDescriptionClear": "You are all caught up. Keep monitoring appointments and conversations from one place.",
     "openAriaLabel": "Open customer notifications",
     "summary": {
@@ -151,37 +148,11 @@
       "resetAction": "Show all"
     }
   },
-  "ProfessionalGateway": {
-    "navTitle": "Professional Portal",
-    "eyebrow": "Professional Area",
-    "title": "The professional portal is separated from the customer app",
-    "description": "In this frontend simulation, the professional flow is intentionally not merged into the customer app so operational needs and family needs stay distinct.",
-    "capabilities": {
-      "dashboardTitle": "Operational dashboard for professionals",
-      "dashboardDescription": "This area is better suited for practice schedules, service performance, and professional activity summaries.",
-      "queueTitle": "Request queue and visit schedule",
-      "queueDescription": "Incoming requests, approvals, and home-visit scheduling are better handled in a dedicated professional portal.",
-      "separationTitle": "Clear role separation",
-      "separationDescription": "Customers focus on finding care and follow-up. Professionals focus on operations, capacity, and SLA."
-    },
-    "nextStepLabel": "Route people by role",
-    "nextStepDescription": "If you are a customer, go back to the customer path. If you only want to browse the catalog, continue as a visitor.",
-    "actions": {
-      "customer": "I am a customer",
-      "visitor": "Back as visitor"
-    }
-  },
   "ProfessionalAccess": {
     "navTitle": "Professional Access",
     "eyebrow": "Professional Access",
     "demoBadge": "Frontend Demo",
     "title": "Enter the professional portal",
-    "description": "This portal handles professional auth, dashboard work, and the public professional profile in one flow.",
-    "benefits": {
-      "dashboard": "Operational dashboard and profile readiness",
-      "requests": "Monitor requests, schedules, and follow-up",
-      "separation": "Customer and professional flows stay separate"
-    },
     "alreadyProfessional": "You are already in professional mode. Open the dashboard to continue.",
     "loginHelper": "Use the demo WhatsApp number and password. If you forget the password, send a reset link to the same number.",
     "connectedProfileLabel": "Connected public profile",
@@ -240,13 +211,10 @@
     "separationDescription": "Customers focus on discovery and booking. Professionals focus on readiness, services, coverage, and operations."
   },
   "ProfessionalPortal": {
-    "navTitle": "Professional Dashboard",
-    "eyebrow": "Professional Portal",
     "headerLabel": "Professional area",
     "completionLabel": "Completion",
     "metrics": {
       "rating": "Rating",
-      "clients": "Clients",
       "response": "Response",
       "averagePrice": "Average price",
       "activeServices": "Active services",
@@ -261,7 +229,7 @@
       "eyebrow": "Update center",
       "title": "Professional notifications",
       "openAriaLabel": "Open professional notifications",
-      "heroDescriptionUnread": "You still have {count} updates to review so inbound requests, operational readiness, and service schedules stay organized.",
+      "heroDescriptionUnread": "You still have {count, number} updates to review so inbound requests, operational readiness, and service schedules stay organized.",
       "heroDescriptionClear": "All professional updates are read. Use this screen to keep request-board and operational reminders in one place.",
       "summary": {
         "unread": "Unread",
@@ -346,8 +314,8 @@
         "availability": "Booking Hours",
         "portfolio": "Portfolio"
       },
-      "sectionProgress": "{completed}/{total} tasks completed",
-      "sectionBlocking": "{count} blockers",
+      "sectionProgress": "{completed, number}/{total, number} tasks completed",
+      "sectionBlocking": "{count, number} blockers",
       "sectionDone": "Ready",
       "status": {
         "draft": {
@@ -375,11 +343,11 @@
           "description": "The professional profile is already visible in the public catalog."
         }
       },
-      "submitSuccess": "Profile was submitted for admin review.",
-      "validationNotice": "Complete all blocking onboarding items before submitting to admin.",
       "demoRevisionSuccess": "Demo review moved the profile to revision requested.",
       "demoVerifySuccess": "Demo review moved the profile to verified.",
-      "publishSuccess": "Profile was published to the catalog."
+      "publishSuccess": "Profile was published to the catalog.",
+      "submitSuccess": "Profile was submitted for admin review.",
+      "validationNotice": "Complete all blocking onboarding items before submitting to admin."
     },
     "tabs": {
       "requests": "Requests",
@@ -390,23 +358,14 @@
       "trust": "Trust"
     },
     "units": {
-      "weeklyCapacity": "{count} per week",
-      "weeklyCapacityLabel": "weekly capacity",
-      "hoursShort": "{count} hours",
-      "hoursCompact": "{count}h",
-      "kilometers": "{count} km",
-      "monthlyCapacity": "{count} per month"
+      "kilometers": "{count} km"
     },
     "requests": {
-      "title": "Recent activity",
       "summaryDescription": "New requests open by default so inbound work is easier to triage. Switch stages to review quoted, scheduled, and completed cases with their supporting proof.",
-      "visibleCount": "{status}: {count}",
+      "visibleCount": "{status}: {count, number}",
       "statusUpdateTitle": "Update request stage",
       "closeButton": "Close editor",
       "saveButton": "Save status update",
-      "filters": {
-        "all": "All requests"
-      },
       "fields": {
         "service": "Service",
         "area": "Area",
@@ -452,14 +411,14 @@
       "preliveDescription": "Finish onboarding, submit the profile to admin, and publish it first. After that, incoming requests will start appearing here.",
       "emptyTitle": "No requests in this stage",
       "emptyDescription": "Switch to another stage or wait for new customer activity to show up here.",
-      "saveSuccess": "Request for {client} was updated to {status}.",
       "errors": {
-        "invalidTransition": "This request can only move to the next valid stage.",
-        "paymentPending": "The schedule cannot be locked before the customer payment is completed.",
         "customerSummaryRequired": "Write the customer-facing summary before saving this status update.",
+        "evidenceNoteRequired": "Add an internal completion note before marking this request as completed.",
         "evidenceRequired": "Add an internal note or an evidence link before saving this status update.",
-        "evidenceNoteRequired": "Add an internal completion note before marking this request as completed."
-      }
+        "invalidTransition": "This request can only move to the next valid stage.",
+        "paymentPending": "The schedule cannot be locked before the customer payment is completed."
+      },
+      "saveSuccess": "Request for {client} was updated to {status}."
     },
     "services": {
       "title": "Services visible to customers",
@@ -490,42 +449,68 @@
       "saveButton": "Save service details",
       "archiveButton": "Hide from catalog",
       "activateButton": "Add from template",
-      "saveSuccess": "Service details for {service} were saved.",
+      "activateSuccess": "{service} was added from the template library.",
       "archiveSuccess": "{service} was hidden from the public catalog.",
-      "activateSuccess": "{service} was added from the template library."
+      "saveSuccess": "Service details for {service} were saved."
     },
     "availability": {
       "title": "Shared booking hours",
-      "heroTitle": "One schedule for every offline service",
-      "heroDescription": "Set booking days and times in one place. Every home-visit and onsite service will read this shared professional availability when a customer chooses a slot.",
+      "heroTitle": "Weekly hours for every offline service",
+      "heroDescription": "Set regular working days once, then add special-date adjustments only when needed. Customers will still see bookable dates and times generated from these shared rules.",
       "metrics": {
         "activeServices": "Active services",
         "activeModes": "Offline modes",
-        "days": "Booking days",
-        "slots": "Booking slots"
+        "days": "Weekly open days",
+        "notice": "Booking notice"
       },
-      "modeSectionTitle": "Schedule by offline mode",
-      "modeSectionDescription": "Split home-visit and onsite hours when their operations need different booking windows.",
-      "modeSummaryValue": "{days} active days • {slots} slots",
-      "modeSummaryEmpty": "There are no active days for this mode yet.",
+      "modeSectionTitle": "Working hours by offline mode",
+      "modeSectionDescription": "Split home-visit and onsite hours only when each mode really needs a different routine, including its latest booking notice.",
+      "modeSummaryValue": "{days, number} weekly days • {slots, number} special adjustments",
+      "modeSummaryEmpty": "This mode does not have weekly hours yet.",
       "readyBadge": "Ready",
       "emptyBadge": "Empty",
-      "summaryLabel": "Selected mode summary",
-      "dayValue": "{count} configured slots",
-      "dateLabel": "Service date",
-      "slotTimeLabel": "Slot time",
-      "slotStatusLabel": "Slot status",
-      "addDay": "Add day",
-      "addSlot": "Add time",
-      "removeDay": "Remove day",
-      "removeSlot": "Remove time",
-      "emptyTitle": "No schedule for this mode yet",
-      "emptyDescription": "Add a day first, then fill the available times so customers only see slots that are truly open for booking.",
-      "emptySlotState": "There are no times for this day yet. Add slots so this mode is ready for every offline service.",
+      "noticeFallback": "Not set",
+      "summaryWeekdays": "Weekly days",
+      "summaryWeekdaysHint": "Regular open days for this mode.",
+      "summaryOverrides": "Special dates",
+      "summaryOverridesHint": "Holiday or custom-hour adjustments.",
+      "minimumNoticeTitle": "Latest booking notice",
+      "minimumNoticeHint": "The latest time a customer may still book before the session starts.",
+      "minimumNoticeDescription": "Use this to block bookings that are too close to the service time. Customer date and time choices will be filtered automatically from this rule.",
+      "minimumNoticeActiveHint": "Currently active for this mode.",
+      "minimumNoticeInactiveHint": "Use this as the latest booking notice.",
+      "noticeValue": "{value, plural, =24 {H-1} =48 {H-2} other {{value, number} hr}}",
+      "noSpecialDays": "None yet",
+      "weeklyHoursTitle": "Regular working hours",
+      "weeklyHoursDescription": "This is the base schedule customers will see most of the time. Turn on only the days that really accept bookings.",
+      "weeklyHoursToggleDescription": "When turned on, the app will automatically generate customer booking times from these hours.",
+      "startTimeLabel": "Start time",
+      "endTimeLabel": "End time",
+      "specialDatesTitle": "Special-day adjustments",
+      "specialDatesDescription": "Use this only for holidays, shorter days, or custom hours that should temporarily override the weekly routine.",
+      "addOverride": "Add special day",
+      "specialDateCardTitle": "Special date",
+      "specialDateCardDescription": "Choose whether this day is closed or follows a custom schedule.",
+      "specialDateLabel": "Date",
+      "specialDateClosed": "Closed",
+      "specialDateCustomHours": "Custom hours",
+      "specialDateNoteLabel": "Internal note",
+      "specialDatesEmptyTitle": "There are no special-date adjustments yet.",
+      "specialDatesEmptyDescription": "Leave this empty if the regular weekly hours are already enough.",
+      "specialDayCount": "{count, number} special days",
+      "weekdays": {
+        "monday": "Monday",
+        "tuesday": "Tuesday",
+        "wednesday": "Wednesday",
+        "thursday": "Thursday",
+        "friday": "Friday",
+        "saturday": "Saturday",
+        "sunday": "Sunday"
+      },
       "editButton": "Edit booking hours",
       "editorTitle": "Manage booking hours",
-      "editorHeroTitle": "Professional availability",
-      "editorDescription": "Changes here apply to every offline service that supports the selected mode.",
+      "editorHeroTitle": "Professional working hours",
+      "editorDescription": "Changes here apply to every offline service that supports the selected mode. Customers will receive generated booking times from these rules.",
       "closeButton": "Close editor",
       "saveButton": "Save booking hours",
       "saveSuccess": "Shared booking hours were updated."
@@ -536,7 +521,6 @@
       "publicCountLabel": "Public portfolio",
       "galleryCountLabel": "Gallery assets",
       "addButton": "Add portfolio",
-      "addSuccess": "A new portfolio draft was added.",
       "editButton": "Edit portfolio",
       "galleryEditButton": "Edit asset",
       "closeButton": "Close editor",
@@ -557,12 +541,9 @@
       },
       "saveButton": "Save portfolio",
       "deleteButton": "Delete portfolio",
-      "saveSuccess": "Portfolio was updated.",
-      "deleteSuccess": "Portfolio was removed from the simulation.",
       "galleryTitle": "Profile gallery",
       "galleryDescription": "Add assets that strengthen customer trust in your practice, services, and outcomes.",
       "galleryAddButton": "Add asset",
-      "galleryAddSuccess": "A new gallery asset was added.",
       "galleryFields": {
         "label": "Asset label",
         "alt": "Alt text",
@@ -572,42 +553,28 @@
       "galleryFeaturedHint": "The featured asset will appear first in the public gallery.",
       "gallerySaveButton": "Save asset",
       "galleryDeleteButton": "Delete asset",
-      "gallerySaveSuccess": "Gallery asset was updated.",
+      "featuredAsset": "Featured asset",
+      "addSuccess": "A new portfolio draft was added.",
+      "deleteSuccess": "Portfolio was removed from the simulation.",
+      "galleryAddSuccess": "A new gallery asset was added.",
       "galleryDeleteSuccess": "Gallery asset was removed from the simulation.",
-      "featuredAsset": "Featured asset"
+      "gallerySaveSuccess": "Gallery asset was updated.",
+      "saveSuccess": "Portfolio was updated."
     },
     "coverage": {
       "title": "Service coverage",
-      "radius": "service radius",
-      "areas": "Selected areas",
       "city": "Home city",
       "scopeTitle": "Active service footprint",
       "scopeDescription": "Keep the active areas and service reach tidy so incoming demand matches your real operations.",
-      "availabilityTitle": "Service availability",
-      "availabilityDescription": "Actual booking times are managed in Booking Hours. Coverage only keeps location, reach, and intake rules aligned.",
       "operationsTitle": "Operational status",
       "operationsDescription": "Monitor new-client intake and the coverage center from one place.",
       "coordinates": "Coverage center coordinates",
-      "radiusLabel": "Home-visit radius",
       "areaCountLabel": "Active areas",
       "modeCoverageLabel": "Enabled service modes",
       "emptyPracticeAddress": "The practice address is not filled in yet.",
       "emptyPublicBio": "A public bio has not been added yet.",
       "emptyAreaSelection": "There are no active areas yet. Add coverage areas so the profile is ready to receive matching requests.",
       "emptyModeSelection": "No active service modes are ready yet. Enable at least one active service in Services.",
-      "emptyAvailability": "No active services are ready yet. Activate services first, then define shared booking hours from Booking Hours.",
-      "manageAvailabilityButton": "Manage booking hours",
-      "serviceSettingsEyebrow": "Managed separately",
-      "serviceSettingsTitle": "Active service modes live in Services, while booking days and hours live in Booking Hours.",
-      "serviceSettingsHint": "If booking hours need to change, update them from Booking Hours. Coverage only reflects the live result.",
-      "instantServicesLabel": "instant services",
-      "requestServicesLabel": "request services",
-      "availabilityMetrics": {
-        "activeServices": "Active services",
-        "activeModes": "Enabled modes",
-        "scheduleDays": "Bookable days",
-        "slots": "Bookable slots"
-      },
       "fields": {
         "city": "Primary city / regency",
         "responseTime": "Response time target",
@@ -629,9 +596,9 @@
       },
       "editButton": "Edit coverage",
       "closeButton": "Close editor",
-      "validationMessage": "Choose at least one coverage area before saving. Service modes are managed in Services and time slots are managed in Booking Hours.",
       "saveButton": "Save coverage settings",
-      "saveSuccess": "Coverage and operational settings were updated."
+      "saveSuccess": "Coverage and operational settings were updated.",
+      "validationMessage": "Choose at least one coverage area before saving. Service modes are managed in Services and working hours are managed in Booking Hours."
     },
     "trust": {
       "credentials": "Credentials and compliance",
@@ -653,10 +620,6 @@
       "emptyCredentialsDescription": "Start with the license, training, or certification that matters most for new customers.",
       "emptyStoriesTitle": "No practice stories are visible yet.",
       "emptyStoriesDescription": "Add one concise story so customers can see how your service is delivered in real situations.",
-      "credentialSaveSuccess": "Credential updated.",
-      "credentialDeleteSuccess": "Credential removed.",
-      "storySaveSuccess": "Practice story updated.",
-      "storyDeleteSuccess": "Practice story removed.",
       "credentialEditor": {
         "title": "Credential entry",
         "fields": {
@@ -685,12 +648,15 @@
         "portfolio": "Public portfolio",
         "gallery": "Visual assets",
         "response": "Response target"
-      }
+      },
+      "credentialDeleteSuccess": "Credential removed.",
+      "credentialSaveSuccess": "Credential updated.",
+      "storyDeleteSuccess": "Practice story removed.",
+      "storySaveSuccess": "Practice story updated."
     }
   },
   "ProfessionalProfile": {
     "navTitle": "Professional Profile",
-    "eyebrow": "Professional Settings",
     "buttons": {
       "close": "Close",
       "editProfile": "Edit"
@@ -701,16 +667,11 @@
       "publicProfileTitle": "Public profile",
       "publicProfileDescription": "Preview the page customers will see before they book."
     },
-    "hero": {
-      "credentialLabel": "License"
-    },
     "language": {
       "title": "App language",
-      "description": "Choose the display language that feels most comfortable when managing the professional account.",
       "compactDescription": "Use the language that feels easiest"
     },
     "actions": {
-      "openDashboard": "Open dashboard",
       "logout": "Exit professional mode"
     },
     "menu": {
@@ -788,7 +749,7 @@
     "onlineOnlyCoverage": "No home care",
     "paginationNext": "Next",
     "paginationPrevious": "Previous",
-    "paginationStatus": "Page {current} of {total}",
+    "paginationStatus": "Page {current, number} of {total, number}",
     "practiceLocation": "Service point",
     "rating": "Rating",
     "selectedArea": "User area",
@@ -804,9 +765,6 @@
     "selectionResumeReadyDescription": "The booking summary is complete. Review the details once more and continue with the booking button below.",
     "selectionProgressBadge": "Complete choice",
     "selectionReadyBadge": "Ready to request",
-    "selectionStatusDone": "Done",
-    "selectionStatusCurrent": "Next",
-    "selectionStatusPending": "Waiting",
     "serviceSectionHelper": "Choose one service first, then configure its mode and schedule in the dialog. After that you can continue with the booking button below.",
     "selectionStepChoose": "Choose the most relevant service",
     "selectionStepConfigure": "Set the mode and schedule if needed",
@@ -828,10 +786,9 @@
     "saveServiceSelection": "Use this selection",
     "serviceModes": "Service modes",
     "serviceSearchPlaceholder": "Search services, summaries, or tags...",
-    "serviceResultsCount": "{count} matching services",
+    "serviceResultsCount": "{count, number} matching services",
     "serviceListTitle": "All services from this professional",
     "serviceSelected": "Selected",
-    "filterLabel": "Filter",
     "allCategories": "All categories",
     "allModes": "All modes",
     "categoryFilterLabel": "Category",
@@ -843,6 +800,7 @@
     "chooseServiceMode": "Choose service mode",
     "chooseVisitDay": "Choose visit day",
     "chooseVisitTime": "Choose visit time",
+    "minimumNoticeInline": "Bookings for this mode close {value} before the schedule starts.",
     "scheduleRequired": "Choose a visit time before continuing with an offline booking.",
     "offlineScheduleRequired": "Choose a visit day and time before continuing the offline booking.",
     "modeReadyToBook": "Ready to book",
@@ -854,7 +812,6 @@
     "noFilteredServices": "No services match the current filters.",
     "noFilteredServicesHint": "Try another search term or reset the filters to see more services.",
     "makeAppointment": "Request booking",
-    "inquiryChat": "Ask {professional}",
     "experience": "Years Exp.",
     "requestUpdates": {
       "eyebrow": "Request update",
@@ -867,7 +824,10 @@
       "submittedSummary": "Your request has been sent and is waiting for provider review.",
       "emptySummary": "The provider has not added a customer-facing summary for this stage yet.",
       "openEvidence": "Open proof"
-    }
+    },
+    "selectionStatusCurrent": "Next",
+    "selectionStatusDone": "Done",
+    "selectionStatusPending": "Waiting"
   },
   "Explore": {
     "title": "{professional}s",
@@ -879,7 +839,7 @@
     "topRated": "Top Rated",
     "availableToday": "Available Today",
     "myFavorites": "My Favorites",
-    "resultsFound": "{count} {count, plural, =1 {Result} other {Results}} Found",
+    "resultsFound": "{count, number} {count, plural, =1 {Result} other {Results}} Found",
     "noResults": "No results found",
     "tryAdjusting": "Try adjusting your filters or search term.",
     "filterTitle": "Filter {professional}s",
@@ -936,17 +896,16 @@
     "globalTitle": "Global {service}s",
     "searchPlaceholder": "Search {service}...",
     "allServices": "All Services",
-    "catalogTitle": "{count} {count, plural, =1 {Service} other {Services}} Catalog",
+    "catalogTitle": "{count, number} {count, plural, =1 {Service} other {Services}} Catalog",
     "noServices": "No services found",
     "trySearchTerm": "Try another search term."
   },
   "ServiceDetail": {
     "about": "About this {service}",
     "available": "Available {professional}s",
-    "expertsCount": "{count} {count, plural, =1 {Expert} other {Experts}}",
+    "expertsCount": "{count, number} {count, plural, =1 {Expert} other {Experts}}",
     "noProfessionals": "No professionals currently provide this service.",
-    "makeAppointment": "Request booking",
-    "inquiryChat": "Ask Professional"
+    "makeAppointment": "Request booking"
   },
   "UI": {
     "seeAll": "See All"
@@ -956,25 +915,10 @@
     "language": "Language",
     "account": "Account Details",
     "security": "Account Security",
-    "aboutApp": "About {appName}",
     "logout": "Log Out",
     "buttons": {
       "close": "Close",
       "editProfile": "Edit"
-    },
-    "careHub": {
-      "eyebrow": "Active Care",
-      "title": "Your family profile and care preferences",
-      "description": "Manage account details, family support, and follow-up rhythms so care feels more personal, organized, and safe.",
-      "areaLabel": "Active area",
-      "focusLabel": "Care focus",
-      "focusFallback": "No special focus has been saved yet.",
-      "supportLabel": "Family support",
-      "supportFallback": "Not added yet",
-      "activeFlowLabel": "Care flow",
-      "activeAppointment": "{service} with {professional} is currently part of your follow-up flow.",
-      "noActiveAppointment": "There is no active session yet. You can still prepare your preferences so the next session feels faster and more tailored.",
-      "activityStatus": "Care status"
     },
     "quickActions": {
       "activityTitle": "Activity",
@@ -991,20 +935,6 @@
       "accountDescription": "Primary contact, care focus, and family support.",
       "securityDescription": "New password and account privacy controls."
     },
-    "preferences": {
-      "title": "Care Preferences",
-      "description": "Align services with family communication, visit modes, and after-care reminders.",
-      "familyUpdatesLabel": "Share updates with family support",
-      "familyUpdatesEnabled": "Schedule summaries and follow-ups are shared.",
-      "familyUpdatesDisabled": "Updates stay with the primary account only.",
-      "remindersLabel": "Recovery and check-in reminders",
-      "remindersEnabled": "Follow-up reminders stay active for the family.",
-      "remindersDisabled": "No extra reminders are enabled.",
-      "privacyLabel": "Sensitive notes stay private",
-      "privacyEnabled": "Sensitive information is limited to the main account.",
-      "privacyDisabled": "Sensitive notes may appear in the family summary.",
-      "editButton": "Edit preferences"
-    },
     "accountSheet": {
       "title": "Account Details",
       "description": "Complete your identity, care focus, and family contact so follow-up stays aligned.",
@@ -1019,10 +949,6 @@
       "supportRelationLabel": "Relationship",
       "supportPhoneLabel": "Support contact number",
       "supportPlaceholder": "Partner / parent / caregiver",
-      "modeTitle": "Preferred care modes",
-      "familyUpdatesToggle": "Share schedule updates with family support",
-      "remindersToggle": "Enable after-care and check-in reminders",
-      "privacyToggle": "Keep sensitive notes for the main account only",
       "save": "Save details",
       "success": "Profile details updated successfully.",
       "errors": {
@@ -1050,20 +976,6 @@
         "newPasswordWeak": "The new password does not meet the security rules.",
         "confirmMismatch": "The password confirmation does not match."
       }
-    },
-    "about": {
-      "eyebrow": "Product Vision",
-      "title": "{appName} is built for care that feels close, safe, and continuous.",
-      "description": "The profile page is more than an identity screen. It becomes the family control center for care preferences, caregiver support, and secure access.",
-      "continuityTitle": "Continuity of care",
-      "continuityDescription": "Brings home care, online follow-up, and service activity together so mothers and families do not start from zero in every session.",
-      "familyTitle": "Family-centered support",
-      "familyDescription": "Creates room for a support contact, shared updates, and realistic check-in rhythms at home.",
-      "trustTitle": "Trust and privacy",
-      "trustDescription": "Builds trust through stronger passwords, control over sensitive information, and a transparent experience.",
-      "researchTitle": "Research basis:",
-      "researchLabel": "this direction follows principles of continuous postnatal care, individualized care, and family support.",
-      "versionLabel": "Version {version}"
     },
     "modeLabels": {
       "online": "Online",

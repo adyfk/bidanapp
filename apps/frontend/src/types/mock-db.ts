@@ -4,7 +4,13 @@ import type {
   AppointmentStatus,
   AppointmentTimelineEvent,
 } from './appointments';
-import type { BookingFlow, ProfessionalGender, ServiceDeliveryMode, TimeSlotStatus } from './catalog';
+import type {
+  BookingFlow,
+  OfflineServiceDeliveryMode,
+  ProfessionalAvailabilityWeekday,
+  ProfessionalGender,
+  ServiceDeliveryMode,
+} from './catalog';
 import type { ChatSender } from './chat';
 
 export interface IndexedRow {
@@ -156,22 +162,33 @@ export interface ProfessionalServiceOfferingRow extends IndexedRow {
   supportsOnsite: boolean;
 }
 
-export interface ProfessionalAvailabilityDayRow extends IndexedRow {
+export interface ProfessionalAvailabilityWeeklyHoursRow extends IndexedRow {
   id: string;
   professionalId: string;
-  mode: Exclude<ServiceDeliveryMode, 'online'>;
-  label: string;
-  dateIso: string;
+  mode: OfflineServiceDeliveryMode;
+  weekday: ProfessionalAvailabilityWeekday;
+  startTime: string;
+  endTime: string;
+  slotIntervalMinutes: number;
 }
 
-export interface ProfessionalAvailabilityTimeSlotRow extends IndexedRow {
+export interface ProfessionalAvailabilityPolicyRow extends IndexedRow {
   id: string;
   professionalId: string;
-  scheduleDayId: string;
-  mode: Exclude<ServiceDeliveryMode, 'online'>;
-  label: string;
+  mode: OfflineServiceDeliveryMode;
+  minimumNoticeHours: number;
+}
+
+export interface ProfessionalAvailabilityDateOverrideRow extends IndexedRow {
+  id: string;
+  professionalId: string;
+  mode: OfflineServiceDeliveryMode;
+  dateIso: string;
+  isClosed: boolean;
   note: string | null;
-  status: TimeSlotStatus;
+  startTime: string | null;
+  endTime: string | null;
+  slotIntervalMinutes: number | null;
 }
 
 export interface ConsumerRow extends IndexedRow {
@@ -327,4 +344,5 @@ export interface AppRuntimeSelectionRow extends IndexedRow {
   currentUserContextId: string;
   activeHomeFeedId: string;
   activeMediaPresetId: string;
+  currentDateTimeIso: string;
 }

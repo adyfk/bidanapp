@@ -121,71 +121,76 @@
   },
   {
     "index": 25,
-    "fileName": "professional_availability_schedule_days.json",
-    "rowCount": 36
+    "fileName": "professional_availability_weekly_hours.json",
+    "rowCount": 29
   },
   {
     "index": 26,
-    "fileName": "professional_availability_time_slots.json",
-    "rowCount": 144
+    "fileName": "professional_availability_policies.json",
+    "rowCount": 9
   },
   {
     "index": 27,
+    "fileName": "professional_availability_date_overrides.json",
+    "rowCount": 6
+  },
+  {
+    "index": 28,
     "fileName": "consumers.json",
     "rowCount": 3
   },
   {
-    "index": 28,
+    "index": 29,
     "fileName": "user_contexts.json",
     "rowCount": 3
   },
   {
-    "index": 29,
+    "index": 30,
     "fileName": "home_feed_snapshots.json",
     "rowCount": 3
   },
   {
-    "index": 30,
+    "index": 31,
     "fileName": "home_feed_featured_appointments.json",
     "rowCount": 2
   },
   {
-    "index": 31,
+    "index": 32,
     "fileName": "home_feed_popular_services.json",
     "rowCount": 12
   },
   {
-    "index": 32,
+    "index": 33,
     "fileName": "home_feed_nearby_professionals.json",
     "rowCount": 12
   },
   {
-    "index": 33,
+    "index": 34,
     "fileName": "media_presets.json",
     "rowCount": 2
   },
   {
-    "index": 34,
+    "index": 35,
     "fileName": "appointments.json",
     "rowCount": 12
   },
   {
-    "index": 35,
+    "index": 36,
     "fileName": "chat_threads.json",
     "rowCount": 15
   },
   {
-    "index": 36,
+    "index": 37,
     "fileName": "chat_messages.json",
     "rowCount": 19
   },
   {
-    "index": 37,
+    "index": 38,
     "fileName": "app_section_configs.json",
     "rowCount": 6
   },
   {
-    "index": 38,
+    "index": 39,
     "fileName": "app_runtime_selections.json",
     "rowCount": 1
   }

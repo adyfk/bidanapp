@@ -10,11 +10,8 @@ import { ProfessionalDashboardShell } from '@/components/screens/professional-da
 import type { CoverageDraft } from '@/components/screens/professional-dashboard/types';
 import { useDashboardDialogLifecycle } from '@/components/screens/professional-dashboard/useDashboardDialogLifecycle';
 import { useProfessionalDashboardPageData } from '@/components/screens/professional-dashboard/useProfessionalDashboardPageData';
-import { useRouter } from '@/i18n/routing';
-import { professionalDashboardRoute } from '@/lib/routes';
 
 export const ProfessionalDashboardCoverageScreen = () => {
-  const router = useRouter();
   const {
     activeCoverageAreas,
     activeProfessional,
@@ -134,11 +131,10 @@ export const ProfessionalDashboardCoverageScreen = () => {
       responseTimeGoal={portalState.responseTimeGoal}
     >
       <ProfessionalDashboardCoverageTab
-        availabilityByMode={portalState.availabilityByMode}
+        availabilityRulesByMode={portalState.availabilityRulesByMode}
         coverageDraft={coverageDraft}
         getAreaLabel={getAreaLabel}
         getModeLabel={getModeLabel}
-        onManageAvailability={() => router.push(professionalDashboardRoute('availability'))}
         onEditCoverage={openCoverageEditor}
         serviceConfigurations={portalState.serviceConfigurations}
       />

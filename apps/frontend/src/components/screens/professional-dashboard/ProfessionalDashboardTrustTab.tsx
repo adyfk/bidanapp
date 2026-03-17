@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/tokens';
 import type { ProfessionalManagedActivityStory, ProfessionalManagedCredential } from '@/lib/use-professional-portal';
 import type { Professional } from '@/types/catalog';
-import { MiniStatCard, SectionHeading } from './ProfessionalDashboardShared';
+import { MiniStatCard, SectionHeading, StackedSectionHeading } from './ProfessionalDashboardShared';
 
 interface ProfessionalDashboardTrustTabProps {
   activeProfessional: Professional;
@@ -63,16 +63,16 @@ export const ProfessionalDashboardTrustTab = ({
       </div>
 
       <div className={surfaceCardPaddedClass}>
-        <SectionHeading
+        <StackedSectionHeading
+          description={t('trust.credentialsDescription')}
+          icon={<BadgeCheck className="h-5 w-5" />}
+          title={t('trust.credentials')}
           action={
-            <button type="button" onClick={onAddCredential} className={`${accentPrimaryButtonClass} px-4 py-2.5`}>
+            <button type="button" onClick={onAddCredential} className={`${accentPrimaryButtonClass} w-full`}>
               <Plus className="mr-2 h-4 w-4" />
               {t('trust.addCredentialButton')}
             </button>
           }
-          description={t('trust.credentialsDescription')}
-          icon={<BadgeCheck className="h-5 w-5" />}
-          title={t('trust.credentials')}
         />
         <div className="mt-4 space-y-3">
           {trustCredentials.length === 0 ? (
@@ -118,16 +118,16 @@ export const ProfessionalDashboardTrustTab = ({
       </div>
 
       <div className={surfaceCardPaddedClass}>
-        <SectionHeading
+        <StackedSectionHeading
+          description={t('trust.storiesDescription')}
+          icon={<CalendarDays className="h-5 w-5" />}
+          title={t('trust.stories')}
           action={
-            <button type="button" onClick={onAddStory} className={`${accentPrimaryButtonClass} px-4 py-2.5`}>
+            <button type="button" onClick={onAddStory} className={`${accentPrimaryButtonClass} w-full`}>
               <Plus className="mr-2 h-4 w-4" />
               {t('trust.addStoryButton')}
             </button>
           }
-          description={t('trust.storiesDescription')}
-          icon={<CalendarDays className="h-5 w-5" />}
-          title={t('trust.stories')}
         />
         <div className="mt-4 space-y-3">
           {trustActivityStories.length === 0 ? (

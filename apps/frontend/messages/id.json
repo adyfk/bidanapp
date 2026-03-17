@@ -1,7 +1,4 @@
 {
-  "Index": {
-    "title": "Selamat datang di BidanApp"
-  },
   "Home": {
     "location": "Lokasi",
     "searchPlaceholder": "Cari {service} atau {category}...",
@@ -111,7 +108,7 @@
     "title": "Notifikasi",
     "eyebrow": "Customer updates",
     "heroTitle": "Pantau update customer tanpa kehilangan konteks",
-    "heroDescriptionUnread": "Ada {count} notifikasi yang masih perlu Anda buka agar jadwal, chat, dan pembayaran tetap sinkron.",
+    "heroDescriptionUnread": "Ada {count, number} notifikasi yang masih perlu Anda buka agar jadwal, chat, dan pembayaran tetap sinkron.",
     "heroDescriptionClear": "Semua update customer sudah terbaca. Anda bisa lanjut memantau jadwal dan percakapan dengan lebih tenang.",
     "openAriaLabel": "Buka notifikasi customer",
     "summary": {
@@ -151,37 +148,11 @@
       "resetAction": "Lihat semua"
     }
   },
-  "ProfessionalGateway": {
-    "navTitle": "Portal profesional",
-    "eyebrow": "Area profesional",
-    "title": "Portal profesional dipisahkan dari aplikasi pelanggan",
-    "description": "Di simulasi frontend ini, jalur profesional sengaja dipisahkan dari aplikasi pelanggan agar kebutuhan operasional dan kebutuhan keluarga tidak saling bercampur.",
-    "capabilities": {
-      "dashboardTitle": "Dashboard operasional profesional",
-      "dashboardDescription": "Area ini ideal untuk jadwal praktik, performa layanan, dan ringkasan aktivitas profesional.",
-      "queueTitle": "Antrean permintaan dan jadwal kunjungan",
-      "queueDescription": "Permintaan masuk, persetujuan, dan pengaturan kunjungan rumah lebih rapi bila dikelola di portal profesional tersendiri.",
-      "separationTitle": "Peran tiap sisi lebih jelas",
-      "separationDescription": "Pelanggan fokus mencari layanan dan memantau tindak lanjut. Profesional fokus pada operasional, kapasitas, dan kecepatan respons."
-    },
-    "nextStepLabel": "Arahkan pengguna sesuai peran",
-    "nextStepDescription": "Kalau Anda pelanggan, kembali ke jalur pelanggan. Kalau hanya ingin melihat katalog, lanjut sebagai pengunjung.",
-    "actions": {
-      "customer": "Saya pelanggan",
-      "visitor": "Kembali sebagai pengunjung"
-    }
-  },
   "ProfessionalAccess": {
     "navTitle": "Akses profesional",
     "eyebrow": "Akses profesional",
     "demoBadge": "Simulasi FE",
     "title": "Masuk ke portal profesional",
-    "description": "Portal ini dipakai untuk login profesional, melengkapi pengaturan operasional, dan membuka dashboard yang terhubung ke profil publik.",
-    "benefits": {
-      "dashboard": "Dashboard operasional dan kesiapan profil",
-      "requests": "Pantau permintaan, jadwal, dan tindak lanjut",
-      "separation": "Alur pelanggan dan profesional tetap terpisah"
-    },
     "alreadyProfessional": "Anda sedang berada di mode profesional. Buka dashboard untuk melanjutkan.",
     "loginHelper": "Gunakan nomor WhatsApp dan password demo. Jika lupa password, kirim tautan reset ke nomor yang dipakai login.",
     "connectedProfileLabel": "Profil publik yang terhubung",
@@ -240,13 +211,10 @@
     "separationDescription": "Pelanggan fokus mencari layanan dan booking. Profesional fokus pada kesiapan profil, layanan, jangkauan, dan operasional."
   },
   "ProfessionalPortal": {
-    "navTitle": "Dashboard profesional",
-    "eyebrow": "Portal profesional",
     "headerLabel": "Area profesional",
     "completionLabel": "Kelengkapan",
     "metrics": {
       "rating": "Rating",
-      "clients": "Klien",
       "response": "Respons",
       "averagePrice": "Rata-rata harga",
       "activeServices": "Layanan aktif",
@@ -261,7 +229,7 @@
       "eyebrow": "Pusat update",
       "title": "Notifikasi profesional",
       "openAriaLabel": "Buka notifikasi profesional",
-      "heroDescriptionUnread": "Ada {count} update yang masih perlu ditinjau agar permintaan masuk, kesiapan operasional, dan jadwal layanan tetap rapi.",
+      "heroDescriptionUnread": "Ada {count, number} update yang masih perlu ditinjau agar permintaan masuk, kesiapan operasional, dan jadwal layanan tetap rapi.",
       "heroDescriptionClear": "Semua update profesional sudah terbaca. Gunakan layar ini untuk memantau request board dan pengingat operasional dari satu tempat.",
       "summary": {
         "unread": "Belum dibaca",
@@ -346,8 +314,8 @@
         "availability": "Jam booking",
         "portfolio": "Portofolio"
       },
-      "sectionProgress": "{completed}/{total} tugas selesai",
-      "sectionBlocking": "{count} blocker",
+      "sectionProgress": "{completed, number}/{total, number} tugas selesai",
+      "sectionBlocking": "{count, number} blocker",
       "sectionDone": "Siap",
       "status": {
         "draft": {
@@ -375,11 +343,11 @@
           "description": "Profil profesional sudah tampil di katalog publik."
         }
       },
-      "submitSuccess": "Profil berhasil diajukan ke admin untuk direview.",
-      "validationNotice": "Lengkapi semua item onboarding yang memblokir sebelum mengajukan ke admin.",
       "demoRevisionSuccess": "Demo review memindahkan profil ke status revisi.",
       "demoVerifySuccess": "Demo review memindahkan profil ke status terverifikasi.",
-      "publishSuccess": "Profil berhasil dipublish ke katalog."
+      "publishSuccess": "Profil berhasil dipublish ke katalog.",
+      "submitSuccess": "Profil berhasil diajukan ke admin untuk direview.",
+      "validationNotice": "Lengkapi semua item onboarding yang memblokir sebelum mengajukan ke admin."
     },
     "tabs": {
       "requests": "Permintaan",
@@ -390,23 +358,14 @@
       "trust": "Kepercayaan"
     },
     "units": {
-      "weeklyCapacity": "{count} per minggu",
-      "weeklyCapacityLabel": "kapasitas per minggu",
-      "hoursShort": "{count} jam",
-      "hoursCompact": "{count}j",
-      "kilometers": "{count} km",
-      "monthlyCapacity": "{count} per bulan"
+      "kilometers": "{count} km"
     },
     "requests": {
-      "title": "Permintaan terbaru",
       "summaryDescription": "Permintaan baru ditampilkan sebagai tampilan awal agar pekerjaan masuk lebih mudah dipilah. Pindah tahap untuk melihat kasus penawaran, penjadwalan, dan layanan selesai beserta bukti pendukungnya.",
-      "visibleCount": "{status}: {count}",
+      "visibleCount": "{status}: {count, number}",
       "statusUpdateTitle": "Perbarui tahap permintaan",
       "closeButton": "Tutup editor",
       "saveButton": "Simpan perubahan status",
-      "filters": {
-        "all": "Semua permintaan"
-      },
       "fields": {
         "service": "Layanan",
         "area": "Area",
@@ -452,14 +411,14 @@
       "preliveDescription": "Selesaikan onboarding, ajukan profil ke admin, lalu publish dulu. Setelah itu, permintaan masuk akan mulai muncul di sini.",
       "emptyTitle": "Belum ada permintaan di tahap ini",
       "emptyDescription": "Pindah ke tahap lain atau tunggu aktivitas pelanggan baru muncul di sini.",
-      "saveSuccess": "Permintaan dari {client} dipindahkan ke {status}.",
       "errors": {
-        "invalidTransition": "Permintaan ini hanya boleh dipindahkan ke tahap valid berikutnya.",
-        "paymentPending": "Jadwal tidak bisa dikunci sebelum pembayaran pelanggan selesai.",
         "customerSummaryRequired": "Tulis dulu ringkasan yang akan dilihat pelanggan sebelum menyimpan perubahan status ini.",
+        "evidenceNoteRequired": "Tambahkan catatan penyelesaian internal sebelum menandai permintaan ini selesai.",
         "evidenceRequired": "Tambahkan catatan internal atau tautan bukti sebelum menyimpan perubahan status ini.",
-        "evidenceNoteRequired": "Tambahkan catatan penyelesaian internal sebelum menandai permintaan ini selesai."
-      }
+        "invalidTransition": "Permintaan ini hanya boleh dipindahkan ke tahap valid berikutnya.",
+        "paymentPending": "Jadwal tidak bisa dikunci sebelum pembayaran pelanggan selesai."
+      },
+      "saveSuccess": "Permintaan dari {client} dipindahkan ke {status}."
     },
     "services": {
       "title": "Layanan yang tampil ke pelanggan",
@@ -490,42 +449,68 @@
       "saveButton": "Simpan detail layanan",
       "archiveButton": "Nonaktifkan dari katalog",
       "activateButton": "Tambah dari template",
-      "saveSuccess": "Detail layanan {service} disimpan.",
+      "activateSuccess": "Layanan {service} ditambahkan dari template.",
       "archiveSuccess": "Layanan {service} disembunyikan dari katalog publik.",
-      "activateSuccess": "Layanan {service} ditambahkan dari template."
+      "saveSuccess": "Detail layanan {service} disimpan."
     },
     "availability": {
       "title": "Jam booking umum",
-      "heroTitle": "Satu jadwal untuk semua layanan offline",
-      "heroDescription": "Atur hari dan jam booking di satu tempat. Semua layanan home visit dan onsite akan membaca availability umum profesional ini saat customer memilih slot.",
+      "heroTitle": "Jam kerja mingguan untuk semua layanan offline",
+      "heroDescription": "Atur hari kerja reguler sekali saja, lalu tambahkan penyesuaian hari khusus hanya bila perlu. Customer tetap akan melihat pilihan tanggal dan jam yang dihasilkan otomatis dari aturan ini.",
       "metrics": {
         "activeServices": "Layanan aktif",
         "activeModes": "Mode offline aktif",
-        "days": "Hari booking",
-        "slots": "Slot booking"
+        "days": "Hari kerja mingguan",
+        "notice": "Batas booking"
       },
-      "modeSectionTitle": "Jadwal per mode offline",
-      "modeSectionDescription": "Pisahkan jam untuk kunjungan rumah dan datang ke lokasi bila operasionalnya berbeda.",
-      "modeSummaryValue": "{days} hari aktif • {slots} slot",
-      "modeSummaryEmpty": "Belum ada hari aktif untuk mode ini.",
+      "modeSectionTitle": "Jam kerja per mode offline",
+      "modeSectionDescription": "Pisahkan jam untuk kunjungan rumah dan datang ke lokasi hanya bila memang operasionalnya berbeda, termasuk batas booking terdekatnya.",
+      "modeSummaryValue": "{days, number} hari mingguan • {slots, number} penyesuaian khusus",
+      "modeSummaryEmpty": "Mode ini belum punya jam kerja mingguan.",
       "readyBadge": "Siap",
       "emptyBadge": "Kosong",
-      "summaryLabel": "Ringkasan mode terpilih",
-      "dayValue": "{count} slot tersusun",
-      "dateLabel": "Tanggal layanan",
-      "slotTimeLabel": "Jam slot",
-      "slotStatusLabel": "Status slot",
-      "addDay": "Tambah hari",
-      "addSlot": "Tambah jam",
-      "removeDay": "Hapus hari",
-      "removeSlot": "Hapus jam",
-      "emptyTitle": "Belum ada jadwal untuk mode ini",
-      "emptyDescription": "Tambah hari dulu, lalu isi jam yang tersedia supaya customer hanya melihat slot yang benar-benar siap dibooking.",
-      "emptySlotState": "Belum ada jam di hari ini. Tambahkan slot agar mode ini siap dipakai semua layanan offline.",
+      "noticeFallback": "Belum diatur",
+      "summaryWeekdays": "Hari mingguan",
+      "summaryWeekdaysHint": "Hari kerja reguler untuk mode ini.",
+      "summaryOverrides": "Hari khusus",
+      "summaryOverridesHint": "Libur atau penyesuaian jam sementara.",
+      "minimumNoticeTitle": "Batas booking terakhir",
+      "minimumNoticeHint": "Booking terakhir yang masih boleh masuk sebelum jadwal dimulai.",
+      "minimumNoticeDescription": "Gunakan aturan ini untuk menutup booking yang terlalu mepet. Pilihan tanggal dan jam customer akan otomatis difilter berdasarkan batas ini.",
+      "minimumNoticeActiveHint": "Sedang dipakai untuk mode ini.",
+      "minimumNoticeInactiveHint": "Pilih sebagai batas booking terakhir.",
+      "noticeValue": "{value, plural, =24 {H-1} =48 {H-2} other {{value, number} jam}}",
+      "noSpecialDays": "Belum ada",
+      "weeklyHoursTitle": "Jam kerja reguler",
+      "weeklyHoursDescription": "Ini jadwal dasar yang paling sering dilihat customer. Aktifkan hanya hari yang benar-benar menerima booking.",
+      "weeklyHoursToggleDescription": "Saat aktif, aplikasi akan otomatis membuat pilihan jam booking customer dari rentang ini.",
+      "startTimeLabel": "Jam mulai",
+      "endTimeLabel": "Jam selesai",
+      "specialDatesTitle": "Penyesuaian hari khusus",
+      "specialDatesDescription": "Gunakan hanya untuk libur, hari pendek, atau jam khusus yang sementara menggantikan jadwal mingguan.",
+      "addOverride": "Tambah hari khusus",
+      "specialDateCardTitle": "Hari khusus",
+      "specialDateCardDescription": "Pilih apakah hari ini libur penuh atau memakai jam khusus.",
+      "specialDateLabel": "Tanggal",
+      "specialDateClosed": "Libur",
+      "specialDateCustomHours": "Jam khusus",
+      "specialDateNoteLabel": "Catatan internal",
+      "specialDatesEmptyTitle": "Belum ada penyesuaian hari khusus.",
+      "specialDatesEmptyDescription": "Biarkan kosong bila jam kerja mingguan sudah cukup.",
+      "specialDayCount": "{count, number} hari khusus",
+      "weekdays": {
+        "monday": "Senin",
+        "tuesday": "Selasa",
+        "wednesday": "Rabu",
+        "thursday": "Kamis",
+        "friday": "Jumat",
+        "saturday": "Sabtu",
+        "sunday": "Minggu"
+      },
       "editButton": "Edit jam booking",
       "editorTitle": "Kelola jam booking",
-      "editorHeroTitle": "Availability profesional",
-      "editorDescription": "Perubahan di sini berlaku ke semua layanan offline yang mendukung mode terkait.",
+      "editorHeroTitle": "Jam kerja profesional",
+      "editorDescription": "Perubahan di sini berlaku ke semua layanan offline yang mendukung mode terkait. Customer akan menerima pilihan jam booking yang dihasilkan otomatis dari aturan ini.",
       "closeButton": "Tutup editor",
       "saveButton": "Simpan jam booking",
       "saveSuccess": "Jam booking umum berhasil diperbarui."
@@ -536,7 +521,6 @@
       "publicCountLabel": "Portofolio publik",
       "galleryCountLabel": "Aset galeri",
       "addButton": "Tambah portofolio",
-      "addSuccess": "Draft portofolio baru ditambahkan.",
       "editButton": "Edit portofolio",
       "galleryEditButton": "Edit aset",
       "closeButton": "Tutup editor",
@@ -557,12 +541,9 @@
       },
       "saveButton": "Simpan portofolio",
       "deleteButton": "Hapus portofolio",
-      "saveSuccess": "Portofolio berhasil diperbarui.",
-      "deleteSuccess": "Portofolio dihapus dari simulasi.",
       "galleryTitle": "Galeri profil",
       "galleryDescription": "Tambahkan aset yang membantu pelanggan lebih yakin pada praktik, layanan, dan hasil kerja Anda.",
       "galleryAddButton": "Tambah aset",
-      "galleryAddSuccess": "Aset galeri baru ditambahkan.",
       "galleryFields": {
         "label": "Label aset",
         "alt": "Teks alternatif",
@@ -572,42 +553,28 @@
       "galleryFeaturedHint": "Aset unggulan akan tampil paling depan di galeri publik.",
       "gallerySaveButton": "Simpan aset",
       "galleryDeleteButton": "Hapus aset",
-      "gallerySaveSuccess": "Aset galeri berhasil diperbarui.",
+      "featuredAsset": "Aset unggulan",
+      "addSuccess": "Draft portofolio baru ditambahkan.",
+      "deleteSuccess": "Portofolio dihapus dari simulasi.",
+      "galleryAddSuccess": "Aset galeri baru ditambahkan.",
       "galleryDeleteSuccess": "Aset galeri dihapus dari simulasi.",
-      "featuredAsset": "Aset unggulan"
+      "gallerySaveSuccess": "Aset galeri berhasil diperbarui.",
+      "saveSuccess": "Portofolio berhasil diperbarui."
     },
     "coverage": {
       "title": "Jangkauan layanan",
-      "radius": "radius layanan",
-      "areas": "Area terpilih",
       "city": "Kota domisili",
       "scopeTitle": "Cakupan layanan aktif",
       "scopeDescription": "Rapikan area aktif dan jangkauan layanan agar permintaan yang masuk sesuai dengan operasional Anda.",
-      "availabilityTitle": "Ketersediaan layanan",
-      "availabilityDescription": "Jam booking nyata dikelola di tab Jam booking. Coverage hanya menjaga jangkauan, lokasi, dan aturan intake tetap sinkron.",
       "operationsTitle": "Status operasional",
       "operationsDescription": "Pantau intake klien baru dan titik pusat jangkauan dari satu tempat.",
       "coordinates": "Koordinat pusat jangkauan",
-      "radiusLabel": "Radius kunjungan rumah",
       "areaCountLabel": "Area aktif",
       "modeCoverageLabel": "Mode layanan yang aktif",
       "emptyPracticeAddress": "Alamat praktik belum dilengkapi.",
       "emptyPublicBio": "Bio publik belum ditambahkan.",
       "emptyAreaSelection": "Belum ada area aktif. Tambahkan area agar profil siap menerima permintaan sesuai jangkauan.",
       "emptyModeSelection": "Belum ada mode layanan aktif. Aktifkan minimal satu layanan di tab Layanan.",
-      "emptyAvailability": "Belum ada layanan aktif yang siap dibooking. Aktifkan layanan dulu, lalu susun jam booking umum dari tab Jam booking.",
-      "manageAvailabilityButton": "Kelola jam booking",
-      "serviceSettingsEyebrow": "Dikelola terpisah",
-      "serviceSettingsTitle": "Mode layanan aktif ada di tab Layanan, sedangkan hari dan jam booking ada di tab Jam booking.",
-      "serviceSettingsHint": "Kalau jam booking berubah, ubah dari tab Jam booking. Halaman coverage hanya menampilkan hasil aktifnya.",
-      "instantServicesLabel": "layanan instan",
-      "requestServicesLabel": "layanan ajukan dulu",
-      "availabilityMetrics": {
-        "activeServices": "Layanan aktif",
-        "activeModes": "Mode aktif",
-        "scheduleDays": "Hari yang bisa dibooking",
-        "slots": "Slot yang bisa dibooking"
-      },
       "fields": {
         "city": "Kota / kabupaten utama",
         "responseTime": "Target waktu respons",
@@ -629,9 +596,9 @@
       },
       "editButton": "Edit jangkauan",
       "closeButton": "Tutup editor",
-      "validationMessage": "Pilih minimal satu area jangkauan sebelum menyimpan. Mode layanan dikelola di tab Layanan dan slot waktu dikelola di tab Jam booking.",
       "saveButton": "Simpan pengaturan jangkauan",
-      "saveSuccess": "Pengaturan jangkauan dan operasional diperbarui."
+      "saveSuccess": "Pengaturan jangkauan dan operasional diperbarui.",
+      "validationMessage": "Pilih minimal satu area jangkauan sebelum menyimpan. Mode layanan dikelola di tab Layanan dan jam kerja dikelola di tab Jam booking."
     },
     "trust": {
       "credentials": "Kredensial dan legalitas",
@@ -653,10 +620,6 @@
       "emptyCredentialsDescription": "Mulai dari lisensi, pelatihan, atau sertifikasi yang paling penting dilihat pelanggan baru.",
       "emptyStoriesTitle": "Belum ada cerita praktik yang tampil.",
       "emptyStoriesDescription": "Tambahkan satu cerita singkat agar pelanggan bisa melihat bagaimana layanan Anda dijalankan di situasi nyata.",
-      "credentialSaveSuccess": "Kredensial berhasil diperbarui.",
-      "credentialDeleteSuccess": "Kredensial dihapus.",
-      "storySaveSuccess": "Cerita praktik berhasil diperbarui.",
-      "storyDeleteSuccess": "Cerita praktik dihapus.",
       "credentialEditor": {
         "title": "Entri kredensial",
         "fields": {
@@ -685,12 +648,15 @@
         "portfolio": "Portofolio publik",
         "gallery": "Aset visual",
         "response": "Target respons"
-      }
+      },
+      "credentialDeleteSuccess": "Kredensial dihapus.",
+      "credentialSaveSuccess": "Kredensial berhasil diperbarui.",
+      "storyDeleteSuccess": "Cerita praktik dihapus.",
+      "storySaveSuccess": "Cerita praktik berhasil diperbarui."
     }
   },
   "ProfessionalProfile": {
     "navTitle": "Profil profesional",
-    "eyebrow": "Pengaturan profesional",
     "buttons": {
       "close": "Tutup",
       "editProfile": "Edit"
@@ -701,16 +667,11 @@
       "publicProfileTitle": "Profil publik",
       "publicProfileDescription": "Lihat halaman yang akan dibuka pelanggan sebelum booking."
     },
-    "hero": {
-      "credentialLabel": "STR / SIP"
-    },
     "language": {
       "title": "Bahasa aplikasi",
-      "description": "Pilih bahasa tampilan yang paling nyaman dipakai saat mengelola akun profesional.",
       "compactDescription": "Pakai bahasa yang paling nyaman"
     },
     "actions": {
-      "openDashboard": "Buka dashboard",
       "logout": "Keluar dari mode profesional"
     },
     "menu": {
@@ -788,7 +749,7 @@
     "onlineOnlyCoverage": "Tanpa kunjungan rumah",
     "paginationNext": "Berikutnya",
     "paginationPrevious": "Sebelumnya",
-    "paginationStatus": "Halaman {current} dari {total}",
+    "paginationStatus": "Halaman {current, number} dari {total, number}",
     "practiceLocation": "Titik layanan",
     "rating": "Penilaian",
     "selectedArea": "Area pengguna",
@@ -804,9 +765,6 @@
     "selectionResumeReadyDescription": "Resume pilihan sudah lengkap. Periksa lagi detailnya lalu lanjutkan ke tombol booking di bawah.",
     "selectionProgressBadge": "Lengkapi pilihan",
     "selectionReadyBadge": "Siap diajukan",
-    "selectionStatusDone": "Selesai",
-    "selectionStatusCurrent": "Lanjut",
-    "selectionStatusPending": "Menunggu",
     "serviceSectionHelper": "Pilih satu layanan dulu, lalu atur mode dan jadwalnya di dialog. Setelah itu Anda bisa lanjut ajukan booking dari tombol bawah.",
     "selectionStepChoose": "Pilih layanan yang paling sesuai",
     "selectionStepConfigure": "Atur mode dan jadwal bila perlu",
@@ -828,10 +786,9 @@
     "saveServiceSelection": "Gunakan pilihan ini",
     "serviceModes": "Mode layanan",
     "serviceSearchPlaceholder": "Cari layanan, ringkasan, atau tag...",
-    "serviceResultsCount": "{count} layanan cocok",
+    "serviceResultsCount": "{count, number} layanan cocok",
     "serviceListTitle": "Semua layanan dari profesional ini",
     "serviceSelected": "Dipilih",
-    "filterLabel": "Filter",
     "allCategories": "Semua kategori",
     "allModes": "Semua mode",
     "categoryFilterLabel": "Kategori",
@@ -843,6 +800,7 @@
     "chooseServiceMode": "Pilih mode layanan",
     "chooseVisitDay": "Pilih hari kunjungan",
     "chooseVisitTime": "Pilih jam kunjungan",
+    "minimumNoticeInline": "Booking untuk mode ini ditutup {value} sebelum jadwal mulai.",
     "scheduleRequired": "Pilih jam kunjungan untuk melanjutkan pemesanan offline.",
     "offlineScheduleRequired": "Pilih hari dan jam kunjungan sebelum melanjutkan pemesanan offline.",
     "modeReadyToBook": "Siap dipesan",
@@ -854,7 +812,6 @@
     "noFilteredServices": "Tidak ada layanan yang cocok dengan filter saat ini.",
     "noFilteredServicesHint": "Coba ubah pencarian atau reset filter untuk melihat layanan lain.",
     "makeAppointment": "Ajukan booking",
-    "inquiryChat": "Tanya {professional}",
     "experience": "Lama pengalaman",
     "requestUpdates": {
       "eyebrow": "Update permintaan",
@@ -867,7 +824,10 @@
       "submittedSummary": "Permintaan Anda sudah dikirim dan sedang menunggu tinjauan dari profesional.",
       "emptySummary": "Profesional belum menambahkan ringkasan yang bisa dilihat pelanggan untuk tahap ini.",
       "openEvidence": "Buka bukti"
-    }
+    },
+    "selectionStatusCurrent": "Lanjut",
+    "selectionStatusDone": "Selesai",
+    "selectionStatusPending": "Menunggu"
   },
   "Explore": {
     "title": "{professional}",
@@ -879,7 +839,7 @@
     "topRated": "Rating Teratas",
     "availableToday": "Tersedia Hari Ini",
     "myFavorites": "Favorit Saya",
-    "resultsFound": "{count} Hasil Ditemukan",
+    "resultsFound": "{count, number} Hasil Ditemukan",
     "noResults": "Hasil tidak ditemukan",
     "tryAdjusting": "Coba ubah filter atau kata kunci pencarian Anda.",
     "filterTitle": "Saring {professional}",
@@ -912,15 +872,6 @@
     "applyFilters": "Terapkan Filter",
     "resolvingLocation": "Memetakan lokasi..."
   },
-  "Messages": {
-    "title": "Pesan",
-    "searchPlaceholder": "Cari pesan...",
-    "all": "Semua",
-    "unread": "Belum dibaca",
-    "archived": "Diarsipkan",
-    "noMessages": "Tidak ada pesan",
-    "trySearching": "Coba cari dengan kata kunci lain."
-  },
   "Appointments": {
     "title": "Aktivitas",
     "searchPlaceholder": "Cari jadwal...",
@@ -945,17 +896,16 @@
     "globalTitle": "{service} Global",
     "searchPlaceholder": "Cari {service}...",
     "allServices": "Semua Layanan",
-    "catalogTitle": "Katalog {count} Layanan",
+    "catalogTitle": "Katalog {count, number} Layanan",
     "noServices": "Tidak ada layanan ditemukan",
     "trySearchTerm": "Coba kata pencarian lain."
   },
   "ServiceDetail": {
     "about": "Tentang {service} ini",
     "available": "{professional} Tersedia",
-    "expertsCount": "{count} Ahli",
+    "expertsCount": "{count, number} Ahli",
     "noProfessionals": "Belum ada profesional yang menyediakan layanan ini.",
-    "makeAppointment": "Ajukan booking",
-    "inquiryChat": "Tanya profesional"
+    "makeAppointment": "Ajukan booking"
   },
   "UI": {
     "seeAll": "Lihat Semua"
@@ -965,25 +915,10 @@
     "language": "Bahasa",
     "account": "Detail Akun",
     "security": "Keamanan Akun",
-    "aboutApp": "Tentang {appName}",
     "logout": "Keluar",
     "buttons": {
       "close": "Tutup",
       "editProfile": "Edit"
-    },
-    "careHub": {
-      "eyebrow": "Pendampingan Aktif",
-      "title": "Profil keluarga dan preferensi layanan Anda",
-      "description": "Kelola detail akun, dukungan keluarga, dan ritme follow-up agar layanan terasa personal, rapi, dan aman.",
-      "areaLabel": "Area aktif",
-      "focusLabel": "Fokus pendampingan",
-      "focusFallback": "Belum ada fokus khusus yang disimpan.",
-      "supportLabel": "Pendamping keluarga",
-      "supportFallback": "Belum ditambahkan",
-      "activeFlowLabel": "Flow layanan",
-      "activeAppointment": "{service} bersama {professional} sedang menjadi fokus tindak lanjut Anda.",
-      "noActiveAppointment": "Belum ada sesi aktif. Anda tetap bisa menyiapkan preferensi agar sesi berikutnya lebih cepat.",
-      "activityStatus": "Status layanan"
     },
     "quickActions": {
       "activityTitle": "Aktivitas",
@@ -1000,20 +935,6 @@
       "accountDescription": "Kontak utama, fokus layanan, dan dukungan keluarga.",
       "securityDescription": "Password baru dan kontrol privasi akun."
     },
-    "preferences": {
-      "title": "Preferensi Pendampingan",
-      "description": "Selaraskan layanan dengan pola komunikasi keluarga, mode kunjungan, dan pengingat after-care.",
-      "familyUpdatesLabel": "Update ke pendamping keluarga",
-      "familyUpdatesEnabled": "Ringkasan jadwal dan follow-up ikut dibagikan.",
-      "familyUpdatesDisabled": "Update hanya masuk ke akun utama.",
-      "remindersLabel": "Reminder recovery dan check-in",
-      "remindersEnabled": "Pengingat lanjutan aktif untuk keluarga.",
-      "remindersDisabled": "Tidak ada reminder tambahan.",
-      "privacyLabel": "Catatan sensitif tetap privat",
-      "privacyEnabled": "Akses informasi sensitif dibatasi di akun utama.",
-      "privacyDisabled": "Catatan sensitif dapat muncul di ringkasan keluarga.",
-      "editButton": "Ubah preferensi"
-    },
     "accountSheet": {
       "title": "Detail Akun",
       "description": "Lengkapi identitas, fokus pendampingan, dan kontak keluarga agar follow-up lebih terarah.",
@@ -1028,10 +949,6 @@
       "supportRelationLabel": "Hubungan",
       "supportPhoneLabel": "Nomor pendamping",
       "supportPlaceholder": "Pasangan / orang tua / caregiver",
-      "modeTitle": "Mode layanan yang disukai",
-      "familyUpdatesToggle": "Bagikan update jadwal ke pendamping keluarga",
-      "remindersToggle": "Aktifkan reminder after-care dan check-in",
-      "privacyToggle": "Simpan catatan sensitif hanya untuk akun utama",
       "save": "Simpan detail",
       "success": "Detail profil berhasil diperbarui.",
       "errors": {
@@ -1059,20 +976,6 @@
         "newPasswordWeak": "Password baru belum memenuhi syarat keamanan.",
         "confirmMismatch": "Konfirmasi password belum sesuai."
       }
-    },
-    "about": {
-      "eyebrow": "Visi Produk",
-      "title": "{appName} dibangun untuk pendampingan yang terasa dekat, aman, dan berkelanjutan.",
-      "description": "Halaman profile bukan hanya tempat identitas akun. Ini adalah pusat kontrol keluarga untuk preferensi layanan, dukungan caregiver, dan keamanan akses.",
-      "continuityTitle": "Pendampingan berkelanjutan",
-      "continuityDescription": "Menyatukan kunjungan rumah, tindak lanjut online, dan aktivitas layanan agar ibu dan keluarga tidak mulai dari nol di setiap sesi.",
-      "familyTitle": "Dukungan berpusat pada keluarga",
-      "familyDescription": "Memberi ruang untuk pendamping keluarga, pembagian update, dan ritme check-in yang realistis di rumah.",
-      "trustTitle": "Kepercayaan dan privasi",
-      "trustDescription": "Menjaga kepercayaan lewat password yang kuat, kontrol informasi sensitif, dan pengalaman yang transparan.",
-      "researchTitle": "Dasar riset:",
-      "researchLabel": "arah ini mengikuti prinsip postnatal care yang berkelanjutan, individualized care, dan dukungan keluarga.",
-      "versionLabel": "Versi {version}"
     },
     "modeLabels": {
       "online": "Online",

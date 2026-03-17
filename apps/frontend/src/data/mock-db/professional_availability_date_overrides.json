@@ -1,0 +1,74 @@
+[
+  {
+    "id": "pado-1-home_visit-2026-03-20",
+    "index": 1,
+    "professionalId": "1",
+    "mode": "home_visit",
+    "dateIso": "2026-03-20",
+    "isClosed": false,
+    "note": "Jumat selesai lebih awal",
+    "startTime": "08:00",
+    "endTime": "15:00",
+    "slotIntervalMinutes": 60
+  },
+  {
+    "id": "pado-1-onsite-2026-03-19",
+    "index": 2,
+    "professionalId": "1",
+    "mode": "onsite",
+    "dateIso": "2026-03-19",
+    "isClosed": false,
+    "note": "Mulai siang karena visit pagi",
+    "startTime": "12:00",
+    "endTime": "19:00",
+    "slotIntervalMinutes": 60
+  },
+  {
+    "id": "pado-2-home_visit-2026-03-18",
+    "index": 3,
+    "professionalId": "2",
+    "mode": "home_visit",
+    "dateIso": "2026-03-18",
+    "isClosed": true,
+    "note": "Libur pribadi",
+    "startTime": null,
+    "endTime": null,
+    "slotIntervalMinutes": null
+  },
+  {
+    "id": "pado-3-home_visit-2026-03-17",
+    "index": 4,
+    "professionalId": "3",
+    "mode": "home_visit",
+    "dateIso": "2026-03-17",
+    "isClosed": false,
+    "note": "Mulai setelah ronde pagi",
+    "startTime": "10:00",
+    "endTime": "16:00",
+    "slotIntervalMinutes": 60
+  },
+  {
+    "id": "pado-4-home_visit-2026-03-19",
+    "index": 5,
+    "professionalId": "4",
+    "mode": "home_visit",
+    "dateIso": "2026-03-19",
+    "isClosed": false,
+    "note": "Jam singkat untuk kelas sore",
+    "startTime": "10:00",
+    "endTime": "14:00",
+    "slotIntervalMinutes": 60
+  },
+  {
+    "id": "pado-5-onsite-2026-03-20",
+    "index": 6,
+    "professionalId": "5",
+    "mode": "onsite",
+    "dateIso": "2026-03-20",
+    "isClosed": true,
+    "note": "Studio tutup untuk perawatan alat",
+    "startTime": null,
+    "endTime": null,
+    "slotIntervalMinutes": null
+  }
+]

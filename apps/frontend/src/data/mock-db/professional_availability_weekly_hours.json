@@ -1,0 +1,292 @@
+[
+  {
+    "id": "pawh-1-home_visit-tuesday",
+    "index": 1,
+    "professionalId": "1",
+    "mode": "home_visit",
+    "weekday": "tuesday",
+    "startTime": "08:00",
+    "endTime": "17:00",
+    "slotIntervalMinutes": 60
+  },
+  {
+    "id": "pawh-1-home_visit-wednesday",
+    "index": 2,
+    "professionalId": "1",
+    "mode": "home_visit",
+    "weekday": "wednesday",
+    "startTime": "08:00",
+    "endTime": "17:00",
+    "slotIntervalMinutes": 60
+  },
+  {
+    "id": "pawh-1-home_visit-thursday",
+    "index": 3,
+    "professionalId": "1",
+    "mode": "home_visit",
+    "weekday": "thursday",
+    "startTime": "08:00",
+    "endTime": "17:00",
+    "slotIntervalMinutes": 60
+  },
+  {
+    "id": "pawh-1-home_visit-friday",
+    "index": 4,
+    "professionalId": "1",
+    "mode": "home_visit",
+    "weekday": "friday",
+    "startTime": "08:00",
+    "endTime": "17:00",
+    "slotIntervalMinutes": 60
+  },
+  {
+    "id": "pawh-1-onsite-tuesday",
+    "index": 5,
+    "professionalId": "1",
+    "mode": "onsite",
+    "weekday": "tuesday",
+    "startTime": "10:00",
+    "endTime": "19:00",
+    "slotIntervalMinutes": 60
+  },
+  {
+    "id": "pawh-1-onsite-wednesday",
+    "index": 6,
+    "professionalId": "1",
+    "mode": "onsite",
+    "weekday": "wednesday",
+    "startTime": "10:00",
+    "endTime": "19:00",
+    "slotIntervalMinutes": 60
+  },
+  {
+    "id": "pawh-1-onsite-thursday",
+    "index": 7,
+    "professionalId": "1",
+    "mode": "onsite",
+    "weekday": "thursday",
+    "startTime": "10:00",
+    "endTime": "19:00",
+    "slotIntervalMinutes": 60
+  },
+  {
+    "id": "pawh-2-home_visit-tuesday",
+    "index": 8,
+    "professionalId": "2",
+    "mode": "home_visit",
+    "weekday": "tuesday",
+    "startTime": "09:00",
+    "endTime": "17:00",
+    "slotIntervalMinutes": 60
+  },
+  {
+    "id": "pawh-2-home_visit-wednesday",
+    "index": 9,
+    "professionalId": "2",
+    "mode": "home_visit",
+    "weekday": "wednesday",
+    "startTime": "09:00",
+    "endTime": "17:00",
+    "slotIntervalMinutes": 60
+  },
+  {
+    "id": "pawh-2-home_visit-thursday",
+    "index": 10,
+    "professionalId": "2",
+    "mode": "home_visit",
+    "weekday": "thursday",
+    "startTime": "09:00",
+    "endTime": "17:00",
+    "slotIntervalMinutes": 60
+  },
+  {
+    "id": "pawh-2-home_visit-friday",
+    "index": 11,
+    "professionalId": "2",
+    "mode": "home_visit",
+    "weekday": "friday",
+    "startTime": "09:00",
+    "endTime": "17:00",
+    "slotIntervalMinutes": 60
+  },
+  {
+    "id": "pawh-2-onsite-tuesday",
+    "index": 12,
+    "professionalId": "2",
+    "mode": "onsite",
+    "weekday": "tuesday",
+    "startTime": "11:00",
+    "endTime": "19:00",
+    "slotIntervalMinutes": 60
+  },
+  {
+    "id": "pawh-2-onsite-wednesday",
+    "index": 13,
+    "professionalId": "2",
+    "mode": "onsite",
+    "weekday": "wednesday",
+    "startTime": "11:00",
+    "endTime": "19:00",
+    "slotIntervalMinutes": 60
+  },
+  {
+    "id": "pawh-2-onsite-thursday",
+    "index": 14,
+    "professionalId": "2",
+    "mode": "onsite",
+    "weekday": "thursday",
+    "startTime": "11:00",
+    "endTime": "19:00",
+    "slotIntervalMinutes": 60
+  },
+  {
+    "id": "pawh-2-onsite-friday",
+    "index": 15,
+    "professionalId": "2",
+    "mode": "onsite",
+    "weekday": "friday",
+    "startTime": "11:00",
+    "endTime": "19:00",
+    "slotIntervalMinutes": 60
+  },
+  {
+    "id": "pawh-3-home_visit-tuesday",
+    "index": 16,
+    "professionalId": "3",
+    "mode": "home_visit",
+    "weekday": "tuesday",
+    "startTime": "08:00",
+    "endTime": "16:00",
+    "slotIntervalMinutes": 60
+  },
+  {
+    "id": "pawh-3-home_visit-wednesday",
+    "index": 17,
+    "professionalId": "3",
+    "mode": "home_visit",
+    "weekday": "wednesday",
+    "startTime": "08:00",
+    "endTime": "16:00",
+    "slotIntervalMinutes": 60
+  },
+  {
+    "id": "pawh-3-home_visit-thursday",
+    "index": 18,
+    "professionalId": "3",
+    "mode": "home_visit",
+    "weekday": "thursday",
+    "startTime": "08:00",
+    "endTime": "16:00",
+    "slotIntervalMinutes": 60
+  },
+  {
+    "id": "pawh-3-onsite-thursday",
+    "index": 19,
+    "professionalId": "3",
+    "mode": "onsite",
+    "weekday": "thursday",
+    "startTime": "12:00",
+    "endTime": "18:00",
+    "slotIntervalMinutes": 60
+  },
+  {
+    "id": "pawh-4-home_visit-wednesday",
+    "index": 20,
+    "professionalId": "4",
+    "mode": "home_visit",
+    "weekday": "wednesday",
+    "startTime": "08:00",
+    "endTime": "16:00",
+    "slotIntervalMinutes": 60
+  },
+  {
+    "id": "pawh-4-home_visit-thursday",
+    "index": 21,
+    "professionalId": "4",
+    "mode": "home_visit",
+    "weekday": "thursday",
+    "startTime": "08:00",
+    "endTime": "16:00",
+    "slotIntervalMinutes": 60
+  },
+  {
+    "id": "pawh-4-home_visit-friday",
+    "index": 22,
+    "professionalId": "4",
+    "mode": "home_visit",
+    "weekday": "friday",
+    "startTime": "08:00",
+    "endTime": "16:00",
+    "slotIntervalMinutes": 60
+  },
+  {
+    "id": "pawh-5-home_visit-tuesday",
+    "index": 23,
+    "professionalId": "5",
+    "mode": "home_visit",
+    "weekday": "tuesday",
+    "startTime": "10:00",
+    "endTime": "18:00",
+    "slotIntervalMinutes": 60
+  },
+  {
+    "id": "pawh-5-home_visit-wednesday",
+    "index": 24,
+    "professionalId": "5",
+    "mode": "home_visit",
+    "weekday": "wednesday",
+    "startTime": "10:00",
+    "endTime": "18:00",
+    "slotIntervalMinutes": 60
+  },
+  {
+    "id": "pawh-5-home_visit-thursday",
+    "index": 25,
+    "professionalId": "5",
+    "mode": "home_visit",
+    "weekday": "thursday",
+    "startTime": "10:00",
+    "endTime": "18:00",
+    "slotIntervalMinutes": 60
+  },
+  {
+    "id": "pawh-5-onsite-tuesday",
+    "index": 26,
+    "professionalId": "5",
+    "mode": "onsite",
+    "weekday": "tuesday",
+    "startTime": "11:00",
+    "endTime": "20:00",
+    "slotIntervalMinutes": 60
+  },
+  {
+    "id": "pawh-5-onsite-wednesday",
+    "index": 27,
+    "professionalId": "5",
+    "mode": "onsite",
+    "weekday": "wednesday",
+    "startTime": "11:00",
+    "endTime": "20:00",
+    "slotIntervalMinutes": 60
+  },
+  {
+    "id": "pawh-5-onsite-thursday",
+    "index": 28,
+    "professionalId": "5",
+    "mode": "onsite",
+    "weekday": "thursday",
+    "startTime": "11:00",
+    "endTime": "20:00",
+    "slotIntervalMinutes": 60
+  },
+  {
+    "id": "pawh-4-home_visit-monday",
+    "index": 29,
+    "professionalId": "4",
+    "mode": "home_visit",
+    "weekday": "monday",
+    "startTime": "08:00",
+    "endTime": "16:00",
+    "slotIntervalMinutes": 60
+  }
+]

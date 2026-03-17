@@ -4,6 +4,7 @@ import {
   CalendarDays,
   Check,
   ChevronLeft,
+  ChevronRight,
   Clock3,
   House,
   Search,
@@ -15,6 +16,7 @@ import {
 import { useLocale, useTranslations } from 'next-intl';
 import { useDeferredValue, useState } from 'react';
 import { createPortal } from 'react-dom';
+import type { Messages, _Translator as Translator } from 'use-intl/core';
 import {
   accentPrimaryButtonClass,
   accentSoftPillClass,
@@ -28,6 +30,7 @@ import {
 } from '@/components/ui/tokens';
 import { ProfessionalSectionTitle } from '@/features/professional-detail/components/ProfessionalSectionTitle';
 import type { ProfessionalServiceEntry } from '@/features/professional-detail/hooks/useProfessionalDetail';
+import { DEFAULT_AVAILABILITY_MINIMUM_NOTICE_HOURS, formatMinimumNoticeLabel } from '@/lib/availability-rules';
 import { APP_CONFIG } from '@/lib/config';
 import {
   getAccessibleServiceModes,
@@ -36,10 +39,15 @@ import {
   isOfflineServiceMode,
   type ProfessionalCoverageStatus,
 } from '@/lib/mock-db/catalog';
-import type { ProfessionalAvailabilityDay, ServiceDeliveryMode } from '@/types/catalog';
+import type {
+  OfflineServiceDeliveryMode,
+  ProfessionalAvailabilityDay,
+  ProfessionalAvailabilityRules,
+  ServiceDeliveryMode,
+} from '@/types/catalog';
 
 interface ProfessionalServicesSectionProps {
-  availabilityByMode?: Partial<Record<ServiceDeliveryMode, ProfessionalAvailabilityDay[]>>;
+  availabilityRulesByMode?: Partial<Record<OfflineServiceDeliveryMode, ProfessionalAvailabilityRules>>;
   coverageStatus: ProfessionalCoverageStatus | null;
   isProfessionalAvailable: boolean;
   offeredServices: ProfessionalServiceEntry[];
@@ -50,6 +58,7 @@ interface ProfessionalServicesSectionProps {
   profileCopy: {
     serviceSectionTitle: string;
   };
+  scheduleDaysByMode?: Partial<Record<ServiceDeliveryMode, ProfessionalAvailabilityDay[]>>;
   selectedBookingMode: ServiceDeliveryMode | null;
   selectedScheduleDayId: string;
   selectedScheduleDays: ProfessionalAvailabilityDay[];
@@ -58,7 +67,7 @@ interface ProfessionalServicesSectionProps {
   selectedTimeSlotId: string;
 }
 
-type ProfessionalTranslations = ReturnType<typeof useTranslations>;
+type ProfessionalTranslations = Translator<Messages, 'Professional'>;
 
 type DraftSelectionState = {
   accessibleModes: ServiceDeliveryMode[];
@@ -145,20 +154,20 @@ const SelectionJourneyStep = ({
 );
 
 const deriveDraftSelectionState = ({
-  availabilityByMode,
   bookingMode,
   coverageStatus,
   isProfessionalAvailable,
   offeredServices,
+  scheduleDaysByMode,
   scheduleDayId,
   serviceId,
   timeSlotId,
 }: {
-  availabilityByMode?: Partial<Record<ServiceDeliveryMode, ProfessionalAvailabilityDay[]>>;
   bookingMode: ServiceDeliveryMode | null;
   coverageStatus: ProfessionalCoverageStatus | null;
   isProfessionalAvailable: boolean;
   offeredServices: ProfessionalServiceEntry[];
+  scheduleDaysByMode?: Partial<Record<ServiceDeliveryMode, ProfessionalAvailabilityDay[]>>;
   scheduleDayId: string;
   serviceId: string;
   timeSlotId: string;
@@ -173,7 +182,7 @@ const deriveDraftSelectionState = ({
         ).filter(
           (mode) =>
             !isOfflineServiceMode(mode) ||
-            (availabilityByMode?.[mode] || []).some((scheduleDay) =>
+            (scheduleDaysByMode?.[mode] || []).some((scheduleDay) =>
               scheduleDay.slots.some((slot) => slot.status !== 'booked'),
             ),
         )
@@ -186,7 +195,7 @@ const deriveDraftSelectionState = ({
   const requiresOfflineScheduleSelection = Boolean(resolvedBookingMode && isOfflineServiceMode(resolvedBookingMode));
   const scheduleDays =
     serviceEntry && resolvedBookingMode && isOfflineServiceMode(resolvedBookingMode)
-      ? availabilityByMode?.[resolvedBookingMode] || []
+      ? scheduleDaysByMode?.[resolvedBookingMode] || []
       : [];
   const resolvedScheduleDayId = requiresOfflineScheduleSelection
     ? (scheduleDayId && scheduleDays.some((scheduleDay) => scheduleDay.id === scheduleDayId)
@@ -219,6 +228,7 @@ const deriveDraftSelectionState = ({
 };
 
 interface ServiceSelectionSheetProps {
+  availabilityRulesByMode?: Partial<Record<OfflineServiceDeliveryMode, ProfessionalAvailabilityRules>>;
   draftSelection: DraftSelectionState;
   isOpen: boolean;
   locale: string;
@@ -230,6 +240,7 @@ interface ServiceSelectionSheetProps {
 }
 
 const ServiceSelectionSheet = ({
+  availabilityRulesByMode,
   draftSelection,
   isOpen,
   locale,
@@ -269,6 +280,12 @@ const ServiceSelectionSheet = ({
   const selectedServiceModes = getEnabledServiceModes(serviceEntry.serviceMapping.serviceModes);
   const selectedScheduleDay =
     scheduleDays.find((currentScheduleDay) => currentScheduleDay.id === scheduleDayId) || null;
+  const minimumNoticeLabel =
+    bookingMode && isOfflineServiceMode(bookingMode)
+      ? formatMinimumNoticeLabel(
+          availabilityRulesByMode?.[bookingMode]?.minimumNoticeHours || DEFAULT_AVAILABILITY_MINIMUM_NOTICE_HOURS,
+        )
+      : null;
 
   return createPortal(
     <div className="fixed inset-0 z-[70] flex items-end justify-center overflow-hidden">
@@ -417,6 +434,11 @@ const ServiceSelectionSheet = ({
                 );
               })}
             </div>
+            {minimumNoticeLabel ? (
+              <p className="mt-3 text-[12px] leading-relaxed text-gray-500">
+                {t('minimumNoticeInline', { value: minimumNoticeLabel })}
+              </p>
+            ) : null}
           </div>
 
           {requiresOfflineScheduleSelection ? (
@@ -523,7 +545,7 @@ const ServiceSelectionSheet = ({
 };
 
 export const ProfessionalServicesSection = ({
-  availabilityByMode,
+  availabilityRulesByMode,
   coverageStatus,
   isProfessionalAvailable,
   offeredServices,
@@ -532,6 +554,7 @@ export const ProfessionalServicesSection = ({
   onSelectService,
   onSelectTimeSlot,
   profileCopy,
+  scheduleDaysByMode,
   selectedBookingMode,
   selectedScheduleDayId,
   selectedScheduleDays,
@@ -643,11 +666,11 @@ export const ProfessionalServicesSection = ({
         : t('selectionResumeReadyDescription');
   const selectionResumeBadge = isSelectionReady ? t('selectionReadyBadge') : t('selectionProgressBadge');
   const draftSelection = deriveDraftSelectionState({
-    availabilityByMode,
     bookingMode: draftBookingMode,
     coverageStatus,
     isProfessionalAvailable,
     offeredServices,
+    scheduleDaysByMode,
     scheduleDayId: draftScheduleDayId,
     serviceId: draftServiceId,
     timeSlotId: draftTimeSlotId,
@@ -955,18 +978,54 @@ export const ProfessionalServicesSection = ({
                     }}
                   >
                     <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-[14px] font-bold text-gray-900">{catalogService.name}</p>
-                          <span className={neutralSoftPillClass}>{categoryName}</span>
-                          {isSelected ? <span className={accentSoftPillClass}>{t('serviceSelected')}</span> : null}
+                      <div className="flex min-w-0 flex-1 gap-3">
+                        <div
+                          className="h-14 w-14 shrink-0 rounded-[18px] bg-cover bg-center"
+                          style={{ backgroundImage: `url(${catalogService.image})` }}
+                        />
+
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <p className="truncate text-[15px] font-bold text-gray-900">{catalogService.name}</p>
+                              <div className="mt-1 flex flex-wrap items-center gap-2">
+                                <span className={accentSoftPillClass}>{categoryName}</span>
+                                {isSelected ? (
+                                  <span className={accentSoftPillClass}>{t('serviceSelected')}</span>
+                                ) : null}
+                              </div>
+                            </div>
+
+                            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-50 text-slate-400">
+                              <ChevronRight className="h-5 w-5" />
+                            </span>
+                          </div>
+
+                          <p className="mt-3 line-clamp-2 text-[13px] leading-relaxed text-gray-600">
+                            {serviceMapping.summary || catalogService.shortDescription}
+                          </p>
+
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {catalogService.tags.slice(0, 3).map((tag) => (
+                              <span key={`${serviceMapping.serviceId}-${tag}`} className={neutralSoftPillClass}>
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
                         </div>
+                      </div>
+                    </div>
 
-                        <p className="mt-2 line-clamp-2 text-[12px] leading-relaxed text-gray-500">
-                          {serviceMapping.summary || catalogService.shortDescription}
-                        </p>
-
-                        <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <div className="mt-4 border-t border-gray-100 pt-4">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className={neutralSoftPillClass}>
+                            <Clock3 className="h-3.5 w-3.5" />
+                            {serviceMapping.duration}
+                          </span>
+                          <span className={neutralSoftPillClass}>
+                            {getBookingFlowLabel(t, serviceMapping.bookingFlow)}
+                          </span>
                           {enabledModes.map((mode) => {
                             const ModeIcon = getModeIcon(mode);
 
@@ -980,21 +1039,18 @@ export const ProfessionalServicesSection = ({
                               </span>
                             );
                           })}
+                        </div>
 
-                          <span className={neutralSoftPillClass}>
-                            {getBookingFlowLabel(t, serviceMapping.bookingFlow)}
+                        <div className="flex items-center gap-2">
+                          <span className="rounded-full bg-slate-900 px-4 py-2.5 text-[13px] font-bold text-white">
+                            {serviceMapping.price}
+                          </span>
+                          <span
+                            className={`${isSelected ? accentPrimaryButtonClass : darkPrimaryButtonClass} px-4 py-2.5 text-[11px]`}
+                          >
+                            {isSelected ? t('changeServiceAction') : t('selectServiceAction')}
                           </span>
                         </div>
-                      </div>
-
-                      <div className="shrink-0 text-right">
-                        <p className="text-[15px] font-bold text-gray-900">{serviceMapping.price}</p>
-                        <p className="mt-1 text-[11px] font-medium text-gray-500">{serviceMapping.duration}</p>
-                        <span
-                          className={`mt-3 ${isSelected ? accentPrimaryButtonClass : darkPrimaryButtonClass} px-4 py-2.5 text-[11px]`}
-                        >
-                          {isSelected ? t('changeServiceAction') : t('selectServiceAction')}
-                        </span>
                       </div>
                     </div>
                   </button>
@@ -1011,6 +1067,7 @@ export const ProfessionalServicesSection = ({
       </section>
 
       <ServiceSelectionSheet
+        availabilityRulesByMode={availabilityRulesByMode}
         draftSelection={draftSelection}
         isOpen={isServiceSheetOpen}
         locale={locale}
