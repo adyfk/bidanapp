@@ -169,30 +169,52 @@ const TrustDashboardContent = ({
   const [isStoryEditorOpen, setIsStoryEditorOpen] = useState(false);
   const [selectedCredentialId, setSelectedCredentialId] = useState(trustCredentials[0]?.id || '');
   const [selectedStoryId, setSelectedStoryId] = useState(trustActivityStories[0]?.id || '');
+  const [editingCredentialId, setEditingCredentialId] = useState<string | null>(null);
+  const [editingStoryId, setEditingStoryId] = useState<string | null>(null);
   const [credentialDraft, setCredentialDraft] = useState<CredentialDraft>(emptyCredentialDraft);
   const [storyDraft, setStoryDraft] = useState<ActivityStoryDraft>(emptyActivityStoryDraft);
   const selectedCredential = trustCredentials.find((item) => item.id === selectedCredentialId) || null;
   const selectedStory = trustActivityStories.find((item) => item.id === selectedStoryId) || null;
+  const editingCredential = editingCredentialId
+    ? trustCredentials.find((item) => item.id === editingCredentialId) || null
+    : null;
+  const editingStory = editingStoryId ? trustActivityStories.find((item) => item.id === editingStoryId) || null : null;
 
   useEffect(() => {
-    if (!selectedCredential && trustCredentials[0]) {
-      setSelectedCredentialId(trustCredentials[0].id);
+    if (selectedCredential) {
+      return;
     }
+
+    if (trustCredentials[0]) {
+      setSelectedCredentialId(trustCredentials[0].id);
+      return;
+    }
+
+    setSelectedCredentialId('');
   }, [selectedCredential, trustCredentials]);
 
   useEffect(() => {
-    if (!selectedStory && trustActivityStories[0]) {
-      setSelectedStoryId(trustActivityStories[0].id);
+    if (selectedStory) {
+      return;
     }
+
+    if (trustActivityStories[0]) {
+      setSelectedStoryId(trustActivityStories[0].id);
+      return;
+    }
+
+    setSelectedStoryId('');
   }, [selectedStory, trustActivityStories]);
 
   const closeCredentialEditor = () => {
-    setCredentialDraft(selectedCredential ? toCredentialDraft(selectedCredential) : emptyCredentialDraft);
+    setCredentialDraft(editingCredential ? toCredentialDraft(editingCredential) : emptyCredentialDraft);
+    setEditingCredentialId(null);
     setIsCredentialEditorOpen(false);
   };
 
   const closeStoryEditor = () => {
-    setStoryDraft(selectedStory ? toActivityStoryDraft(selectedStory) : emptyActivityStoryDraft);
+    setStoryDraft(editingStory ? toActivityStoryDraft(editingStory) : emptyActivityStoryDraft);
+    setEditingStoryId(null);
     setIsStoryEditorOpen(false);
   };
 
@@ -214,24 +236,26 @@ const TrustDashboardContent = ({
         galleryCount={galleryCount}
         getServiceLabel={getServiceLabel}
         onAddCredential={() => {
-          setSelectedCredentialId('');
+          setEditingCredentialId(null);
           setCredentialDraft(emptyCredentialDraft);
           setIsCredentialEditorOpen(true);
         }}
         onAddStory={() => {
-          setSelectedStoryId('');
+          setEditingStoryId(null);
           setStoryDraft(emptyActivityStoryDraft);
           setIsStoryEditorOpen(true);
         }}
         onEditCredential={(credentialId) => {
           const nextCredential = trustCredentials.find((item) => item.id === credentialId);
           setSelectedCredentialId(credentialId);
+          setEditingCredentialId(credentialId);
           setCredentialDraft(nextCredential ? toCredentialDraft(nextCredential) : emptyCredentialDraft);
           setIsCredentialEditorOpen(true);
         }}
         onEditStory={(storyId) => {
           const nextStory = trustActivityStories.find((item) => item.id === storyId);
           setSelectedStoryId(storyId);
+          setEditingStoryId(storyId);
           setStoryDraft(nextStory ? toActivityStoryDraft(nextStory) : emptyActivityStoryDraft);
           setIsStoryEditorOpen(true);
         }}
@@ -250,9 +274,10 @@ const TrustDashboardContent = ({
           onChangeDraft={setCredentialDraft}
           onClose={closeCredentialEditor}
           onDelete={
-            selectedCredential
+            editingCredential
               ? () => {
-                  onDeleteCredential(selectedCredential.id);
+                  onDeleteCredential(editingCredential.id);
+                  setEditingCredentialId(null);
                   setIsCredentialEditorOpen(false);
                   onNotice(t('trust.credentialDeleteSuccess'));
                 }
@@ -260,10 +285,11 @@ const TrustDashboardContent = ({
           }
           onSave={() => {
             const nextId = onUpsertCredential({
-              id: selectedCredentialId || undefined,
+              id: editingCredentialId || undefined,
               ...credentialDraft,
             });
             setSelectedCredentialId(nextId);
+            setEditingCredentialId(nextId);
             setIsCredentialEditorOpen(false);
             onNotice(t('trust.credentialSaveSuccess'));
           }}
@@ -275,9 +301,10 @@ const TrustDashboardContent = ({
           onChangeDraft={setStoryDraft}
           onClose={closeStoryEditor}
           onDelete={
-            selectedStory
+            editingStory
               ? () => {
-                  onDeleteActivityStory(selectedStory.id);
+                  onDeleteActivityStory(editingStory.id);
+                  setEditingStoryId(null);
                   setIsStoryEditorOpen(false);
                   onNotice(t('trust.storyDeleteSuccess'));
                 }
@@ -285,10 +312,11 @@ const TrustDashboardContent = ({
           }
           onSave={() => {
             const nextId = onUpsertActivityStory({
-              id: selectedStoryId || undefined,
+              id: editingStoryId || undefined,
               ...storyDraft,
             });
             setSelectedStoryId(nextId);
+            setEditingStoryId(nextId);
             setIsStoryEditorOpen(false);
             onNotice(t('trust.storySaveSuccess'));
           }}
