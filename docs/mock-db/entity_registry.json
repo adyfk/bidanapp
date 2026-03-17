@@ -134,25 +134,21 @@
   },
   {
     "index": 17,
-    "tableName": "professional_service_schedule_days.json",
+    "tableName": "professional_availability_schedule_days.json",
     "group": "catalog",
     "entityKind": "schedule_parent",
-    "description": "Hari jadwal untuk offering layanan offline.",
-    "keyRelations": [
-      "professionalId -> professionals.id",
-      "serviceOfferingId -> professional_service_offerings.id",
-      "serviceId -> services.id"
-    ]
+    "description": "Hari booking global profesional untuk mode offline.",
+    "keyRelations": ["professionalId -> professionals.id", "mode -> reference_service_delivery_modes.code"]
   },
   {
     "index": 18,
-    "tableName": "professional_service_time_slots.json",
+    "tableName": "professional_availability_time_slots.json",
     "group": "catalog",
     "entityKind": "schedule_child",
-    "description": "Slot waktu untuk setiap hari jadwal.",
+    "description": "Slot booking global profesional untuk setiap hari offline.",
     "keyRelations": [
-      "scheduleDayId -> professional_service_schedule_days.id",
-      "serviceOfferingId -> professional_service_offerings.id"
+      "scheduleDayId -> professional_availability_schedule_days.id",
+      "professionalId -> professionals.id"
     ]
   },
   {

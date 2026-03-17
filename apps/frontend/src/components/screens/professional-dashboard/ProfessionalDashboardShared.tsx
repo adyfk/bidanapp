@@ -5,7 +5,10 @@ import type { ReactNode } from 'react';
 import {
   filterChipClass,
   insetSurfaceClass,
+  neutralSoftPillClass,
   segmentedButtonClass,
+  softMetricTileClass,
+  softWhitePanelClass,
   surfaceCardPaddedClass,
 } from '@/components/ui/tokens';
 import { getNextProfessionalRequestStatus } from '@/features/professional-portal/lib/request-status';
@@ -35,9 +38,9 @@ export const DashboardDialog = ({
     <div
       role="dialog"
       aria-modal="true"
-      className="relative flex max-h-[92vh] w-full max-w-md flex-col overflow-hidden rounded-[30px] border border-slate-200 bg-white shadow-[0_32px_100px_-32px_rgba(15,23,42,0.45)]"
+      className="relative flex max-h-[92vh] w-full max-w-md flex-col overflow-hidden rounded-[30px] border border-pink-100/80 bg-[linear-gradient(180deg,#FFF9FC_0%,#FFFFFF_100%)] shadow-[0_32px_100px_-32px_rgba(15,23,42,0.45)]"
     >
-      <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-4 py-4">
+      <div className="flex items-start justify-between gap-4 border-b border-pink-100/80 px-4 py-4">
         <div>
           <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-slate-400">{eyebrow}</p>
           <h2 className="mt-2 text-[22px] font-bold text-slate-900">{title}</h2>
@@ -52,7 +55,7 @@ export const DashboardDialog = ({
             type="button"
             aria-label={closeLabel}
             onClick={onClose}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition-colors hover:bg-slate-200"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50"
           >
             <X className="h-5 w-5" />
           </button>
@@ -61,7 +64,7 @@ export const DashboardDialog = ({
 
       <div className="overflow-y-auto px-4 py-4">{children}</div>
 
-      {footer ? <div className="border-t border-slate-200 bg-white px-4 py-4">{footer}</div> : null}
+      {footer ? <div className="border-t border-pink-100/80 bg-white px-4 py-4">{footer}</div> : null}
     </div>
   </div>
 );
@@ -82,7 +85,7 @@ export const SectionHeading = ({
   <div className="flex items-start justify-between gap-3">
     <div className="flex min-w-0 items-start gap-3">
       {icon ? (
-        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[16px] bg-slate-100 text-slate-600">
+        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[16px] border border-pink-100/70 bg-white text-pink-500 shadow-[0_10px_26px_-22px_rgba(17,24,39,0.35)]">
           {icon}
         </div>
       ) : null}
@@ -99,21 +102,21 @@ export const SectionHeading = ({
 );
 
 export const MiniStatCard = ({ label, value }: { label: string; value: string }) => (
-  <div className="flex min-h-[80px] flex-col justify-between rounded-[20px] border border-slate-200/80 bg-white px-4 py-3.5 shadow-[0_14px_40px_-28px_rgba(15,23,42,0.18)]">
+  <div className={`${softMetricTileClass} flex min-h-[80px] flex-col justify-between`}>
     <p className="text-[12px] text-slate-500">{label}</p>
     <p className="mt-3 break-words text-[17px] font-bold leading-tight text-slate-900">{value}</p>
   </div>
 );
 
 export const ServiceMetaChip = ({ label, value }: { label: string; value: string }) => (
-  <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5">
+  <div className={neutralSoftPillClass}>
     <span className="text-[11px] font-medium text-slate-500">{label}</span>
     <span className="text-[12px] font-bold text-slate-900">{value}</span>
   </div>
 );
 
 export const ServiceMetricTile = ({ label, value }: { label: string; value: string }) => (
-  <div className={`${insetSurfaceClass} px-3.5 py-3`}>
+  <div className={`${softMetricTileClass} px-3.5 py-3`}>
     <p className="text-[11px] font-medium text-slate-500">{label}</p>
     <p className="mt-2 text-[14px] font-bold leading-snug text-slate-900">{value}</p>
   </div>
@@ -130,7 +133,7 @@ export const ServiceModeBadge = ({
 }) => (
   <span
     className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[12px] font-semibold ${
-      isActive ? 'border-blue-200 bg-blue-50 text-blue-700' : 'border-slate-200 bg-white text-slate-400'
+      isActive ? 'border-pink-100 bg-pink-50 text-pink-600' : 'border-slate-200 bg-white text-slate-400'
     }`}
   >
     <span className={`h-2 w-2 rounded-full ${isActive ? 'bg-current opacity-80' : 'bg-slate-300'}`} />
@@ -152,7 +155,7 @@ export const SwitchStatusRow = ({
   offLabel: string;
   onLabel: string;
 }) => (
-  <div className="rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-3">
+  <div className={`${softWhitePanelClass} px-4 py-3`}>
     <div className="flex items-start justify-between gap-4">
       <div className="pr-4">
         <p className="text-[14px] font-bold text-slate-900">{label}</p>
@@ -170,7 +173,7 @@ export const SwitchStatusRow = ({
 );
 
 export const ChecklistRow = ({ title, value }: { title: string; value: string }) => (
-  <div className={`${insetSurfaceClass} flex min-h-[128px] flex-col justify-between px-4 py-4`}>
+  <div className={`${softWhitePanelClass} flex min-h-[128px] flex-col justify-between px-4 py-4`}>
     <div className="flex items-center gap-3">
       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
         <BadgeCheck className="h-4 w-4" />
@@ -199,6 +202,7 @@ export const RequestCard = ({
   evidenceLabels,
   fieldLabels,
   getAreaLabel,
+  getBookingFlowLabel,
   getModeLabel,
   getServiceLabel,
   htmlId,
@@ -224,13 +228,14 @@ export const RequestCard = ({
   fieldLabels: {
     area: string;
     budget: string;
-    channel: string;
+    bookingFlow: string;
     currentStatus: string;
     note: string;
     requestedMode: string;
     service: string;
   };
   getAreaLabel: (areaId: string) => string;
+  getBookingFlowLabel: (flow: ProfessionalManagedRequest['bookingFlow']) => string;
   getModeLabel: (mode: ProfessionalManagedRequest['requestedMode']) => string;
   getServiceLabel: (serviceId: string) => string;
   htmlId?: string;
@@ -281,7 +286,7 @@ export const RequestCard = ({
 
       <div className="mt-3 flex flex-wrap gap-2">
         <ServiceMetaChip label={fieldLabels.requestedMode} value={getModeLabel(request.requestedMode)} />
-        <ServiceMetaChip label={fieldLabels.channel} value={request.channel} />
+        <ServiceMetaChip label={fieldLabels.bookingFlow} value={getBookingFlowLabel(request.bookingFlow)} />
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-2">
@@ -290,7 +295,12 @@ export const RequestCard = ({
             <ClipboardList className="h-4 w-4 text-slate-400" />
             <span>{fieldLabels.service}</span>
           </div>
-          <p className="mt-2 text-[13px] font-bold leading-snug text-slate-900">{getServiceLabel(request.serviceId)}</p>
+          <p className="mt-2 text-[13px] font-bold leading-snug text-slate-900">
+            {request.serviceName || getServiceLabel(request.serviceId)}
+          </p>
+          {request.serviceSummary ? (
+            <p className="mt-1 text-[12px] leading-relaxed text-slate-500">{request.serviceSummary}</p>
+          ) : null}
         </div>
         <div className={`${insetSurfaceClass} px-3.5 py-3`}>
           <div className="flex items-center gap-2 text-[11px] font-medium text-slate-500">

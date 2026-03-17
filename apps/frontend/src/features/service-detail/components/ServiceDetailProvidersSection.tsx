@@ -3,6 +3,12 @@
 import { Clock, Heart, MapPin } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
+import {
+  accentPrimaryButtonClass,
+  accentSoftPillClass,
+  neutralSoftPillClass,
+  softWhitePanelClass,
+} from '@/components/ui/tokens';
 import type { ServiceProviderSummary } from '@/features/service-detail/hooks/useServiceDetail';
 import { useRouter } from '@/i18n/routing';
 import { APP_CONFIG } from '@/lib/config';
@@ -37,7 +43,7 @@ export const ServiceDetailProvidersSection = ({ onRequestBooking, providers }: S
           <div
             key={provider.id}
             onClick={() => router.push(professionalRoute(provider.slug))}
-            className="cursor-pointer rounded-[24px] border border-gray-100 bg-white p-4 shadow-sm transition-all active:scale-[0.98] hover:shadow-md"
+            className={`${softWhitePanelClass} cursor-pointer p-4 transition-all active:scale-[0.98] hover:shadow-[0_18px_34px_-24px_rgba(17,24,39,0.28)]`}
             onKeyDown={(event) => {
               if (event.key === 'Enter' || event.key === ' ') {
                 event.preventDefault();
@@ -87,10 +93,7 @@ export const ServiceDetailProvidersSection = ({ onRequestBooking, providers }: S
                 </div>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {getEnabledServiceModes(provider.serviceModes).map((mode) => (
-                    <span
-                      key={`${provider.id}-${mode}`}
-                      className="rounded-full bg-gray-50 px-2.5 py-1 text-[10px] font-semibold text-gray-600"
-                    >
+                    <span key={`${provider.id}-${mode}`} className={neutralSoftPillClass}>
                       {mode === 'online'
                         ? professionalT('modeOnline')
                         : mode === 'home_visit'
@@ -114,8 +117,8 @@ export const ServiceDetailProvidersSection = ({ onRequestBooking, providers }: S
             <div className="mt-2 flex gap-2 pt-1">
               <button
                 type="button"
-                className="w-full rounded-[12px] py-2.5 text-[13px] font-bold text-white shadow-sm transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-white/80 disabled:shadow-none"
-                style={{ backgroundColor: provider.canBook ? APP_CONFIG.colors.primary : '#D1D5DB' }}
+                className={`${provider.canBook ? accentPrimaryButtonClass : accentSoftPillClass} w-full py-2.5 text-[13px] disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-white/80 disabled:shadow-none`}
+                style={{ background: provider.canBook ? undefined : '#D1D5DB' }}
                 onClick={(event) => {
                   event.stopPropagation();
                   onRequestBooking(provider);

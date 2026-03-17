@@ -11,7 +11,8 @@ export type RequestStatusValidationError =
   | 'customerSummaryRequired'
   | 'evidenceNoteRequired'
   | 'evidenceRequired'
-  | 'invalidTransition';
+  | 'invalidTransition'
+  | 'paymentPending';
 
 export interface ProfessionalRequestTransitionMeta {
   allowedStatuses: ProfessionalRequestStatus[];
@@ -60,6 +61,14 @@ export const validateProfessionalRequestStatusUpdate = (
 
   if (!transition.isAllowed) {
     return 'invalidTransition';
+  }
+
+  if (
+    request.status === 'quoted' &&
+    nextStatus === 'scheduled' &&
+    request.customerStatus === 'approved_waiting_payment'
+  ) {
+    return 'paymentPending';
   }
 
   if (transition.customerSummaryRequired && !input?.customerSummary?.trim()) {

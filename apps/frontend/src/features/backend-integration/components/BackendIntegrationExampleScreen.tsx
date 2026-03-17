@@ -158,7 +158,7 @@ export const BackendIntegrationExampleScreen = () => {
             <h2 className="text-[16px] font-bold text-gray-900">{t('restSection')}</h2>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-3">
             <div className="rounded-[20px] bg-gray-50 p-4">
               <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">{t('health')}</p>
               <p className="mt-2 text-[13px] font-semibold text-gray-900">{healthSummary || '...'}</p>

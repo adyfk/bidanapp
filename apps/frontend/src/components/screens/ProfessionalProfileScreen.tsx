@@ -229,7 +229,7 @@ export const ProfessionalProfileScreen = () => {
   return (
     <>
       <div className="flex h-full flex-col overflow-y-auto bg-gray-50 pb-10 custom-scrollbar">
-        <ProfilePageHeader onBack={() => router.push(professionalDashboardRoute('overview'))} title={t('navTitle')} />
+        <ProfilePageHeader onBack={() => router.push(professionalDashboardRoute('requests'))} title={t('navTitle')} />
 
         <div className="space-y-6 px-5 py-6">
           <ProfileIdentityCard
@@ -248,7 +248,7 @@ export const ProfessionalProfileScreen = () => {
               icon={<LayoutDashboard className="h-5 w-5" />}
               title={t('quickActions.dashboardTitle')}
               description={t('quickActions.dashboardDescription')}
-              onClick={() => router.push(professionalDashboardRoute('overview'))}
+              onClick={() => router.push(professionalDashboardRoute('requests'))}
             />
             <ProfileQuickActionCard
               icon={<UserRound className="h-5 w-5" />}

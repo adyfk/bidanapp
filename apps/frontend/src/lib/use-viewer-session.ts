@@ -50,7 +50,7 @@ const persistViewerSession = (nextState: ViewerSessionState) => {
 };
 
 export const useViewerSession = () => {
-  const [viewerSession, setViewerSession] = useState<ViewerSessionState>(readViewerSession);
+  const [viewerSession, setViewerSession] = useState<ViewerSessionState>(defaultViewerSession);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -61,6 +61,7 @@ export const useViewerSession = () => {
       setViewerSession(readViewerSession());
     };
 
+    syncViewerSession();
     window.addEventListener('storage', syncViewerSession);
     window.addEventListener(viewerSessionEventName, syncViewerSession);
 

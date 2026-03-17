@@ -3,7 +3,7 @@
 import { ArrowUpRight, ClipboardList, MapPin } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { PROFESSIONAL_REQUEST_STATUS_ORDER } from '@/features/professional-portal/lib/request-status';
-import { getAreaById, getServiceById } from '@/lib/mock-db/catalog';
+import { getAreaById } from '@/lib/mock-db/catalog';
 import type { ProfessionalManagedRequest } from '@/lib/use-professional-portal';
 
 interface CustomerRequestStatusCardProps {
@@ -57,15 +57,16 @@ export const CustomerRequestStatusCard = ({ professionalName, request }: Custome
         })}
       </div>
 
-      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <div className="mt-4 grid grid-cols-1 gap-3">
         <div className="rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-3">
           <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
             <ClipboardList className="h-4 w-4" />
             <span>{t('requestUpdates.service')}</span>
           </div>
-          <p className="mt-2 text-[14px] font-bold text-slate-900">
-            {getServiceById(request.serviceId)?.name || request.serviceId}
-          </p>
+          <p className="mt-2 text-[14px] font-bold text-slate-900">{request.serviceName || request.serviceId}</p>
+          {request.serviceSummary ? (
+            <p className="mt-1 text-[12px] leading-relaxed text-slate-500">{request.serviceSummary}</p>
+          ) : null}
         </div>
         <div className="rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-3">
           <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">

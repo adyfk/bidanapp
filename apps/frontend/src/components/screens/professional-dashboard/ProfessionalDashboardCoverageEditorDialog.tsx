@@ -2,16 +2,14 @@
 
 import { Save } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { accentPrimaryButtonClass, blushSubtlePanelClass, softWhitePanelClass } from '@/components/ui/tokens';
 import { MOCK_AREAS } from '@/lib/mock-db/catalog';
-import type { ServiceDeliveryMode } from '@/types/catalog';
 import { dashboardInputClass, dashboardTextareaClass, dashboardTextareaTallClass } from './editorStyles';
-import { deliveryModes } from './helpers';
 import { DashboardDialog, LabeledField, SelectableChip, SwitchRow } from './ProfessionalDashboardShared';
 import type { CoverageDraft } from './types';
 
 interface ProfessionalDashboardCoverageEditorDialogProps {
   coverageDraft: CoverageDraft;
-  getModeLabel: (mode: ServiceDeliveryMode) => string;
   onChangeDraft: (draft: CoverageDraft) => void;
   onClose: () => void;
   onSave: () => void;
@@ -19,7 +17,6 @@ interface ProfessionalDashboardCoverageEditorDialogProps {
 
 export const ProfessionalDashboardCoverageEditorDialog = ({
   coverageDraft,
-  getModeLabel,
   onChangeDraft,
   onClose,
   onSave,
@@ -38,7 +35,7 @@ export const ProfessionalDashboardCoverageEditorDialog = ({
         <button
           type="button"
           onClick={onSave}
-          className="flex w-full items-center justify-center gap-2 rounded-full bg-blue-600 py-3 text-[14px] font-bold text-white"
+          className={`${accentPrimaryButtonClass} flex w-full items-center justify-center gap-2`}
         >
           <Save className="h-4 w-4" />
           {t('coverage.saveButton')}
@@ -46,7 +43,7 @@ export const ProfessionalDashboardCoverageEditorDialog = ({
       }
     >
       <div className="grid gap-4">
-        <div className="grid gap-3">
+        <div className={`${blushSubtlePanelClass} grid gap-3 p-4`}>
           <SwitchRow
             checked={coverageDraft.acceptingNewClients}
             description={t('coverage.switches.acceptingDescription')}
@@ -61,7 +58,7 @@ export const ProfessionalDashboardCoverageEditorDialog = ({
           />
         </div>
 
-        <div className="grid gap-4">
+        <div className={`${softWhitePanelClass} grid gap-4 p-4`}>
           <LabeledField label={t('coverage.fields.city')}>
             <input
               type="text"
@@ -94,14 +91,6 @@ export const ProfessionalDashboardCoverageEditorDialog = ({
               className={dashboardInputClass}
             />
           </LabeledField>
-          <LabeledField label={t('coverage.fields.capacity')}>
-            <input
-              type="number"
-              value={coverageDraft.monthlyCapacity}
-              onChange={(event) => updateDraft({ monthlyCapacity: event.target.value })}
-              className={dashboardInputClass}
-            />
-          </LabeledField>
           <LabeledField label={t('coverage.fields.latitude')}>
             <input
               type="number"
@@ -120,42 +109,24 @@ export const ProfessionalDashboardCoverageEditorDialog = ({
           </LabeledField>
         </div>
 
-        <LabeledField label={t('coverage.fields.practiceAddress')}>
-          <textarea
-            value={coverageDraft.practiceAddress}
-            onChange={(event) => updateDraft({ practiceAddress: event.target.value })}
-            className={dashboardTextareaClass}
-          />
-        </LabeledField>
-        <LabeledField label={t('coverage.fields.publicBio')}>
-          <textarea
-            value={coverageDraft.publicBio}
-            onChange={(event) => updateDraft({ publicBio: event.target.value })}
-            className={dashboardTextareaTallClass}
-          />
-        </LabeledField>
+        <div className={`${softWhitePanelClass} grid gap-4 p-4`}>
+          <LabeledField label={t('coverage.fields.practiceAddress')}>
+            <textarea
+              value={coverageDraft.practiceAddress}
+              onChange={(event) => updateDraft({ practiceAddress: event.target.value })}
+              className={dashboardTextareaClass}
+            />
+          </LabeledField>
+          <LabeledField label={t('coverage.fields.publicBio')}>
+            <textarea
+              value={coverageDraft.publicBio}
+              onChange={(event) => updateDraft({ publicBio: event.target.value })}
+              className={dashboardTextareaTallClass}
+            />
+          </LabeledField>
+        </div>
 
-        <div className="grid gap-4">
-          <div>
-            <p className="mb-2 text-[12px] font-semibold text-slate-500">{t('coverage.fields.practiceModes')}</p>
-            <div className="flex flex-wrap gap-2">
-              {deliveryModes.map((mode) => (
-                <SelectableChip
-                  key={mode}
-                  isActive={coverageDraft.practiceModes.includes(mode)}
-                  label={getModeLabel(mode)}
-                  onClick={() =>
-                    updateDraft({
-                      practiceModes: coverageDraft.practiceModes.includes(mode)
-                        ? coverageDraft.practiceModes.filter((currentMode) => currentMode !== mode)
-                        : [...coverageDraft.practiceModes, mode],
-                    })
-                  }
-                />
-              ))}
-            </div>
-          </div>
-
+        <div className={`${softWhitePanelClass} grid gap-4 p-4`}>
           <div>
             <p className="mb-2 text-[12px] font-semibold text-slate-500">{t('coverage.fields.areaSelection')}</p>
             <div className="flex flex-wrap gap-2">
@@ -174,6 +145,14 @@ export const ProfessionalDashboardCoverageEditorDialog = ({
                 />
               ))}
             </div>
+          </div>
+
+          <div className={`${blushSubtlePanelClass} px-4 py-4`}>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-pink-500">
+              {t('coverage.serviceSettingsEyebrow')}
+            </p>
+            <p className="mt-2 text-[14px] font-bold text-slate-900">{t('coverage.serviceSettingsTitle')}</p>
+            <p className="mt-2 text-[13px] leading-relaxed text-slate-600">{t('coverage.serviceSettingsHint')}</p>
           </div>
         </div>
       </div>

@@ -29,3 +29,29 @@ export const compactBadgeClass = 'rounded-full bg-white px-3 py-1.5 text-[12px] 
 
 export const iconButtonSurfaceClass =
   'flex items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition-colors hover:bg-slate-50 active:scale-95';
+
+export const blushPanelClass =
+  'rounded-[28px] border border-pink-100/80 bg-[linear-gradient(180deg,#FFF7FB_0%,#FFFFFF_100%)] shadow-[0_18px_40px_-28px_rgba(17,24,39,0.18)]';
+
+export const blushSubtlePanelClass =
+  'rounded-[24px] border border-pink-100/80 bg-[linear-gradient(180deg,#FFFFFF_0%,#FFF7FB_100%)] shadow-[0_18px_40px_-30px_rgba(17,24,39,0.25)]';
+
+export const blushInputShellClass =
+  'rounded-[24px] border border-pink-100/70 bg-[linear-gradient(180deg,#FFF9FC_0%,#FFFFFF_100%)]';
+
+export const softWhitePanelClass =
+  'rounded-[24px] border border-gray-100 bg-white shadow-[0_18px_36px_-32px_rgba(17,24,39,0.25)]';
+
+export const softMetricTileClass = 'rounded-[20px] border border-gray-100 bg-white px-4 py-4';
+
+export const neutralSoftPillClass =
+  'inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-[11px] font-semibold text-gray-600 shadow-[inset_0_0_0_1px_rgba(229,231,235,1)]';
+
+export const accentSoftPillClass =
+  'inline-flex items-center gap-2 rounded-full bg-pink-50 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-pink-600';
+
+export const accentPrimaryButtonClass =
+  'inline-flex items-center justify-center rounded-full bg-[linear-gradient(180deg,#F7259B_0%,#E11D87_100%)] px-5 py-3 text-[13px] font-bold text-white shadow-[0_18px_28px_-18px_rgba(233,30,140,0.42)] transition-transform active:scale-[0.98]';
+
+export const darkPrimaryButtonClass =
+  'inline-flex items-center justify-center rounded-full bg-[#111827] px-5 py-3 text-[13px] font-bold text-white transition-transform active:scale-[0.98]';

@@ -53,10 +53,10 @@ Folder ini adalah abstraksi dummy database sebelum migrasi ke PostgreSQL. Semua 
   Join table coverage area. Satu profesional bisa melayani beberapa area.
 - `professional_service_offerings.json`
   Join table profesional ke layanan. Di sinilah harga, durasi, mode aktif, default mode, booking flow, dan summary per profesional disimpan.
-- `professional_service_schedule_days.json`
-  Hari jadwal per service offering dan mode offline. Ini memisahkan hari kunjungan dari detail jam.
-- `professional_service_time_slots.json`
-  Slot waktu per hari. Ini adalah kandidat tabel `schedule_slots` dengan foreign key ke `schedule_days`.
+- `professional_availability_schedule_days.json`
+  Hari booking global per profesional dan mode offline. Ini menjadi source of truth tunggal untuk jadwal customer-facing.
+- `professional_availability_time_slots.json`
+  Slot waktu per hari booking profesional. Ini adalah kandidat tabel `availability_slots` dengan foreign key ke `availability_days`.
 
 ### Trust, portfolio, dan social proof profesional
 
@@ -104,6 +104,7 @@ Folder ini adalah abstraksi dummy database sebelum migrasi ke PostgreSQL. Semua 
 
 - `appointments.json`
   Entitas transaksi utama. Row ini menghubungkan consumer, profesional, service, dan state appointment.
+  Row appointment sekarang menyimpan `serviceSnapshot`, `scheduleSnapshot`, `timeline`, `serviceOfferingId`, dan `bookingFlow` agar harga, durasi, summary, serta mode saat order tetap immutable walaupun offering profesional berubah setelah order dibuat.
 - `chat_threads.json`
   Thread komunikasi antara consumer dan profesional. Bisa bertipe `direct` atau `appointment`.
 - `chat_messages.json`
@@ -118,8 +119,8 @@ Folder ini adalah abstraksi dummy database sebelum migrasi ke PostgreSQL. Semua 
 
 - `services` 1:N `professional_service_offerings`
 - `professionals` 1:N `professional_service_offerings`
-- `professional_service_offerings` 1:N `professional_service_schedule_days`
-- `professional_service_schedule_days` 1:N `professional_service_time_slots`
+- `professionals` 1:N `professional_availability_schedule_days`
+- `professional_availability_schedule_days` 1:N `professional_availability_time_slots`
 - `professionals` 1:N hampir semua tabel trust dan portofolio
 - `areas` 1:N `user_contexts`
 - `areas` N:M `professionals` melalui `professional_coverage_areas`
@@ -148,11 +149,13 @@ Folder ini adalah abstraksi dummy database sebelum migrasi ke PostgreSQL. Semua 
 ### 3. Booking flow
 
 1. Consumer memilih `service`, `professional`, dan `delivery mode`.
-2. Jika mode offline, sistem membaca `professional_service_schedule_days` lalu `professional_service_time_slots`.
-3. Jika offering memakai `bookingFlow = request`, booking masuk state `requested`.
-4. Profesional dapat memindahkan state ke `approved_waiting_payment`.
-5. Setelah pembayaran berhasil, booking masuk `paid`, lalu `confirmed`, lalu `in_service`.
-6. Setelah layanan selesai, booking masuk `completed`.
+2. CTA dari service detail tidak langsung membuat request. CTA selalu diarahkan ke halaman profesional agar semua booking memakai composer yang sama.
+3. Jika mode offline, sistem membaca `professional_availability_schedule_days` lalu `professional_availability_time_slots`.
+4. Saat order dibuat, sistem menyimpan `serviceSnapshot`, `scheduleSnapshot`, dan `timeline` awal langsung ke `appointments.json`.
+5. Jika offering memakai `bookingFlow = request`, booking masuk state `requested`.
+6. Jika offering memakai `bookingFlow = instant`, booking langsung masuk `approved_waiting_payment` tanpa approval manual, tetapi tetap menunggu pembayaran.
+7. Setelah pembayaran berhasil, booking masuk `paid`, lalu `confirmed`, lalu `in_service`.
+8. Setelah layanan selesai, booking masuk `completed`.
 
 ### 4. Payment dan closure
 
@@ -187,7 +190,7 @@ Folder ini adalah abstraksi dummy database sebelum migrasi ke PostgreSQL. Semua 
 ### Booking flow
 
 - `instant`
-  Cocok untuk layanan yang bisa langsung aktif tanpa review manual.
+  Cocok untuk layanan yang tidak butuh review manual, tetapi tetap harus melewati pembayaran sebelum `confirmed`.
 - `request`
   Cocok untuk layanan yang membutuhkan approval profesional atau validasi kesiapan.
 
@@ -232,7 +235,7 @@ Folder ini adalah abstraksi dummy database sebelum migrasi ke PostgreSQL. Semua 
   - `appointments.professionalId`
   - `appointments.status`
   - `chat_messages.threadId`
-  - `professional_service_time_slots.scheduleDayId`
+  - `professional_availability_time_slots.scheduleDayId`
 - Pertimbangkan unique constraint pada:
   - `(professionalId, serviceId)` di `professional_service_offerings`
   - `(professionalId, areaId)` di `professional_coverage_areas`

@@ -1,4 +1,9 @@
-import type { AppointmentStatus } from './appointments';
+import type {
+  AppointmentScheduleSnapshot,
+  AppointmentServiceSnapshot,
+  AppointmentStatus,
+  AppointmentTimelineEvent,
+} from './appointments';
 import type { BookingFlow, ProfessionalGender, ServiceDeliveryMode, TimeSlotStatus } from './catalog';
 import type { ChatSender } from './chat';
 
@@ -151,21 +156,17 @@ export interface ProfessionalServiceOfferingRow extends IndexedRow {
   supportsOnsite: boolean;
 }
 
-export interface ProfessionalServiceScheduleDayRow extends IndexedRow {
+export interface ProfessionalAvailabilityDayRow extends IndexedRow {
   id: string;
   professionalId: string;
-  serviceOfferingId: string;
-  serviceId: string;
   mode: Exclude<ServiceDeliveryMode, 'online'>;
   label: string;
   dateIso: string;
 }
 
-export interface ProfessionalServiceTimeSlotRow extends IndexedRow {
+export interface ProfessionalAvailabilityTimeSlotRow extends IndexedRow {
   id: string;
   professionalId: string;
-  serviceOfferingId: string;
-  serviceId: string;
   scheduleDayId: string;
   mode: Exclude<ServiceDeliveryMode, 'online'>;
   label: string;
@@ -236,18 +237,22 @@ export interface MediaPresetRow extends IndexedRow {
 
 export interface AppointmentRow extends IndexedRow {
   areaId: string;
+  bookingFlow: BookingFlow;
   consumerId: string;
   customerFeedback?: AppointmentFeedbackRow | null;
   id: string;
   professionalId: string;
   recentActivity?: AppointmentRecentActivityRow | null;
-  requestChannel: string;
   requestNote: string;
   requestedAt: string;
   requestedMode: ServiceDeliveryMode;
+  scheduleSnapshot: AppointmentScheduleSnapshot;
+  serviceOfferingId: string;
+  serviceSnapshot: AppointmentServiceSnapshot;
   status: AppointmentStatus;
   serviceId: string;
   scheduledTimeLabel: string;
+  timeline: AppointmentTimelineEvent[];
   totalPriceLabel: string;
 }
 

@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { ProfessionalAccessScreen } from '@/components/screens/ProfessionalAccessScreen';
 import { ProfessionalPageSkeleton } from '@/components/screens/ProfessionalPageSkeleton';
-import { ProfessionalSetupScreen } from '@/components/screens/ProfessionalSetupScreen';
 import { buildOutcomes, toGalleryDraft, toPortfolioDraft } from '@/components/screens/professional-dashboard/helpers';
 import { ProfessionalDashboardGalleryEditorDialog } from '@/components/screens/professional-dashboard/ProfessionalDashboardGalleryEditorDialog';
 import { ProfessionalDashboardPortfolioEditorDialog } from '@/components/screens/professional-dashboard/ProfessionalDashboardPortfolioEditorDialog';
@@ -17,6 +16,7 @@ export const ProfessionalDashboardPortfolioScreen = () => {
   const {
     activeCoverageAreas,
     activeProfessional,
+    activeReviewState,
     activeServiceConfigurations,
     averageServicePriceLabel,
     clampedCompletionScore,
@@ -28,10 +28,14 @@ export const ProfessionalDashboardPortfolioScreen = () => {
     getServiceLabel,
     hasMounted,
     isProfessional,
+    onboardingState,
+    publishProfessionalProfile,
     portalState,
     publicPortfolioEntries,
     saveGalleryItem,
     savePortfolioEntry,
+    simulateProfessionalAdminReview,
+    submitProfessionalProfileForReview,
     t,
   } = useProfessionalDashboardPageData();
   const [notice, setNotice] = useState<string | null>(null);
@@ -111,8 +115,8 @@ export const ProfessionalDashboardPortfolioScreen = () => {
     return <ProfessionalAccessScreen defaultTab="login" />;
   }
 
-  if (!portalState.onboardingCompleted || !activeProfessional) {
-    return <ProfessionalSetupScreen />;
+  if (!activeProfessional) {
+    return <ProfessionalAccessScreen defaultTab="login" />;
   }
 
   const openPortfolioEditor = (portfolioId: string) => {
@@ -204,7 +208,33 @@ export const ProfessionalDashboardPortfolioScreen = () => {
       clampedCompletionScore={clampedCompletionScore}
       headerLocationLabel={dashboardLocationLabel}
       notice={notice}
+      onboardingState={onboardingState}
       onDismissNotice={() => setNotice(null)}
+      onPublishProfile={() => {
+        if (!publishProfessionalProfile()) {
+          return;
+        }
+
+        setNotice(t('onboarding.publishSuccess'));
+      }}
+      onSimulateReview={(status) => {
+        if (!simulateProfessionalAdminReview(status)) {
+          return;
+        }
+
+        setNotice(
+          status === 'changes_requested' ? t('onboarding.demoRevisionSuccess') : t('onboarding.demoVerifySuccess'),
+        );
+      }}
+      onSubmitForReview={() => {
+        if (!submitProfessionalProfileForReview()) {
+          setNotice(t('onboarding.validationNotice'));
+          return;
+        }
+
+        setNotice(t('onboarding.submitSuccess'));
+      }}
+      reviewState={activeReviewState}
       responseTimeGoal={portalState.responseTimeGoal}
     >
       <ProfessionalDashboardPortfolioTab

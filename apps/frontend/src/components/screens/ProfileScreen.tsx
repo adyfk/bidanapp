@@ -17,7 +17,7 @@ import { ProfileSettingsSheet } from '@/features/profile/components/ProfileSetti
 import { useProfileSettings } from '@/features/profile/hooks/useProfileSettings';
 import { useRouter } from '@/i18n/routing';
 import { ACTIVE_CONSUMER, ACTIVE_USER_CONTEXT } from '@/lib/mock-db/runtime';
-import { APP_ROUTES, professionalAccessRoute, professionalDashboardRoute } from '@/lib/routes';
+import { APP_ROUTES, professionalAccessRoute } from '@/lib/routes';
 import { useViewerSession } from '@/lib/use-viewer-session';
 
 export const ProfileScreen = () => {
@@ -43,7 +43,7 @@ export const ProfileScreen = () => {
 
   useEffect(() => {
     if (isProfessional) {
-      router.replace(professionalDashboardRoute('overview'));
+      router.replace(APP_ROUTES.professionalProfile);
     }
   }, [isProfessional, router]);
 

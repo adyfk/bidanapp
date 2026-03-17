@@ -29,9 +29,9 @@ export type ProfessionalNotificationSection = 'actionNeeded' | 'monitoring';
 export type ProfessionalNotificationType = 'request' | 'schedule' | 'operations';
 export type ProfessionalNotificationActionKey =
   | 'openRequestBoard'
-  | 'reviewServices'
   | 'reviewCoverage'
-  | 'openOverview';
+  | 'reviewProfile'
+  | 'reviewServices';
 
 export interface ProfessionalNotificationItem {
   actionKey: ProfessionalNotificationActionKey;

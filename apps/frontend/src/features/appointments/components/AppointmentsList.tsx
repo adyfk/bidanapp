@@ -3,9 +3,14 @@
 import { Activity, History } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
+import {
+  accentSoftPillClass,
+  blushSubtlePanelClass,
+  neutralSoftPillClass,
+  softWhitePanelClass,
+} from '@/components/ui/tokens';
 import { getAppointmentStatusChipClassName } from '@/features/appointments/lib/status';
 import { APP_CONFIG } from '@/lib/config';
-import { useUiText } from '@/lib/ui-text';
 import type { Appointment } from '@/types/appointments';
 
 interface AppointmentsListProps {
@@ -16,13 +21,14 @@ interface AppointmentsListProps {
 
 export const AppointmentsList = ({ activeTab, appointments, onSelect }: AppointmentsListProps) => {
   const t = useTranslations('Appointments');
-  const uiText = useUiText();
+  const professionalT = useTranslations('Professional');
+  const profileT = useTranslations('Profile');
 
   return (
     <div className="px-5">
       {appointments.length > 0 ? (
-        <div className="mb-6 overflow-hidden rounded-[24px] border border-gray-100 bg-white shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)]">
-          {appointments.map((appointment, index) => (
+        <div className="mb-6 space-y-3">
+          {appointments.map((appointment) => (
             <div
               key={appointment.id}
               onClick={() => onSelect(appointment.id)}
@@ -32,9 +38,7 @@ export const AppointmentsList = ({ activeTab, appointments, onSelect }: Appointm
                   onSelect(appointment.id);
                 }
               }}
-              className={`flex cursor-pointer flex-col p-4 transition-colors active:bg-gray-100 hover:bg-gray-50 sm:p-5 ${
-                index !== appointments.length - 1 ? 'border-b border-gray-50' : ''
-              }`}
+              className={`${softWhitePanelClass} flex cursor-pointer flex-col p-4 transition-colors active:bg-gray-50 hover:bg-gray-50/80`}
               role="button"
               tabIndex={0}
             >
@@ -53,6 +57,23 @@ export const AppointmentsList = ({ activeTab, appointments, onSelect }: Appointm
                       {appointment.professional.name}
                     </h3>
                     <p className="mt-0.5 text-[13px] text-gray-500">{appointment.service.name}</p>
+                    <p className="mt-1 line-clamp-1 text-[12px] text-gray-400">{appointment.service.summary}</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <span className={neutralSoftPillClass}>
+                        {appointment.requestedMode === 'online'
+                          ? profileT('modeLabels.online')
+                          : appointment.requestedMode === 'home_visit'
+                            ? profileT('modeLabels.home_visit')
+                            : profileT('modeLabels.onsite')}
+                      </span>
+                      <span
+                        className={appointment.bookingFlow === 'instant' ? accentSoftPillClass : neutralSoftPillClass}
+                      >
+                        {appointment.bookingFlow === 'instant'
+                          ? professionalT('bookingFlowInstant')
+                          : professionalT('bookingFlowRequest')}
+                      </span>
+                    </div>
                   </div>
                 </div>
                 <span
@@ -62,15 +83,12 @@ export const AppointmentsList = ({ activeTab, appointments, onSelect }: Appointm
                 </span>
               </div>
 
-              <div className="flex items-center justify-between rounded-[12px] border border-gray-100 bg-gray-50 p-3">
-                <div className="flex flex-col">
-                  <button
-                    type="button"
-                    className="pointer-events-none rounded-full px-4 py-1.5 text-[13px] font-bold"
-                    style={{ color: APP_CONFIG.colors.primary, backgroundColor: APP_CONFIG.colors.primaryLight }}
-                  >
-                    {uiText.appointmentActionLabels.detail}
-                  </button>
+              <div className={`${blushSubtlePanelClass} flex items-center justify-between p-3`}>
+                <div>
+                  <p className="text-[12px] font-medium text-gray-500">{appointment.service.durationLabel}</p>
+                  <p className="mt-1 text-[14px] font-bold" style={{ color: APP_CONFIG.colors.primary }}>
+                    {appointment.totalPrice}
+                  </p>
                 </div>
                 <p className="text-right text-[12px] font-medium text-gray-500">{appointment.time}</p>
               </div>

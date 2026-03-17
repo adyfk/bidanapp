@@ -118,5 +118,35 @@
     "dayLabel": "10 MARET",
     "inputPlaceholder": "Tulis pesan...",
     "autoReplyText": null
+  },
+  {
+    "index": 10,
+    "id": "thread-apt-010",
+    "threadType": "appointment",
+    "professionalId": "3",
+    "appointmentId": "apt-010",
+    "dayLabel": "15 MARET",
+    "inputPlaceholder": "Tulis pesan...",
+    "autoReplyText": null
+  },
+  {
+    "index": 11,
+    "id": "thread-apt-011",
+    "threadType": "appointment",
+    "professionalId": "4",
+    "appointmentId": "apt-011",
+    "dayLabel": "BESOK",
+    "inputPlaceholder": "Tulis pesan...",
+    "autoReplyText": null
+  },
+  {
+    "index": 12,
+    "id": "thread-apt-012",
+    "threadType": "appointment",
+    "professionalId": "1",
+    "appointmentId": "apt-012",
+    "dayLabel": "HARI INI",
+    "inputPlaceholder": "Tulis pesan...",
+    "autoReplyText": null
   }
 ]

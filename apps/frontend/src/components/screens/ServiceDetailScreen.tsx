@@ -37,7 +37,11 @@ export const ServiceDetailScreen = ({ serviceId }: { serviceId: string }) => {
               return;
             }
 
-            requestBooking(provider);
+            const nextRoute = requestBooking(provider);
+
+            if (nextRoute) {
+              router.push(nextRoute);
+            }
           }}
           providers={providers}
         />

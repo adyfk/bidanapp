@@ -22,8 +22,8 @@
   "bookingFlows": [
     {
       "code": "instant",
-      "description": "Booking bisa langsung aktif tanpa review manual.",
-      "entryState": "paid",
+      "description": "Booking melewati approval manual, tetapi tetap masuk ke tahap menunggu pembayaran sebelum lanjut.",
+      "entryState": "approved_waiting_payment",
       "requiresApproval": false
     },
     {

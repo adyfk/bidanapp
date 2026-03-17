@@ -31,21 +31,21 @@ export const OnboardingScreen = () => {
         />
       </div>
 
-      <div className="relative z-10 flex items-center justify-between px-5 pt-5 sm:px-6">
+      <div className="relative z-10 flex items-center justify-between px-5 pt-5">
         <div className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/78 backdrop-blur-md">
           {t('getStarted')}
         </div>
         <LanguageSwitcher variant="dark" />
       </div>
 
-      <div className="relative z-10 px-5 pt-7 text-center sm:px-6">
+      <div className="relative z-10 px-5 pt-7 text-center">
         <h1 className="text-[42px] font-bold leading-[0.95] tracking-[-0.04em] drop-shadow-sm">{APP_CONFIG.appName}</h1>
         <p className="mx-auto mt-4 max-w-[22rem] text-[15px] font-medium leading-6 text-white/82">
           {APP_CONFIG.seoDescription}
         </p>
       </div>
 
-      <div className="relative z-10 flex flex-1 flex-col px-5 pb-5 pt-6 sm:px-6 sm:pb-6">
+      <div className="relative z-10 flex flex-1 flex-col px-5 pb-5 pt-6">
         <div className="relative h-[clamp(260px,37vh,360px)] w-full">
           <div className="absolute inset-x-6 bottom-2 top-8 rounded-[40px] bg-black/18 blur-2xl" />
           <div className="absolute inset-0 overflow-hidden rounded-[38px] border border-white/18 bg-white/10 shadow-[0_24px_70px_-42px_rgba(15,23,42,0.6)] backdrop-blur-md">

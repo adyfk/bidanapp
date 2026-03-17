@@ -3,7 +3,7 @@ import type {
   ProfessionalManagedService,
   ProfessionalRequestStatus,
 } from '@/lib/use-professional-portal';
-import type { ServiceDeliveryMode } from '@/types/catalog';
+import type { ProfessionalAvailabilityDay, ServiceDeliveryMode } from '@/types/catalog';
 
 export type RequestFilter = ProfessionalRequestStatus;
 
@@ -12,11 +12,13 @@ export interface ServiceDraft {
   defaultMode: ServiceDeliveryMode;
   duration: string;
   featured: boolean;
-  leadTimeHours: string;
   price: string;
   serviceModes: ProfessionalManagedService['serviceModes'];
   summary: string;
-  weeklyCapacity: string;
+}
+
+export interface AvailabilityDraft {
+  availabilityByMode?: Partial<Record<ServiceDeliveryMode, ProfessionalAvailabilityDay[]>>;
 }
 
 export interface PortfolioDraft {
@@ -44,25 +46,10 @@ export interface CoverageDraft {
   homeVisitRadiusKm: string;
   latitude: string;
   longitude: string;
-  monthlyCapacity: string;
   practiceAddress: string;
   practiceLabel: string;
-  practiceModes: ServiceDeliveryMode[];
   publicBio: string;
   responseTimeGoal: string;
-}
-
-export interface ReadinessItem {
-  id: string;
-  label: string;
-  value: string;
-}
-
-export interface NextAvailableSchedule {
-  dayLabel: string;
-  mode: 'home_visit' | 'onsite';
-  serviceId: string;
-  slotLabel: string;
 }
 
 export interface RequestStatusDraft {

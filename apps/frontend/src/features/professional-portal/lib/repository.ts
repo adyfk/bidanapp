@@ -1,6 +1,8 @@
 import { PUBLIC_ENV } from '@/lib/env';
 import {
   PROFESSIONAL_PORTAL_SCHEMA_VERSION,
+  type ProfessionalLifecycleReviewState,
+  type ProfessionalManagedAppointmentRecord,
   type ProfessionalManagedRequest,
   type ProfessionalPortalDataSource,
   type ProfessionalPortalSnapshot,
@@ -91,9 +93,13 @@ const warnAboutApiFallback = () => {
 
 export const createProfessionalPortalSnapshot = (
   state: ProfessionalPortalState,
+  appointmentRecordsByProfessionalId?: Record<string, ProfessionalManagedAppointmentRecord[]>,
   requestBoardsByProfessionalId?: Record<string, ProfessionalManagedRequest[]>,
+  reviewStatesByProfessionalId?: Record<string, ProfessionalLifecycleReviewState>,
 ): ProfessionalPortalSnapshot => ({
+  appointmentRecordsByProfessionalId,
   requestBoardsByProfessionalId,
+  reviewStatesByProfessionalId,
   savedAt: new Date().toISOString(),
   schemaVersion: PROFESSIONAL_PORTAL_SCHEMA_VERSION,
   state,

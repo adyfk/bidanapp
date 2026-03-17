@@ -4,7 +4,6 @@ import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ProfessionalAccessScreen } from '@/components/screens/ProfessionalAccessScreen';
 import { ProfessionalPageSkeleton } from '@/components/screens/ProfessionalPageSkeleton';
-import { ProfessionalSetupScreen } from '@/components/screens/ProfessionalSetupScreen';
 import { validateProfessionalRequestStatusUpdate } from '@/features/professional-portal/lib/request-status';
 import { requestStatuses } from './helpers';
 import { ProfessionalDashboardRequestStatusDialog } from './ProfessionalDashboardRequestStatusDialog';
@@ -24,6 +23,7 @@ export const ProfessionalDashboardRequestsScreen = () => {
   const {
     activeCoverageAreas,
     activeProfessional,
+    activeReviewState,
     activeServiceConfigurations,
     averageServicePriceLabel,
     clampedCompletionScore,
@@ -32,9 +32,14 @@ export const ProfessionalDashboardRequestsScreen = () => {
     hasMounted,
     getModeLabel,
     getServiceLabel,
+    isPublishedProfessional,
     isProfessional,
+    onboardingState,
+    publishProfessionalProfile,
     portalState,
     requestStatusCounts,
+    simulateProfessionalAdminReview,
+    submitProfessionalProfileForReview,
     t,
     updateRequestStatus,
   } = useProfessionalDashboardPageData();
@@ -122,8 +127,8 @@ export const ProfessionalDashboardRequestsScreen = () => {
     return <ProfessionalAccessScreen defaultTab="login" />;
   }
 
-  if (!portalState.onboardingCompleted || !activeProfessional) {
-    return <ProfessionalSetupScreen />;
+  if (!activeProfessional) {
+    return <ProfessionalAccessScreen defaultTab="login" />;
   }
 
   return (
@@ -136,7 +141,33 @@ export const ProfessionalDashboardRequestsScreen = () => {
       clampedCompletionScore={clampedCompletionScore}
       headerLocationLabel={dashboardLocationLabel}
       notice={notice}
+      onboardingState={onboardingState}
       onDismissNotice={() => setNotice(null)}
+      onPublishProfile={() => {
+        if (!publishProfessionalProfile()) {
+          return;
+        }
+
+        setNotice(t('onboarding.publishSuccess'));
+      }}
+      onSimulateReview={(status) => {
+        if (!simulateProfessionalAdminReview(status)) {
+          return;
+        }
+
+        setNotice(
+          status === 'changes_requested' ? t('onboarding.demoRevisionSuccess') : t('onboarding.demoVerifySuccess'),
+        );
+      }}
+      onSubmitForReview={() => {
+        if (!submitProfessionalProfileForReview()) {
+          setNotice(t('onboarding.validationNotice'));
+          return;
+        }
+
+        setNotice(t('onboarding.submitSuccess'));
+      }}
+      reviewState={activeReviewState}
       responseTimeGoal={portalState.responseTimeGoal}
     >
       <ProfessionalDashboardRequestsTab
@@ -144,6 +175,7 @@ export const ProfessionalDashboardRequestsScreen = () => {
         getAreaLabel={getAreaLabel}
         getModeLabel={getModeLabel}
         getServiceLabel={getServiceLabel}
+        isPublishedProfessional={isPublishedProfessional}
         requestFilter={requestFilter}
         requestStatusCounts={requestStatusCounts}
         selectedRequestId={selectedRequestId}

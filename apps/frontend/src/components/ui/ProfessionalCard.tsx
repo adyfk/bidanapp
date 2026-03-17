@@ -2,7 +2,7 @@ import { Heart, Star } from 'lucide-react';
 import type { Route } from 'next';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import { compactBadgeClass, surfaceCardClass } from '@/components/ui/tokens';
+import { accentSoftPillClass, neutralSoftPillClass, softWhitePanelClass } from '@/components/ui/tokens';
 import { Link } from '@/i18n/routing';
 import { APP_CONFIG } from '@/lib/config';
 import { getProfessionalCategoryLabel, getProfessionalCoverageStatus } from '@/lib/mock-db/catalog';
@@ -36,7 +36,7 @@ export const ProfessionalCard = ({
   return (
     <Link
       href={href}
-      className={`${surfaceCardClass} block cursor-pointer p-4 transition-all hover:shadow-[0_18px_45px_-32px_rgba(15,23,42,0.24)] active:scale-[0.98]`}
+      className={`${softWhitePanelClass} block cursor-pointer p-4 transition-all hover:shadow-[0_18px_45px_-32px_rgba(15,23,42,0.24)] active:scale-[0.98]`}
     >
       <div className="flex gap-4">
         <div className="relative h-[100px] w-[85px] flex-shrink-0 overflow-hidden rounded-[16px] bg-slate-100">
@@ -69,14 +69,12 @@ export const ProfessionalCard = ({
           <p className="mt-2 line-clamp-1 text-[12px] text-slate-500">{professional.specialties.join(' • ')}</p>
 
           <div className="mt-3 flex flex-wrap gap-2">
-            <span
-              className="rounded-full px-2.5 py-1 text-[10px] font-semibold"
-              style={{ backgroundColor: APP_CONFIG.colors.primaryLight, color: APP_CONFIG.colors.primary }}
-            >
-              {genderLabel}
-            </span>
-            <span className={compactBadgeClass}>
+            <span className={accentSoftPillClass}>{genderLabel}</span>
+            <span className={neutralSoftPillClass}>
               {professional.experience} {t('experience')}
+            </span>
+            <span className={neutralSoftPillClass}>
+              {professional.availability.isAvailable ? t('available') : t('unavailable')}
             </span>
           </div>
 
@@ -84,7 +82,7 @@ export const ProfessionalCard = ({
             <div className="flex items-center" style={{ color: APP_CONFIG.colors.warning }}>
               <Star className="mr-1 h-4 w-4 fill-current" /> {professional.rating.toFixed(1)}
             </div>
-            <span>{professional.availability.isAvailable ? t('available') : t('unavailable')}</span>
+            <span>{categoryLabel}</span>
           </div>
 
           <p className="mt-2 text-[11px] text-slate-400">

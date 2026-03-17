@@ -22,6 +22,9 @@ export interface AppointmentChatSession {
   messages: ChatMessage[];
 }
 
+const getStableChatMessageId = (seed: string) =>
+  Array.from(seed).reduce((hash, character) => (hash * 31 + character.charCodeAt(0)) % 1_000_000_000, 17);
+
 const formatMessageTime = () =>
   new Date().toLocaleTimeString([], {
     hour: '2-digit',
@@ -37,7 +40,7 @@ const createFallbackChatSession = (
   autoReplyText: uiText.chatAutoReply,
   messages: [
     {
-      id: Number(`${Date.now()}${appointment.id.slice(-2).padStart(2, '0')}`),
+      id: getStableChatMessageId(`${appointment.id}:${appointment.service.name}`),
       text: uiText.getAppointmentWelcomeMessage(appointment.service.name),
       sender: 'professional',
       time: '10:41',
@@ -45,6 +48,20 @@ const createFallbackChatSession = (
     },
   ],
 });
+
+const hasSameChatSessionReferences = (
+  currentSessions: Record<string, AppointmentChatSession>,
+  nextSessions: Record<string, AppointmentChatSession>,
+) => {
+  const currentAppointmentIds = Object.keys(currentSessions);
+  const nextAppointmentIds = Object.keys(nextSessions);
+
+  if (currentAppointmentIds.length !== nextAppointmentIds.length) {
+    return false;
+  }
+
+  return nextAppointmentIds.every((appointmentId) => currentSessions[appointmentId] === nextSessions[appointmentId]);
+};
 
 const buildInitialChatState = (appointments: Appointment[], uiText: ReturnType<typeof useUiText>) =>
   Object.fromEntries(
@@ -110,6 +127,10 @@ export const useAppointmentFlow = ({
         if (nextSessions[appointmentId]) {
           nextSessions[appointmentId] = session;
         }
+      }
+
+      if (hasSameChatSessionReferences(currentSessions, nextSessions)) {
+        return currentSessions;
       }
 
       return nextSessions;

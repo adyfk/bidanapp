@@ -19,7 +19,7 @@ test('appointment seeds carry unified request and activity metadata', () => {
   for (const appointment of appointments) {
     assert.ok(appointment.areaId, `Missing areaId for ${appointment.id}`);
     assert.ok(appointment.requestedMode, `Missing requestedMode for ${appointment.id}`);
-    assert.ok(appointment.requestChannel, `Missing requestChannel for ${appointment.id}`);
+    assert.equal('requestChannel' in appointment, false, `Legacy requestChannel still present for ${appointment.id}`);
     assert.ok(appointment.requestNote, `Missing requestNote for ${appointment.id}`);
     assert.match(
       appointment.requestedAt,

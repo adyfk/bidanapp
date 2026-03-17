@@ -6,51 +6,70 @@ import {
   type CreateCustomerRequestInput,
   PROFESSIONAL_PORTAL_SCHEMA_VERSION,
   type ProfessionalAccessDraft,
+  type ProfessionalLifecycleReviewState,
+  type ProfessionalLifecycleStatus,
+  type ProfessionalManagedAppointmentRecord,
   type ProfessionalManagedGalleryItem,
   type ProfessionalManagedPortfolioEntry,
   type ProfessionalManagedRequest,
   type ProfessionalManagedService,
+  type ProfessionalPortalSnapshot,
   type ProfessionalPortalState,
   type ProfessionalRequestStatus,
   type ProfessionalRequestStatusEvidence,
-  type ProfessionalSetupInput,
   type SaveBusinessSettingsInput,
   type UpdateRequestStatusInput,
 } from '@/features/professional-portal/lib/contracts';
+import {
+  createProfessionalOnboardingDraft,
+  deriveProfessionalOnboardingState,
+  PROFESSIONAL_LIFECYCLE_REVIEW_STATE_MOCKS,
+} from '@/features/professional-portal/lib/onboarding';
 import {
   createProfessionalPortalSnapshot,
   getProfessionalPortalRepository,
 } from '@/features/professional-portal/lib/repository';
 import { validateProfessionalRequestStatusUpdate } from '@/features/professional-portal/lib/request-status';
 import { getAppointmentRowsByProfessionalId } from '@/lib/mock-db/appointment-records';
-import { createHydratedAppointment } from '@/lib/mock-db/appointments';
+import { appointmentPriceLabelToNumber, createHydratedAppointment } from '@/lib/mock-db/appointments';
 import {
   getAreaById,
   getProfessionalById,
   getProfessionalCategoryLabel,
-  getServiceById,
   MOCK_CATEGORIES,
   MOCK_PROFESSIONALS,
   MOCK_SERVICES,
 } from '@/lib/mock-db/catalog';
 import { ACTIVE_CONSUMER, ACTIVE_USER_CONTEXT } from '@/lib/mock-db/runtime';
-import { getRequiredItem } from '@/lib/mock-db/utils';
-import type { Appointment, AppointmentStatus } from '@/types/appointments';
+import type {
+  Appointment,
+  AppointmentScheduleSnapshot,
+  AppointmentServiceSnapshot,
+  AppointmentStatus,
+  AppointmentTimelineActor,
+  AppointmentTimelineEvent,
+} from '@/types/appointments';
 import type {
   Area,
   BookingFlow,
   GeoPoint,
   Professional,
+  ProfessionalAvailabilityDay,
+  ProfessionalAvailabilityTimeSlot,
   ProfessionalGalleryItem,
   ProfessionalService,
   ServiceDeliveryMode,
   ServiceModeFlags,
 } from '@/types/catalog';
+import type { AppointmentRow } from '@/types/mock-db';
 import { useViewerSession } from './use-viewer-session';
 
 export type {
   CreateCustomerRequestInput,
   ProfessionalAccessDraft,
+  ProfessionalLifecycleReviewState,
+  ProfessionalLifecycleStatus,
+  ProfessionalManagedAppointmentRecord,
   ProfessionalManagedGalleryItem,
   ProfessionalManagedPortfolioEntry,
   ProfessionalManagedRequest,
@@ -59,7 +78,6 @@ export type {
   ProfessionalRequestPriority,
   ProfessionalRequestStatus,
   ProfessionalRequestStatusEvidence,
-  ProfessionalSetupInput,
   SaveBusinessSettingsInput,
   UpdateRequestStatusInput,
 } from '@/features/professional-portal/lib/contracts';
@@ -67,6 +85,8 @@ export type {
 const defaultProfessional = MOCK_PROFESSIONALS[0] || null;
 const professionalPortalRepository = getProfessionalPortalRepository();
 const professionalRequestStatuses: ProfessionalRequestStatus[] = ['new', 'quoted', 'scheduled', 'completed'];
+const publishedReviewStateTemplate = PROFESSIONAL_LIFECYCLE_REVIEW_STATE_MOCKS.published;
+const draftReviewStateTemplate = PROFESSIONAL_LIFECYCLE_REVIEW_STATE_MOCKS.draft;
 
 const isPracticeMode = (value: string): value is ServiceDeliveryMode =>
   value === 'online' || value === 'home_visit' || value === 'onsite';
@@ -138,6 +158,26 @@ const formatRequestStatusTimestamp = (date = new Date()) =>
     timeStyle: 'short',
   }).format(date);
 
+const createPublishedReviewState = (): ProfessionalLifecycleReviewState => ({
+  publishedAt: publishedReviewStateTemplate.publishedAt,
+  reviewedAt: publishedReviewStateTemplate.reviewedAt,
+  reviewerName: publishedReviewStateTemplate.reviewerName,
+  status: 'published',
+  submittedAt: publishedReviewStateTemplate.submittedAt,
+});
+
+const createDraftReviewState = (): ProfessionalLifecycleReviewState => ({
+  status: draftReviewStateTemplate.status,
+});
+
+const isProfessionalLifecycleStatus = (value: string): value is ProfessionalLifecycleStatus =>
+  value === 'draft' ||
+  value === 'ready_for_review' ||
+  value === 'submitted' ||
+  value === 'changes_requested' ||
+  value === 'verified' ||
+  value === 'published';
+
 const professionalPortalCopyByLocale = {
   en: {
     defaults: {
@@ -149,21 +189,11 @@ const professionalPortalCopyByLocale = {
       portfolioPeriodLabel: 'March 2026',
       portfolioSummary: 'Case study summary can be completed later.',
       portfolioTitle: 'New portfolio entry',
-      requestChannel: 'Chat',
       requestClientName: 'New client',
       requestNote: 'New request note.',
       requestTodayLabel: 'Today',
     },
     requestBoard: {
-      channels: {
-        asyncFollowUp: 'Async follow-up',
-        clinicDeskHandoff: 'Clinic desk handoff',
-        clinicFollowUpDesk: 'Clinic follow-up desk',
-        customerApp: 'Customer app',
-        phoneFollowUp: 'Phone follow-up',
-        videoRoom: 'BidanCare Video Room',
-        whatsappReferral: 'WhatsApp referral',
-      },
       notes: {
         completedPrimary:
           'Follow-up request for growth tracking, feeding routine adjustments, and a written recap that can be reviewed with the pediatrician later.',
@@ -245,21 +275,11 @@ const professionalPortalCopyByLocale = {
       portfolioPeriodLabel: 'Maret 2026',
       portfolioSummary: 'Ringkasan studi kasus masih bisa dilengkapi.',
       portfolioTitle: 'Portofolio baru',
-      requestChannel: 'Chat',
       requestClientName: 'Klien baru',
       requestNote: 'Catatan permintaan baru.',
       requestTodayLabel: 'Hari ini',
     },
     requestBoard: {
-      channels: {
-        asyncFollowUp: 'Tindak lanjut asinkron',
-        clinicDeskHandoff: 'Serah terima admin klinik',
-        clinicFollowUpDesk: 'Admin klinik',
-        customerApp: 'Aplikasi pelanggan',
-        phoneFollowUp: 'Tindak lanjut telepon',
-        videoRoom: 'Ruang Video BidanCare',
-        whatsappReferral: 'Rujukan WhatsApp',
-      },
       notes: {
         completedPrimary:
           'Permintaan tindak lanjut untuk pemantauan tumbuh kembang, penyesuaian rutinitas makan, dan ringkasan tertulis yang bisa dibawa ke dokter anak.',
@@ -377,6 +397,94 @@ const sanitizeServiceModes = (value: unknown, fallback: ServiceModeFlags): Servi
   };
 };
 
+const sanitizeAvailabilityTimeSlot = (
+  value: Partial<ProfessionalAvailabilityTimeSlot> | null | undefined,
+  fallback: ProfessionalAvailabilityTimeSlot,
+): ProfessionalAvailabilityTimeSlot => ({
+  id: value?.id?.trim() || fallback.id,
+  index: typeof value?.index === 'number' ? value.index : fallback.index,
+  label: value?.label?.trim() || fallback.label,
+  note: value?.note?.trim() || fallback.note,
+  status:
+    value?.status === 'available' || value?.status === 'limited' || value?.status === 'booked'
+      ? value.status
+      : fallback.status,
+});
+
+const sanitizeAvailabilityDay = (
+  value: Partial<ProfessionalAvailabilityDay> | null | undefined,
+  fallback: ProfessionalAvailabilityDay,
+): ProfessionalAvailabilityDay => ({
+  dateIso: value?.dateIso?.trim() || fallback.dateIso,
+  id: value?.id?.trim() || fallback.id,
+  index: typeof value?.index === 'number' ? value.index : fallback.index,
+  label: value?.label?.trim() || fallback.label,
+  slots: Array.isArray(value?.slots)
+    ? value.slots.map((slot, index) =>
+        sanitizeAvailabilityTimeSlot(
+          slot,
+          fallback.slots[index] || {
+            id: `${value?.id || fallback.id}-slot-${index + 1}`,
+            index: index + 1,
+            label: '08:00',
+            status: 'available',
+          },
+        ),
+      )
+    : fallback.slots,
+});
+
+const normalizeAvailabilityDays = (scheduleDays: ProfessionalAvailabilityDay[]) =>
+  scheduleDays.map((scheduleDay, scheduleDayIndex) => ({
+    ...scheduleDay,
+    index: scheduleDayIndex + 1,
+    slots: scheduleDay.slots.map((slot, slotIndex) => ({
+      ...slot,
+      index: slotIndex + 1,
+    })),
+  }));
+
+const sanitizeAvailabilityByMode = (
+  value: unknown,
+  fallback: Partial<Record<ServiceDeliveryMode, ProfessionalAvailabilityDay[]>> | undefined,
+) => {
+  const nextAvailabilityByMode: Partial<Record<ServiceDeliveryMode, ProfessionalAvailabilityDay[]>> = {};
+
+  for (const mode of ['home_visit', 'onsite'] as const) {
+    const fallbackDays = fallback?.[mode] || [];
+    const rawDays =
+      value && typeof value === 'object' && mode in value
+        ? (value as Partial<Record<ServiceDeliveryMode, unknown>>)[mode]
+        : undefined;
+
+    if (!Array.isArray(rawDays)) {
+      if (fallbackDays.length > 0) {
+        nextAvailabilityByMode[mode] = normalizeAvailabilityDays(fallbackDays);
+      }
+      continue;
+    }
+
+    const sanitizedDays = rawDays.map((day, index) =>
+      sanitizeAvailabilityDay(
+        typeof day === 'object' && day ? (day as Partial<ProfessionalAvailabilityDay>) : undefined,
+        fallbackDays[index] || {
+          dateIso: '',
+          id: `${mode}-day-${index + 1}`,
+          index: index + 1,
+          label: '',
+          slots: [],
+        },
+      ),
+    );
+
+    if (sanitizedDays.length > 0) {
+      nextAvailabilityByMode[mode] = normalizeAvailabilityDays(sanitizedDays);
+    }
+  }
+
+  return Object.keys(nextAvailabilityByMode).length > 0 ? nextAvailabilityByMode : undefined;
+};
+
 const serviceDefaultsByServiceId = new Map<string, ProfessionalService>();
 
 for (const professional of MOCK_PROFESSIONALS) {
@@ -387,8 +495,13 @@ for (const professional of MOCK_PROFESSIONALS) {
   }
 }
 
-const getDateWithOffset = (dateIso: string, minutes: number) =>
-  new Date(new Date(dateIso).getTime() + minutes * 60 * 1000);
+const appointmentTimelineActors: AppointmentTimelineActor[] = ['customer', 'professional', 'system'];
+
+const isAppointmentStatus = (value: string): value is AppointmentStatus =>
+  [...ACTIVE_APPOINTMENT_STATUSES, ...HISTORY_APPOINTMENT_STATUSES].includes(value as AppointmentStatus);
+
+const isAppointmentTimelineActor = (value: string): value is AppointmentTimelineActor =>
+  appointmentTimelineActors.includes(value as AppointmentTimelineActor);
 
 const getProfessionalRequestStatusFromAppointmentStatus = (status: AppointmentStatus): ProfessionalRequestStatus => {
   if (status === 'requested') {
@@ -437,237 +550,146 @@ const getRequestPriorityFromCustomerStatus = (status: AppointmentStatus): Profes
   return 'low';
 };
 
-const buildRequestStatusHistoryEntry = ({
+const createAppointmentTimelineEvent = ({
+  actor,
   createdAt,
   customerSummary,
-  evidenceNote,
   evidenceUrl,
   fromStatus,
-  requestId,
-  sequence,
-  status,
+  id,
+  internalNote,
+  toStatus,
 }: {
+  actor: AppointmentTimelineActor;
   createdAt: Date;
-  customerSummary: string;
-  evidenceNote?: string;
+  customerSummary?: string;
   evidenceUrl?: string;
-  fromStatus: ProfessionalRequestStatus;
-  requestId: string;
-  sequence: number;
-  status: ProfessionalRequestStatus;
-}): ProfessionalRequestStatusEvidence => ({
+  fromStatus?: AppointmentStatus;
+  id: string;
+  internalNote?: string;
+  toStatus: AppointmentStatus;
+}): AppointmentTimelineEvent => ({
+  actor,
   createdAt: createdAt.toISOString(),
   createdAtLabel: formatRequestStatusTimestamp(createdAt),
-  customerSummary,
-  evidenceNote,
-  evidenceUrl,
+  customerSummary: customerSummary?.trim() || undefined,
+  evidenceUrl: evidenceUrl?.trim() || undefined,
   fromStatus,
-  id: `${requestId}-history-${sequence}`,
-  status,
+  id,
+  internalNote: internalNote?.trim() || undefined,
+  toStatus,
 });
 
-const buildLinkedAppointmentStatusHistory = ({
-  appointmentId,
-  customerStatus,
-  requestId,
-  requestedAt,
-  scheduledTimeLabel,
-  serviceName,
-}: {
-  appointmentId: string;
-  customerStatus: AppointmentStatus;
-  requestId: string;
-  requestedAt: string;
-  scheduledTimeLabel: string;
-  serviceName: string;
-}): ProfessionalRequestStatusEvidence[] => {
-  if (customerStatus === 'requested') {
-    return [];
-  }
+const buildAppointmentRecordFromRow = (record: AppointmentRow): ProfessionalManagedAppointmentRecord => ({
+  areaId: record.areaId,
+  bookingFlow: record.bookingFlow,
+  consumerId: record.consumerId,
+  id: record.id,
+  index: record.index,
+  professionalId: record.professionalId,
+  requestNote: record.requestNote,
+  requestedAt: record.requestedAt,
+  requestedMode: record.requestedMode,
+  scheduleSnapshot: record.scheduleSnapshot,
+  serviceId: record.serviceId,
+  serviceOfferingId: record.serviceOfferingId,
+  serviceSnapshot: record.serviceSnapshot,
+  status: record.status,
+  timeline: record.timeline,
+});
 
-  const historyEntries: ProfessionalRequestStatusEvidence[] = [];
+const getAppointmentRecordLastUpdatedAt = (record: ProfessionalManagedAppointmentRecord) =>
+  record.timeline[record.timeline.length - 1]?.createdAt || record.requestedAt;
 
-  if (customerStatus === 'approved_waiting_payment' || customerStatus === 'paid') {
-    historyEntries.push(
-      buildRequestStatusHistoryEntry({
-        createdAt: getDateWithOffset(requestedAt, 15),
-        customerSummary:
-          customerStatus === 'paid'
-            ? `Permintaan ${serviceName} disetujui dan pelanggan sudah menyelesaikan pembayaran.`
-            : `Permintaan ${serviceName} disetujui dan pelanggan sedang menunggu menyelesaikan pembayaran.`,
-        evidenceNote:
-          customerStatus === 'paid'
-            ? `Status booking ${appointmentId} sudah masuk tahap pembayaran terverifikasi.`
-            : `Status booking ${appointmentId} sudah masuk tahap menunggu pembayaran pelanggan.`,
-        fromStatus: 'new',
-        requestId,
-        sequence: 1,
-        status: 'quoted',
-      }),
-    );
+const buildRequestStatusHistoryFromTimeline = (
+  record: ProfessionalManagedAppointmentRecord,
+): ProfessionalRequestStatusEvidence[] => {
+  const requestId = `professional-request-linked-${record.id}`;
+  let fallbackFromStatus: ProfessionalRequestStatus = 'new';
 
-    return historyEntries;
-  }
+  return [...record.timeline]
+    .sort((leftEvent, rightEvent) => new Date(leftEvent.createdAt).getTime() - new Date(rightEvent.createdAt).getTime())
+    .flatMap((event, index) => {
+      const nextRequestStatus = getProfessionalRequestStatusFromAppointmentStatus(event.toStatus);
+      const previousRequestStatus = event.fromStatus
+        ? getProfessionalRequestStatusFromAppointmentStatus(event.fromStatus)
+        : fallbackFromStatus;
 
-  if (customerStatus === 'confirmed' || customerStatus === 'in_service' || customerStatus === 'completed') {
-    historyEntries.push(
-      buildRequestStatusHistoryEntry({
-        createdAt: getDateWithOffset(requestedAt, 15),
-        customerSummary: `Ringkasan biaya dan persiapan ${serviceName} sudah dibagikan ke pelanggan.`,
-        evidenceNote: `Thread booking ${appointmentId} sudah menyimpan penawaran dan detail persiapan sesi.`,
-        fromStatus: 'new',
-        requestId,
-        sequence: 1,
-        status: 'quoted',
-      }),
-      buildRequestStatusHistoryEntry({
-        createdAt: getDateWithOffset(requestedAt, 45),
-        customerSummary:
-          customerStatus === 'in_service'
-            ? `Sesi ${serviceName} sedang berjalan sesuai jadwal ${scheduledTimeLabel}.`
-            : `Jadwal ${serviceName} sudah dikonfirmasi untuk ${scheduledTimeLabel}.`,
-        evidenceNote: `Jadwal layanan ${appointmentId} sudah dikunci pada ${scheduledTimeLabel}.`,
-        fromStatus: 'quoted',
-        requestId,
-        sequence: 2,
-        status: 'scheduled',
-      }),
-    );
-  }
+      fallbackFromStatus = nextRequestStatus;
 
-  if (customerStatus === 'completed') {
-    historyEntries.push(
-      buildRequestStatusHistoryEntry({
-        createdAt: getDateWithOffset(requestedAt, 90),
-        customerSummary: `Sesi ${serviceName} selesai dan ringkasan tindak lanjut sudah dikirim ke pelanggan.`,
-        evidenceNote: `Booking ${appointmentId} ditutup sebagai sesi selesai dengan recap layanan terkirim.`,
-        fromStatus: 'scheduled',
-        requestId,
-        sequence: 3,
-        status: 'completed',
-      }),
-    );
+      if (nextRequestStatus === previousRequestStatus || nextRequestStatus === 'new') {
+        return [];
+      }
 
-    return historyEntries;
-  }
-
-  if (customerStatus === 'cancelled') {
-    return [
-      buildRequestStatusHistoryEntry({
-        createdAt: getDateWithOffset(requestedAt, 20),
-        customerSummary: `Pelanggan membatalkan ${serviceName} sebelum sesi berlangsung, sehingga slot dikembalikan ke jadwal.`,
-        evidenceNote: `Booking ${appointmentId} ditutup sebagai pembatalan pelanggan.`,
-        fromStatus: 'new',
-        requestId,
-        sequence: 1,
-        status: 'completed',
-      }),
-    ];
-  }
-
-  if (customerStatus === 'rejected') {
-    return [
-      buildRequestStatusHistoryEntry({
-        createdAt: getDateWithOffset(requestedAt, 20),
-        customerSummary: `Permintaan ${serviceName} tidak bisa diproses karena area atau kebutuhan pelanggan tidak sesuai cakupan profesional.`,
-        evidenceNote: `Booking ${appointmentId} ditolak saat proses validasi awal.`,
-        fromStatus: 'new',
-        requestId,
-        sequence: 1,
-        status: 'completed',
-      }),
-    ];
-  }
-
-  return [
-    buildRequestStatusHistoryEntry({
-      createdAt: getDateWithOffset(requestedAt, 15),
-      customerSummary: `Permintaan ${serviceName} disetujui, tetapi booking otomatis ditutup karena pembayaran tidak selesai tepat waktu.`,
-      evidenceNote: `Booking ${appointmentId} kedaluwarsa pada tahap pembayaran.`,
-      fromStatus: 'new',
-      requestId,
-      sequence: 1,
-      status: 'quoted',
-    }),
-    buildRequestStatusHistoryEntry({
-      createdAt: getDateWithOffset(requestedAt, 60),
-      customerSummary: `Booking ${serviceName} berakhir karena pelanggan tidak menyelesaikan pembayaran sebelum batas waktu.`,
-      evidenceNote: `Booking ${appointmentId} ditutup sebagai kedaluwarsa pembayaran.`,
-      fromStatus: 'quoted',
-      requestId,
-      sequence: 2,
-      status: 'completed',
-    }),
-  ];
+      return [
+        {
+          createdAt: event.createdAt,
+          createdAtLabel: formatRequestStatusTimestamp(new Date(event.createdAt)),
+          customerSummary: event.customerSummary,
+          evidenceNote: event.internalNote,
+          evidenceUrl: event.evidenceUrl,
+          fromStatus: previousRequestStatus,
+          id: `${requestId}-history-${index + 1}`,
+          status: nextRequestStatus,
+        } satisfies ProfessionalRequestStatusEvidence,
+      ];
+    });
 };
 
-const buildRequestFromAppointmentSeed = (
-  appointment: Pick<
-    Appointment,
-    | 'areaId'
-    | 'consumerId'
-    | 'id'
-    | 'requestChannel'
-    | 'requestNote'
-    | 'requestedAt'
-    | 'requestedMode'
-    | 'service'
-    | 'status'
-    | 'time'
-    | 'totalPrice'
-  > & { professionalId: string },
+const buildRequestFromAppointmentRecord = (
+  record: ProfessionalManagedAppointmentRecord,
 ): ProfessionalManagedRequest => {
-  const requestId = `professional-request-linked-${appointment.id}`;
-  const requestedAtDate = new Date(appointment.requestedAt);
+  const requestedAtDate = new Date(record.requestedAt);
 
   return {
-    appointmentId: appointment.id,
-    areaId: appointment.areaId,
-    budgetLabel: appointment.totalPrice,
-    channel: appointment.requestChannel,
-    clientId: appointment.consumerId,
+    appointmentId: record.id,
+    areaId: record.areaId,
+    bookingFlow: record.bookingFlow,
+    budgetLabel: record.serviceSnapshot.priceLabel,
+    clientId: record.consumerId,
     clientName: ACTIVE_CONSUMER.name,
-    customerStatus: appointment.status,
-    id: requestId,
-    note: appointment.requestNote,
-    priority: getRequestPriorityFromCustomerStatus(appointment.status),
-    requestedAt: appointment.requestedAt,
+    customerStatus: record.status,
+    id: `professional-request-linked-${record.id}`,
+    note: record.requestNote,
+    priority: getRequestPriorityFromCustomerStatus(record.status),
+    requestedAt: record.requestedAt,
     requestedAtLabel: formatRequestStatusTimestamp(requestedAtDate),
-    requestedMode: appointment.requestedMode,
-    scheduledTimeLabel: appointment.time,
-    serviceId: appointment.service.id,
-    status: getProfessionalRequestStatusFromAppointmentStatus(appointment.status),
-    statusHistory: buildLinkedAppointmentStatusHistory({
-      appointmentId: appointment.id,
-      customerStatus: appointment.status,
-      requestId,
-      requestedAt: appointment.requestedAt,
-      scheduledTimeLabel: appointment.time,
-      serviceName: appointment.service.name,
-    }),
+    requestedMode: record.requestedMode,
+    scheduledTimeLabel: record.scheduleSnapshot.scheduledTimeLabel,
+    serviceId: record.serviceId,
+    serviceName: record.serviceSnapshot.name,
+    serviceOfferingId: record.serviceOfferingId,
+    serviceSummary: record.serviceSnapshot.summary,
+    status: getProfessionalRequestStatusFromAppointmentStatus(record.status),
+    statusHistory: buildRequestStatusHistoryFromTimeline(record),
   };
 };
 
-const buildRequestFromAppointmentRow = (professionalId: string) =>
-  getAppointmentRowsByProfessionalId(professionalId).map((appointmentRow) =>
-    buildRequestFromAppointmentSeed({
-      areaId: appointmentRow.areaId,
-      consumerId: appointmentRow.consumerId,
-      id: appointmentRow.id,
-      professionalId,
-      requestChannel: appointmentRow.requestChannel,
-      requestNote: appointmentRow.requestNote,
-      requestedAt: appointmentRow.requestedAt,
-      requestedMode: appointmentRow.requestedMode,
-      service: getRequiredItem(
-        getServiceById(appointmentRow.serviceId),
-        `appointments.${appointmentRow.id}.serviceId -> ${appointmentRow.serviceId}`,
-      ),
-      status: appointmentRow.status,
-      time: appointmentRow.scheduledTimeLabel,
-      totalPrice: appointmentRow.totalPriceLabel,
-    }),
-  );
+const buildRequestBoardFromAppointmentRecords = (records: ProfessionalManagedAppointmentRecord[]) =>
+  [...records]
+    .sort(
+      (leftRecord, rightRecord) =>
+        new Date(getAppointmentRecordLastUpdatedAt(rightRecord)).getTime() -
+        new Date(getAppointmentRecordLastUpdatedAt(leftRecord)).getTime(),
+    )
+    .map(buildRequestFromAppointmentRecord);
+
+const buildDefaultAppointmentRecords = (professional: Professional | null): ProfessionalManagedAppointmentRecord[] => {
+  if (!professional) {
+    return [];
+  }
+
+  return getAppointmentRowsByProfessionalId(professional.id).map(buildAppointmentRecordFromRow);
+};
+
+const buildDefaultAppointmentRecordsByProfessionalId = () =>
+  MOCK_PROFESSIONALS.reduce<Record<string, ProfessionalManagedAppointmentRecord[]>>((records, professional) => {
+    records[professional.id] = buildDefaultAppointmentRecords(professional);
+    return records;
+  }, {});
+
+const buildDefaultRequestBoard = (professional: Professional | null): ProfessionalManagedRequest[] =>
+  buildRequestBoardFromAppointmentRecords(buildDefaultAppointmentRecords(professional));
 
 const buildDefaultServiceConfigurations = (professional: Professional | null): ProfessionalManagedService[] => {
   const professionalServiceById = new Map(
@@ -684,16 +706,17 @@ const buildDefaultServiceConfigurations = (professional: Professional | null): P
       defaultMode: existingService?.defaultMode || templateService?.defaultMode || serviceTemplate.defaultMode,
       duration: existingService?.duration || templateService?.duration || '45 min',
       featured: featuredServiceId === serviceTemplate.id,
+      id:
+        existingService?.id ||
+        templateService?.id ||
+        `professional-service-${professional?.id || 'template'}-${serviceTemplate.id}`,
       index: existingService?.index || index + 1,
       isActive: Boolean(existingService),
-      leadTimeHours: existingService?.bookingFlow === 'instant' ? 2 : 12,
       price: existingService?.price || templateService?.price || 'Rp 150.000',
-      scheduleByMode: existingService?.scheduleByMode || templateService?.scheduleByMode,
       serviceId: serviceTemplate.id,
       serviceModes: existingService?.serviceModes || templateService?.serviceModes || serviceTemplate.serviceModes,
       source: existingService ? 'existing' : 'template',
       summary: existingService?.summary || templateService?.summary || serviceTemplate.shortDescription,
-      weeklyCapacity: existingService ? 12 : 6,
     };
   });
 };
@@ -740,20 +763,6 @@ const normalizeManagedGalleryItems = (items: ProfessionalManagedGalleryItem[]): 
   }));
 };
 
-const buildDefaultRequestBoard = (professional: Professional | null): ProfessionalManagedRequest[] => {
-  if (!professional) {
-    return [];
-  }
-
-  return buildRequestFromAppointmentRow(professional.id);
-};
-
-const buildDefaultRequestBoards = () =>
-  MOCK_PROFESSIONALS.reduce<Record<string, ProfessionalManagedRequest[]>>((boards, professional) => {
-    boards[professional.id] = buildDefaultRequestBoard(professional);
-    return boards;
-  }, {});
-
 const buildDefaultPortalState = (professionalId = defaultProfessional?.id || ''): ProfessionalPortalState => {
   const professional = getProfessionalById(professionalId) || defaultProfessional;
   const primaryArea = professional?.coverage.areaIds[0] ? getAreaById(professional.coverage.areaIds[0]) : undefined;
@@ -761,6 +770,7 @@ const buildDefaultPortalState = (professionalId = defaultProfessional?.id || '')
   return {
     acceptingNewClients: professional?.availability.isAvailable ?? true,
     activeProfessionalId: professional?.id || '',
+    availabilityByMode: sanitizeAvailabilityByMode(professional?.availabilityByMode, professional?.availabilityByMode),
     autoApproveInstantBookings: (professional?.services || []).some((service) => service.bookingFlow === 'instant'),
     city: primaryArea?.city || professional?.location || '',
     coverageAreaIds: professional?.coverage.areaIds.slice(0, 3) || [],
@@ -772,20 +782,10 @@ const buildDefaultPortalState = (professionalId = defaultProfessional?.id || '')
     displayName: professional?.name || '',
     galleryItems: buildDefaultGalleryItems(professional),
     homeVisitRadiusKm: professional?.coverage.homeVisitRadiusKm || 0,
-    monthlyCapacity: 32,
-    onboardingCompleted: false,
     phone: '+62 812 3000 0000',
     portfolioEntries: buildDefaultPortfolioEntries(professional),
     practiceAddress: professional?.practiceLocation?.address || professional?.about || '',
     practiceLabel: professional?.practiceLocation?.label || professional?.location || '',
-    practiceModes: (professional?.services || [])
-      .flatMap((service) => [
-        service.serviceModes.online ? 'online' : null,
-        service.serviceModes.homeVisit ? 'home_visit' : null,
-        service.serviceModes.onsite ? 'onsite' : null,
-      ])
-      .filter((mode): mode is ServiceDeliveryMode => Boolean(mode))
-      .filter((mode, index, modes) => modes.indexOf(mode) === index),
     publicBio: professional?.about || '',
     requestBoard: buildDefaultRequestBoard(professional),
     responseTimeGoal: professional?.responseTime || '< 30 menit',
@@ -802,16 +802,14 @@ const sanitizeManagedService = (
   defaultMode: value?.defaultMode && isPracticeMode(value.defaultMode) ? value.defaultMode : fallback.defaultMode,
   duration: value?.duration?.trim() || fallback.duration,
   featured: value?.featured === true,
+  id: value?.id?.trim() || fallback.id,
   index: typeof value?.index === 'number' ? value.index : fallback.index,
   isActive: value?.isActive ?? fallback.isActive,
-  leadTimeHours: parseInteger(value?.leadTimeHours, fallback.leadTimeHours),
   price: value?.price?.trim() || fallback.price,
-  scheduleByMode: value?.scheduleByMode || fallback.scheduleByMode,
   serviceId: fallback.serviceId,
   serviceModes: sanitizeServiceModes(value?.serviceModes, fallback.serviceModes),
   source: value?.source === 'existing' || value?.source === 'template' ? value.source : fallback.source,
   summary: value?.summary?.trim() || fallback.summary,
-  weeklyCapacity: parseInteger(value?.weeklyCapacity, fallback.weeklyCapacity),
 });
 
 const sanitizeManagedPortfolioEntry = (
@@ -871,7 +869,8 @@ const sanitizeManagedRequest = (
     appointmentId: value.appointmentId?.trim() || fallback?.appointmentId || `appointment-${Date.now()}`,
     areaId: value.areaId || fallback?.areaId || '',
     budgetLabel: value.budgetLabel?.trim() || fallback?.budgetLabel || formatRupiah(150000),
-    channel: value.channel?.trim() || fallback?.channel || copy.defaults.requestChannel,
+    bookingFlow:
+      value.bookingFlow && isBookingFlow(value.bookingFlow) ? value.bookingFlow : fallback?.bookingFlow || 'request',
     clientId: value.clientId?.trim() || fallback?.clientId || `demo-client-${Date.now()}`,
     clientName: value.clientName?.trim() || fallback?.clientName || copy.defaults.requestClientName,
     customerStatus:
@@ -897,6 +896,9 @@ const sanitizeManagedRequest = (
     scheduledTimeLabel:
       value.scheduledTimeLabel?.trim() || fallback?.scheduledTimeLabel || copy.defaults.requestTodayLabel,
     serviceId: value.serviceId || fallback?.serviceId || '',
+    serviceName: value.serviceName?.trim() || fallback?.serviceName || value.serviceId || fallback?.serviceId || '',
+    serviceOfferingId: value.serviceOfferingId?.trim() || fallback?.serviceOfferingId || '',
+    serviceSummary: value.serviceSummary?.trim() || fallback?.serviceSummary || '',
     status:
       value.status && professionalRequestStatuses.includes(value.status) ? value.status : fallback?.status || 'new',
     statusHistory: Array.isArray(value.statusHistory)
@@ -949,6 +951,142 @@ const sanitizeManagedRequest = (
   };
 };
 
+const sanitizeStringArray = (value: unknown, fallback: string[]) =>
+  Array.isArray(value) ? value.map((item) => String(item).trim()).filter(Boolean) : fallback;
+
+const sanitizeAppointmentScheduleSnapshot = (
+  value: Partial<AppointmentScheduleSnapshot> | null | undefined,
+  fallback: AppointmentScheduleSnapshot,
+): AppointmentScheduleSnapshot => ({
+  dateIso: value?.dateIso?.trim() || fallback.dateIso,
+  requiresSchedule: value?.requiresSchedule ?? fallback.requiresSchedule,
+  scheduleDayId: value?.scheduleDayId?.trim() || fallback.scheduleDayId,
+  scheduleDayLabel: value?.scheduleDayLabel?.trim() || fallback.scheduleDayLabel,
+  scheduledTimeLabel: value?.scheduledTimeLabel?.trim() || fallback.scheduledTimeLabel,
+  timeSlotId: value?.timeSlotId?.trim() || fallback.timeSlotId,
+  timeSlotLabel: value?.timeSlotLabel?.trim() || fallback.timeSlotLabel,
+});
+
+const sanitizeAppointmentServiceSnapshot = (
+  value: Partial<AppointmentServiceSnapshot> | null | undefined,
+  fallback: AppointmentServiceSnapshot,
+): AppointmentServiceSnapshot => ({
+  bookingFlow: value?.bookingFlow && isBookingFlow(value.bookingFlow) ? value.bookingFlow : fallback.bookingFlow,
+  categoryId: value?.categoryId?.trim() || fallback.categoryId,
+  coverImage: value?.coverImage?.trim() || fallback.coverImage,
+  defaultMode: value?.defaultMode && isPracticeMode(value.defaultMode) ? value.defaultMode : fallback.defaultMode,
+  description: value?.description?.trim() || fallback.description,
+  durationLabel: value?.durationLabel?.trim() || fallback.durationLabel,
+  highlights: sanitizeStringArray(value?.highlights, fallback.highlights),
+  image: value?.image?.trim() || fallback.image,
+  name: value?.name?.trim() || fallback.name,
+  priceAmount: parseInteger(value?.priceAmount, fallback.priceAmount),
+  priceLabel: value?.priceLabel?.trim() || fallback.priceLabel,
+  serviceId: value?.serviceId?.trim() || fallback.serviceId,
+  serviceModes: sanitizeServiceModes(value?.serviceModes, fallback.serviceModes),
+  serviceOfferingId: value?.serviceOfferingId?.trim() || fallback.serviceOfferingId,
+  shortDescription: value?.shortDescription?.trim() || fallback.shortDescription,
+  slug: value?.slug?.trim() || fallback.slug,
+  summary: value?.summary?.trim() || fallback.summary,
+  tags: sanitizeStringArray(value?.tags, fallback.tags),
+});
+
+const sanitizeAppointmentTimelineEvent = (
+  value: Partial<AppointmentTimelineEvent> | null | undefined,
+  fallback: AppointmentTimelineEvent,
+  recordId: string,
+  index: number,
+): AppointmentTimelineEvent => ({
+  actor:
+    value?.actor && typeof value.actor === 'string' && isAppointmentTimelineActor(value.actor)
+      ? value.actor
+      : fallback.actor,
+  createdAt: value?.createdAt?.trim() || fallback.createdAt,
+  createdAtLabel: value?.createdAtLabel?.trim() || fallback.createdAtLabel,
+  customerSummary: value?.customerSummary?.trim() || fallback.customerSummary,
+  evidenceUrl: value?.evidenceUrl?.trim() || fallback.evidenceUrl,
+  fromStatus:
+    value?.fromStatus && typeof value.fromStatus === 'string' && isAppointmentStatus(value.fromStatus)
+      ? value.fromStatus
+      : fallback.fromStatus,
+  id: value?.id?.trim() || fallback.id || `${recordId}-timeline-${index + 1}`,
+  internalNote: value?.internalNote?.trim() || fallback.internalNote,
+  toStatus:
+    value?.toStatus && typeof value.toStatus === 'string' && isAppointmentStatus(value.toStatus)
+      ? value.toStatus
+      : fallback.toStatus,
+});
+
+const sanitizeManagedAppointmentRecord = (
+  value: Partial<ProfessionalManagedAppointmentRecord> | null | undefined,
+  fallback: ProfessionalManagedAppointmentRecord,
+): ProfessionalManagedAppointmentRecord => ({
+  areaId: value?.areaId?.trim() || fallback.areaId,
+  bookingFlow: value?.bookingFlow && isBookingFlow(value.bookingFlow) ? value.bookingFlow : fallback.bookingFlow,
+  consumerId: value?.consumerId?.trim() || fallback.consumerId,
+  id: value?.id?.trim() || fallback.id,
+  index: typeof value?.index === 'number' ? value.index : fallback.index,
+  professionalId: value?.professionalId?.trim() || fallback.professionalId,
+  requestNote: value?.requestNote?.trim() || fallback.requestNote,
+  requestedAt: value?.requestedAt?.trim() || fallback.requestedAt,
+  requestedMode:
+    value?.requestedMode && isPracticeMode(value.requestedMode) ? value.requestedMode : fallback.requestedMode,
+  scheduleSnapshot: sanitizeAppointmentScheduleSnapshot(value?.scheduleSnapshot, fallback.scheduleSnapshot),
+  serviceId: value?.serviceId?.trim() || fallback.serviceId,
+  serviceOfferingId: value?.serviceOfferingId?.trim() || fallback.serviceOfferingId,
+  serviceSnapshot: sanitizeAppointmentServiceSnapshot(value?.serviceSnapshot, fallback.serviceSnapshot),
+  status: value?.status && isAppointmentStatus(value.status) ? value.status : fallback.status,
+  timeline: Array.isArray(value?.timeline)
+    ? value.timeline
+        .map((event, index) =>
+          sanitizeAppointmentTimelineEvent(
+            event,
+            fallback.timeline[index] ||
+              createAppointmentTimelineEvent({
+                actor: 'system',
+                createdAt: new Date(fallback.requestedAt),
+                fromStatus: undefined,
+                id: `${fallback.id}-timeline-${index + 1}`,
+                toStatus: fallback.status,
+              }),
+            value?.id?.trim() || fallback.id,
+            index,
+          ),
+        )
+        .filter((event) => Boolean(event))
+    : fallback.timeline,
+});
+
+const sanitizeAppointmentRecordsByProfessionalId = (
+  value: unknown,
+): Record<string, ProfessionalManagedAppointmentRecord[]> => {
+  if (!value || typeof value !== 'object') {
+    return {};
+  }
+
+  return Object.entries(value).reduce<Record<string, ProfessionalManagedAppointmentRecord[]>>(
+    (records, [professionalId, board]) => {
+      const fallbackRecords = buildDefaultAppointmentRecords(
+        getProfessionalById(professionalId) || defaultProfessional,
+      );
+      records[professionalId] = Array.isArray(board)
+        ? board.flatMap((item, index) => {
+            if (!item || typeof item !== 'object') {
+              return [];
+            }
+
+            const rawItem = item as ProfessionalManagedAppointmentRecord;
+            const fallbackRecord = fallbackRecords[index] || rawItem;
+
+            return [sanitizeManagedAppointmentRecord(rawItem, fallbackRecord)];
+          })
+        : fallbackRecords;
+      return records;
+    },
+    {},
+  );
+};
+
 const sanitizeRequestBoard = (
   professionalId: string,
   requestBoard: Partial<ProfessionalManagedRequest>[] | null | undefined,
@@ -967,18 +1105,36 @@ const sanitizeRequestBoard = (
   return sanitizedRequestBoard;
 };
 
-const sanitizeRequestBoardsByProfessionalId = (value: unknown): Record<string, ProfessionalManagedRequest[]> => {
+const sanitizeReviewState = (
+  value: Partial<ProfessionalLifecycleReviewState> | null | undefined,
+  fallback: ProfessionalLifecycleReviewState = createPublishedReviewState(),
+): ProfessionalLifecycleReviewState => ({
+  adminNote: value?.adminNote?.trim() || fallback.adminNote,
+  publishedAt: value?.publishedAt?.trim() || fallback.publishedAt,
+  reviewedAt: value?.reviewedAt?.trim() || fallback.reviewedAt,
+  reviewerName: value?.reviewerName?.trim() || fallback.reviewerName,
+  status: value?.status && isProfessionalLifecycleStatus(value.status) ? value.status : fallback.status,
+  submittedAt: value?.submittedAt?.trim() || fallback.submittedAt,
+});
+
+const buildDefaultReviewStates = () =>
+  MOCK_PROFESSIONALS.reduce<Record<string, ProfessionalLifecycleReviewState>>((states, professional) => {
+    states[professional.id] = createPublishedReviewState();
+    return states;
+  }, {});
+
+const sanitizeReviewStatesByProfessionalId = (value: unknown): Record<string, ProfessionalLifecycleReviewState> => {
   if (!value || typeof value !== 'object') {
     return {};
   }
 
-  return Object.entries(value).reduce<Record<string, ProfessionalManagedRequest[]>>(
-    (boards, [professionalId, board]) => {
-      boards[professionalId] = sanitizeRequestBoard(
-        professionalId,
-        Array.isArray(board) ? (board as Partial<ProfessionalManagedRequest>[]) : null,
+  return Object.entries(value).reduce<Record<string, ProfessionalLifecycleReviewState>>(
+    (states, [professionalId, state]) => {
+      states[professionalId] = sanitizeReviewState(
+        state as Partial<ProfessionalLifecycleReviewState>,
+        createPublishedReviewState(),
       );
-      return boards;
+      return states;
     },
     {},
   );
@@ -997,15 +1153,11 @@ const sanitizePortalState = (value: Partial<ProfessionalPortalState> | null | un
   const coverageAreaIds = Array.isArray(value?.coverageAreaIds)
     ? value.coverageAreaIds.filter((areaId): areaId is string => typeof areaId === 'string' && areaId.length > 0)
     : baseState.coverageAreaIds;
-  const practiceModes = Array.isArray(value?.practiceModes)
-    ? value.practiceModes.filter(
-        (mode): mode is ServiceDeliveryMode => typeof mode === 'string' && isPracticeMode(mode),
-      )
-    : baseState.practiceModes;
 
   return {
     acceptingNewClients: value?.acceptingNewClients ?? baseState.acceptingNewClients,
     activeProfessionalId: professionalId,
+    availabilityByMode: sanitizeAvailabilityByMode(value?.availabilityByMode, baseState.availabilityByMode),
     autoApproveInstantBookings: value?.autoApproveInstantBookings ?? baseState.autoApproveInstantBookings,
     city: value?.city?.trim() || baseState.city,
     coverageAreaIds,
@@ -1018,15 +1170,12 @@ const sanitizePortalState = (value: Partial<ProfessionalPortalState> | null | un
         : baseState.galleryItems,
     ),
     homeVisitRadiusKm: parseInteger(value?.homeVisitRadiusKm, baseState.homeVisitRadiusKm),
-    monthlyCapacity: parseInteger(value?.monthlyCapacity, baseState.monthlyCapacity),
-    onboardingCompleted: value?.onboardingCompleted === true,
     phone: value?.phone?.trim() || baseState.phone,
     portfolioEntries: portfolioEntries
       ? portfolioEntries.map((item, index) => sanitizeManagedPortfolioEntry(item, baseState.portfolioEntries[index]))
       : baseState.portfolioEntries,
     practiceAddress: value?.practiceAddress?.trim() || baseState.practiceAddress,
     practiceLabel: value?.practiceLabel?.trim() || baseState.practiceLabel,
-    practiceModes,
     publicBio: value?.publicBio?.trim() || baseState.publicBio,
     requestBoard,
     responseTimeGoal: value?.responseTimeGoal?.trim() || baseState.responseTimeGoal,
@@ -1043,101 +1192,132 @@ const sanitizePortalState = (value: Partial<ProfessionalPortalState> | null | un
 
 const readProfessionalPortalData = (): {
   portalState: ProfessionalPortalState;
-  requestBoardsByProfessionalId: Record<string, ProfessionalManagedRequest[]>;
+  appointmentRecordsByProfessionalId: Record<string, ProfessionalManagedAppointmentRecord[]>;
+  reviewStatesByProfessionalId: Record<string, ProfessionalLifecycleReviewState>;
 } => {
   const defaultState = buildDefaultPortalState();
-  const defaultRequestBoards = buildDefaultRequestBoards();
+  const defaultAppointmentRecords = buildDefaultAppointmentRecordsByProfessionalId();
+  const defaultReviewStates = buildDefaultReviewStates();
 
   if (typeof window === 'undefined') {
     return {
+      appointmentRecordsByProfessionalId: defaultAppointmentRecords,
       portalState: defaultState,
-      requestBoardsByProfessionalId: defaultRequestBoards,
+      reviewStatesByProfessionalId: defaultReviewStates,
     };
   }
 
   try {
-    const storedSnapshot = professionalPortalRepository.read();
+    const storedSnapshot = professionalPortalRepository.read() as Partial<ProfessionalPortalSnapshot> | null;
 
-    if (!storedSnapshot || storedSnapshot.schemaVersion !== PROFESSIONAL_PORTAL_SCHEMA_VERSION) {
+    if (!storedSnapshot) {
       return {
+        appointmentRecordsByProfessionalId: defaultAppointmentRecords,
         portalState: defaultState,
-        requestBoardsByProfessionalId: defaultRequestBoards,
+        reviewStatesByProfessionalId: defaultReviewStates,
       };
     }
 
-    const sanitizedRequestBoards = {
-      ...defaultRequestBoards,
-      ...sanitizeRequestBoardsByProfessionalId(storedSnapshot.requestBoardsByProfessionalId),
+    if (
+      storedSnapshot.schemaVersion !== PROFESSIONAL_PORTAL_SCHEMA_VERSION ||
+      !storedSnapshot.appointmentRecordsByProfessionalId
+    ) {
+      persistProfessionalPortalState(defaultState, defaultAppointmentRecords, defaultReviewStates);
+
+      return {
+        appointmentRecordsByProfessionalId: defaultAppointmentRecords,
+        portalState: defaultState,
+        reviewStatesByProfessionalId: defaultReviewStates,
+      };
+    }
+
+    const sanitizedAppointmentRecords = {
+      ...defaultAppointmentRecords,
+      ...sanitizeAppointmentRecordsByProfessionalId(storedSnapshot.appointmentRecordsByProfessionalId),
     };
-    const activeProfessionalId = storedSnapshot.state.activeProfessionalId || defaultState.activeProfessionalId;
-    const requestBoard =
-      sanitizedRequestBoards[activeProfessionalId] ||
-      sanitizeRequestBoard(activeProfessionalId, storedSnapshot.state.requestBoard);
+    const sanitizedReviewStates = {
+      ...defaultReviewStates,
+      ...sanitizeReviewStatesByProfessionalId(storedSnapshot.reviewStatesByProfessionalId),
+    };
+    const activeProfessionalId = storedSnapshot.state?.activeProfessionalId || defaultState.activeProfessionalId;
+    const requestBoard = buildRequestBoardFromAppointmentRecords(
+      sanitizedAppointmentRecords[activeProfessionalId] || [],
+    );
     const portalState = sanitizePortalState({
       ...storedSnapshot.state,
       requestBoard,
     });
 
     return {
+      appointmentRecordsByProfessionalId: sanitizedAppointmentRecords,
       portalState,
-      requestBoardsByProfessionalId: {
-        ...sanitizedRequestBoards,
-        [portalState.activeProfessionalId]: requestBoard,
+      reviewStatesByProfessionalId: {
+        ...sanitizedReviewStates,
+        [portalState.activeProfessionalId]:
+          sanitizedReviewStates[portalState.activeProfessionalId] || createPublishedReviewState(),
       },
     };
   } catch {
     return {
+      appointmentRecordsByProfessionalId: defaultAppointmentRecords,
       portalState: defaultState,
-      requestBoardsByProfessionalId: defaultRequestBoards,
+      reviewStatesByProfessionalId: defaultReviewStates,
     };
   }
 };
 
 const persistProfessionalPortalState = (
   nextState: ProfessionalPortalState,
-  requestBoardsByProfessionalId: Record<string, ProfessionalManagedRequest[]>,
+  appointmentRecordsByProfessionalId: Record<string, ProfessionalManagedAppointmentRecord[]>,
+  reviewStatesByProfessionalId: Record<string, ProfessionalLifecycleReviewState>,
 ) => {
   if (typeof window === 'undefined') {
     return;
   }
 
-  professionalPortalRepository.write(createProfessionalPortalSnapshot(nextState, requestBoardsByProfessionalId));
+  professionalPortalRepository.write(
+    createProfessionalPortalSnapshot(
+      nextState,
+      appointmentRecordsByProfessionalId,
+      undefined,
+      reviewStatesByProfessionalId,
+    ),
+  );
 };
 
 const getRequestLastUpdatedAt = (request: ProfessionalManagedRequest) =>
   request.statusHistory[request.statusHistory.length - 1]?.createdAt || request.requestedAt;
 
-const buildCustomerAppointmentsFromRequestBoards = (
-  requestBoardsByProfessionalId: Record<string, ProfessionalManagedRequest[]>,
+const buildCustomerAppointmentsFromAppointmentRecords = (
+  appointmentRecordsByProfessionalId: Record<string, ProfessionalManagedAppointmentRecord[]>,
 ): Appointment[] =>
-  Object.entries(requestBoardsByProfessionalId)
-    .flatMap(([professionalId, requests]) =>
-      requests
-        .filter((request) => request.clientId === ACTIVE_CONSUMER.id)
-        .map((request) => ({
-          professionalId,
-          request,
+  Object.values(appointmentRecordsByProfessionalId)
+    .flatMap((records) =>
+      records
+        .filter((record) => record.consumerId === ACTIVE_CONSUMER.id)
+        .map((record) => ({
+          record,
         })),
     )
     .sort(
       (leftEntry, rightEntry) =>
-        new Date(getRequestLastUpdatedAt(rightEntry.request)).getTime() -
-        new Date(getRequestLastUpdatedAt(leftEntry.request)).getTime(),
+        new Date(getAppointmentRecordLastUpdatedAt(rightEntry.record)).getTime() -
+        new Date(getAppointmentRecordLastUpdatedAt(leftEntry.record)).getTime(),
     )
-    .map(({ professionalId, request }) =>
+    .map(({ record }) =>
       createHydratedAppointment({
-        areaId: request.areaId,
-        consumerId: request.clientId,
-        id: request.appointmentId,
-        professionalId,
-        requestChannel: request.channel,
-        requestNote: request.note,
-        requestedAt: request.requestedAt,
-        requestedMode: request.requestedMode,
-        scheduledTimeLabel: request.scheduledTimeLabel,
-        serviceId: request.serviceId,
-        status: request.customerStatus,
-        totalPriceLabel: request.budgetLabel,
+        areaId: record.areaId,
+        bookingFlow: record.bookingFlow,
+        consumerId: record.consumerId,
+        id: record.id,
+        professionalId: record.professionalId,
+        requestNote: record.requestNote,
+        requestedAt: record.requestedAt,
+        requestedMode: record.requestedMode,
+        scheduleSnapshot: record.scheduleSnapshot,
+        serviceSnapshot: record.serviceSnapshot,
+        status: record.status,
+        timeline: record.timeline,
       }),
     );
 
@@ -1162,9 +1342,9 @@ const mergeProfessionalWithPortalState = (
       bookingFlow: service.bookingFlow,
       defaultMode: service.defaultMode,
       duration: service.duration,
+      id: `professional-service-${portalState.activeProfessionalId}-${service.serviceId}`,
       index: index + 1,
       price: service.price,
-      scheduleByMode: service.scheduleByMode,
       serviceId: service.serviceId,
       serviceModes: service.serviceModes,
       summary: service.summary,
@@ -1204,6 +1384,7 @@ const mergeProfessionalWithPortalState = (
     },
     experience: portalState.yearsExperience || professional.experience,
     gallery: publicGalleryItems,
+    availabilityByMode: portalState.availabilityByMode,
     location: portalState.practiceLabel || professional.location,
     name: portalState.displayName || professional.name,
     portfolioEntries: publicPortfolioEntries,
@@ -1227,15 +1408,25 @@ export const useProfessionalPortal = () => {
   const [portalState, setPortalState] = useState<ProfessionalPortalState>(
     () => readProfessionalPortalData().portalState,
   );
-  const [requestBoardsByProfessionalId, setRequestBoardsByProfessionalId] = useState<
-    Record<string, ProfessionalManagedRequest[]>
-  >(() => readProfessionalPortalData().requestBoardsByProfessionalId);
+  const [appointmentRecordsByProfessionalId, setAppointmentRecordsByProfessionalId] = useState<
+    Record<string, ProfessionalManagedAppointmentRecord[]>
+  >(() => readProfessionalPortalData().appointmentRecordsByProfessionalId);
+  const [reviewStatesByProfessionalId, setReviewStatesByProfessionalId] = useState<
+    Record<string, ProfessionalLifecycleReviewState>
+  >(() => readProfessionalPortalData().reviewStatesByProfessionalId);
+  const requestBoardsByProfessionalId = Object.fromEntries(
+    Object.entries(appointmentRecordsByProfessionalId).map(([professionalId, records]) => [
+      professionalId,
+      buildRequestBoardFromAppointmentRecords(records),
+    ]),
+  );
 
   useEffect(() => {
     const syncPortalState = () => {
       const nextData = readProfessionalPortalData();
       setPortalState(nextData.portalState);
-      setRequestBoardsByProfessionalId(nextData.requestBoardsByProfessionalId);
+      setAppointmentRecordsByProfessionalId(nextData.appointmentRecordsByProfessionalId);
+      setReviewStatesByProfessionalId(nextData.reviewStatesByProfessionalId);
     };
 
     return professionalPortalRepository.subscribe(syncPortalState);
@@ -1243,23 +1434,42 @@ export const useProfessionalPortal = () => {
 
   const updatePortalState = (
     nextState: ProfessionalPortalState,
-    nextRequestBoardsInput?: Record<string, ProfessionalManagedRequest[]>,
+    nextAppointmentRecordsInput?: Record<string, ProfessionalManagedAppointmentRecord[]>,
+    nextReviewStatesInput?: Record<string, ProfessionalLifecycleReviewState>,
   ) => {
     const candidateState = sanitizePortalState(nextState);
-    const candidateRequestBoards = sanitizeRequestBoardsByProfessionalId({
-      ...requestBoardsByProfessionalId,
-      ...nextRequestBoardsInput,
-      [candidateState.activeProfessionalId]:
-        nextRequestBoardsInput?.[candidateState.activeProfessionalId] || candidateState.requestBoard,
-    });
+    const candidateAppointmentRecords = {
+      ...buildDefaultAppointmentRecordsByProfessionalId(),
+      ...appointmentRecordsByProfessionalId,
+      ...sanitizeAppointmentRecordsByProfessionalId(nextAppointmentRecordsInput),
+    };
+    const candidateRequestBoards = Object.fromEntries(
+      Object.entries(candidateAppointmentRecords).map(([professionalId, records]) => [
+        professionalId,
+        buildRequestBoardFromAppointmentRecords(records),
+      ]),
+    );
+    const candidateReviewStates = {
+      ...buildDefaultReviewStates(),
+      ...sanitizeReviewStatesByProfessionalId({
+        ...reviewStatesByProfessionalId,
+        ...nextReviewStatesInput,
+      }),
+      [candidateState.activeProfessionalId]: sanitizeReviewState(
+        nextReviewStatesInput?.[candidateState.activeProfessionalId] ||
+          reviewStatesByProfessionalId[candidateState.activeProfessionalId],
+        createPublishedReviewState(),
+      ),
+    };
     const sanitizedState = sanitizePortalState({
       ...candidateState,
       requestBoard: candidateRequestBoards[candidateState.activeProfessionalId] || candidateState.requestBoard,
     });
 
     setPortalState(sanitizedState);
-    setRequestBoardsByProfessionalId(candidateRequestBoards);
-    persistProfessionalPortalState(sanitizedState, candidateRequestBoards);
+    setAppointmentRecordsByProfessionalId(candidateAppointmentRecords);
+    setReviewStatesByProfessionalId(candidateReviewStates);
+    persistProfessionalPortalState(sanitizedState, candidateAppointmentRecords, candidateReviewStates);
   };
 
   const updatePortalStateWith = (updater: (currentState: ProfessionalPortalState) => ProfessionalPortalState) => {
@@ -1267,21 +1477,30 @@ export const useProfessionalPortal = () => {
   };
 
   const startProfessionalLogin = ({ phone, professionalId }: ProfessionalAccessDraft) => {
-    const requestBoard =
-      requestBoardsByProfessionalId[professionalId] ||
-      buildDefaultRequestBoard(getProfessionalById(professionalId) || defaultProfessional);
+    const baseState =
+      portalState.activeProfessionalId === professionalId ? portalState : buildDefaultPortalState(professionalId);
+    const appointmentRecords =
+      appointmentRecordsByProfessionalId[professionalId] ||
+      buildDefaultAppointmentRecords(getProfessionalById(professionalId) || defaultProfessional);
+    const requestBoard = buildRequestBoardFromAppointmentRecords(appointmentRecords);
     const nextState = sanitizePortalState({
-      ...buildDefaultPortalState(professionalId),
+      ...baseState,
       activeProfessionalId: professionalId,
-      onboardingCompleted: true,
       phone,
       requestBoard,
     });
 
-    updatePortalState(nextState, {
-      ...requestBoardsByProfessionalId,
-      [professionalId]: requestBoard,
-    });
+    updatePortalState(
+      nextState,
+      {
+        ...appointmentRecordsByProfessionalId,
+        [professionalId]: appointmentRecords,
+      },
+      {
+        ...reviewStatesByProfessionalId,
+        [professionalId]: reviewStatesByProfessionalId[professionalId] || createPublishedReviewState(),
+      },
+    );
     continueAsProfessional();
   };
 
@@ -1292,46 +1511,48 @@ export const useProfessionalPortal = () => {
     phone,
     professionalId,
   }: ProfessionalAccessDraft) => {
-    const requestBoard =
-      requestBoardsByProfessionalId[professionalId] ||
-      buildDefaultRequestBoard(getProfessionalById(professionalId) || defaultProfessional);
-    const nextState = sanitizePortalState({
-      ...buildDefaultPortalState(professionalId),
-      activeProfessionalId: professionalId,
-      city,
-      credentialNumber,
-      displayName,
-      onboardingCompleted: false,
-      phone,
-      requestBoard,
-    });
+    const nextState = sanitizePortalState(
+      createProfessionalOnboardingDraft({
+        ...buildDefaultPortalState(professionalId),
+        activeProfessionalId: professionalId,
+        city: city || '',
+        credentialNumber: credentialNumber || '',
+        displayName: displayName || '',
+        phone,
+      }),
+    );
 
-    updatePortalState(nextState, {
-      ...requestBoardsByProfessionalId,
-      [professionalId]: requestBoard,
-    });
-    continueAsProfessional();
-  };
-
-  const completeProfessionalSetup = (input: ProfessionalSetupInput) => {
-    updatePortalStateWith((currentState) => ({
-      ...currentState,
-      coverageAreaIds: input.coverageAreaIds,
-      onboardingCompleted: true,
-      practiceModes: input.practiceModes,
-      yearsExperience: input.yearsExperience,
-    }));
+    updatePortalState(
+      nextState,
+      {
+        ...appointmentRecordsByProfessionalId,
+        [professionalId]: [],
+      },
+      {
+        ...reviewStatesByProfessionalId,
+        [professionalId]: createDraftReviewState(),
+      },
+    );
     continueAsProfessional();
   };
 
   const switchProfessionalProfile = (professionalId: string) => {
     const professional = getProfessionalById(professionalId) || defaultProfessional;
-    const requestBoard = requestBoardsByProfessionalId[professionalId] || buildDefaultRequestBoard(professional);
+    const appointmentRecords =
+      appointmentRecordsByProfessionalId[professionalId] || buildDefaultAppointmentRecords(professional);
+    const requestBoard = buildRequestBoardFromAppointmentRecords(appointmentRecords);
 
-    updatePortalState({
-      ...buildDefaultPortalState(professionalId),
-      requestBoard,
-    });
+    updatePortalState(
+      {
+        ...buildDefaultPortalState(professionalId),
+        requestBoard,
+      },
+      undefined,
+      {
+        ...reviewStatesByProfessionalId,
+        [professionalId]: reviewStatesByProfessionalId[professionalId] || createPublishedReviewState(),
+      },
+    );
   };
 
   const saveServiceConfiguration = (serviceId: string, updates: Partial<ProfessionalManagedService>) => {
@@ -1430,75 +1651,225 @@ export const useProfessionalPortal = () => {
     }));
   };
 
+  const saveAvailabilityByMode = (
+    availabilityByMode?: Partial<Record<ServiceDeliveryMode, ProfessionalAvailabilityDay[]>>,
+  ) => {
+    updatePortalStateWith((currentState) => ({
+      ...currentState,
+      availabilityByMode: sanitizeAvailabilityByMode(availabilityByMode, currentState.availabilityByMode),
+    }));
+  };
+
+  const submitProfessionalProfileForReview = () => {
+    const readinessState = deriveProfessionalOnboardingState(portalState, null);
+
+    if (readinessState.blockingTaskCount > 0) {
+      return false;
+    }
+
+    const submittedAt = new Date().toISOString();
+
+    updatePortalState(portalState, undefined, {
+      ...reviewStatesByProfessionalId,
+      [portalState.activeProfessionalId]: {
+        status: 'submitted',
+        submittedAt,
+      },
+    });
+
+    return true;
+  };
+
+  const simulateProfessionalAdminReview = (status: 'changes_requested' | 'verified') => {
+    const activeReviewState =
+      reviewStatesByProfessionalId[portalState.activeProfessionalId] || createDraftReviewState();
+
+    if (activeReviewState.status !== 'submitted') {
+      return false;
+    }
+
+    const reviewedAt = new Date().toISOString();
+
+    updatePortalState(portalState, undefined, {
+      ...reviewStatesByProfessionalId,
+      [portalState.activeProfessionalId]:
+        status === 'changes_requested'
+          ? {
+              adminNote: PROFESSIONAL_LIFECYCLE_REVIEW_STATE_MOCKS.changesRequested.adminNote,
+              reviewedAt,
+              reviewerName:
+                PROFESSIONAL_LIFECYCLE_REVIEW_STATE_MOCKS.changesRequested.reviewerName || 'Admin BidanCare',
+              status,
+              submittedAt: activeReviewState.submittedAt,
+            }
+          : {
+              reviewedAt,
+              reviewerName:
+                PROFESSIONAL_LIFECYCLE_REVIEW_STATE_MOCKS.verifiedPendingPublish.reviewerName || 'Admin BidanCare',
+              status,
+              submittedAt: activeReviewState.submittedAt,
+            },
+    });
+
+    return true;
+  };
+
+  const publishProfessionalProfile = () => {
+    const activeReviewState =
+      reviewStatesByProfessionalId[portalState.activeProfessionalId] || createDraftReviewState();
+
+    if (activeReviewState.status !== 'verified') {
+      return false;
+    }
+
+    updatePortalState(
+      {
+        ...portalState,
+        acceptingNewClients: true,
+      },
+      undefined,
+      {
+        ...reviewStatesByProfessionalId,
+        [portalState.activeProfessionalId]: {
+          ...activeReviewState,
+          publishedAt: new Date().toISOString(),
+          status: 'published',
+        },
+      },
+    );
+
+    return true;
+  };
+
   const createCustomerRequest = ({
-    budgetLabel,
-    channel,
     note,
-    priority = 'high',
     professionalId,
     requestedMode,
+    scheduleDayId,
     scheduledTimeLabel,
     serviceId,
+    serviceOfferingId,
+    timeSlotId,
   }: CreateCustomerRequestInput) => {
-    const professional = getProfessionalById(professionalId) || defaultProfessional;
-    const baseRequestBoard = requestBoardsByProfessionalId[professionalId] || buildDefaultRequestBoard(professional);
+    const professional =
+      publicProfessionals.find((candidateProfessional) => candidateProfessional.id === professionalId) ||
+      getProfessionalById(professionalId) ||
+      defaultProfessional;
+
+    if (!professional) {
+      return false;
+    }
+
+    const catalogService = MOCK_SERVICES.find((service) => service.id === serviceId);
+    const serviceMapping =
+      professional.services.find((service) => service.id === serviceOfferingId && service.serviceId === serviceId) ||
+      professional.services.find((service) => service.serviceId === serviceId);
+
+    if (!catalogService || !serviceMapping) {
+      return false;
+    }
+
+    const supportsRequestedMode =
+      (requestedMode === 'online' && serviceMapping.serviceModes.online) ||
+      (requestedMode === 'home_visit' && serviceMapping.serviceModes.homeVisit) ||
+      (requestedMode === 'onsite' && serviceMapping.serviceModes.onsite);
+
+    if (!supportsRequestedMode) {
+      return false;
+    }
+
+    const requiresSchedule = requestedMode !== 'online';
+    const availabilityDays = requiresSchedule ? professional.availabilityByMode?.[requestedMode] || [] : [];
+    const selectedScheduleDay =
+      requiresSchedule && scheduleDayId
+        ? availabilityDays.find((scheduleDay) => scheduleDay.id === scheduleDayId) || null
+        : null;
+    const selectedTimeSlot =
+      requiresSchedule && selectedScheduleDay && timeSlotId
+        ? selectedScheduleDay.slots.find((timeSlot) => timeSlot.id === timeSlotId && timeSlot.status !== 'booked') ||
+          null
+        : null;
+
+    if (requiresSchedule && (!selectedScheduleDay || !selectedTimeSlot)) {
+      return false;
+    }
+
     const requestTimestamp = Date.now();
-    const requestId = `professional-request-${professionalId}-${requestTimestamp}`;
     const requestedAt = new Date();
-    const requestedAtLabel = formatRequestStatusTimestamp(requestedAt);
     const nextScheduledTimeLabel =
       scheduledTimeLabel?.trim() ||
       (requestedMode === 'online' ? 'Menunggu detail sesi online' : 'Menunggu konfirmasi jadwal');
-    const existingRequest = baseRequestBoard.find(
-      (request) =>
-        request.clientId === ACTIVE_CONSUMER.id && request.serviceId === serviceId && request.status === 'new',
-    );
-    const nextRequestBoard = existingRequest
-      ? baseRequestBoard.map((request) =>
-          request.id === existingRequest.id
-            ? sanitizeManagedRequest(
-                {
-                  ...request,
-                  areaId: ACTIVE_USER_CONTEXT.area.id,
-                  budgetLabel,
-                  channel,
-                  note,
-                  priority,
-                  requestedAt: requestedAt.toISOString(),
-                  requestedAtLabel,
-                  requestedMode,
-                  scheduledTimeLabel: nextScheduledTimeLabel,
-                  serviceId,
-                  customerStatus: 'requested',
-                  status: 'new',
-                  statusHistory: [],
-                },
-                request,
-              )
-            : request,
-        )
-      : [
-          sanitizeManagedRequest({
-            appointmentId: `apt-local-${professionalId}-${requestTimestamp}`,
-            areaId: ACTIVE_USER_CONTEXT.area.id,
-            budgetLabel,
-            channel,
-            clientId: ACTIVE_CONSUMER.id,
-            clientName: ACTIVE_CONSUMER.name,
-            customerStatus: 'requested',
-            id: requestId,
-            note,
-            priority,
-            requestedAt: requestedAt.toISOString(),
-            requestedAtLabel,
-            requestedMode,
-            scheduledTimeLabel: nextScheduledTimeLabel,
-            serviceId,
-            status: 'new',
-            statusHistory: [],
+    const appointmentId = `apt-local-${professionalId}-${requestTimestamp}`;
+    const initialStatus: AppointmentStatus =
+      serviceMapping.bookingFlow === 'instant' ? 'approved_waiting_payment' : 'requested';
+    const timeline = [
+      initialStatus === 'approved_waiting_payment'
+        ? createAppointmentTimelineEvent({
+            actor: 'system',
+            createdAt: requestedAt,
+            customerSummary: `Booking instan ${catalogService.name} langsung masuk tahap pembayaran pelanggan.`,
+            fromStatus: 'requested',
+            id: `${appointmentId}-timeline-1`,
+            internalNote: `Booking instan ${appointmentId} tidak butuh approval manual dan menunggu pembayaran.`,
+            toStatus: 'approved_waiting_payment',
+          })
+        : createAppointmentTimelineEvent({
+            actor: 'customer',
+            createdAt: requestedAt,
+            customerSummary: note,
+            id: `${appointmentId}-timeline-1`,
+            internalNote: `Request ${appointmentId} dibuat pelanggan dan menunggu review profesional.`,
+            toStatus: 'requested',
           }),
-          ...baseRequestBoard,
-        ];
+    ];
+    const nextRecord: ProfessionalManagedAppointmentRecord = {
+      areaId: ACTIVE_USER_CONTEXT.area.id,
+      bookingFlow: serviceMapping.bookingFlow,
+      consumerId: ACTIVE_CONSUMER.id,
+      id: appointmentId,
+      index: requestTimestamp,
+      professionalId,
+      requestNote: note,
+      requestedAt: requestedAt.toISOString(),
+      requestedMode,
+      scheduleSnapshot: {
+        dateIso: selectedScheduleDay?.dateIso,
+        requiresSchedule,
+        scheduleDayId: selectedScheduleDay?.id,
+        scheduleDayLabel: selectedScheduleDay?.label,
+        scheduledTimeLabel: nextScheduledTimeLabel,
+        timeSlotId: selectedTimeSlot?.id,
+        timeSlotLabel: selectedTimeSlot?.label,
+      },
+      serviceId,
+      serviceOfferingId: serviceMapping.id || serviceOfferingId,
+      serviceSnapshot: {
+        bookingFlow: serviceMapping.bookingFlow,
+        categoryId: catalogService.categoryId,
+        coverImage: catalogService.coverImage,
+        defaultMode: serviceMapping.defaultMode,
+        description: catalogService.description,
+        durationLabel: serviceMapping.duration,
+        highlights: catalogService.highlights,
+        image: catalogService.image,
+        name: catalogService.name,
+        priceAmount: appointmentPriceLabelToNumber(serviceMapping.price),
+        priceLabel: serviceMapping.price,
+        serviceId,
+        serviceModes: serviceMapping.serviceModes,
+        serviceOfferingId: serviceMapping.id || serviceOfferingId,
+        shortDescription: catalogService.shortDescription,
+        slug: catalogService.slug,
+        summary: serviceMapping.summary || catalogService.shortDescription,
+        tags: catalogService.tags,
+      },
+      status: initialStatus,
+      timeline,
+    };
+    const baseAppointmentRecords =
+      appointmentRecordsByProfessionalId[professionalId] || buildDefaultAppointmentRecords(professional);
+    const nextAppointmentRecords = [nextRecord, ...baseAppointmentRecords];
+    const nextRequestBoard = buildRequestBoardFromAppointmentRecords(nextAppointmentRecords);
 
     updatePortalState(
       portalState.activeProfessionalId === professionalId
@@ -1508,29 +1879,46 @@ export const useProfessionalPortal = () => {
           }
         : portalState,
       {
-        ...requestBoardsByProfessionalId,
-        [professionalId]: nextRequestBoard,
+        ...appointmentRecordsByProfessionalId,
+        [professionalId]: nextAppointmentRecords,
       },
     );
+
+    return true;
   };
 
   const markCustomerAppointmentPaid = (appointmentId: string) => {
     let hasChanged = false;
-    const nextRequestBoards = Object.fromEntries(
-      Object.entries(requestBoardsByProfessionalId).map(([professionalId, requestBoard]) => [
+    const nextAppointmentRecords = Object.fromEntries(
+      Object.entries(appointmentRecordsByProfessionalId).map(([professionalId, records]) => [
         professionalId,
-        requestBoard.map((request) => {
-          if (request.appointmentId !== appointmentId || request.customerStatus !== 'approved_waiting_payment') {
-            return request;
+        records.map((record) => {
+          if (record.id !== appointmentId || record.status !== 'approved_waiting_payment') {
+            return record;
           }
 
           hasChanged = true;
-          return sanitizeManagedRequest(
+          const updatedAt = new Date();
+
+          return sanitizeManagedAppointmentRecord(
             {
-              ...request,
-              customerStatus: 'paid',
+              ...record,
+              status: 'paid',
+              timeline: [
+                ...record.timeline,
+                createAppointmentTimelineEvent({
+                  actor: 'customer',
+                  createdAt: updatedAt,
+                  customerSummary: `Pembayaran untuk ${record.serviceSnapshot.name} sudah diterima dan booking siap dikonfirmasi.`,
+                  evidenceUrl: undefined,
+                  fromStatus: record.status,
+                  id: `${record.id}-timeline-${record.timeline.length + 1}`,
+                  internalNote: `Pembayaran booking ${record.id} tervalidasi dari sisi pelanggan.`,
+                  toStatus: 'paid',
+                }),
+              ],
             },
-            request,
+            record,
           );
         }),
       ]),
@@ -1543,9 +1931,11 @@ export const useProfessionalPortal = () => {
     updatePortalState(
       {
         ...portalState,
-        requestBoard: nextRequestBoards[portalState.activeProfessionalId] || portalState.requestBoard,
+        requestBoard:
+          buildRequestBoardFromAppointmentRecords(nextAppointmentRecords[portalState.activeProfessionalId] || []) ||
+          portalState.requestBoard,
       },
-      nextRequestBoards,
+      nextAppointmentRecords,
     );
 
     return true;
@@ -1575,27 +1965,41 @@ export const useProfessionalPortal = () => {
     }
 
     const updatedAt = new Date();
-    const nextRequestBoard = portalState.requestBoard.map((currentRequest) =>
-      currentRequest.id === requestId
-        ? {
-            ...currentRequest,
-            customerStatus: getCustomerStatusFromRequestStatus(status, currentRequest.customerStatus),
-            status,
-            statusHistory: [
-              ...currentRequest.statusHistory,
-              {
-                createdAt: updatedAt.toISOString(),
-                createdAtLabel: formatRequestStatusTimestamp(updatedAt),
-                customerSummary: input?.customerSummary?.trim() || undefined,
-                evidenceNote: input?.evidenceNote?.trim() || undefined,
-                evidenceUrl: input?.evidenceUrl?.trim() || undefined,
-                fromStatus: currentRequest.status,
-                id: `${currentRequest.id}-history-${currentRequest.statusHistory.length + 1}`,
-                status,
-              },
+    const nextAppointmentRecords = {
+      ...appointmentRecordsByProfessionalId,
+      [portalState.activeProfessionalId]: (
+        appointmentRecordsByProfessionalId[portalState.activeProfessionalId] || []
+      ).map((record) => {
+        if (record.id !== request.appointmentId) {
+          return record;
+        }
+
+        const nextCustomerStatus = getCustomerStatusFromRequestStatus(status, record.status);
+
+        return sanitizeManagedAppointmentRecord(
+          {
+            ...record,
+            status: nextCustomerStatus,
+            timeline: [
+              ...record.timeline,
+              createAppointmentTimelineEvent({
+                actor: 'professional',
+                createdAt: updatedAt,
+                customerSummary: input?.customerSummary,
+                evidenceUrl: input?.evidenceUrl,
+                fromStatus: record.status,
+                id: `${record.id}-timeline-${record.timeline.length + 1}`,
+                internalNote: input?.evidenceNote,
+                toStatus: nextCustomerStatus,
+              }),
             ],
-          }
-        : currentRequest,
+          },
+          record,
+        );
+      }),
+    };
+    const nextRequestBoard = buildRequestBoardFromAppointmentRecords(
+      nextAppointmentRecords[portalState.activeProfessionalId] || [],
     );
 
     updatePortalState(
@@ -1603,10 +2007,7 @@ export const useProfessionalPortal = () => {
         ...portalState,
         requestBoard: nextRequestBoard,
       },
-      {
-        ...requestBoardsByProfessionalId,
-        [portalState.activeProfessionalId]: nextRequestBoard,
-      },
+      nextAppointmentRecords,
     );
 
     return {
@@ -1615,14 +2016,20 @@ export const useProfessionalPortal = () => {
   };
 
   const baseProfessional = getProfessionalById(portalState.activeProfessionalId) || defaultProfessional;
-  const activeProfessional = baseProfessional ? mergeProfessionalWithPortalState(baseProfessional, portalState) : null;
+  const activeReviewState =
+    reviewStatesByProfessionalId[portalState.activeProfessionalId] || createPublishedReviewState();
+  const onboardingState = deriveProfessionalOnboardingState(portalState, activeReviewState);
+  const previewProfessional = baseProfessional ? mergeProfessionalWithPortalState(baseProfessional, portalState) : null;
+  const activeProfessional = previewProfessional;
   const publicProfessionals = MOCK_PROFESSIONALS.map((professional) =>
-    professional.id === activeProfessional?.id ? activeProfessional : professional,
+    professional.id === previewProfessional?.id && activeReviewState.status === 'published'
+      ? previewProfessional
+      : professional,
   );
   const activeCoverageAreas = portalState.coverageAreaIds
     .map((areaId) => getAreaById(areaId))
     .filter((area): area is Area => Boolean(area));
-  const customerAppointments = buildCustomerAppointmentsFromRequestBoards(requestBoardsByProfessionalId);
+  const customerAppointments = buildCustomerAppointmentsFromAppointmentRecords(appointmentRecordsByProfessionalId);
   const activeServiceConfigurations = [...portalState.serviceConfigurations]
     .filter((service) => service.isActive)
     .sort((leftService, rightService) => {
@@ -1657,45 +2064,36 @@ export const useProfessionalPortal = () => {
       scheduled: 0,
     },
   );
-  const profileCompletionScore = Math.round(
-    (([
-      portalState.displayName,
-      portalState.phone,
-      portalState.city,
-      portalState.credentialNumber,
-      portalState.yearsExperience,
-      portalState.publicBio,
-    ].filter((value) => Boolean(value?.trim())).length +
-      (portalState.practiceModes.length > 0 ? 1 : 0) +
-      (portalState.coverageAreaIds.length > 0 ? 1 : 0) +
-      (activeServiceConfigurations.length > 0 ? 1 : 0) +
-      (publicPortfolioEntries.length > 0 ? 1 : 0) +
-      (portalState.galleryItems.length > 0 ? 1 : 0)) /
-      10) *
-      100,
-  );
+  const profileCompletionScore = onboardingState.completionPercent;
+  const isPublishedProfessional = activeReviewState.status === 'published';
 
   return {
     activeCoverageAreas,
     activeProfessional,
     activeProfessionalCategoryLabel: activeProfessional ? getProfessionalCategoryLabel(activeProfessional) : '',
+    activeReviewState,
     activeServiceConfigurations,
     averageServicePriceLabel,
     customerAppointments,
     demoProfessionals: MOCK_PROFESSIONALS.slice(0, 4),
     featuredServiceConfiguration,
     inactiveServiceTemplates,
+    isPublishedProfessional,
+    onboardingState,
     portalState,
     profileCompletionScore,
     publicPortfolioEntries,
     publicProfessionals,
+    publishProfessionalProfile,
     requestStatusCounts,
+    reviewStatesByProfessionalId,
     serviceCategories: MOCK_CATEGORIES,
     serviceTemplates: MOCK_SERVICES,
+    simulateProfessionalAdminReview,
+    submitProfessionalProfileForReview,
     updateRequestStatus,
     activateTemplateService,
     archiveService,
-    completeProfessionalSetup,
     createCustomerRequest,
     createGalleryItem,
     createPortfolioEntry,
@@ -1719,6 +2117,7 @@ export const useProfessionalPortal = () => {
       );
     },
     markCustomerAppointmentPaid,
+    saveAvailabilityByMode,
     saveBusinessSettings,
     saveGalleryItem,
     savePortfolioEntry,
@@ -1727,10 +2126,13 @@ export const useProfessionalPortal = () => {
     startProfessionalRegistration,
     switchProfessionalProfile,
     getAreaLabel: (areaId: string) => getAreaById(areaId)?.label || areaId,
+    getPreviewProfessionalBySlug: (professionalSlug: string) =>
+      previewProfessional?.slug === professionalSlug ? previewProfessional : null,
     getPublicProfessionalById: (professionalId: string) =>
       publicProfessionals.find((professional) => professional.id === professionalId) || null,
     getPublicProfessionalBySlug: (professionalSlug: string) =>
       publicProfessionals.find((professional) => professional.slug === professionalSlug) || null,
-    getServiceLabel: (serviceId: string) => getServiceById(serviceId)?.name || serviceId,
+    getServiceLabel: (serviceId: string) =>
+      MOCK_SERVICES.find((service) => service.id === serviceId)?.name || serviceId,
   };
 };

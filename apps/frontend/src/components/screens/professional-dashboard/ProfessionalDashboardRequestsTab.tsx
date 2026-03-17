@@ -14,6 +14,7 @@ interface ProfessionalDashboardRequestsTabProps {
   getAreaLabel: (areaId: string) => string;
   getModeLabel: (mode: ServiceDeliveryMode) => string;
   getServiceLabel: (serviceId: string) => string;
+  isPublishedProfessional: boolean;
   onChangeStatus: (requestId: string, status: ProfessionalRequestStatus) => void;
   requestFilter: RequestFilter;
   requestStatusCounts: Record<ProfessionalRequestStatus, number>;
@@ -26,6 +27,7 @@ export const ProfessionalDashboardRequestsTab = ({
   getAreaLabel,
   getModeLabel,
   getServiceLabel,
+  isPublishedProfessional,
   onChangeStatus,
   requestFilter,
   requestStatusCounts,
@@ -33,6 +35,27 @@ export const ProfessionalDashboardRequestsTab = ({
   setRequestFilter,
 }: ProfessionalDashboardRequestsTabProps) => {
   const t = useTranslations('ProfessionalPortal');
+  const professionalT = useTranslations('Professional');
+
+  if (!isPublishedProfessional) {
+    return (
+      <section className="space-y-4">
+        <div className="grid grid-cols-2 gap-3">
+          {requestStatuses.map((status) => (
+            <MiniStatCard key={status} label={t(`requests.status.${status}`)} value="0" />
+          ))}
+        </div>
+
+        <div className={surfaceCardPaddedClass}>
+          <SectionHeading
+            icon={<ClipboardList className="h-5 w-5" />}
+            title={t('requests.preliveTitle')}
+            description={t('requests.preliveDescription')}
+          />
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="space-y-4">
@@ -86,13 +109,16 @@ export const ProfessionalDashboardRequestsTab = ({
               fieldLabels={{
                 area: t('requests.fields.area'),
                 budget: t('requests.fields.budget'),
-                channel: t('requests.fields.channel'),
+                bookingFlow: t('services.fields.bookingFlow'),
                 currentStatus: t('requests.fields.currentStatus'),
                 note: t('requests.fields.note'),
                 requestedMode: t('requests.fields.requestedMode'),
                 service: t('requests.fields.service'),
               }}
               getAreaLabel={getAreaLabel}
+              getBookingFlowLabel={(flow) =>
+                flow === 'instant' ? professionalT('bookingFlowInstant') : professionalT('bookingFlowRequest')
+              }
               getModeLabel={getModeLabel}
               getServiceLabel={getServiceLabel}
               htmlId={`professional-request-card-${request.id}`}

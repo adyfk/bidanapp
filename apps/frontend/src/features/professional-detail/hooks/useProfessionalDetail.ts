@@ -1,18 +1,20 @@
 'use client';
 
+import { useSearchParams } from 'next/navigation';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import {
   getAccessibleServiceModes,
+  getProfessionalAvailabilityScheduleDays,
   getProfessionalCategoryLabel,
   getProfessionalCoverageStatus,
-  getProfessionalServiceScheduleDays,
   isOfflineServiceMode,
   MOCK_SERVICES,
 } from '@/lib/mock-db/catalog';
 import { useUiText } from '@/lib/ui-text';
 import { useProfessionalPortal } from '@/lib/use-professional-portal';
 import { useProfessionalUserPreferences } from '@/lib/use-professional-user-preferences';
+import { useViewerSession } from '@/lib/use-viewer-session';
 import type { Professional, ServiceDeliveryMode } from '@/types/catalog';
 
 export interface ProfessionalTrustIndicator {
@@ -28,18 +30,29 @@ export interface ProfessionalServiceEntry {
 
 export const useProfessionalDetail = (professionalSlug: string | undefined) => {
   const uiText = useUiText();
+  const searchParams = useSearchParams();
   const [notice, setNotice] = useState<string | null>(null);
   const [selectedService, setSelectedService] = useState('');
   const [selectedBookingMode, setSelectedBookingMode] = useState<ServiceDeliveryMode | null>(null);
   const [selectedScheduleDayId, setSelectedScheduleDayId] = useState('');
   const [selectedTimeSlotId, setSelectedTimeSlotId] = useState('');
   const { selectedAreaId, userLocation } = useProfessionalUserPreferences();
-  const { createCustomerRequest, getCustomerRequestForProfessional, getPublicProfessionalBySlug } =
-    useProfessionalPortal();
+  const { isProfessional } = useViewerSession();
+  const {
+    createCustomerRequest,
+    getCustomerRequestForProfessional,
+    getPreviewProfessionalBySlug,
+    getPublicProfessionalBySlug,
+  } = useProfessionalPortal();
 
-  const professional = professionalSlug ? getPublicProfessionalBySlug(professionalSlug) : null;
+  const professional = professionalSlug
+    ? (isProfessional ? getPreviewProfessionalBySlug(professionalSlug) : null) ||
+      getPublicProfessionalBySlug(professionalSlug)
+    : null;
   const customerRequest = professional ? getCustomerRequestForProfessional(professional.id) : null;
   const profCategory = professional ? getProfessionalCategoryLabel(professional) || 'Professional' : 'Professional';
+  const requestedServiceId = searchParams.get('service');
+  const requestedModeParam = searchParams.get('mode');
   const offeredServices: ProfessionalServiceEntry[] = professional
     ? professional.services.flatMap((serviceMapping) => {
         const catalogService = MOCK_SERVICES.find((service) => service.id === serviceMapping.serviceId);
@@ -57,10 +70,18 @@ export const useProfessionalDetail = (professionalSlug: string | undefined) => {
       return;
     }
 
-    if (!offeredServices.some(({ serviceMapping }) => serviceMapping.serviceId === selectedService)) {
-      setSelectedService(offeredServices[0]?.serviceMapping.serviceId || '');
+    const nextSelectedService =
+      (requestedServiceId &&
+        offeredServices.some(({ serviceMapping }) => serviceMapping.serviceId === requestedServiceId) &&
+        requestedServiceId) ||
+      (offeredServices.some(({ serviceMapping }) => serviceMapping.serviceId === selectedService)
+        ? selectedService
+        : '');
+
+    if (nextSelectedService !== selectedService) {
+      setSelectedService(nextSelectedService);
     }
-  }, [offeredServices, selectedService]);
+  }, [offeredServices, requestedServiceId, selectedService]);
 
   const selectedServiceEntry =
     offeredServices.find(({ serviceMapping }) => serviceMapping.serviceId === selectedService) || null;
@@ -73,6 +94,12 @@ export const useProfessionalDetail = (professionalSlug: string | undefined) => {
           selectedServiceEntry.serviceMapping.serviceModes,
           coverageStatus,
           professional.availability.isAvailable,
+        ).filter(
+          (mode) =>
+            !isOfflineServiceMode(mode) ||
+            getProfessionalAvailabilityScheduleDays(professional, mode).some((scheduleDay) =>
+              scheduleDay.slots.some((slot) => slot.status !== 'booked'),
+            ),
         )
       : [];
 
@@ -85,7 +112,12 @@ export const useProfessionalDetail = (professionalSlug: string | undefined) => {
       return;
     }
 
+    const requestedMode =
+      requestedModeParam === 'online' || requestedModeParam === 'home_visit' || requestedModeParam === 'onsite'
+        ? requestedModeParam
+        : null;
     const nextMode =
+      (requestedMode && selectedAccessibleModes.includes(requestedMode) && requestedMode) ||
       (selectedBookingMode && selectedAccessibleModes.includes(selectedBookingMode) && selectedBookingMode) ||
       (selectedAccessibleModes.includes(selectedServiceEntry.serviceMapping.defaultMode) &&
         selectedServiceEntry.serviceMapping.defaultMode) ||
@@ -95,11 +127,11 @@ export const useProfessionalDetail = (professionalSlug: string | undefined) => {
     if (nextMode !== selectedBookingMode) {
       setSelectedBookingMode(nextMode);
     }
-  }, [selectedAccessibleModes, selectedBookingMode, selectedServiceEntry]);
+  }, [requestedModeParam, selectedAccessibleModes, selectedBookingMode, selectedServiceEntry]);
 
   const selectedScheduleDays =
-    selectedServiceEntry && selectedBookingMode && isOfflineServiceMode(selectedBookingMode)
-      ? getProfessionalServiceScheduleDays(selectedServiceEntry.serviceMapping, selectedBookingMode)
+    selectedServiceEntry && professional && selectedBookingMode && isOfflineServiceMode(selectedBookingMode)
+      ? getProfessionalAvailabilityScheduleDays(professional, selectedBookingMode)
       : [];
   const selectedScheduleDay =
     selectedScheduleDays.find((scheduleDay) => scheduleDay.id === selectedScheduleDayId) || null;
@@ -175,15 +207,20 @@ export const useProfessionalDetail = (professionalSlug: string | undefined) => {
     );
 
     if (professional) {
-      createCustomerRequest({
-        budgetLabel: selectedServiceEntry.serviceMapping.price,
-        channel: uiText.booking.customerAppChannel,
+      const created = createCustomerRequest({
         note: nextNotice,
         professionalId: professional.id,
         requestedMode: selectedBookingMode,
+        scheduleDayId: selectedScheduleDay?.id,
         scheduledTimeLabel,
         serviceId: selectedServiceEntry.catalogService.id,
+        serviceOfferingId: selectedServiceEntry.serviceMapping.id,
+        timeSlotId: selectedTimeSlot?.id,
       });
+
+      if (!created) {
+        return;
+      }
     }
 
     setNotice(nextNotice);
@@ -194,6 +231,7 @@ export const useProfessionalDetail = (professionalSlug: string | undefined) => {
 
   return {
     canRequestBooking,
+    coverageStatus,
     customerRequest,
     getServiceName,
     notice,

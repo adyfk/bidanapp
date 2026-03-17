@@ -1,19 +1,20 @@
 import type { Route } from 'next';
 import type { AppointmentStatus } from '@/types/appointments';
+import type { ServiceDeliveryMode } from '@/types/catalog';
 
 export type CustomerAccessIntent = 'general' | 'activity' | 'profile' | 'booking' | 'notifications';
 export type ProfessionalAccessTab = 'login' | 'register';
 export type ProfessionalRequestRouteStatus = 'new' | 'quoted' | 'scheduled' | 'completed';
 export const PROFESSIONAL_DASHBOARD_TABS = [
-  'overview',
   'requests',
   'services',
+  'availability',
   'portfolio',
   'coverage',
   'trust',
 ] as const;
 export type ProfessionalDashboardTab = (typeof PROFESSIONAL_DASHBOARD_TABS)[number];
-export const PROFESSIONAL_DASHBOARD_DEFAULT_TAB: ProfessionalDashboardTab = 'overview';
+export const PROFESSIONAL_DASHBOARD_DEFAULT_TAB: ProfessionalDashboardTab = 'requests';
 
 export const APP_ROUTES = {
   customerAccess: '/auth/customer' as Route,
@@ -21,7 +22,6 @@ export const APP_ROUTES = {
   professionalDashboard: '/for-professionals/dashboard' as Route,
   professionalNotifications: '/for-professionals/dashboard/notifications' as Route,
   professionalProfile: '/for-professionals/profile' as Route,
-  professionalSetup: '/for-professionals/setup' as Route,
   home: '/home' as Route,
   services: '/services' as Route,
   explore: '/explore' as Route,
@@ -30,8 +30,27 @@ export const APP_ROUTES = {
   notifications: '/notifications' as Route,
 } as const;
 
-export function professionalRoute(slug: string): Route {
-  return `/p/${slug}` as Route;
+export function professionalRoute(
+  slug: string,
+  params: { mode?: ServiceDeliveryMode; serviceId?: string } = {},
+): Route {
+  const query = new URLSearchParams();
+
+  if (params.serviceId) {
+    query.set('service', params.serviceId);
+  }
+
+  if (params.mode) {
+    query.set('mode', params.mode);
+  }
+
+  const queryString = query.toString();
+
+  if (!queryString) {
+    return `/p/${slug}` as Route;
+  }
+
+  return `/p/${slug}?${queryString}` as Route;
 }
 
 export function professionalDashboardRoute(tab: ProfessionalDashboardTab = PROFESSIONAL_DASHBOARD_DEFAULT_TAB): Route {

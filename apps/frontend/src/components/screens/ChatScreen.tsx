@@ -221,7 +221,7 @@ export const ChatScreen = ({ professionalId }: { professionalId: string }) => {
       </div>
 
       {/* Input Area */}
-      <div className="bg-white px-4 py-3 pb-6 sm:pb-8 border-t border-gray-100 z-20 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.05)]">
+      <div className="z-20 border-t border-gray-100 bg-white px-4 py-3 pb-6 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.05)]">
         <form onSubmit={handleSendMessage} className="flex gap-2.5 items-end">
           <button
             type="button"

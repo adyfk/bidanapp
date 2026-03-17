@@ -55,11 +55,11 @@ export const useProfessionalNotifications = () => {
   const t = useTranslations('ProfessionalPortal');
   const {
     activeCoverageAreas,
+    activeReviewState,
     activeServiceConfigurations,
     getAreaLabel,
     getServiceLabel,
     portalState,
-    profileCompletionScore,
   } = useProfessionalPortal();
   const [storedReadIds, setStoredReadIds] = useState<Record<string, string[]>>(readStoredReadIds);
   const activeProfessionalId = portalState.activeProfessionalId;
@@ -113,7 +113,6 @@ export const useProfessionalNotifications = () => {
             actionKey: 'openRequestBoard' as const,
             body: t('notifications.items.newRequestBody', {
               area: getAreaLabel(request.areaId),
-              channel: request.channel,
               service: getServiceLabel(request.serviceId),
             }),
             isUnreadByDefault: true,
@@ -170,18 +169,45 @@ export const useProfessionalNotifications = () => {
       });
     const operationalNotifications = [];
 
-    if (profileCompletionScore < 100) {
+    if (activeReviewState.status === 'submitted') {
       operationalNotifications.push({
-        actionKey: 'openOverview' as const,
-        body: t('notifications.items.profileReadinessBody', {
-          score: profileCompletionScore,
-        }),
-        href: professionalDashboardRoute('overview'),
-        id: `operations:profile:${activeProfessionalId}`,
+        actionKey: 'reviewProfile' as const,
+        body: t('notifications.items.reviewPendingBody'),
+        href: professionalDashboardRoute('requests'),
+        id: `operations:review-pending:${activeProfessionalId}`,
+        isUnreadByDefault: true,
+        section: 'monitoring' as const,
+        timeLabel: t('notifications.labels.system'),
+        title: t('notifications.items.reviewPendingTitle'),
+        type: 'operations' as const,
+      });
+    }
+
+    if (activeReviewState.status === 'changes_requested') {
+      operationalNotifications.push({
+        actionKey: 'reviewProfile' as const,
+        body: t('notifications.items.reviewChangesRequestedBody'),
+        href: professionalDashboardRoute('requests'),
+        id: `operations:review-changes:${activeProfessionalId}`,
+        isUnreadByDefault: true,
+        isUrgent: true,
+        section: 'actionNeeded' as const,
+        timeLabel: t('notifications.labels.system'),
+        title: t('notifications.items.reviewChangesRequestedTitle'),
+        type: 'operations' as const,
+      });
+    }
+
+    if (activeReviewState.status === 'verified') {
+      operationalNotifications.push({
+        actionKey: 'reviewProfile' as const,
+        body: t('notifications.items.reviewVerifiedBody'),
+        href: professionalDashboardRoute('requests'),
+        id: `operations:review-verified:${activeProfessionalId}`,
         isUnreadByDefault: true,
         section: 'actionNeeded' as const,
         timeLabel: t('notifications.labels.system'),
-        title: t('notifications.items.profileReadinessTitle'),
+        title: t('notifications.items.reviewVerifiedTitle'),
         type: 'operations' as const,
       });
     }
@@ -249,12 +275,12 @@ export const useProfessionalNotifications = () => {
   }, [
     activeCoverageAreas.length,
     activeProfessionalId,
+    activeReviewState.status,
     activeServiceConfigurations,
     getAreaLabel,
     getServiceLabel,
     portalState.acceptingNewClients,
     portalState.requestBoard,
-    profileCompletionScore,
     storedReadIds,
     t,
   ]);

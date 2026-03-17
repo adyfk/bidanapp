@@ -5,8 +5,14 @@ import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 import { AppAvatar } from '@/components/ui/AppAvatar';
 import { InlineFeedbackNotice } from '@/components/ui/InlineFeedbackNotice';
+import {
+  accentPrimaryButtonClass,
+  darkPrimaryButtonClass,
+  neutralSoftPillClass,
+  softWhitePanelClass,
+} from '@/components/ui/tokens';
+import type { ProfessionalOnboardingState } from '@/features/professional-portal/lib/onboarding';
 import { useRouter } from '@/i18n/routing';
-import { APP_CONFIG } from '@/lib/config';
 import {
   APP_ROUTES,
   PROFESSIONAL_DASHBOARD_TABS,
@@ -15,7 +21,9 @@ import {
   professionalRoute,
 } from '@/lib/routes';
 import { useProfessionalNotifications } from '@/lib/use-professional-notifications';
+import type { ProfessionalLifecycleReviewState } from '@/lib/use-professional-portal';
 import type { Professional } from '@/types/catalog';
+import { ProfessionalDashboardOnboardingCard } from './ProfessionalDashboardOnboardingCard';
 
 interface ProfessionalDashboardShellProps {
   activeCoverageAreaCount: number;
@@ -27,7 +35,12 @@ interface ProfessionalDashboardShellProps {
   clampedCompletionScore: number;
   headerLocationLabel?: string;
   notice?: string | null;
+  onboardingState?: ProfessionalOnboardingState | null;
   onDismissNotice?: () => void;
+  onPublishProfile?: () => void;
+  onSimulateReview?: (status: 'changes_requested' | 'verified') => void;
+  onSubmitForReview?: () => void;
+  reviewState?: ProfessionalLifecycleReviewState | null;
   responseTimeGoal: string;
 }
 
@@ -41,7 +54,12 @@ export const ProfessionalDashboardShell = ({
   clampedCompletionScore,
   headerLocationLabel,
   notice,
+  onboardingState,
   onDismissNotice,
+  onPublishProfile,
+  onSimulateReview,
+  onSubmitForReview,
+  reviewState,
   responseTimeGoal,
 }: ProfessionalDashboardShellProps) => {
   const router = useRouter();
@@ -50,8 +68,8 @@ export const ProfessionalDashboardShell = ({
   const locationLabel = headerLocationLabel || activeProfessional.location;
 
   return (
-    <div className="flex h-full flex-col overflow-y-auto bg-gray-50 pb-10 custom-scrollbar">
-      <div className="sticky top-0 z-20 bg-gray-50 px-6 pb-6 pt-14">
+    <div className="flex h-full flex-col overflow-y-auto bg-[linear-gradient(180deg,#FFF8FC_0%,#FCFCFD_26%,#F8FAFC_100%)] pb-10 custom-scrollbar">
+      <div className="sticky top-0 z-20 bg-[linear-gradient(180deg,#FFF8FC_0%,rgba(255,248,252,0.96)_72%,rgba(255,248,252,0)_100%)] px-6 pb-6 pt-14 backdrop-blur-sm">
         <div className="flex items-center justify-between">
           <button
             type="button"
@@ -89,6 +107,21 @@ export const ProfessionalDashboardShell = ({
       </div>
 
       <div className="space-y-5 px-5 py-6">
+        {onboardingState &&
+        reviewState &&
+        onboardingState.pageState !== 'live' &&
+        onPublishProfile &&
+        onSimulateReview &&
+        onSubmitForReview ? (
+          <ProfessionalDashboardOnboardingCard
+            onboardingState={onboardingState}
+            reviewState={reviewState}
+            onPublish={onPublishProfile}
+            onSimulateReview={onSimulateReview}
+            onSubmit={onSubmitForReview}
+          />
+        ) : null}
+
         {notice && onDismissNotice ? <InlineFeedbackNotice message={notice} onDismiss={onDismissNotice} /> : null}
 
         <div className="flex flex-wrap gap-2">
@@ -123,8 +156,7 @@ export const ProfessionalDashboardShell = ({
           <button
             type="button"
             onClick={() => router.push(professionalRoute(activeProfessional.slug))}
-            className="flex items-center justify-center gap-2 rounded-full py-4 text-[14px] font-bold text-white shadow-lg shadow-pink-500/20 transition-transform active:scale-[0.99]"
-            style={{ backgroundColor: APP_CONFIG.colors.primary }}
+            className={`${accentPrimaryButtonClass} flex items-center justify-center gap-2 py-4 text-[14px]`}
           >
             {t('actions.viewPublicProfile')}
             <ArrowRight className="h-4 w-4" />
@@ -132,13 +164,13 @@ export const ProfessionalDashboardShell = ({
           <button
             type="button"
             onClick={() => router.push(APP_ROUTES.explore)}
-            className="flex items-center justify-center gap-2 rounded-full bg-gray-100 py-4 text-[14px] font-bold text-gray-700 transition-colors hover:bg-gray-200"
+            className={`${darkPrimaryButtonClass} flex items-center justify-center gap-2 py-4 text-[14px]`}
           >
             {t('actions.openCatalog')}
           </button>
         </div>
 
-        <hr className="border-t-1 border-gray-400"></hr>
+        <hr className="border-t border-pink-100/80" />
 
         <div className="flex gap-2 overflow-auto px-0.5 custom-scrollbar">
           {PROFESSIONAL_DASHBOARD_TABS.map((tab) => (
@@ -148,7 +180,7 @@ export const ProfessionalDashboardShell = ({
               onClick={() => router.push(professionalDashboardRoute(tab))}
               className={`whitespace-nowrap rounded-full border px-4 py-2.5 text-[13px] font-semibold transition-all ${
                 activeTab === tab
-                  ? 'border-gray-900 bg-gray-900 text-white shadow-sm'
+                  ? 'border-pink-100 bg-pink-50 text-pink-600 shadow-[0_14px_30px_-24px_rgba(236,72,153,0.45)]'
                   : 'border-gray-200 bg-white text-gray-600 hover:bg-slate-50'
               }`}
             >
@@ -164,7 +196,7 @@ export const ProfessionalDashboardShell = ({
 };
 
 const SummaryMetricCard = ({ icon, label, value }: { icon: ReactNode; label: string; value: string }) => (
-  <div className="rounded-[24px] border border-gray-100 bg-white px-4 py-3.5 shadow-sm">
+  <div className={`${softWhitePanelClass} px-4 py-3.5`}>
     <div className="flex items-center gap-2 text-[11px] font-semibold text-gray-500">
       <span className="text-pink-500">{icon}</span>
       {label}
@@ -174,7 +206,7 @@ const SummaryMetricCard = ({ icon, label, value }: { icon: ReactNode; label: str
 );
 
 const DashboardInfoChip = ({ label, value }: { label: string; value: string }) => (
-  <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3.5 py-2 text-[12px]">
+  <div className={`${neutralSoftPillClass} px-3.5 py-2 text-[12px]`}>
     <span className="font-medium text-slate-500">{label}</span>
     <span className="font-bold text-slate-900">{value}</span>
   </div>
