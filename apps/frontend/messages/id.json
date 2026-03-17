@@ -639,7 +639,7 @@
       "feedback": "Ulasan dan kualitas layanan",
       "feedbackDescription": "Sinyal kualitas dari review pelanggan dan appointment yang selesai. Bagian ini tidak bisa diedit dari dashboard.",
       "testimonials": "Suara pelanggan terbaru",
-      "testimonialsDescription": "Kutpan pelanggan tetap read-only agar lapisan trust publik tetap bisa diaudit.",
+      "testimonialsDescription": "Kutipan pelanggan tetap read-only agar lapisan trust publik tetap bisa diaudit.",
       "stories": "Cerita praktik dan bukti kerja",
       "storiesDescription": "Kurasi beberapa momen nyata dari praktik Anda agar pelanggan paham cara kerja Anda sebelum booking.",
       "customerSignals": "Sinyal kepercayaan pelanggan",

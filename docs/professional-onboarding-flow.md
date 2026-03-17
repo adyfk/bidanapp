@@ -18,6 +18,7 @@ Fitur editable yang sudah ada dan bisa dipakai untuk onboarding:
 - coverage operasional: `coverageAreaIds`, `practiceLabel`, `practiceAddress`, `homeVisitRadiusKm`, `coverageCenter`
 - layanan: `serviceConfigurations`
 - portofolio: `portfolioEntries`, `galleryItems`
+- trust milik profesional: `credentials`, `activityStories`
 
 Gap utama dari implementasi sekarang:
 
@@ -56,7 +57,9 @@ Section yang dipakai dari fitur existing:
 
 Catatan:
 
-- `Trust` tidak dijadikan blocker onboarding karena saat ini credentials, testimonials, dan feedback trust mayoritas datang dari mock public catalog, bukan dari state edit profesional.
+- `Trust` tidak dijadikan blocker onboarding.
+- profesional sekarang bisa mengelola `credentials` dan `activityStories` dari dashboard trust.
+- `feedback` dan `testimonials` tetap read-only karena sumbernya berasal dari pelanggan dan histori layanan.
 
 ### 3. Submit Ke Admin
 
@@ -246,5 +249,7 @@ Untuk flow onboarding, itu menyesatkan. Karena itu draft registrasi sebaiknya:
 ## Batas Tanggung Jawab Data
 
 - `ProfessionalPortalState` tetap jadi source of truth untuk data yang diedit profesional.
+- `credentials` dan `activityStories` dikelola profesional dari dashboard trust lalu diproyeksikan ke profil publik.
+- `feedback`, `feedbackSummary`, `feedbackBreakdown`, dan `testimonials` tetap jadi read-only trust layer yang berasal dari pelanggan atau agregasi sistem.
 - lifecycle admin review disimpan terpisah sebagai metadata kecil.
 - public catalog tetap diturunkan dari state yang sudah `published`, bukan dari draft mentah.

@@ -106,6 +106,7 @@ test(
       '/for-professionals/setup',
       '/for-professionals/profile',
       '/for-professionals/dashboard/overview',
+      '/for-professionals/dashboard/trust',
       '/examples/backend',
       `/p/${professionalSlug}`,
       `/s/${serviceSlug}`,
