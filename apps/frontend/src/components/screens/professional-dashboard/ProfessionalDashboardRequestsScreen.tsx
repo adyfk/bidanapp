@@ -1,15 +1,22 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ProfessionalAccessScreen } from '@/components/screens/ProfessionalAccessScreen';
 import { ProfessionalPageSkeleton } from '@/components/screens/ProfessionalPageSkeleton';
+import {
+  createDefaultCancellationPolicySnapshot,
+  getAppointmentClosePreview,
+  isProfessionalCloseAllowed,
+} from '@/features/appointments/lib/cancellation';
 import { validateProfessionalRequestStatusUpdate } from '@/features/professional-portal/lib/request-status';
+import { getProfessionalCancellationPolicy } from '@/lib/mock-db/catalog';
 import { requestStatuses } from './helpers';
+import { ProfessionalDashboardRequestCloseDialog } from './ProfessionalDashboardRequestCloseDialog';
 import { ProfessionalDashboardRequestStatusDialog } from './ProfessionalDashboardRequestStatusDialog';
 import { ProfessionalDashboardRequestsTab } from './ProfessionalDashboardRequestsTab';
 import { ProfessionalDashboardShell } from './ProfessionalDashboardShell';
-import type { RequestFilter, RequestStatusDraft } from './types';
+import type { RequestCloseDraft, RequestFilter, RequestStatusDraft } from './types';
 import { useDashboardDialogLifecycle } from './useDashboardDialogLifecycle';
 import { useProfessionalDashboardPageData } from './useProfessionalDashboardPageData';
 
@@ -41,16 +48,20 @@ export const ProfessionalDashboardRequestsScreen = () => {
     simulateProfessionalAdminReview,
     submitProfessionalProfileForReview,
     t,
+    closeProfessionalRequest,
     updateRequestStatus,
   } = useProfessionalDashboardPageData();
   const [notice, setNotice] = useState<string | null>(null);
   const [requestFilter, setRequestFilter] = useState<RequestFilter>(requestedFilter);
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
+  const [isCloseDialogOpen, setIsCloseDialogOpen] = useState(false);
   const [statusError, setStatusError] = useState<string | null>(null);
+  const [closeError, setCloseError] = useState<string | null>(null);
   const [selectedRequestId, setSelectedRequestId] = useState(
     requestedRequestId || portalState.requestBoard[0]?.id || '',
   );
   const [statusDraft, setStatusDraft] = useState<RequestStatusDraft | null>(null);
+  const [closeDraft, setCloseDraft] = useState<RequestCloseDraft | null>(null);
   const priorityRank = {
     high: 0,
     medium: 1,
@@ -76,14 +87,40 @@ export const ProfessionalDashboardRequestsScreen = () => {
     portalState.requestBoard.find((currentRequest) => currentRequest.id === selectedRequestId) ||
     portalState.requestBoard[0] ||
     null;
+  const closePreview = useMemo(() => {
+    if (!activeProfessional || !selectedRequest || !isProfessionalCloseAllowed(selectedRequest.customerStatus)) {
+      return null;
+    }
+
+    const policySnapshot =
+      getProfessionalCancellationPolicy(activeProfessional.id, selectedRequest.requestedMode) ||
+      createDefaultCancellationPolicySnapshot(selectedRequest.requestedMode);
+
+    return getAppointmentClosePreview({
+      actor: 'professional',
+      policySnapshot,
+      scheduleSnapshot: {
+        requiresSchedule: selectedRequest.requestedMode !== 'online',
+        scheduledTimeLabel: selectedRequest.scheduledTimeLabel,
+        timeSlotLabel: selectedRequest.scheduledTimeLabel,
+      },
+      status: selectedRequest.customerStatus,
+    });
+  }, [activeProfessional, selectedRequest]);
 
   const closeStatusDialog = () => {
     setStatusError(null);
     setStatusDraft(null);
     setIsStatusDialogOpen(false);
   };
+  const closeRequestDialog = () => {
+    setCloseError(null);
+    setCloseDraft(null);
+    setIsCloseDialogOpen(false);
+  };
 
   useDashboardDialogLifecycle(isStatusDialogOpen, closeStatusDialog);
+  useDashboardDialogLifecycle(isCloseDialogOpen, closeRequestDialog);
 
   useEffect(() => {
     setRequestFilter(requestedFilter);
@@ -176,6 +213,18 @@ export const ProfessionalDashboardRequestsScreen = () => {
         getModeLabel={getModeLabel}
         getServiceLabel={getServiceLabel}
         isPublishedProfessional={isPublishedProfessional}
+        onCloseRequest={(requestId) => {
+          const request = portalState.requestBoard.find((currentRequest) => currentRequest.id === requestId);
+
+          if (!request || !isProfessionalCloseAllowed(request.customerStatus)) {
+            return;
+          }
+
+          setCloseError(null);
+          setSelectedRequestId(requestId);
+          setCloseDraft({ reason: '' });
+          setIsCloseDialogOpen(true);
+        }}
         requestFilter={requestFilter}
         requestStatusCounts={requestStatusCounts}
         selectedRequestId={selectedRequestId}
@@ -244,6 +293,42 @@ export const ProfessionalDashboardRequestsScreen = () => {
             );
           })()
         : null}
+
+      {isCloseDialogOpen && selectedRequest && closeDraft && closePreview ? (
+        <ProfessionalDashboardRequestCloseDialog
+          draft={closeDraft}
+          getAreaLabel={getAreaLabel}
+          getServiceLabel={getServiceLabel}
+          onChangeDraft={(draft) => {
+            setCloseError(null);
+            setCloseDraft(draft);
+          }}
+          onClose={closeRequestDialog}
+          onSave={() => {
+            if (!closeDraft.reason.trim()) {
+              setCloseError(t('requests.errors.closeReasonRequired'));
+              return;
+            }
+
+            const result = closeProfessionalRequest(selectedRequest.id, closeDraft.reason);
+
+            if (!result.ok) {
+              setCloseError(t('requests.errors.invalidTransition'));
+              return;
+            }
+
+            setNotice(
+              t(`requests.closeSuccess.${closePreview.nextStatus === 'rejected' ? 'rejected' : 'cancelled'}`, {
+                client: selectedRequest.clientName,
+              }),
+            );
+            closeRequestDialog();
+          }}
+          preview={closePreview}
+          request={selectedRequest}
+          validationMessage={closeError}
+        />
+      ) : null}
     </ProfessionalDashboardShell>
   );
 };

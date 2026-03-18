@@ -2,11 +2,14 @@
 
 import { ChevronLeft } from 'lucide-react';
 import { InlineFeedbackNotice } from '@/components/ui/InlineFeedbackNotice';
+import { AppointmentCancelSheet } from '@/features/appointments/components/AppointmentCancelSheet';
 import { AppointmentChatSheet } from '@/features/appointments/components/AppointmentChatSheet';
 import { AppointmentDetailSheet } from '@/features/appointments/components/AppointmentDetailSheet';
 import { AppointmentReviewSheet } from '@/features/appointments/components/AppointmentReviewSheet';
 import { useAppointmentFlow } from '@/features/appointments/hooks/useAppointmentFlow';
+import { useRouter } from '@/i18n/routing';
 import { APP_CONFIG } from '@/lib/config';
+import { professionalRoute } from '@/lib/routes';
 import { useUiText } from '@/lib/ui-text';
 
 interface AppointmentDetailExperienceProps {
@@ -15,16 +18,22 @@ interface AppointmentDetailExperienceProps {
 }
 
 export const AppointmentDetailExperience = ({ appointmentId, onBack }: AppointmentDetailExperienceProps) => {
+  const router = useRouter();
   const uiText = useUiText();
   const {
+    cancelPreview,
+    cancelReason,
     canChatSelectedAppointment,
+    closeCancel,
     chatInput,
     closeChat,
     closeReview,
+    isCancelOpen,
     isChatOpen,
     isReviewOpen,
     markPaid,
     notice,
+    openCancel,
     openChat,
     openReview,
     rating,
@@ -36,7 +45,9 @@ export const AppointmentDetailExperience = ({ appointmentId, onBack }: Appointme
     setNotice,
     setRating,
     setReviewText,
+    setCancelReason,
     submitChatMessage,
+    submitCancel,
     submitReview,
     selectReviewPhoto,
   } = useAppointmentFlow({ initialSelectedAppointmentId: appointmentId });
@@ -75,10 +86,30 @@ export const AppointmentDetailExperience = ({ appointmentId, onBack }: Appointme
       <AppointmentDetailSheet
         appointment={selectedAppointment}
         onClose={onBack}
+        onBookAgain={() => {
+          router.push(
+            professionalRoute(selectedAppointment.professional.slug, {
+              mode: selectedAppointment.requestedMode,
+              serviceId: selectedAppointment.service.serviceId,
+            }),
+          );
+        }}
+        onOpenCancel={openCancel}
         onOpenChat={openChat}
         onOpenReview={openReview}
         onPayNow={markPaid}
       />
+
+      {isCancelOpen && cancelPreview ? (
+        <AppointmentCancelSheet
+          appointment={selectedAppointment}
+          cancelPreview={cancelPreview}
+          cancelReason={cancelReason}
+          onCancelReasonChange={setCancelReason}
+          onClose={closeCancel}
+          onSubmit={submitCancel}
+        />
+      ) : null}
 
       {canChatSelectedAppointment && isChatOpen && selectedChatSession ? (
         <AppointmentChatSheet

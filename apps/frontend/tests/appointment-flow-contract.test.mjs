@@ -19,6 +19,7 @@ const [
   services,
   weeklyHours,
   availabilityPolicies,
+  cancellationPolicies,
 ] = await Promise.all([
   readJson('src/data/mock-db/appointments.json'),
   readJson('src/data/mock-db/areas.json'),
@@ -29,6 +30,7 @@ const [
   readJson('src/data/mock-db/services.json'),
   readJson('src/data/mock-db/professional_availability_weekly_hours.json'),
   readJson('src/data/mock-db/professional_availability_policies.json'),
+  readJson('src/data/mock-db/professional_cancellation_policies.json'),
 ]);
 
 const areasById = new Map(areas.map((area) => [area.id, area]));
@@ -40,11 +42,21 @@ const offeringsById = new Map(offerings.map((offering) => [offering.id, offering
 const availabilityPoliciesByProfessionalMode = new Map(
   availabilityPolicies.map((policy) => [`${policy.professionalId}:${policy.mode}`, policy]),
 );
+const cancellationPoliciesByProfessionalMode = new Map(
+  cancellationPolicies.map((policy) => [`${policy.professionalId}:${policy.mode}`, policy]),
+);
 const servicesById = new Map(services.map((service) => [service.id, service]));
 const weeklyHoursByProfessionalModeAndWeekday = new Map(
   weeklyHours.map((row) => [`${row.professionalId}:${row.mode}:${row.weekday}`, row]),
 );
 const allowedMinimumNoticeHours = new Set([4, 12, 24, 48]);
+const allowedCancellationOutcomes = new Set([
+  'none',
+  'void_pending_payment',
+  'full_refund',
+  'no_refund',
+  'manual_refund_required',
+]);
 
 const parsePriceLabel = (priceLabel) => Number.parseInt(String(priceLabel).replace(/\D/g, ''), 10) || 0;
 const parseTimeLabelToMinutes = (timeLabel) => {
@@ -332,4 +344,66 @@ test('availability policies exist for every seeded offline availability mode', (
     /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/,
     'Runtime clock seed must expose a stable currentDateTimeIso',
   );
+});
+
+test('cancellation policy fixtures exist for every seeded appointment mode and snapshots stay coherent', () => {
+  for (const appointment of appointments) {
+    const livePolicy = cancellationPoliciesByProfessionalMode.get(
+      `${appointment.professionalId}:${appointment.requestedMode}`,
+    );
+
+    assert.ok(livePolicy, `Missing cancellation policy for ${appointment.professionalId}:${appointment.requestedMode}`);
+
+    if (!appointment.cancellationPolicySnapshot) {
+      continue;
+    }
+
+    assert.equal(
+      appointment.cancellationPolicySnapshot.customerPaidCancelCutoffHours,
+      livePolicy.customerPaidCancelCutoffHours,
+      `Cancellation cutoff mismatch for ${appointment.id}`,
+    );
+    assert.equal(
+      appointment.cancellationPolicySnapshot.beforeCutoffOutcome,
+      livePolicy.beforeCutoffOutcome,
+      `Before-cutoff outcome mismatch for ${appointment.id}`,
+    );
+    assert.equal(
+      appointment.cancellationPolicySnapshot.afterCutoffOutcome,
+      livePolicy.afterCutoffOutcome,
+      `After-cutoff outcome mismatch for ${appointment.id}`,
+    );
+    assert.equal(
+      appointment.cancellationPolicySnapshot.professionalCancelOutcome,
+      livePolicy.professionalCancelOutcome,
+      `Professional cancellation outcome mismatch for ${appointment.id}`,
+    );
+  }
+});
+
+test('cancelled appointments carry explicit cancellation audit data', () => {
+  const cancelledAppointments = appointments.filter((appointment) => appointment.status === 'cancelled');
+
+  assert.ok(cancelledAppointments.length > 0, 'Expected at least one cancelled appointment fixture');
+
+  for (const appointment of cancelledAppointments) {
+    assert.ok(appointment.cancellationResolution, `Missing cancellationResolution for ${appointment.id}`);
+    assert.match(
+      appointment.cancellationResolution.cancelledAt,
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/,
+      `Invalid cancelledAt for ${appointment.id}`,
+    );
+    assert.ok(
+      ['customer', 'professional'].includes(appointment.cancellationResolution.cancelledBy),
+      `Invalid cancelledBy for ${appointment.id}`,
+    );
+    assert.ok(
+      appointment.cancellationResolution.cancellationReason,
+      `Missing cancellationReason for ${appointment.id}`,
+    );
+    assert.ok(
+      allowedCancellationOutcomes.has(appointment.cancellationResolution.financialOutcome),
+      `Invalid financialOutcome for ${appointment.id}`,
+    );
+  }
 });

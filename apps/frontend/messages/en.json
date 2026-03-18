@@ -222,8 +222,8 @@
       "areaUnit": "areas"
     },
     "actions": {
-      "viewPublicProfile": "View public profile",
-      "openCatalog": "Open customer catalog"
+      "viewPublicProfile": "Public profile",
+      "openCatalog": "Customer catalog"
     },
     "notifications": {
       "eyebrow": "Update center",
@@ -364,6 +364,7 @@
       "summaryDescription": "New requests open by default so inbound work is easier to triage. Switch stages to review quoted, scheduled, and completed cases with their supporting proof.",
       "visibleCount": "{status}: {count, number}",
       "statusUpdateTitle": "Update request stage",
+      "closeDialogEyebrow": "Close request",
       "closeButton": "Close editor",
       "saveButton": "Save status update",
       "fields": {
@@ -372,11 +373,35 @@
         "budget": "Budget",
         "note": "Client note",
         "currentStatus": "Current status",
+        "customerStatus": "Customer lifecycle",
         "requestedMode": "Requested mode"
       },
       "moveTo": "Move to stage",
+      "declineAction": "Decline request",
+      "cancelAction": "Cancel appointment",
       "timelineTitle": "Stage progress",
       "updateAction": "Move to {status}",
+      "closeDialogDescription": "Use chat for negotiation only. If the request cannot continue, formally reject it or cancel the appointment from here.",
+      "closeReasonLabel": "Reason for closing",
+      "closeReasonPlaceholder": "Explain briefly why this request needs to be declined or cancelled.",
+      "closeOutcomeTitle": "Customer financial outcome",
+      "closeStatusPreview": {
+        "requested": "The request is still under review, so declining it closes the flow without a refund.",
+        "approved_waiting_payment": "Payment has not settled yet, so cancelling should void the unfinished payment.",
+        "paid": "The order is already paid, so the customer should receive a full refund.",
+        "confirmed": "The order is already confirmed, so the customer should receive a full refund."
+      },
+      "closeOutcome": {
+        "none": "No financial impact",
+        "void_pending_payment": "Pending payment voided",
+        "full_refund": "Full refund to customer",
+        "no_refund": "No refund",
+        "manual_refund_required": "Manual refund review"
+      },
+      "closeSave": {
+        "rejected": "Decline request",
+        "cancelled": "Cancel appointment"
+      },
       "evidence": {
         "title": "Supporting evidence",
         "description": "Sensitive status updates should include a customer-facing summary and proof so the change can be audited by both sides.",
@@ -416,9 +441,14 @@
         "evidenceNoteRequired": "Add an internal completion note before marking this request as completed.",
         "evidenceRequired": "Add an internal note or an evidence link before saving this status update.",
         "invalidTransition": "This request can only move to the next valid stage.",
-        "paymentPending": "The schedule cannot be locked before the customer payment is completed."
+        "paymentPending": "The schedule cannot be locked before the customer payment is completed.",
+        "closeReasonRequired": "Write a short reason before closing this request."
       },
-      "saveSuccess": "Request for {client} was updated to {status}."
+      "saveSuccess": "Request for {client} was updated to {status}.",
+      "closeSuccess": {
+        "rejected": "Request for {client} was declined.",
+        "cancelled": "Appointment for {client} was cancelled."
+      }
     },
     "services": {
       "title": "Services visible to customers",
@@ -676,7 +706,8 @@
     },
     "menu": {
       "accountDescription": "Identity, contact number, public bio, and response target.",
-      "securityDescription": "Change the password or send a reset link when access is blocked."
+      "securityDescription": "Change the password or send a reset link when access is blocked.",
+      "supportDescription": "Disputes, refunds, reporting, and dashboard issues through admin."
     },
     "account": {
       "title": "Professional account details",
@@ -729,6 +760,173 @@
         "newPasswordWeak": "The new password does not meet the minimum security rules.",
         "confirmMismatch": "The password confirmation does not match the new password.",
         "resetPhoneRequired": "Enter the WhatsApp number for the reset flow first."
+      }
+    },
+    "support": {
+      "title": "Admin support",
+      "description": "Send disputes, refunds, reports, or dashboard issues without leaving the professional profile.",
+      "submitButton": "Send ticket to admin",
+      "success": "Ticket {ticketId} was created and is now in the admin queue.",
+      "entry": {
+        "title": "Need to escalate to admin?",
+        "description": "Use one lane for booking disputes, refunds, customer reports, or operational bugs.",
+        "action": "Open support hub",
+        "responseBadge": "<10 min triage",
+        "issueBadge": "Dispute",
+        "refundBadge": "Refund",
+        "reportBadge": "Report"
+      },
+      "overview": {
+        "title": "When admin should step in",
+        "description": "Use this area when booking disputes, payment corrections, safety risks, or technical blockers can no longer be resolved from the normal dashboard flow."
+      },
+      "metrics": {
+        "firstResponse": {
+          "label": "First response",
+          "value": "<10 min"
+        },
+        "reviewWindow": {
+          "label": "Evidence review",
+          "value": "<2 hours"
+        },
+        "resolution": {
+          "label": "Resolution target",
+          "value": "<24 hours"
+        }
+      },
+      "moments": {
+        "caseOne": {
+          "title": "Need admin mediation in the booking flow",
+          "description": "Use this when schedule disputes, unilateral cancellations, or request states need an admin decision."
+        },
+        "caseTwo": {
+          "title": "Refund or payment correction needs clarification",
+          "description": "Choose the refund category so admin can compare payment proof, service status, and cancellation rules."
+        },
+        "caseThree": {
+          "title": "Need to report an account risk or bug",
+          "description": "Use this lane for risky customer behavior, suspicious account details, or dashboard bugs that block operations."
+        }
+      },
+      "form": {
+        "title": "Create a support ticket",
+        "description": "Pick the closest category, choose the follow-up channel, and describe the blocker or dispute so triage starts quickly.",
+        "categoryLabel": "Issue category",
+        "summaryLabel": "Short summary",
+        "summaryPlaceholder": "Example: Refund clarification after a confirmed booking",
+        "referenceLabel": "Request or reference code (optional)",
+        "referencePlaceholder": "Example: REQ-1024 or invoice",
+        "channelLabel": "Preferred follow-up channel",
+        "contactLabel": "Contact for follow-up",
+        "contactPlaceholder": "WhatsApp number, phone number, or email",
+        "urgencyLabel": "Handling priority",
+        "detailsLabel": "Issue details",
+        "detailsPlaceholder": "Explain the timeline, the current operational state, and the decision you need from admin.",
+        "helper": "Tip: include booking timeline, payment status, schedule changes, and any relevant chat evidence. File upload is not available yet, so mention the evidence you already keep."
+      },
+      "categories": {
+        "serviceDispute": {
+          "title": "Operational dispute",
+          "description": "Schedule, cancellation, completion, or order conflict that needs admin mediation."
+        },
+        "refundClarification": {
+          "title": "Refund clarification",
+          "description": "Need an admin decision before refund, fee deduction, or payment correction can proceed."
+        },
+        "accountAccess": {
+          "title": "Account access",
+          "description": "Cannot sign in, need reverification, or password reset did not restore access."
+        },
+        "reportCustomer": {
+          "title": "Report customer",
+          "description": "Safety risk, abusive behavior, or customer data that needs admin review."
+        },
+        "technicalIssue": {
+          "title": "Technical bug",
+          "description": "Issue in the dashboard, notifications, request board, or professional profile page."
+        },
+        "other": {
+          "title": "Other issue",
+          "description": "Use this when the blocker does not fit the categories above."
+        }
+      },
+      "channels": {
+        "whatsapp": "WhatsApp",
+        "call": "Phone",
+        "email": "Email"
+      },
+      "urgency": {
+        "normal": {
+          "title": "Normal",
+          "description": "The issue needs attention, but operations can still continue temporarily."
+        },
+        "high": {
+          "title": "High",
+          "description": "The issue is already affecting schedule, payment, or customer response."
+        },
+        "urgent": {
+          "title": "Urgent",
+          "description": "Use only when there is a safety risk, active service disruption, or a total technical blocker."
+        }
+      },
+      "flow": {
+        "title": "How admin handles it",
+        "description": "Every ticket follows the same path so disputes, refunds, and operational reports stay transparent.",
+        "stepOne": {
+          "badge": "Step 1",
+          "title": "Ticket logged",
+          "description": "Admin receives the category, request reference, follow-up channel, and initial operational context."
+        },
+        "stepTwo": {
+          "badge": "Step 2",
+          "title": "Triage and owner assignment",
+          "description": "Priority is checked, booking data is pulled, and the ticket is routed to the right admin owner."
+        },
+        "stepThree": {
+          "badge": "Step 3",
+          "title": "Evidence review",
+          "description": "Admin compares booking logs, payment state, chat timeline, and related reports."
+        },
+        "stepFour": {
+          "badge": "Step 4",
+          "title": "Decision and next action",
+          "description": "The professional receives the admin decision, next action, and refund/correction status when relevant."
+        }
+      },
+      "recent": {
+        "title": "Recent tickets",
+        "description": "This section helps professionals track whether admin is still triaging, reviewing, or has already closed the latest case.",
+        "empty": "No support ticket yet.",
+        "ticketLabel": "Ticket",
+        "etaLabel": "Next update target",
+        "statuses": {
+          "new": "New",
+          "triaged": "Triaged",
+          "reviewing": "Reviewing",
+          "resolved": "Resolved",
+          "refunded": "Refund processed"
+        },
+        "etas": {
+          "normal": "<24 hours",
+          "high": "<4 hours",
+          "urgent": "<30 minutes"
+        },
+        "samples": {
+          "first": {
+            "summary": "Clarification for a customer cancellation after schedule confirmation"
+          },
+          "second": {
+            "summary": "Phone verification needed to restore account access"
+          },
+          "third": {
+            "summary": "Approval for a refund correction after duplicate payment"
+          }
+        }
+      },
+      "errors": {
+        "categoryRequired": "Choose the issue category first.",
+        "contactRequired": "Enter a contact that admin can use for follow-up.",
+        "detailsRequired": "Describe the issue so admin can continue the investigation."
       }
     }
   },
@@ -933,7 +1131,8 @@
     "menu": {
       "languageDescription": "Switch between Bahasa Indonesia and English anytime.",
       "accountDescription": "Primary contact, care focus, and family support.",
-      "securityDescription": "New password and account privacy controls."
+      "securityDescription": "New password and account privacy controls.",
+      "supportDescription": "Complaints, refunds, reporting, and account issues through admin."
     },
     "accountSheet": {
       "title": "Account Details",
@@ -977,6 +1176,173 @@
         "confirmMismatch": "The password confirmation does not match."
       }
     },
+    "support": {
+      "title": "Admin support",
+      "description": "Send complaints, refunds, reports, or account issues without leaving the profile page.",
+      "submitButton": "Send ticket to admin",
+      "success": "Your report was submitted. Ticket {ticketId} is now in the admin queue.",
+      "entry": {
+        "title": "Need admin help?",
+        "description": "Use one support lane for complaints, refunds, reporting, or booking issues.",
+        "action": "Open support form",
+        "responseBadge": "<10 min triage",
+        "issueBadge": "Complaint",
+        "refundBadge": "Refund",
+        "reportBadge": "Report"
+      },
+      "overview": {
+        "title": "When admin should step in",
+        "description": "Use this lane when the provider flow, payment flow, or safety/reporting flow can no longer be resolved from the regular chat."
+      },
+      "metrics": {
+        "firstResponse": {
+          "label": "First response",
+          "value": "<10 min"
+        },
+        "reviewWindow": {
+          "label": "Evidence review",
+          "value": "<2 hours"
+        },
+        "resolution": {
+          "label": "Resolution target",
+          "value": "<24 hours"
+        }
+      },
+      "moments": {
+        "caseOne": {
+          "title": "Complaint or follow-up is stuck",
+          "description": "Use this when service quality, schedule changes, or provider communication already blocks care continuity."
+        },
+        "caseTwo": {
+          "title": "Need a refund or payment correction",
+          "description": "Choose the refund/payment category so admin can review payment proof and booking status in one flow."
+        },
+        "caseThree": {
+          "title": "Need to report a profile or behavior",
+          "description": "Use reporting for safety concerns, inappropriate conduct, invalid profile details, or repeated unexplained cancellations."
+        }
+      },
+      "form": {
+        "title": "Create a support ticket",
+        "description": "Pick the closest category, tell us how to reach you, and summarize the issue so triage can start quickly.",
+        "categoryLabel": "Issue category",
+        "summaryLabel": "Short summary",
+        "summaryPlaceholder": "Example: Refund for a cancelled home visit",
+        "referenceLabel": "Booking or reference code (optional)",
+        "referencePlaceholder": "Example: ACT-2048 or invoice number",
+        "channelLabel": "Preferred follow-up channel",
+        "contactLabel": "Contact for follow-up",
+        "contactPlaceholder": "WhatsApp number, phone number, or email",
+        "urgencyLabel": "Handling priority",
+        "detailsLabel": "Issue details",
+        "detailsPlaceholder": "Explain what happened, when it happened, and what result you expect from admin.",
+        "helper": "Tip: include timeline, payment proof reference, schedule changes, and who was involved. File upload is not available yet, so mention the evidence you already have."
+      },
+      "categories": {
+        "serviceComplaint": {
+          "title": "Service complaint",
+          "description": "Quality, attitude, delay, or operational issue during the session."
+        },
+        "refundRequest": {
+          "title": "Refund request",
+          "description": "Cancellation, duplicate payment, or service not delivered as agreed."
+        },
+        "paymentIssue": {
+          "title": "Payment issue",
+          "description": "Payment failed, charged twice, or billing amount is incorrect."
+        },
+        "reportProfessional": {
+          "title": "Report provider",
+          "description": "Profile, conduct, or safety concern involving a provider."
+        },
+        "accountAccess": {
+          "title": "Account access",
+          "description": "Cannot log in, reset password fails, or profile access is blocked."
+        },
+        "other": {
+          "title": "Other issue",
+          "description": "Use this when the issue does not fit the categories above."
+        }
+      },
+      "channels": {
+        "whatsapp": "WhatsApp",
+        "call": "Phone",
+        "email": "Email"
+      },
+      "urgency": {
+        "normal": {
+          "title": "Normal",
+          "description": "The issue matters, but it is not blocking care right now."
+        },
+        "high": {
+          "title": "High",
+          "description": "The issue is already affecting schedule, payment, or care continuity."
+        },
+        "urgent": {
+          "title": "Urgent",
+          "description": "Use only when there is a safety risk or the active service is disrupted right now."
+        }
+      },
+      "flow": {
+        "title": "How admin handles it",
+        "description": "Every ticket follows the same path so complaints, refunds, and reports stay traceable.",
+        "stepOne": {
+          "badge": "Step 1",
+          "title": "Ticket logged",
+          "description": "Your report is recorded with category, follow-up channel, and initial context."
+        },
+        "stepTwo": {
+          "badge": "Step 2",
+          "title": "Triage and owner assignment",
+          "description": "Admin reviews urgency, checks the booking context, and assigns the right owner."
+        },
+        "stepThree": {
+          "badge": "Step 3",
+          "title": "Evidence review",
+          "description": "Timeline, payment status, chat context, and report details are reviewed before action is decided."
+        },
+        "stepFour": {
+          "badge": "Step 4",
+          "title": "Resolution or refund update",
+          "description": "You receive the decision, next action, and refund or correction status."
+        }
+      },
+      "recent": {
+        "title": "Recent tickets",
+        "description": "This area shows the latest support tickets so customers can tell whether admin is still triaging, reviewing, or has already resolved the issue.",
+        "empty": "No support ticket yet.",
+        "ticketLabel": "Ticket",
+        "etaLabel": "Next update target",
+        "statuses": {
+          "new": "New",
+          "triaged": "Triaged",
+          "reviewing": "Reviewing",
+          "resolved": "Resolved",
+          "refunded": "Refund processed"
+        },
+        "etas": {
+          "normal": "<24 hours",
+          "high": "<4 hours",
+          "urgent": "<30 minutes"
+        },
+        "samples": {
+          "first": {
+            "summary": "Refund follow-up for a cancelled home visit"
+          },
+          "second": {
+            "summary": "Report about repeated last-minute schedule changes"
+          },
+          "third": {
+            "summary": "Complaint review for session punctuality and handover"
+          }
+        }
+      },
+      "errors": {
+        "categoryRequired": "Choose the issue category first.",
+        "contactRequired": "Enter a contact that admin can use for follow-up.",
+        "detailsRequired": "Describe the issue so admin can continue the investigation."
+      }
+    },
     "modeLabels": {
       "online": "Online",
       "home_visit": "Home care",
@@ -1005,6 +1371,13 @@
       "paymentSuccess": "Payment simulation successful",
       "chatSent": "Message sent in demo mode",
       "chatUnavailable": "Chat is only available for active activities.",
+      "appointmentCancelled": {
+        "none": "Appointment cancelled.",
+        "void_pending_payment": "Appointment cancelled. Pending payment was voided.",
+        "full_refund": "Appointment cancelled. Customer receives a full refund.",
+        "no_refund": "Appointment cancelled. The order passed the refund cutoff.",
+        "manual_refund_required": "Appointment cancelled. Refund will be reviewed manually."
+      },
       "reviewPhotoReady": "Review photo ready to upload: {fileName}",
       "reviewSuccessWithPhoto": "{successMessage} Photo: {fileName}."
     },
@@ -1029,7 +1402,49 @@
       "actionLabels": {
         "detail": "Details",
         "cancel": "Cancel",
-        "payNow": "Pay Now"
+        "payNow": "Pay Now",
+        "bookAgain": "Book Again"
+      },
+      "cancellation": {
+        "title": "Cancel appointment",
+        "description": "Use chat to discuss changes first. If you still need a different time or service, cancel this order and place a new one.",
+        "submitLabel": "Confirm cancellation",
+        "keepLabel": "Keep appointment",
+        "reasonLabel": "Reason for cancellation",
+        "reasonPlaceholder": "Explain briefly why you need to cancel this order.",
+        "policyTitle": "Cancellation policy",
+        "outcomeTitle": "Financial outcome",
+        "customerNoPaymentPolicy": "Before payment settles, cancellation closes the order without a refund flow.",
+        "professionalPolicy": "If the professional cancels before the service starts, the customer receives a full refund.",
+        "customerCutoffPolicy": "Customer cancellation {hours} hours or more before the session: full refund. After that: no refund.",
+        "cutoffWindowLabel": "{hours}-hour refund window",
+        "timing": {
+          "beforeCutoff": "This request is still before the {hours}-hour refund cutoff.",
+          "afterCutoff": "This request is already past the {hours}-hour refund cutoff.",
+          "notApplicable": "No refund cutoff applies to this order yet."
+        },
+        "outcomes": {
+          "none": "No financial impact",
+          "void_pending_payment": "Pending payment voided",
+          "full_refund": "Full refund",
+          "no_refund": "No refund",
+          "manual_refund_required": "Manual refund review"
+        },
+        "outcomeDescriptions": {
+          "none": "No settled payment exists on this order yet.",
+          "void_pending_payment": "Payment is still pending, so the order is simply closed.",
+          "full_refund": "The payment should be refunded in full after cancellation.",
+          "no_refund": "This cancellation is past the customer refund cutoff.",
+          "manual_refund_required": "This payment needs manual refund handling."
+        },
+        "actorLabels": {
+          "customer": "Customer",
+          "professional": "Professional"
+        },
+        "resolutionTitle": "Cancellation summary",
+        "resolutionReasonLabel": "Recorded reason",
+        "resolutionFinancialOutcomeLabel": "Financial outcome",
+        "resolutionCancelledAtLabel": "Closed at"
       },
       "statusBanners": {
         "requested": "The provider is reviewing your request. We will notify you as soon as it is approved.",

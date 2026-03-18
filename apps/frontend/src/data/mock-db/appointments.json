@@ -20,6 +20,12 @@
     },
     "customerFeedback": null,
     "bookingFlow": "request",
+    "cancellationPolicySnapshot": {
+      "customerPaidCancelCutoffHours": 6,
+      "beforeCutoffOutcome": "full_refund",
+      "afterCutoffOutcome": "no_refund",
+      "professionalCancelOutcome": "full_refund"
+    },
     "scheduleSnapshot": {
       "dateIso": "2026-03-17",
       "requiresSchedule": true,
@@ -130,6 +136,12 @@
     },
     "customerFeedback": null,
     "bookingFlow": "request",
+    "cancellationPolicySnapshot": {
+      "customerPaidCancelCutoffHours": 6,
+      "beforeCutoffOutcome": "full_refund",
+      "afterCutoffOutcome": "no_refund",
+      "professionalCancelOutcome": "full_refund"
+    },
     "scheduleSnapshot": {
       "dateIso": "2026-03-16",
       "requiresSchedule": true,
@@ -229,6 +241,12 @@
     },
     "customerFeedback": null,
     "bookingFlow": "instant",
+    "cancellationPolicySnapshot": {
+      "customerPaidCancelCutoffHours": 6,
+      "beforeCutoffOutcome": "full_refund",
+      "afterCutoffOutcome": "no_refund",
+      "professionalCancelOutcome": "full_refund"
+    },
     "scheduleSnapshot": {
       "requiresSchedule": false,
       "scheduledTimeLabel": "Hari ini, 19:30 WIB",
@@ -568,6 +586,18 @@
     },
     "customerFeedback": null,
     "bookingFlow": "instant",
+    "cancellationPolicySnapshot": {
+      "customerPaidCancelCutoffHours": 6,
+      "beforeCutoffOutcome": "full_refund",
+      "afterCutoffOutcome": "no_refund",
+      "professionalCancelOutcome": "full_refund"
+    },
+    "cancellationResolution": {
+      "cancelledAt": "2026-03-12T09:35:00.000Z",
+      "cancelledBy": "customer",
+      "cancellationReason": "Jadwal kantor berubah mendadak dan pelanggan memilih booking ulang di hari lain.",
+      "financialOutcome": "no_refund"
+    },
     "scheduleSnapshot": {
       "dateIso": "2026-03-12",
       "requiresSchedule": true,
@@ -639,10 +669,10 @@
         "actor": "customer",
         "createdAt": "2026-03-12T09:35:00.000Z",
         "createdAtLabel": "12 Mar 2026, 16.35",
-        "customerSummary": "Pelanggan membatalkan Pijat Refleksi Rumah sebelum sesi berlangsung dan slot dilepas kembali.",
+        "customerSummary": "Pelanggan membatalkan Pijat Refleksi Rumah setelah jadwal dikunci. Order ditutup tanpa refund karena sudah melewati batas pembatalan.",
         "fromStatus": "confirmed",
         "id": "apt-007-timeline-cancelled-1773308100000",
-        "internalNote": "Booking apt-007 dibatalkan pelanggan setelah jadwal sempat disiapkan.",
+        "internalNote": "Booking apt-007 dibatalkan pelanggan setelah melewati cutoff 6 jam, sehingga outcome finansialnya no_refund.",
         "toStatus": "cancelled"
       }
     ]
@@ -747,6 +777,12 @@
     },
     "customerFeedback": null,
     "bookingFlow": "instant",
+    "cancellationPolicySnapshot": {
+      "customerPaidCancelCutoffHours": 6,
+      "beforeCutoffOutcome": "full_refund",
+      "afterCutoffOutcome": "no_refund",
+      "professionalCancelOutcome": "full_refund"
+    },
     "scheduleSnapshot": {
       "requiresSchedule": false,
       "scheduledTimeLabel": "10 Maret 2026, 20:00 WIB",

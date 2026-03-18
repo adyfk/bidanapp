@@ -1,4 +1,14 @@
 import type {
+  SupportCategoryId,
+  SupportChannelId,
+  SupportEtaKey,
+  SupportRole,
+  SupportTicketStatus,
+  SupportUrgencyId,
+} from './admin';
+import type {
+  AppointmentCancellationPolicySnapshot,
+  AppointmentCancellationResolution,
   AppointmentScheduleSnapshot,
   AppointmentServiceSnapshot,
   AppointmentStatus,
@@ -8,6 +18,7 @@ import type {
   BookingFlow,
   OfflineServiceDeliveryMode,
   ProfessionalAvailabilityWeekday,
+  ProfessionalCancellationPolicy,
   ProfessionalGender,
   ServiceDeliveryMode,
 } from './catalog';
@@ -179,6 +190,12 @@ export interface ProfessionalAvailabilityPolicyRow extends IndexedRow {
   minimumNoticeHours: number;
 }
 
+export interface ProfessionalCancellationPolicyRow extends IndexedRow, ProfessionalCancellationPolicy {
+  id: string;
+  professionalId: string;
+  mode: ServiceDeliveryMode;
+}
+
 export interface ProfessionalAvailabilityDateOverrideRow extends IndexedRow {
   id: string;
   professionalId: string;
@@ -255,6 +272,8 @@ export interface MediaPresetRow extends IndexedRow {
 export interface AppointmentRow extends IndexedRow {
   areaId: string;
   bookingFlow: BookingFlow;
+  cancellationPolicySnapshot: AppointmentCancellationPolicySnapshot;
+  cancellationResolution?: AppointmentCancellationResolution | null;
   consumerId: string;
   customerFeedback?: AppointmentFeedbackRow | null;
   id: string;
@@ -345,4 +364,26 @@ export interface AppRuntimeSelectionRow extends IndexedRow {
   activeHomeFeedId: string;
   activeMediaPresetId: string;
   currentDateTimeIso: string;
+}
+
+export interface SupportTicketRow extends IndexedRow {
+  assignedAdminId: string | null;
+  categoryId: SupportCategoryId;
+  contactValue: string;
+  createdAt: string;
+  details: string;
+  etaKey: SupportEtaKey;
+  id: string;
+  preferredChannel: SupportChannelId;
+  referenceCode: string | null;
+  relatedAppointmentId: string | null;
+  relatedProfessionalId: string | null;
+  reporterName: string;
+  reporterPhone: string;
+  reporterRole: SupportRole;
+  sourceSurface: 'admin_manual' | 'profile_customer' | 'profile_professional';
+  status: SupportTicketStatus;
+  summary: string;
+  updatedAt: string;
+  urgency: SupportUrgencyId;
 }

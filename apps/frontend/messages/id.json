@@ -222,8 +222,8 @@
       "areaUnit": "area"
     },
     "actions": {
-      "viewPublicProfile": "Lihat profil publik",
-      "openCatalog": "Buka katalog pelanggan"
+      "viewPublicProfile": "Profil publik",
+      "openCatalog": "Katalog pelanggan"
     },
     "notifications": {
       "eyebrow": "Pusat update",
@@ -364,6 +364,7 @@
       "summaryDescription": "Permintaan baru ditampilkan sebagai tampilan awal agar pekerjaan masuk lebih mudah dipilah. Pindah tahap untuk melihat kasus penawaran, penjadwalan, dan layanan selesai beserta bukti pendukungnya.",
       "visibleCount": "{status}: {count, number}",
       "statusUpdateTitle": "Perbarui tahap permintaan",
+      "closeDialogEyebrow": "Tutup request",
       "closeButton": "Tutup editor",
       "saveButton": "Simpan perubahan status",
       "fields": {
@@ -372,11 +373,35 @@
         "budget": "Perkiraan biaya",
         "note": "Catatan klien",
         "currentStatus": "Status saat ini",
+        "customerStatus": "Siklus pelanggan",
         "requestedMode": "Cara layanan yang diminta"
       },
       "moveTo": "Pindahkan ke tahap",
+      "declineAction": "Tolak request",
+      "cancelAction": "Batalkan appointment",
       "timelineTitle": "Perjalanan tahap",
       "updateAction": "Pindahkan ke {status}",
+      "closeDialogDescription": "Gunakan chat hanya untuk negosiasi. Jika request tidak bisa dilanjutkan, tolak atau batalkan appointment secara formal dari sini.",
+      "closeReasonLabel": "Alasan penutupan",
+      "closeReasonPlaceholder": "Jelaskan singkat kenapa request ini perlu ditolak atau dibatalkan.",
+      "closeOutcomeTitle": "Dampak finansial ke pelanggan",
+      "closeStatusPreview": {
+        "requested": "Request masih dalam tahap review, jadi penolakan menutup alur tanpa refund.",
+        "approved_waiting_payment": "Pembayaran belum settle, jadi pembatalan seharusnya membatalkan pembayaran yang belum selesai.",
+        "paid": "Order sudah dibayar, jadi pelanggan seharusnya mendapat refund penuh.",
+        "confirmed": "Order sudah dikonfirmasi, jadi pelanggan seharusnya mendapat refund penuh."
+      },
+      "closeOutcome": {
+        "none": "Tanpa dampak finansial",
+        "void_pending_payment": "Pembayaran pending dibatalkan",
+        "full_refund": "Refund penuh ke pelanggan",
+        "no_refund": "Tanpa refund",
+        "manual_refund_required": "Perlu review refund manual"
+      },
+      "closeSave": {
+        "rejected": "Tolak request",
+        "cancelled": "Batalkan appointment"
+      },
       "evidence": {
         "title": "Bukti pendukung",
         "description": "Perubahan status yang sensitif sebaiknya disertai ringkasan untuk pelanggan dan bukti pendukung agar jejaknya bisa diaudit dari dua sisi.",
@@ -416,9 +441,14 @@
         "evidenceNoteRequired": "Tambahkan catatan penyelesaian internal sebelum menandai permintaan ini selesai.",
         "evidenceRequired": "Tambahkan catatan internal atau tautan bukti sebelum menyimpan perubahan status ini.",
         "invalidTransition": "Permintaan ini hanya boleh dipindahkan ke tahap valid berikutnya.",
-        "paymentPending": "Jadwal tidak bisa dikunci sebelum pembayaran pelanggan selesai."
+        "paymentPending": "Jadwal tidak bisa dikunci sebelum pembayaran pelanggan selesai.",
+        "closeReasonRequired": "Tulis alasan singkat sebelum menutup request ini."
       },
-      "saveSuccess": "Permintaan dari {client} dipindahkan ke {status}."
+      "saveSuccess": "Permintaan dari {client} dipindahkan ke {status}.",
+      "closeSuccess": {
+        "rejected": "Permintaan dari {client} ditolak.",
+        "cancelled": "Appointment untuk {client} dibatalkan."
+      }
     },
     "services": {
       "title": "Layanan yang tampil ke pelanggan",
@@ -676,7 +706,8 @@
     },
     "menu": {
       "accountDescription": "Identitas, nomor kontak, bio publik, dan target respons.",
-      "securityDescription": "Ganti password atau kirim reset link saat akses terkendala."
+      "securityDescription": "Ganti password atau kirim reset link saat akses terkendala.",
+      "supportDescription": "Dispute, refund, pelaporan, dan bug dashboard lewat admin."
     },
     "account": {
       "title": "Informasi akun profesional",
@@ -729,6 +760,173 @@
         "newPasswordWeak": "Password baru belum memenuhi syarat keamanan minimum.",
         "confirmMismatch": "Konfirmasi password belum sama dengan password baru.",
         "resetPhoneRequired": "Masukkan nomor WhatsApp tujuan reset terlebih dahulu."
+      }
+    },
+    "support": {
+      "title": "Bantuan admin",
+      "description": "Kirim dispute, refund, pelaporan, atau kendala dashboard tanpa keluar dari profil profesional.",
+      "submitButton": "Kirim tiket ke admin",
+      "success": "Tiket {ticketId} berhasil dibuat dan sudah masuk antrean admin.",
+      "entry": {
+        "title": "Butuh eskalasi ke admin?",
+        "description": "Gunakan satu jalur untuk dispute order, refund, pelaporan customer, atau bug operasional.",
+        "action": "Buka pusat bantuan",
+        "responseBadge": "Triase <10 menit",
+        "issueBadge": "Dispute",
+        "refundBadge": "Refund",
+        "reportBadge": "Pelaporan"
+      },
+      "overview": {
+        "title": "Kapan admin perlu ikut menangani",
+        "description": "Gunakan area ini saat dispute booking, koreksi pembayaran, risiko keamanan, atau blocker teknis sudah tidak bisa diselesaikan dari alur dashboard biasa."
+      },
+      "metrics": {
+        "firstResponse": {
+          "label": "Respon awal",
+          "value": "<10 menit"
+        },
+        "reviewWindow": {
+          "label": "Review bukti",
+          "value": "<2 jam"
+        },
+        "resolution": {
+          "label": "Target selesai",
+          "value": "<24 jam"
+        }
+      },
+      "moments": {
+        "caseOne": {
+          "title": "Perlu mediasi admin di alur booking",
+          "description": "Pakai ini saat ada dispute jadwal, pembatalan sepihak, atau status request yang perlu keputusan admin."
+        },
+        "caseTwo": {
+          "title": "Refund atau koreksi pembayaran perlu klarifikasi",
+          "description": "Gunakan kategori refund agar admin bisa membandingkan bukti pembayaran, status layanan, dan aturan pembatalan."
+        },
+        "caseThree": {
+          "title": "Perlu melaporkan risiko akun atau bug",
+          "description": "Gunakan jalur ini untuk perilaku customer yang berisiko, detail akun mencurigakan, atau bug dashboard yang mengganggu operasional."
+        }
+      },
+      "form": {
+        "title": "Buat tiket bantuan",
+        "description": "Pilih kategori yang paling sesuai, tentukan kanal follow-up, lalu jelaskan blocker atau dispute agar triase berjalan cepat.",
+        "categoryLabel": "Kategori kendala",
+        "summaryLabel": "Ringkasan singkat",
+        "summaryPlaceholder": "Contoh: Klarifikasi refund setelah booking dikonfirmasi",
+        "referenceLabel": "Kode request / referensi (opsional)",
+        "referencePlaceholder": "Contoh: REQ-1024 atau invoice",
+        "channelLabel": "Kanal follow-up yang diinginkan",
+        "contactLabel": "Kontak untuk follow-up",
+        "contactPlaceholder": "Nomor WhatsApp, nomor telepon, atau email",
+        "urgencyLabel": "Prioritas penanganan",
+        "detailsLabel": "Detail kendala",
+        "detailsPlaceholder": "Jelaskan kronologi, status operasional saat ini, dan keputusan apa yang Anda butuhkan dari admin.",
+        "helper": "Tips: sertakan timeline booking, status pembayaran, perubahan jadwal, dan bukti percakapan yang relevan. Upload file belum tersedia, jadi sebutkan bukti yang sudah Anda simpan."
+      },
+      "categories": {
+        "serviceDispute": {
+          "title": "Dispute operasional",
+          "description": "Masalah jadwal, pembatalan, status selesai, atau konflik order yang perlu mediasi admin."
+        },
+        "refundClarification": {
+          "title": "Klarifikasi refund",
+          "description": "Butuh keputusan admin sebelum refund, potongan biaya, atau koreksi pembayaran dijalankan."
+        },
+        "accountAccess": {
+          "title": "Akses akun",
+          "description": "Tidak bisa login, perlu verifikasi ulang, atau reset password belum berhasil."
+        },
+        "reportCustomer": {
+          "title": "Laporkan customer",
+          "description": "Risiko keamanan, perilaku abusif, atau data customer yang perlu ditinjau admin."
+        },
+        "technicalIssue": {
+          "title": "Bug teknis",
+          "description": "Kendala dashboard, notifikasi, request board, atau halaman profil profesional."
+        },
+        "other": {
+          "title": "Kendala lainnya",
+          "description": "Pilih ini jika blocker Anda belum masuk kategori di atas."
+        }
+      },
+      "channels": {
+        "whatsapp": "WhatsApp",
+        "call": "Telepon",
+        "email": "Email"
+      },
+      "urgency": {
+        "normal": {
+          "title": "Normal",
+          "description": "Masalah perlu ditangani, tetapi operasi masih bisa berjalan sementara."
+        },
+        "high": {
+          "title": "Tinggi",
+          "description": "Masalah sudah mengganggu jadwal, pembayaran, atau respons ke customer."
+        },
+        "urgent": {
+          "title": "Mendesak",
+          "description": "Gunakan hanya saat ada risiko keamanan, gangguan layanan aktif, atau blocker teknis total."
+        }
+      },
+      "flow": {
+        "title": "Alur penanganan admin",
+        "description": "Setiap tiket diproses dengan alur yang sama agar dispute, refund, dan pelaporan operasional tetap transparan.",
+        "stepOne": {
+          "badge": "Tahap 1",
+          "title": "Tiket dicatat",
+          "description": "Admin menerima kategori, referensi request, kanal follow-up, dan konteks operasional awal."
+        },
+        "stepTwo": {
+          "badge": "Tahap 2",
+          "title": "Triase dan penugasan",
+          "description": "Prioritas dicek, data booking ditarik, lalu tiket diarahkan ke admin yang relevan."
+        },
+        "stepThree": {
+          "badge": "Tahap 3",
+          "title": "Review bukti",
+          "description": "Admin membandingkan log booking, status pembayaran, kronologi chat, dan pelaporan pihak terkait."
+        },
+        "stepFour": {
+          "badge": "Tahap 4",
+          "title": "Keputusan dan tindak lanjut",
+          "description": "Profesional menerima update keputusan admin, aksi berikutnya, dan status koreksi/refund bila ada."
+        }
+      },
+      "recent": {
+        "title": "Tiket terbaru",
+        "description": "Bagian ini membantu profesional melihat tiket terbaru dan mengetahui apakah admin masih triase, review, atau sudah menutup kasusnya.",
+        "empty": "Belum ada tiket bantuan.",
+        "ticketLabel": "Tiket",
+        "etaLabel": "Target update berikutnya",
+        "statuses": {
+          "new": "Baru masuk",
+          "triaged": "Sudah ditriase",
+          "reviewing": "Sedang direview",
+          "resolved": "Selesai",
+          "refunded": "Refund diproses"
+        },
+        "etas": {
+          "normal": "<24 jam",
+          "high": "<4 jam",
+          "urgent": "<30 menit"
+        },
+        "samples": {
+          "first": {
+            "summary": "Klarifikasi pembatalan customer setelah jadwal dikonfirmasi"
+          },
+          "second": {
+            "summary": "Verifikasi nomor login untuk memulihkan akses akun"
+          },
+          "third": {
+            "summary": "Persetujuan koreksi refund untuk pembayaran ganda"
+          }
+        }
+      },
+      "errors": {
+        "categoryRequired": "Pilih kategori kendala terlebih dahulu.",
+        "contactRequired": "Isi kontak yang bisa dihubungi admin.",
+        "detailsRequired": "Jelaskan detail kendalanya agar admin bisa menindaklanjuti."
       }
     }
   },
@@ -933,7 +1131,8 @@
     "menu": {
       "languageDescription": "Pakai Bahasa Indonesia atau Inggris kapan saja.",
       "accountDescription": "Kontak utama, fokus layanan, dan dukungan keluarga.",
-      "securityDescription": "Password baru dan kontrol privasi akun."
+      "securityDescription": "Password baru dan kontrol privasi akun.",
+      "supportDescription": "Komplain, refund, pelaporan, dan kendala akun lewat admin."
     },
     "accountSheet": {
       "title": "Detail Akun",
@@ -977,6 +1176,173 @@
         "confirmMismatch": "Konfirmasi password belum sesuai."
       }
     },
+    "support": {
+      "title": "Bantuan admin",
+      "description": "Kirim komplain, refund, pelaporan, atau kendala akun tanpa keluar dari halaman profil.",
+      "submitButton": "Kirim laporan ke admin",
+      "success": "Laporan berhasil dikirim. Tiket {ticketId} sudah masuk ke admin untuk ditindaklanjuti.",
+      "entry": {
+        "title": "Butuh bantuan admin?",
+        "description": "Pakai satu jalur bantuan untuk komplain, refund, pelaporan, atau kendala booking.",
+        "action": "Buka form bantuan",
+        "responseBadge": "Triase <10 menit",
+        "issueBadge": "Komplain",
+        "refundBadge": "Refund",
+        "reportBadge": "Pelaporan"
+      },
+      "overview": {
+        "title": "Kapan admin perlu turun tangan",
+        "description": "Gunakan jalur ini saat alur dengan profesional, pembayaran, atau aspek keamanan sudah tidak bisa diselesaikan dari chat biasa."
+      },
+      "metrics": {
+        "firstResponse": {
+          "label": "Respon awal",
+          "value": "<10 menit"
+        },
+        "reviewWindow": {
+          "label": "Review bukti",
+          "value": "<2 jam"
+        },
+        "resolution": {
+          "label": "Target selesai",
+          "value": "<24 jam"
+        }
+      },
+      "moments": {
+        "caseOne": {
+          "title": "Komplain atau follow-up layanan mandek",
+          "description": "Pakai jalur ini saat kualitas layanan, perubahan jadwal, atau komunikasi profesional sudah menghambat kelanjutan layanan."
+        },
+        "caseTwo": {
+          "title": "Butuh refund atau koreksi pembayaran",
+          "description": "Pilih kategori refund/pembayaran agar admin bisa meninjau bukti transfer dan status booking dalam satu alur."
+        },
+        "caseThree": {
+          "title": "Perlu melaporkan profil atau perilaku",
+          "description": "Gunakan pelaporan untuk isu keamanan, perilaku tidak pantas, detail profil yang tidak valid, atau pembatalan berulang tanpa alasan jelas."
+        }
+      },
+      "form": {
+        "title": "Buat tiket bantuan",
+        "description": "Pilih kategori yang paling dekat, isi kanal follow-up, lalu jelaskan masalahnya agar admin bisa mulai triase dengan cepat.",
+        "categoryLabel": "Kategori kendala",
+        "summaryLabel": "Ringkasan singkat",
+        "summaryPlaceholder": "Contoh: Refund untuk kunjungan rumah yang dibatalkan",
+        "referenceLabel": "Kode booking / referensi (opsional)",
+        "referencePlaceholder": "Contoh: ACT-2048 atau nomor invoice",
+        "channelLabel": "Kanal follow-up yang diinginkan",
+        "contactLabel": "Kontak untuk follow-up",
+        "contactPlaceholder": "Nomor WhatsApp, nomor telepon, atau email",
+        "urgencyLabel": "Prioritas penanganan",
+        "detailsLabel": "Detail kendala",
+        "detailsPlaceholder": "Jelaskan apa yang terjadi, kapan kejadiannya, dan hasil apa yang Anda harapkan dari admin.",
+        "helper": "Tips: tulis kronologi, referensi bukti pembayaran, perubahan jadwal, dan pihak yang terlibat. Upload file belum tersedia, jadi sebutkan bukti yang sudah Anda punya."
+      },
+      "categories": {
+        "serviceComplaint": {
+          "title": "Komplain layanan",
+          "description": "Kualitas layanan, sikap, keterlambatan, atau kendala operasional saat sesi berlangsung."
+        },
+        "refundRequest": {
+          "title": "Permintaan refund",
+          "description": "Pembatalan, pembayaran ganda, atau layanan tidak berjalan sesuai kesepakatan."
+        },
+        "paymentIssue": {
+          "title": "Kendala pembayaran",
+          "description": "Pembayaran gagal, terdebet dua kali, atau nominal tagihan tidak sesuai."
+        },
+        "reportProfessional": {
+          "title": "Laporkan profesional",
+          "description": "Masalah profil, perilaku, atau isu keamanan yang melibatkan profesional."
+        },
+        "accountAccess": {
+          "title": "Akses akun",
+          "description": "Tidak bisa login, reset password gagal, atau akses profil terkunci."
+        },
+        "other": {
+          "title": "Kendala lainnya",
+          "description": "Pilih ini jika masalah Anda belum masuk kategori di atas."
+        }
+      },
+      "channels": {
+        "whatsapp": "WhatsApp",
+        "call": "Telepon",
+        "email": "Email"
+      },
+      "urgency": {
+        "normal": {
+          "title": "Normal",
+          "description": "Masalah penting, tetapi belum menghambat layanan saat ini."
+        },
+        "high": {
+          "title": "Tinggi",
+          "description": "Masalah sudah memengaruhi jadwal, pembayaran, atau kesinambungan layanan."
+        },
+        "urgent": {
+          "title": "Mendesak",
+          "description": "Gunakan hanya bila ada risiko keamanan atau layanan aktif sedang terganggu sekarang."
+        }
+      },
+      "flow": {
+        "title": "Alur penanganan admin",
+        "description": "Setiap tiket melewati alur operasional yang sama agar komplain, refund, dan pelaporan tetap terlacak.",
+        "stepOne": {
+          "badge": "Tahap 1",
+          "title": "Tiket dicatat",
+          "description": "Laporan masuk dengan kategori, kanal follow-up, dan konteks awal yang Anda tulis."
+        },
+        "stepTwo": {
+          "badge": "Tahap 2",
+          "title": "Triase dan penugasan",
+          "description": "Admin mengecek prioritas, konteks booking, lalu menugaskan PIC yang paling tepat."
+        },
+        "stepThree": {
+          "badge": "Tahap 3",
+          "title": "Review bukti",
+          "description": "Kronologi, status pembayaran, percakapan, dan detail pelaporan ditinjau sebelum keputusan dibuat."
+        },
+        "stepFour": {
+          "badge": "Tahap 4",
+          "title": "Resolusi atau update refund",
+          "description": "Anda menerima tindak lanjut berisi keputusan admin, aksi berikutnya, dan status refund atau perbaikan."
+        }
+      },
+      "recent": {
+        "title": "Tiket terbaru",
+        "description": "Bagian ini menampilkan tiket bantuan terakhir agar customer bisa melihat apakah admin masih men-triase, review, atau sudah menyelesaikannya.",
+        "empty": "Belum ada tiket bantuan.",
+        "ticketLabel": "Tiket",
+        "etaLabel": "Target update berikutnya",
+        "statuses": {
+          "new": "Baru masuk",
+          "triaged": "Sudah ditriase",
+          "reviewing": "Sedang direview",
+          "resolved": "Selesai",
+          "refunded": "Refund diproses"
+        },
+        "etas": {
+          "normal": "<24 jam",
+          "high": "<4 jam",
+          "urgent": "<30 menit"
+        },
+        "samples": {
+          "first": {
+            "summary": "Follow-up refund untuk kunjungan rumah yang dibatalkan"
+          },
+          "second": {
+            "summary": "Laporan perubahan jadwal mendadak yang berulang"
+          },
+          "third": {
+            "summary": "Review komplain terkait ketepatan waktu sesi dan handover"
+          }
+        }
+      },
+      "errors": {
+        "categoryRequired": "Pilih kategori kendala terlebih dahulu.",
+        "contactRequired": "Isi kontak yang bisa dihubungi admin.",
+        "detailsRequired": "Jelaskan detail kendalanya agar admin bisa menindaklanjuti."
+      }
+    },
     "modeLabels": {
       "online": "Online",
       "home_visit": "Kunjungan rumah",
@@ -1005,6 +1371,13 @@
       "paymentSuccess": "Simulasi pembayaran berhasil",
       "chatSent": "Pesan terkirim dalam mode demo",
       "chatUnavailable": "Chat hanya tersedia untuk aktivitas yang masih aktif.",
+      "appointmentCancelled": {
+        "none": "Appointment berhasil dibatalkan.",
+        "void_pending_payment": "Appointment berhasil dibatalkan. Pembayaran yang masih pending dibatalkan.",
+        "full_refund": "Appointment berhasil dibatalkan. Pelanggan berhak mendapat refund penuh.",
+        "no_refund": "Appointment berhasil dibatalkan. Order sudah melewati batas refund.",
+        "manual_refund_required": "Appointment berhasil dibatalkan. Refund perlu ditinjau manual."
+      },
       "reviewPhotoReady": "Foto review siap diunggah: {fileName}",
       "reviewSuccessWithPhoto": "{successMessage} Foto: {fileName}."
     },
@@ -1029,7 +1402,49 @@
       "actionLabels": {
         "detail": "Detail",
         "cancel": "Batalkan",
-        "payNow": "Bayar Sekarang"
+        "payNow": "Bayar Sekarang",
+        "bookAgain": "Pesan Lagi"
+      },
+      "cancellation": {
+        "title": "Batalkan appointment",
+        "description": "Gunakan chat untuk diskusi perubahan dulu. Jika tetap perlu jadwal atau layanan lain, batalkan order ini lalu buat order baru.",
+        "submitLabel": "Konfirmasi pembatalan",
+        "keepLabel": "Pertahankan appointment",
+        "reasonLabel": "Alasan pembatalan",
+        "reasonPlaceholder": "Jelaskan singkat kenapa order ini perlu dibatalkan.",
+        "policyTitle": "Kebijakan pembatalan",
+        "outcomeTitle": "Dampak finansial",
+        "customerNoPaymentPolicy": "Sebelum pembayaran settle, pembatalan hanya menutup order tanpa alur refund.",
+        "professionalPolicy": "Jika profesional yang membatalkan sebelum layanan dimulai, pelanggan mendapat refund penuh.",
+        "customerCutoffPolicy": "Pembatalan oleh pelanggan {hours} jam atau lebih sebelum sesi: refund penuh. Setelah itu: tanpa refund.",
+        "cutoffWindowLabel": "Jendela refund {hours} jam",
+        "timing": {
+          "beforeCutoff": "Permintaan ini masih sebelum batas refund {hours} jam.",
+          "afterCutoff": "Permintaan ini sudah melewati batas refund {hours} jam.",
+          "notApplicable": "Belum ada batas refund yang berlaku untuk order ini."
+        },
+        "outcomes": {
+          "none": "Tanpa dampak finansial",
+          "void_pending_payment": "Pembayaran pending dibatalkan",
+          "full_refund": "Refund penuh",
+          "no_refund": "Tanpa refund",
+          "manual_refund_required": "Perlu review refund manual"
+        },
+        "outcomeDescriptions": {
+          "none": "Belum ada pembayaran settle pada order ini.",
+          "void_pending_payment": "Pembayaran masih pending, jadi order cukup ditutup.",
+          "full_refund": "Pembayaran seharusnya dikembalikan penuh setelah pembatalan.",
+          "no_refund": "Pembatalan ini sudah melewati batas refund pelanggan.",
+          "manual_refund_required": "Pembayaran ini membutuhkan penanganan refund manual."
+        },
+        "actorLabels": {
+          "customer": "Pelanggan",
+          "professional": "Profesional"
+        },
+        "resolutionTitle": "Ringkasan pembatalan",
+        "resolutionReasonLabel": "Alasan yang dicatat",
+        "resolutionFinancialOutcomeLabel": "Dampak finansial",
+        "resolutionCancelledAtLabel": "Ditutup pada"
       },
       "statusBanners": {
         "requested": "Profesional sedang meninjau permintaan Anda. Kami akan memberi tahu Anda segera setelah disetujui.",

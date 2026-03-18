@@ -168,9 +168,9 @@ export const MiniStatCard = ({ label, value }: { label: string; value: string })
 );
 
 export const ServiceMetaChip = ({ label, value }: { label: string; value: string }) => (
-  <div className={neutralSoftPillClass}>
+  <div className={`${neutralSoftPillClass} max-w-full`}>
     <span className="text-[11px] font-medium text-slate-500">{label}</span>
-    <span className="text-[12px] font-bold text-slate-900">{value}</span>
+    <span className="truncate text-[12px] font-bold text-slate-900">{value}</span>
   </div>
 );
 
@@ -191,12 +191,12 @@ export const ServiceModeBadge = ({
   label: string;
 }) => (
   <span
-    className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[12px] font-semibold ${
+    className={`inline-flex max-w-full items-center gap-2 rounded-full border px-3 py-1.5 text-[12px] font-semibold ${
       isActive ? 'border-pink-100 bg-pink-50 text-pink-600' : 'border-slate-200 bg-white text-slate-400'
     }`}
   >
     <span className={`h-2 w-2 rounded-full ${isActive ? 'bg-current opacity-80' : 'bg-slate-300'}`} />
-    <span>{label}</span>
+    <span className="whitespace-normal leading-5">{label}</span>
     {isDefault && isActive ? <Star className="h-3 w-3" /> : null}
   </span>
 );
@@ -258,6 +258,8 @@ export const RequestFilterChip = ({
 );
 
 export const RequestCard = ({
+  closeActionLabel,
+  customerStatusLabel,
   evidenceLabels,
   fieldLabels,
   getAreaLabel,
@@ -267,6 +269,7 @@ export const RequestCard = ({
   htmlId,
   isHighlighted,
   moveToLabel,
+  onCloseRequest,
   onChangeStatus,
   priorityLabel,
   request,
@@ -274,6 +277,8 @@ export const RequestCard = ({
   statusLabel,
   updateActionLabel,
 }: {
+  closeActionLabel?: string;
+  customerStatusLabel: (status: ProfessionalManagedRequest['customerStatus']) => string;
   evidenceLabels: {
     customerSummary: string;
     empty: string;
@@ -289,6 +294,7 @@ export const RequestCard = ({
     budget: string;
     bookingFlow: string;
     currentStatus: string;
+    customerStatus: string;
     note: string;
     requestedMode: string;
     service: string;
@@ -300,6 +306,7 @@ export const RequestCard = ({
   htmlId?: string;
   isHighlighted?: boolean;
   moveToLabel: string;
+  onCloseRequest?: () => void;
   onChangeStatus: (status: ProfessionalRequestStatus) => void;
   priorityLabel: string;
   request: ProfessionalManagedRequest;
@@ -346,6 +353,7 @@ export const RequestCard = ({
       <div className="mt-3 flex flex-wrap gap-2">
         <ServiceMetaChip label={fieldLabels.requestedMode} value={getModeLabel(request.requestedMode)} />
         <ServiceMetaChip label={fieldLabels.bookingFlow} value={getBookingFlowLabel(request.bookingFlow)} />
+        <ServiceMetaChip label={fieldLabels.customerStatus} value={customerStatusLabel(request.customerStatus)} />
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-2">
@@ -467,14 +475,25 @@ export const RequestCard = ({
       <div className="mt-4">
         <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">{moveToLabel}</p>
         {nextStatus ? (
-          <button
-            type="button"
-            onClick={() => onChangeStatus(nextStatus)}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-[16px] bg-slate-900 px-4 py-3 text-[13px] font-semibold text-white transition-colors hover:bg-slate-800"
-          >
-            <span>{updateActionLabel(nextStatus)}</span>
-            <ArrowRight className="h-4 w-4" />
-          </button>
+          <div className="flex gap-3">
+            {onCloseRequest && closeActionLabel ? (
+              <button
+                type="button"
+                onClick={onCloseRequest}
+                className="inline-flex flex-1 items-center justify-center rounded-[16px] border border-red-200 bg-red-50 px-4 py-3 text-[13px] font-semibold text-red-700 transition-colors hover:bg-red-100"
+              >
+                {closeActionLabel}
+              </button>
+            ) : null}
+            <button
+              type="button"
+              onClick={() => onChangeStatus(nextStatus)}
+              className="inline-flex flex-1 items-center justify-center gap-2 rounded-[16px] bg-slate-900 px-4 py-3 text-[13px] font-semibold text-white transition-colors hover:bg-slate-800"
+            >
+              <span>{updateActionLabel(nextStatus)}</span>
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          </div>
         ) : (
           <div className="rounded-[16px] bg-emerald-50 px-4 py-3 text-[13px] font-semibold text-emerald-700">
             {statusLabel(request.status)}
@@ -518,7 +537,7 @@ export const SelectableChip = ({
   <button
     type="button"
     onClick={onClick}
-    className={`rounded-full px-4 py-2 text-[13px] font-semibold transition-all ${
+    className={`rounded-full px-4 py-2 text-[13px] font-semibold leading-5 transition-all ${
       isActive ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600'
     }`}
   >

@@ -2,13 +2,7 @@
 
 import { Layers3 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import {
-  accentPrimaryButtonClass,
-  accentSoftPillClass,
-  darkPrimaryButtonClass,
-  neutralSoftPillClass,
-  softWhitePanelClass,
-} from '@/components/ui/tokens';
+import { accentSoftPillClass, neutralSoftPillClass, softWhitePanelClass } from '@/components/ui/tokens';
 import type { ProfessionalManagedService } from '@/lib/use-professional-portal';
 import type { ServiceDeliveryMode } from '@/types/catalog';
 import { deliveryModes, isServiceModeEnabled } from './helpers';
@@ -134,21 +128,13 @@ export const ProfessionalDashboardServicesTab = ({
                       </p>
                     </div>
 
-                    <div className="grid gap-2">
-                      <button
-                        type="button"
-                        onClick={() => onEditService(service.serviceId)}
-                        className={`${darkPrimaryButtonClass} flex w-full items-center justify-center`}
-                      >
+                    <div className="grid grid-cols-2 gap-2">
+                      <ServiceActionButton variant="secondary" onClick={() => onEditService(service.serviceId)}>
                         {t('services.editButton')}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => onToggleActivation(service)}
-                        className="flex w-full items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-3 text-[13px] font-bold text-slate-700 shadow-[inset_0_0_0_1px_rgba(226,232,240,1)]"
-                      >
+                      </ServiceActionButton>
+                      <ServiceActionButton variant="ghost" onClick={() => onToggleActivation(service)}>
                         {t('services.archiveButton')}
-                      </button>
+                      </ServiceActionButton>
                     </div>
                   </div>
                 </article>
@@ -204,21 +190,13 @@ export const ProfessionalDashboardServicesTab = ({
                     ))}
                   </div>
 
-                  <div className="mt-4 grid gap-2">
-                    <button
-                      type="button"
-                      onClick={() => onToggleActivation(service)}
-                      className={`${accentPrimaryButtonClass} flex w-full items-center justify-center`}
-                    >
+                  <div className="mt-4 grid grid-cols-2 gap-2">
+                    <ServiceActionButton variant="primary" onClick={() => onToggleActivation(service)}>
                       {t('services.activateButton')}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => onEditService(service.serviceId)}
-                      className={`${darkPrimaryButtonClass} flex w-full items-center justify-center`}
-                    >
+                    </ServiceActionButton>
+                    <ServiceActionButton variant="secondary" onClick={() => onEditService(service.serviceId)}>
                       {t('services.editButton')}
-                    </button>
+                    </ServiceActionButton>
                   </div>
                 </article>
               );
@@ -229,3 +207,27 @@ export const ProfessionalDashboardServicesTab = ({
     </section>
   );
 };
+
+const ServiceActionButton = ({
+  children,
+  onClick,
+  variant,
+}: {
+  children: string;
+  onClick: () => void;
+  variant: 'ghost' | 'primary' | 'secondary';
+}) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className={`flex min-h-[52px] w-full items-center justify-center rounded-[18px] px-4 py-3 text-center text-[13px] font-bold leading-5 transition-all active:scale-[0.99] ${
+      variant === 'primary'
+        ? 'bg-[linear-gradient(180deg,#F7259B_0%,#E11D87_100%)] text-white shadow-[0_18px_28px_-18px_rgba(233,30,140,0.42)]'
+        : variant === 'secondary'
+          ? 'bg-slate-900 text-white shadow-[0_18px_28px_-18px_rgba(15,23,42,0.34)]'
+          : 'border border-slate-200 bg-white text-slate-700 shadow-[inset_0_0_0_1px_rgba(226,232,240,1)]'
+    }`}
+  >
+    <span className="whitespace-normal">{children}</span>
+  </button>
+);

@@ -76,5 +76,9 @@ export interface RequestStatusDraft {
   nextStatus: ProfessionalRequestStatus;
 }
 
+export interface RequestCloseDraft {
+  reason: string;
+}
+
 export type ManagedCredentialId = ProfessionalManagedCredential['id'];
 export type ManagedActivityStoryId = ProfessionalManagedActivityStory['id'];

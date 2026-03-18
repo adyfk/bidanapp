@@ -1,6 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import {
+  createDefaultCancellationPolicySnapshot,
+  getAppointmentClosePreview,
+} from '@/features/appointments/lib/cancellation';
 import { ACTIVE_APPOINTMENT_STATUSES, HISTORY_APPOINTMENT_STATUSES } from '@/features/appointments/lib/status';
 import {
   type CreateCustomerRequestInput,
@@ -39,14 +43,18 @@ import {
   getAreaById,
   getProfessionalAvailabilityScheduleDays,
   getProfessionalById,
+  getProfessionalCancellationPolicy,
   getProfessionalCategoryLabel,
   MOCK_CATEGORIES,
   MOCK_PROFESSIONALS,
   MOCK_SERVICES,
 } from '@/lib/mock-db/catalog';
 import { ACTIVE_CONSUMER, ACTIVE_USER_CONTEXT } from '@/lib/mock-db/runtime';
+import { ACTIVE_RUNTIME_CLOCK_ISO } from '@/lib/mock-db/runtime-selection';
 import type {
   Appointment,
+  AppointmentCancellationPolicySnapshot,
+  AppointmentCancellationResolution,
   AppointmentScheduleSnapshot,
   AppointmentServiceSnapshot,
   AppointmentStatus,
@@ -441,6 +449,20 @@ const isAppointmentStatus = (value: string): value is AppointmentStatus =>
 const isAppointmentTimelineActor = (value: string): value is AppointmentTimelineActor =>
   appointmentTimelineActors.includes(value as AppointmentTimelineActor);
 
+const isAppointmentCancellationActor = (value: string): value is AppointmentCancellationResolution['cancelledBy'] =>
+  value === 'customer' || value === 'professional';
+
+const appointmentFinancialOutcomes: AppointmentCancellationResolution['financialOutcome'][] = [
+  'none',
+  'void_pending_payment',
+  'full_refund',
+  'no_refund',
+  'manual_refund_required',
+];
+
+const isAppointmentFinancialOutcome = (value: string): value is AppointmentCancellationResolution['financialOutcome'] =>
+  appointmentFinancialOutcomes.includes(value as AppointmentCancellationResolution['financialOutcome']);
+
 const getProfessionalRequestStatusFromAppointmentStatus = (status: AppointmentStatus): ProfessionalRequestStatus => {
   if (status === 'requested') {
     return 'new';
@@ -518,9 +540,64 @@ const createAppointmentTimelineEvent = ({
   toStatus,
 });
 
+const formatFinancialOutcomeLabel = (
+  outcome: AppointmentCancellationResolution['financialOutcome'],
+  locale: 'en' | 'id' = getProfessionalPortalLocale(),
+) => {
+  if (outcome === 'void_pending_payment') {
+    return locale === 'id' ? 'pembayaran dibatalkan sebelum settlement' : 'pending payment was voided';
+  }
+
+  if (outcome === 'full_refund') {
+    return locale === 'id' ? 'refund penuh' : 'full refund';
+  }
+
+  if (outcome === 'no_refund') {
+    return locale === 'id' ? 'tanpa refund' : 'no refund';
+  }
+
+  if (outcome === 'manual_refund_required') {
+    return locale === 'id' ? 'refund manual diperlukan' : 'manual refund required';
+  }
+
+  return locale === 'id' ? 'tanpa dampak finansial' : 'no financial impact';
+};
+
+const createAppointmentCancellationResolution = ({
+  cancelledAt,
+  cancelledBy,
+  cancellationReason,
+  financialOutcome,
+}: {
+  cancelledAt: Date;
+  cancelledBy: AppointmentCancellationResolution['cancelledBy'];
+  cancellationReason: string;
+  financialOutcome: AppointmentCancellationResolution['financialOutcome'];
+}): AppointmentCancellationResolution => ({
+  cancelledAt: cancelledAt.toISOString(),
+  cancelledBy,
+  cancellationReason: cancellationReason.trim(),
+  financialOutcome,
+});
+
+const resolveAppointmentCancellationPolicySnapshot = (
+  professionalId: string,
+  requestedMode: ServiceDeliveryMode,
+  fallback?: AppointmentCancellationPolicySnapshot,
+) =>
+  fallback ||
+  getProfessionalCancellationPolicy(professionalId, requestedMode) ||
+  createDefaultCancellationPolicySnapshot(requestedMode);
+
 const buildAppointmentRecordFromRow = (record: AppointmentRow): ProfessionalManagedAppointmentRecord => ({
   areaId: record.areaId,
   bookingFlow: record.bookingFlow,
+  cancellationPolicySnapshot: resolveAppointmentCancellationPolicySnapshot(
+    record.professionalId,
+    record.requestedMode,
+    record.cancellationPolicySnapshot,
+  ),
+  cancellationResolution: record.cancellationResolution || undefined,
   consumerId: record.consumerId,
   id: record.id,
   index: record.index,
@@ -996,6 +1073,56 @@ const sanitizeAppointmentServiceSnapshot = (
   tags: sanitizeStringArray(value?.tags, fallback.tags),
 });
 
+const sanitizeAppointmentCancellationPolicySnapshot = (
+  value: Partial<AppointmentCancellationPolicySnapshot> | null | undefined,
+  fallback: AppointmentCancellationPolicySnapshot,
+): AppointmentCancellationPolicySnapshot => ({
+  customerPaidCancelCutoffHours: parseInteger(
+    value?.customerPaidCancelCutoffHours,
+    fallback.customerPaidCancelCutoffHours,
+  ),
+  professionalCancelOutcome: value?.professionalCancelOutcome || fallback.professionalCancelOutcome,
+  beforeCutoffOutcome: value?.beforeCutoffOutcome || fallback.beforeCutoffOutcome,
+  afterCutoffOutcome: value?.afterCutoffOutcome || fallback.afterCutoffOutcome,
+});
+
+const sanitizeAppointmentCancellationResolution = (
+  value: Partial<AppointmentCancellationResolution> | null | undefined,
+  fallback?: AppointmentCancellationResolution,
+): AppointmentCancellationResolution | undefined => {
+  if (!value && !fallback) {
+    return undefined;
+  }
+
+  const candidate = value || fallback;
+
+  if (!candidate) {
+    return undefined;
+  }
+
+  const cancelledBy =
+    candidate.cancelledBy && isAppointmentCancellationActor(candidate.cancelledBy)
+      ? candidate.cancelledBy
+      : fallback?.cancelledBy;
+  const financialOutcome =
+    candidate.financialOutcome && isAppointmentFinancialOutcome(candidate.financialOutcome)
+      ? candidate.financialOutcome
+      : fallback?.financialOutcome;
+  const cancellationReason = candidate.cancellationReason?.trim() || fallback?.cancellationReason;
+  const cancelledAt = candidate.cancelledAt?.trim() || fallback?.cancelledAt;
+
+  if (!cancelledBy || !financialOutcome || !cancellationReason || !cancelledAt) {
+    return undefined;
+  }
+
+  return {
+    cancelledAt,
+    cancelledBy,
+    cancellationReason,
+    financialOutcome,
+  };
+};
+
 const sanitizeAppointmentTimelineEvent = (
   value: Partial<AppointmentTimelineEvent> | null | undefined,
   fallback: AppointmentTimelineEvent,
@@ -1028,6 +1155,14 @@ const sanitizeManagedAppointmentRecord = (
 ): ProfessionalManagedAppointmentRecord => ({
   areaId: value?.areaId?.trim() || fallback.areaId,
   bookingFlow: value?.bookingFlow && isBookingFlow(value.bookingFlow) ? value.bookingFlow : fallback.bookingFlow,
+  cancellationPolicySnapshot: sanitizeAppointmentCancellationPolicySnapshot(
+    value?.cancellationPolicySnapshot,
+    fallback.cancellationPolicySnapshot,
+  ),
+  cancellationResolution: sanitizeAppointmentCancellationResolution(
+    value?.cancellationResolution,
+    fallback.cancellationResolution,
+  ),
   consumerId: value?.consumerId?.trim() || fallback.consumerId,
   id: value?.id?.trim() || fallback.id,
   index: typeof value?.index === 'number' ? value.index : fallback.index,
@@ -1328,6 +1463,8 @@ const buildCustomerAppointmentsFromAppointmentRecords = (
       createHydratedAppointment({
         areaId: record.areaId,
         bookingFlow: record.bookingFlow,
+        cancellationPolicySnapshot: record.cancellationPolicySnapshot,
+        cancellationResolution: record.cancellationResolution,
         consumerId: record.consumerId,
         id: record.id,
         professionalId: record.professionalId,
@@ -1934,6 +2071,8 @@ export const useProfessionalPortal = () => {
     const nextRecord: ProfessionalManagedAppointmentRecord = {
       areaId: ACTIVE_USER_CONTEXT.area.id,
       bookingFlow: serviceMapping.bookingFlow,
+      cancellationPolicySnapshot: resolveAppointmentCancellationPolicySnapshot(professionalId, requestedMode),
+      cancellationResolution: undefined,
       consumerId: ACTIVE_CONSUMER.id,
       id: appointmentId,
       index: requestTimestamp,
@@ -2048,6 +2187,209 @@ export const useProfessionalPortal = () => {
     );
 
     return true;
+  };
+
+  const cancelCustomerAppointment = (appointmentId: string, cancellationReason: string) => {
+    const trimmedReason = cancellationReason.trim();
+
+    if (!trimmedReason) {
+      return {
+        ok: false as const,
+      };
+    }
+
+    const locale = getProfessionalPortalLocale();
+    let hasChanged = false;
+    const updatedAt = new Date(ACTIVE_RUNTIME_CLOCK_ISO);
+    const nextAppointmentRecords = Object.fromEntries(
+      Object.entries(appointmentRecordsByProfessionalId).map(([professionalId, records]) => [
+        professionalId,
+        records.map((record) => {
+          if (record.id !== appointmentId) {
+            return record;
+          }
+
+          const closePreview = getAppointmentClosePreview({
+            actor: 'customer',
+            policySnapshot: record.cancellationPolicySnapshot,
+            referenceDateTimeIso: ACTIVE_RUNTIME_CLOCK_ISO,
+            scheduleSnapshot: record.scheduleSnapshot,
+            status: record.status,
+          });
+
+          if (!closePreview.allowed || !closePreview.nextStatus || !closePreview.financialOutcome) {
+            return record;
+          }
+
+          hasChanged = true;
+          const financialOutcomeLabel = formatFinancialOutcomeLabel(closePreview.financialOutcome, locale);
+          const customerSummary =
+            locale === 'id'
+              ? `Pelanggan membatalkan ${record.serviceSnapshot.name}. Hasil finansial: ${financialOutcomeLabel}.`
+              : `The customer cancelled ${record.serviceSnapshot.name}. Financial outcome: ${financialOutcomeLabel}.`;
+          const internalNote =
+            locale === 'id'
+              ? `Pembatalan pelanggan dicatat dengan alasan: ${trimmedReason}. Outcome: ${financialOutcomeLabel}.`
+              : `Customer cancellation recorded with reason: ${trimmedReason}. Outcome: ${financialOutcomeLabel}.`;
+
+          return sanitizeManagedAppointmentRecord(
+            {
+              ...record,
+              cancellationResolution:
+                closePreview.nextStatus === 'cancelled'
+                  ? createAppointmentCancellationResolution({
+                      cancelledAt: updatedAt,
+                      cancelledBy: 'customer',
+                      cancellationReason: trimmedReason,
+                      financialOutcome: closePreview.financialOutcome,
+                    })
+                  : record.cancellationResolution,
+              status: closePreview.nextStatus,
+              timeline: [
+                ...record.timeline,
+                createAppointmentTimelineEvent({
+                  actor: 'customer',
+                  createdAt: updatedAt,
+                  customerSummary,
+                  fromStatus: record.status,
+                  id: `${record.id}-timeline-${record.timeline.length + 1}`,
+                  internalNote,
+                  toStatus: closePreview.nextStatus,
+                }),
+              ],
+            },
+            record,
+          );
+        }),
+      ]),
+    );
+
+    if (!hasChanged) {
+      return {
+        ok: false as const,
+      };
+    }
+
+    updatePortalState(
+      {
+        ...portalState,
+        requestBoard:
+          buildRequestBoardFromAppointmentRecords(nextAppointmentRecords[portalState.activeProfessionalId] || []) ||
+          portalState.requestBoard,
+      },
+      nextAppointmentRecords,
+    );
+
+    return {
+      ok: true as const,
+    };
+  };
+
+  const closeProfessionalRequest = (requestId: string, cancellationReason: string) => {
+    const request = portalState.requestBoard.find((currentRequest) => currentRequest.id === requestId);
+    const trimmedReason = cancellationReason.trim();
+
+    if (!request || !trimmedReason) {
+      return {
+        ok: false as const,
+      };
+    }
+
+    const locale = getProfessionalPortalLocale();
+    let hasChanged = false;
+    const updatedAt = new Date(ACTIVE_RUNTIME_CLOCK_ISO);
+    const nextAppointmentRecords = {
+      ...appointmentRecordsByProfessionalId,
+      [portalState.activeProfessionalId]: (
+        appointmentRecordsByProfessionalId[portalState.activeProfessionalId] || []
+      ).map((record) => {
+        if (record.id !== request.appointmentId) {
+          return record;
+        }
+
+        const closePreview = getAppointmentClosePreview({
+          actor: 'professional',
+          policySnapshot: record.cancellationPolicySnapshot,
+          referenceDateTimeIso: ACTIVE_RUNTIME_CLOCK_ISO,
+          scheduleSnapshot: record.scheduleSnapshot,
+          status: record.status,
+        });
+
+        if (!closePreview.allowed || !closePreview.nextStatus || !closePreview.financialOutcome) {
+          return record;
+        }
+
+        hasChanged = true;
+        const financialOutcomeLabel = formatFinancialOutcomeLabel(closePreview.financialOutcome, locale);
+        const customerSummary =
+          closePreview.nextStatus === 'rejected'
+            ? locale === 'id'
+              ? `${record.serviceSnapshot.name} tidak dapat dilanjutkan dan permintaan ditolak profesional.`
+              : `${record.serviceSnapshot.name} cannot proceed and the request was declined by the professional.`
+            : locale === 'id'
+              ? `Profesional membatalkan ${record.serviceSnapshot.name}. Hasil finansial untuk pelanggan: ${financialOutcomeLabel}.`
+              : `The professional cancelled ${record.serviceSnapshot.name}. Customer financial outcome: ${financialOutcomeLabel}.`;
+        const internalNote =
+          closePreview.nextStatus === 'rejected'
+            ? locale === 'id'
+              ? `Profesional menolak request dengan alasan: ${trimmedReason}.`
+              : `Professional declined the request with reason: ${trimmedReason}.`
+            : locale === 'id'
+              ? `Profesional membatalkan appointment dengan alasan: ${trimmedReason}. Outcome: ${financialOutcomeLabel}.`
+              : `Professional cancelled the appointment with reason: ${trimmedReason}. Outcome: ${financialOutcomeLabel}.`;
+
+        return sanitizeManagedAppointmentRecord(
+          {
+            ...record,
+            cancellationResolution:
+              closePreview.nextStatus === 'cancelled'
+                ? createAppointmentCancellationResolution({
+                    cancelledAt: updatedAt,
+                    cancelledBy: 'professional',
+                    cancellationReason: trimmedReason,
+                    financialOutcome: closePreview.financialOutcome,
+                  })
+                : undefined,
+            status: closePreview.nextStatus,
+            timeline: [
+              ...record.timeline,
+              createAppointmentTimelineEvent({
+                actor: 'professional',
+                createdAt: updatedAt,
+                customerSummary,
+                fromStatus: record.status,
+                id: `${record.id}-timeline-${record.timeline.length + 1}`,
+                internalNote,
+                toStatus: closePreview.nextStatus,
+              }),
+            ],
+          },
+          record,
+        );
+      }),
+    };
+
+    if (!hasChanged) {
+      return {
+        ok: false as const,
+      };
+    }
+
+    const nextRequestBoard = buildRequestBoardFromAppointmentRecords(
+      nextAppointmentRecords[portalState.activeProfessionalId] || [],
+    );
+
+    updatePortalState(
+      {
+        ...portalState,
+        requestBoard: nextRequestBoard,
+      },
+      nextAppointmentRecords,
+    );
+
+    return {
+      ok: true as const,
+    };
   };
 
   const updateRequestStatus = (
@@ -2204,6 +2546,7 @@ export const useProfessionalPortal = () => {
     activateTemplateService,
     archiveService,
     createCustomerRequest,
+    cancelCustomerAppointment,
     createGalleryItem,
     createPortfolioEntry,
     deleteActivityStory,
@@ -2227,6 +2570,7 @@ export const useProfessionalPortal = () => {
           )[0] || null
       );
     },
+    closeProfessionalRequest,
     markCustomerAppointmentPaid,
     saveAvailabilityRulesByMode,
     saveBusinessSettings,

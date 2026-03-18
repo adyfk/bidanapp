@@ -1,8 +1,8 @@
 'use client';
 
-import { BookHeart, BriefcaseMedical, KeyRound, LogOut, MapPin, User } from 'lucide-react';
+import { BookHeart, BriefcaseMedical, KeyRound, LifeBuoy, LogOut, MapPin, User } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { CustomerAccessScreen } from '@/components/screens/CustomerAccessScreen';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import {
@@ -14,6 +14,7 @@ import {
   ProfileSettingsRow,
 } from '@/features/profile/components/ProfilePagePrimitives';
 import { ProfileSettingsSheet } from '@/features/profile/components/ProfileSettingsSheet';
+import { ProfileSupportEntryCard, ProfileSupportSheet } from '@/features/profile/components/ProfileSupportCenter';
 import { useProfileSettings } from '@/features/profile/hooks/useProfileSettings';
 import { useRouter } from '@/i18n/routing';
 import { ACTIVE_CONSUMER, ACTIVE_USER_CONTEXT } from '@/lib/mock-db/runtime';
@@ -24,6 +25,7 @@ export const ProfileScreen = () => {
   const router = useRouter();
   const t = useTranslations('Profile');
   const { continueAsVisitor, isCustomer, isProfessional } = useViewerSession();
+  const [isSupportSheetOpen, setIsSupportSheetOpen] = useState(false);
   const {
     activeSheet,
     closeSheet,
@@ -87,6 +89,8 @@ export const ProfileScreen = () => {
             />
           </div>
 
+          <ProfileSupportEntryCard namespace="Profile" onOpen={() => setIsSupportSheetOpen(true)} />
+
           <ProfileSettingsCard>
             <ProfileSettingsRow
               icon={<span className="text-[12px] font-bold">ID/EN</span>}
@@ -108,6 +112,13 @@ export const ProfileScreen = () => {
               title={t('security')}
               description={t('menu.securityDescription')}
               onClick={() => openSheet('security')}
+            />
+            <ProfileSettingsRow
+              icon={<LifeBuoy className="h-4 w-4" />}
+              iconClassName="bg-amber-50 text-amber-600"
+              title={t('support.title')}
+              description={t('menu.supportDescription')}
+              onClick={() => setIsSupportSheetOpen(true)}
               isLast
             />
           </ProfileSettingsCard>
@@ -153,6 +164,16 @@ export const ProfileScreen = () => {
         profileDraft={profileDraft}
         profileErrorKey={profileErrorKey}
         profileSaveState={profileSaveState}
+      />
+
+      <ProfileSupportSheet
+        defaultContact={profileDraft.phone || ACTIVE_CONSUMER.phone}
+        isOpen={isSupportSheetOpen}
+        namespace="Profile"
+        onClose={() => setIsSupportSheetOpen(false)}
+        reporterName={profileDraft.name || ACTIVE_CONSUMER.name}
+        reporterPhone={profileDraft.phone || ACTIVE_CONSUMER.phone}
+        supportRole="customer"
       />
     </>
   );

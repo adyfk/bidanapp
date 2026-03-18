@@ -1,4 +1,6 @@
 import type {
+  AppointmentCancellationPolicySnapshot,
+  AppointmentCancellationResolution,
   AppointmentScheduleSnapshot,
   AppointmentServiceSnapshot,
   AppointmentStatus,
@@ -17,7 +19,7 @@ import type {
   ServiceDeliveryMode,
 } from '@/types/catalog';
 
-export const PROFESSIONAL_PORTAL_SCHEMA_VERSION = 9;
+export const PROFESSIONAL_PORTAL_SCHEMA_VERSION = 10;
 
 export const PROFESSIONAL_PORTAL_API_ENDPOINTS = {
   coverage: '/professionals/me/coverage',
@@ -109,6 +111,8 @@ export interface ProfessionalManagedRequest {
 export interface ProfessionalManagedAppointmentRecord {
   areaId: string;
   bookingFlow: BookingFlow;
+  cancellationPolicySnapshot: AppointmentCancellationPolicySnapshot;
+  cancellationResolution?: AppointmentCancellationResolution;
   consumerId: string;
   id: string;
   index: number;

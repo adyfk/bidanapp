@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { type AppointmentClosePreview, getAppointmentClosePreview } from '@/features/appointments/lib/cancellation';
 import {
   ACTIVE_APPOINTMENT_STATUSES,
   type AppointmentStatusFilter,
@@ -92,7 +93,7 @@ export const useAppointmentFlow = ({
   initialTab?: AppointmentTab;
 } = {}) => {
   const uiText = useUiText();
-  const { customerAppointments, markCustomerAppointmentPaid } = useProfessionalPortal();
+  const { cancelCustomerAppointment, customerAppointments, markCustomerAppointmentPaid } = useProfessionalPortal();
   const [activeTab, setActiveTab] = useState<AppointmentTab>(initialTab);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<AppointmentStatusFilter>(initialStatusFilter);
@@ -100,6 +101,8 @@ export const useAppointmentFlow = ({
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState('');
   const [isReviewOpen, setIsReviewOpen] = useState(false);
+  const [isCancelOpen, setIsCancelOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
   const [rating, setRating] = useState(0);
   const [reviewText, setReviewText] = useState('');
   const [reviewPhotoName, setReviewPhotoName] = useState<string | null>(null);
@@ -183,17 +186,32 @@ export const useAppointmentFlow = ({
   const canChatSelectedAppointment = selectedAppointment
     ? isAppointmentChatAvailable(selectedAppointment.status)
     : false;
+  const cancelPreview = useMemo(
+    () =>
+      selectedAppointment
+        ? getAppointmentClosePreview({
+            actor: 'customer',
+            policySnapshot: selectedAppointment.cancellationPolicySnapshot,
+            scheduleSnapshot: selectedAppointment.scheduleSnapshot,
+            status: selectedAppointment.status,
+          })
+        : null,
+    [selectedAppointment],
+  );
 
   const selectAppointment = (appointmentId: string) => {
     setSelectedAppointmentId(appointmentId);
     setIsChatOpen(false);
+    setIsCancelOpen(false);
     setIsReviewOpen(false);
   };
 
   const closeAppointment = () => {
     setSelectedAppointmentId(null);
     setIsChatOpen(false);
+    setIsCancelOpen(false);
     setIsReviewOpen(false);
+    setCancelReason('');
     setChatInput('');
   };
 
@@ -221,6 +239,19 @@ export const useAppointmentFlow = ({
     setIsReviewOpen(false);
   };
 
+  const openCancel = () => {
+    if (!selectedAppointment || !cancelPreview?.allowed) {
+      return;
+    }
+
+    setIsCancelOpen(true);
+  };
+
+  const closeCancel = () => {
+    setIsCancelOpen(false);
+    setCancelReason('');
+  };
+
   const markPaid = () => {
     if (!selectedAppointment) {
       return;
@@ -228,6 +259,21 @@ export const useAppointmentFlow = ({
 
     markCustomerAppointmentPaid(selectedAppointment.id);
     setNotice(uiText.paymentSuccessAlert);
+  };
+
+  const submitCancel = () => {
+    if (!selectedAppointment || !cancelPreview?.allowed || !cancelReason.trim()) {
+      return;
+    }
+
+    const result = cancelCustomerAppointment(selectedAppointment.id, cancelReason);
+
+    if (!result.ok) {
+      return;
+    }
+
+    setNotice(uiText.getAppointmentCancellationNotice(cancelPreview.financialOutcome || 'none'));
+    closeCancel();
   };
 
   const selectReviewPhoto = (fileName: string | null) => {
@@ -322,13 +368,18 @@ export const useAppointmentFlow = ({
     canChatSelectedAppointment,
     chatInput,
     closeAppointment,
+    closeCancel,
     closeChat,
     closeReview,
     filteredAppointments,
+    cancelPreview,
+    cancelReason,
+    isCancelOpen,
     isChatOpen,
     isReviewOpen,
     markPaid,
     notice,
+    openCancel,
     openChat,
     openReview,
     rating,
@@ -341,6 +392,7 @@ export const useAppointmentFlow = ({
     selectedAppointment,
     selectedChatSession,
     setActiveTab,
+    setCancelReason,
     setChatInput,
     setNotice,
     setRating,
@@ -350,6 +402,7 @@ export const useAppointmentFlow = ({
     submitChatMessage,
     submitReview,
     statusFilter,
+    submitCancel,
     tabAppointments,
   };
 };

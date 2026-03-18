@@ -1,0 +1,182 @@
+[
+  {
+    "id": "pcp-1-online",
+    "index": 1,
+    "professionalId": "1",
+    "mode": "online",
+    "customerPaidCancelCutoffHours": 6,
+    "beforeCutoffOutcome": "full_refund",
+    "afterCutoffOutcome": "no_refund",
+    "professionalCancelOutcome": "full_refund"
+  },
+  {
+    "id": "pcp-1-home_visit",
+    "index": 2,
+    "professionalId": "1",
+    "mode": "home_visit",
+    "customerPaidCancelCutoffHours": 6,
+    "beforeCutoffOutcome": "full_refund",
+    "afterCutoffOutcome": "no_refund",
+    "professionalCancelOutcome": "full_refund"
+  },
+  {
+    "id": "pcp-1-onsite",
+    "index": 3,
+    "professionalId": "1",
+    "mode": "onsite",
+    "customerPaidCancelCutoffHours": 6,
+    "beforeCutoffOutcome": "full_refund",
+    "afterCutoffOutcome": "no_refund",
+    "professionalCancelOutcome": "full_refund"
+  },
+  {
+    "id": "pcp-2-online",
+    "index": 4,
+    "professionalId": "2",
+    "mode": "online",
+    "customerPaidCancelCutoffHours": 6,
+    "beforeCutoffOutcome": "full_refund",
+    "afterCutoffOutcome": "no_refund",
+    "professionalCancelOutcome": "full_refund"
+  },
+  {
+    "id": "pcp-2-home_visit",
+    "index": 5,
+    "professionalId": "2",
+    "mode": "home_visit",
+    "customerPaidCancelCutoffHours": 6,
+    "beforeCutoffOutcome": "full_refund",
+    "afterCutoffOutcome": "no_refund",
+    "professionalCancelOutcome": "full_refund"
+  },
+  {
+    "id": "pcp-2-onsite",
+    "index": 6,
+    "professionalId": "2",
+    "mode": "onsite",
+    "customerPaidCancelCutoffHours": 6,
+    "beforeCutoffOutcome": "full_refund",
+    "afterCutoffOutcome": "no_refund",
+    "professionalCancelOutcome": "full_refund"
+  },
+  {
+    "id": "pcp-3-online",
+    "index": 7,
+    "professionalId": "3",
+    "mode": "online",
+    "customerPaidCancelCutoffHours": 6,
+    "beforeCutoffOutcome": "full_refund",
+    "afterCutoffOutcome": "no_refund",
+    "professionalCancelOutcome": "full_refund"
+  },
+  {
+    "id": "pcp-3-home_visit",
+    "index": 8,
+    "professionalId": "3",
+    "mode": "home_visit",
+    "customerPaidCancelCutoffHours": 6,
+    "beforeCutoffOutcome": "full_refund",
+    "afterCutoffOutcome": "no_refund",
+    "professionalCancelOutcome": "full_refund"
+  },
+  {
+    "id": "pcp-3-onsite",
+    "index": 9,
+    "professionalId": "3",
+    "mode": "onsite",
+    "customerPaidCancelCutoffHours": 6,
+    "beforeCutoffOutcome": "full_refund",
+    "afterCutoffOutcome": "no_refund",
+    "professionalCancelOutcome": "full_refund"
+  },
+  {
+    "id": "pcp-4-online",
+    "index": 10,
+    "professionalId": "4",
+    "mode": "online",
+    "customerPaidCancelCutoffHours": 6,
+    "beforeCutoffOutcome": "full_refund",
+    "afterCutoffOutcome": "no_refund",
+    "professionalCancelOutcome": "full_refund"
+  },
+  {
+    "id": "pcp-4-home_visit",
+    "index": 11,
+    "professionalId": "4",
+    "mode": "home_visit",
+    "customerPaidCancelCutoffHours": 6,
+    "beforeCutoffOutcome": "full_refund",
+    "afterCutoffOutcome": "no_refund",
+    "professionalCancelOutcome": "full_refund"
+  },
+  {
+    "id": "pcp-4-onsite",
+    "index": 12,
+    "professionalId": "4",
+    "mode": "onsite",
+    "customerPaidCancelCutoffHours": 6,
+    "beforeCutoffOutcome": "full_refund",
+    "afterCutoffOutcome": "no_refund",
+    "professionalCancelOutcome": "full_refund"
+  },
+  {
+    "id": "pcp-5-online",
+    "index": 13,
+    "professionalId": "5",
+    "mode": "online",
+    "customerPaidCancelCutoffHours": 6,
+    "beforeCutoffOutcome": "full_refund",
+    "afterCutoffOutcome": "no_refund",
+    "professionalCancelOutcome": "full_refund"
+  },
+  {
+    "id": "pcp-5-home_visit",
+    "index": 14,
+    "professionalId": "5",
+    "mode": "home_visit",
+    "customerPaidCancelCutoffHours": 6,
+    "beforeCutoffOutcome": "full_refund",
+    "afterCutoffOutcome": "no_refund",
+    "professionalCancelOutcome": "full_refund"
+  },
+  {
+    "id": "pcp-5-onsite",
+    "index": 15,
+    "professionalId": "5",
+    "mode": "onsite",
+    "customerPaidCancelCutoffHours": 6,
+    "beforeCutoffOutcome": "full_refund",
+    "afterCutoffOutcome": "no_refund",
+    "professionalCancelOutcome": "full_refund"
+  },
+  {
+    "id": "pcp-6-online",
+    "index": 16,
+    "professionalId": "6",
+    "mode": "online",
+    "customerPaidCancelCutoffHours": 6,
+    "beforeCutoffOutcome": "full_refund",
+    "afterCutoffOutcome": "no_refund",
+    "professionalCancelOutcome": "full_refund"
+  },
+  {
+    "id": "pcp-6-home_visit",
+    "index": 17,
+    "professionalId": "6",
+    "mode": "home_visit",
+    "customerPaidCancelCutoffHours": 6,
+    "beforeCutoffOutcome": "full_refund",
+    "afterCutoffOutcome": "no_refund",
+    "professionalCancelOutcome": "full_refund"
+  },
+  {
+    "id": "pcp-6-onsite",
+    "index": 18,
+    "professionalId": "6",
+    "mode": "onsite",
+    "customerPaidCancelCutoffHours": 6,
+    "beforeCutoffOutcome": "full_refund",
+    "afterCutoffOutcome": "no_refund",
+    "professionalCancelOutcome": "full_refund"
+  }
+]

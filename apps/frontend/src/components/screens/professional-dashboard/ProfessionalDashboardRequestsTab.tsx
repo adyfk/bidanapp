@@ -3,6 +3,7 @@
 import { ClipboardList } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { surfaceCardPaddedClass } from '@/components/ui/tokens';
+import { isProfessionalCloseAllowed } from '@/features/appointments/lib/cancellation';
 import type { ProfessionalManagedRequest, ProfessionalRequestStatus } from '@/lib/use-professional-portal';
 import type { ServiceDeliveryMode } from '@/types/catalog';
 import { requestStatuses } from './helpers';
@@ -15,6 +16,7 @@ interface ProfessionalDashboardRequestsTabProps {
   getModeLabel: (mode: ServiceDeliveryMode) => string;
   getServiceLabel: (serviceId: string) => string;
   isPublishedProfessional: boolean;
+  onCloseRequest: (requestId: string) => void;
   onChangeStatus: (requestId: string, status: ProfessionalRequestStatus) => void;
   requestFilter: RequestFilter;
   requestStatusCounts: Record<ProfessionalRequestStatus, number>;
@@ -28,6 +30,7 @@ export const ProfessionalDashboardRequestsTab = ({
   getModeLabel,
   getServiceLabel,
   isPublishedProfessional,
+  onCloseRequest,
   onChangeStatus,
   requestFilter,
   requestStatusCounts,
@@ -36,6 +39,7 @@ export const ProfessionalDashboardRequestsTab = ({
 }: ProfessionalDashboardRequestsTabProps) => {
   const t = useTranslations('ProfessionalPortal');
   const professionalT = useTranslations('Professional');
+  const appointmentsT = useTranslations('Appointments');
 
   if (!isPublishedProfessional) {
     return (
@@ -111,10 +115,19 @@ export const ProfessionalDashboardRequestsTab = ({
                 budget: t('requests.fields.budget'),
                 bookingFlow: t('services.fields.bookingFlow'),
                 currentStatus: t('requests.fields.currentStatus'),
+                customerStatus: t('requests.fields.customerStatus'),
                 note: t('requests.fields.note'),
                 requestedMode: t('requests.fields.requestedMode'),
                 service: t('requests.fields.service'),
               }}
+              closeActionLabel={
+                isProfessionalCloseAllowed(request.customerStatus)
+                  ? request.customerStatus === 'requested'
+                    ? t('requests.declineAction')
+                    : t('requests.cancelAction')
+                  : undefined
+              }
+              customerStatusLabel={(status) => appointmentsT(`status.${status}`)}
               getAreaLabel={getAreaLabel}
               getBookingFlowLabel={(flow) =>
                 flow === 'instant' ? professionalT('bookingFlowInstant') : professionalT('bookingFlowRequest')
@@ -129,6 +142,9 @@ export const ProfessionalDashboardRequestsTab = ({
               requestStatuses={requestStatuses}
               statusLabel={(status) => t(`requests.status.${status}`)}
               updateActionLabel={(status) => t('requests.updateAction', { status: t(`requests.status.${status}`) })}
+              onCloseRequest={
+                isProfessionalCloseAllowed(request.customerStatus) ? () => onCloseRequest(request.id) : undefined
+              }
               onChangeStatus={(status) => onChangeStatus(request.id, status)}
             />
           ))

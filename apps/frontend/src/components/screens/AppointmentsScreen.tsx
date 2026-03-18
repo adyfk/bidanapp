@@ -4,6 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 import { CustomerAccessScreen } from '@/components/screens/CustomerAccessScreen';
 import { InlineFeedbackNotice } from '@/components/ui/InlineFeedbackNotice';
+import { AppointmentCancelSheet } from '@/features/appointments/components/AppointmentCancelSheet';
 import { AppointmentChatSheet } from '@/features/appointments/components/AppointmentChatSheet';
 import { AppointmentDetailSheet } from '@/features/appointments/components/AppointmentDetailSheet';
 import { AppointmentReviewSheet } from '@/features/appointments/components/AppointmentReviewSheet';
@@ -19,7 +20,7 @@ import {
 } from '@/features/appointments/lib/status';
 import { useRouter } from '@/i18n/routing';
 import { APP_CONFIG } from '@/lib/config';
-import { APP_ROUTES, professionalDashboardRoute } from '@/lib/routes';
+import { APP_ROUTES, professionalDashboardRoute, professionalRoute } from '@/lib/routes';
 import { useViewerSession } from '@/lib/use-viewer-session';
 
 export const AppointmentsScreen = () => {
@@ -32,16 +33,21 @@ export const AppointmentsScreen = () => {
   const { isCustomer, isProfessional } = useViewerSession();
   const {
     activeTab,
+    cancelPreview,
+    cancelReason,
     canChatSelectedAppointment,
+    closeCancel,
     chatInput,
     closeAppointment,
     closeChat,
     closeReview,
     filteredAppointments,
+    isCancelOpen,
     isChatOpen,
     isReviewOpen,
     markPaid,
     notice,
+    openCancel,
     openChat,
     openReview,
     rating,
@@ -59,8 +65,10 @@ export const AppointmentsScreen = () => {
     setRating,
     setReviewText,
     setSearchQuery,
+    setCancelReason,
     statusFilter,
     submitChatMessage,
+    submitCancel,
     submitReview,
     tabAppointments,
   } = useAppointmentFlow({
@@ -111,9 +119,30 @@ export const AppointmentsScreen = () => {
         <AppointmentDetailSheet
           appointment={selectedAppointment}
           onClose={closeAppointment}
+          onBookAgain={() => {
+            closeAppointment();
+            router.push(
+              professionalRoute(selectedAppointment.professional.slug, {
+                mode: selectedAppointment.requestedMode,
+                serviceId: selectedAppointment.service.serviceId,
+              }),
+            );
+          }}
+          onOpenCancel={openCancel}
           onOpenChat={openChat}
           onOpenReview={openReview}
           onPayNow={markPaid}
+        />
+      ) : null}
+
+      {selectedAppointment && isCancelOpen && cancelPreview ? (
+        <AppointmentCancelSheet
+          appointment={selectedAppointment}
+          cancelPreview={cancelPreview}
+          cancelReason={cancelReason}
+          onCancelReasonChange={setCancelReason}
+          onClose={closeCancel}
+          onSubmit={submitCancel}
         />
       ) : null}
 

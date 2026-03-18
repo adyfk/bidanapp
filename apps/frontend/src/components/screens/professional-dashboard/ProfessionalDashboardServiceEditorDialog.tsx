@@ -3,7 +3,6 @@
 import { Save } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import {
-  accentPrimaryButtonClass,
   accentSoftPillClass,
   blushSubtlePanelClass,
   neutralSoftPillClass,
@@ -63,7 +62,7 @@ export const ProfessionalDashboardServiceEditorDialog = ({
           <button
             type="button"
             onClick={onSave}
-            className={`${accentPrimaryButtonClass} flex flex-1 items-center justify-center gap-2`}
+            className="flex min-h-[52px] flex-1 items-center justify-center gap-2 rounded-[18px] bg-[linear-gradient(180deg,#F7259B_0%,#E11D87_100%)] px-4 py-3 text-center text-[14px] font-bold text-white shadow-[0_18px_28px_-18px_rgba(233,30,140,0.42)] transition-all active:scale-[0.99]"
           >
             <Save className="h-4 w-4" />
             {t('services.saveButton')}
@@ -71,10 +70,10 @@ export const ProfessionalDashboardServiceEditorDialog = ({
           <button
             type="button"
             onClick={onToggleActivation}
-            className={`flex flex-1 items-center justify-center gap-2 rounded-full py-3 text-[14px] font-bold ${
+            className={`flex min-h-[52px] flex-1 items-center justify-center gap-2 rounded-[18px] px-4 py-3 text-center text-[14px] font-bold leading-5 transition-all active:scale-[0.99] ${
               serviceIsActive
                 ? 'border border-slate-200 bg-white text-slate-700 shadow-[inset_0_0_0_1px_rgba(226,232,240,1)]'
-                : 'bg-pink-50 text-pink-600 shadow-[inset_0_0_0_1px_rgba(251,207,232,1)]'
+                : 'bg-slate-900 text-white shadow-[0_18px_28px_-18px_rgba(15,23,42,0.34)]'
             }`}
           >
             {serviceIsActive ? t('services.archiveButton') : t('services.activateButton')}

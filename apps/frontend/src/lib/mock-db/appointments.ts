@@ -1,7 +1,10 @@
+import { createDefaultCancellationPolicySnapshot } from '@/features/appointments/lib/cancellation';
 import { APPOINTMENT_ROWS } from '@/lib/mock-db/appointment-records';
 import { getProfessionalById } from '@/lib/mock-db/catalog';
 import type {
   Appointment,
+  AppointmentCancellationPolicySnapshot,
+  AppointmentCancellationResolution,
   AppointmentFeedback,
   AppointmentScheduleSnapshot,
   AppointmentServiceSnapshot,
@@ -13,6 +16,8 @@ import { getRequiredItem } from './utils';
 export interface AppointmentSeed {
   areaId: string;
   bookingFlow: BookingFlow;
+  cancellationPolicySnapshot?: AppointmentCancellationPolicySnapshot;
+  cancellationResolution?: AppointmentCancellationResolution;
   consumerId: string;
   feedback?: AppointmentFeedback;
   id: string;
@@ -32,6 +37,10 @@ export const appointmentPriceLabelToNumber = (priceLabel: string) =>
 export const createHydratedAppointment = (appointmentSeed: AppointmentSeed): Appointment => ({
   areaId: appointmentSeed.areaId,
   bookingFlow: appointmentSeed.bookingFlow,
+  cancellationPolicySnapshot:
+    appointmentSeed.cancellationPolicySnapshot ||
+    createDefaultCancellationPolicySnapshot(appointmentSeed.requestedMode),
+  cancellationResolution: appointmentSeed.cancellationResolution,
   consumerId: appointmentSeed.consumerId,
   feedback: appointmentSeed.feedback,
   id: appointmentSeed.id,
@@ -55,6 +64,8 @@ export const MOCK_APPOINTMENTS: Appointment[] = APPOINTMENT_ROWS.map((appointmen
   createHydratedAppointment({
     areaId: appointmentRow.areaId,
     bookingFlow: appointmentRow.bookingFlow,
+    cancellationPolicySnapshot: appointmentRow.cancellationPolicySnapshot,
+    cancellationResolution: appointmentRow.cancellationResolution || undefined,
     consumerId: appointmentRow.consumerId,
     feedback: appointmentRow.customerFeedback || undefined,
     id: appointmentRow.id,

@@ -3,6 +3,7 @@ import professionalActivityStoriesData from '@/data/mock-db/professional_activit
 import professionalAvailabilityDateOverridesData from '@/data/mock-db/professional_availability_date_overrides.json';
 import professionalAvailabilityPoliciesData from '@/data/mock-db/professional_availability_policies.json';
 import professionalAvailabilityWeeklyHoursData from '@/data/mock-db/professional_availability_weekly_hours.json';
+import professionalCancellationPoliciesData from '@/data/mock-db/professional_cancellation_policies.json';
 import professionalCoverageAreasData from '@/data/mock-db/professional_coverage_areas.json';
 import professionalCoveragePoliciesData from '@/data/mock-db/professional_coverage_policies.json';
 import professionalCredentialsData from '@/data/mock-db/professional_credentials.json';
@@ -38,6 +39,7 @@ import type {
   ProfessionalAvailabilityDateOverride,
   ProfessionalAvailabilityRules,
   ProfessionalAvailabilityWeekday,
+  ProfessionalCancellationPolicy,
   ProfessionalService,
   ProfessionalWeeklyAvailabilityWindow,
   ServiceDeliveryMode,
@@ -49,6 +51,7 @@ import type {
   ProfessionalAvailabilityDateOverrideRow,
   ProfessionalAvailabilityPolicyRow,
   ProfessionalAvailabilityWeeklyHoursRow,
+  ProfessionalCancellationPolicyRow,
   ProfessionalCoverageAreaRow,
   ProfessionalCoveragePolicyRow,
   ProfessionalCredentialRow,
@@ -112,6 +115,9 @@ const professionalAvailabilityWeeklyHours = sortByIndex(
 const professionalAvailabilityPolicies = sortByIndex(
   professionalAvailabilityPoliciesData as ProfessionalAvailabilityPolicyRow[],
 );
+const professionalCancellationPolicies = sortByIndex(
+  professionalCancellationPoliciesData as ProfessionalCancellationPolicyRow[],
+);
 const professionalAvailabilityDateOverrides = sortByIndex(
   professionalAvailabilityDateOverridesData as ProfessionalAvailabilityDateOverrideRow[],
 );
@@ -135,6 +141,7 @@ const availabilityWeeklyHourRowsByProfessionalId = groupBy(
   (row) => row.professionalId,
 );
 const availabilityPolicyRowsByProfessionalId = groupBy(professionalAvailabilityPolicies, (row) => row.professionalId);
+const cancellationPolicyRowsByProfessionalId = groupBy(professionalCancellationPolicies, (row) => row.professionalId);
 const availabilityDateOverrideRowsByProfessionalId = groupBy(
   professionalAvailabilityDateOverrides,
   (row) => row.professionalId,
@@ -206,6 +213,26 @@ const hydrateAvailabilityDateOverride = (
   slotIntervalMinutes: dateOverrideRow.slotIntervalMinutes || undefined,
   startTime: dateOverrideRow.startTime || undefined,
 });
+
+const hydrateProfessionalCancellationPoliciesByMode = (
+  professionalId: string,
+): Partial<Record<ServiceDeliveryMode, ProfessionalCancellationPolicy>> | undefined => {
+  const policyRows = sortByIndex(cancellationPolicyRowsByProfessionalId.get(professionalId) || []);
+
+  if (policyRows.length === 0) {
+    return undefined;
+  }
+
+  return policyRows.reduce<Partial<Record<ServiceDeliveryMode, ProfessionalCancellationPolicy>>>((policies, row) => {
+    policies[row.mode] = {
+      customerPaidCancelCutoffHours: row.customerPaidCancelCutoffHours,
+      professionalCancelOutcome: row.professionalCancelOutcome,
+      beforeCutoffOutcome: row.beforeCutoffOutcome,
+      afterCutoffOutcome: row.afterCutoffOutcome,
+    };
+    return policies;
+  }, {});
+};
 
 const hydrateProfessionalAvailabilityRulesByMode = (
   professionalId: string,
@@ -436,6 +463,7 @@ export const MOCK_PROFESSIONALS: Professional[] = professionals.map((professiona
       }),
     ),
     availabilityRulesByMode: hydrateProfessionalAvailabilityRulesByMode(professionalRow.id),
+    cancellationPoliciesByMode: hydrateProfessionalCancellationPoliciesByMode(professionalRow.id),
     services: sortByIndex(serviceOfferingRowsByProfessionalId.get(professionalRow.id) || []).map(
       hydrateProfessionalService,
     ),
@@ -455,6 +483,8 @@ export const getServiceById = (serviceId: string) => servicesById.get(serviceId)
 export const getServiceBySlug = (serviceSlug: string) => servicesBySlug.get(serviceSlug);
 export const getProfessionalById = (professionalId: string) => professionalsById.get(professionalId);
 export const getProfessionalBySlug = (professionalSlug: string) => professionalsBySlug.get(professionalSlug);
+export const getProfessionalCancellationPolicy = (professionalId: string, mode: ServiceDeliveryMode) =>
+  professionalsById.get(professionalId)?.cancellationPoliciesByMode?.[mode];
 
 const isServiceModeEnabled = (serviceModes: ServiceModeFlags, mode: ServiceDeliveryMode) => {
   if (mode === 'online') return serviceModes.online;

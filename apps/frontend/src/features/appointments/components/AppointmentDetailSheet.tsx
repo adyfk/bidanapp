@@ -11,6 +11,7 @@ import {
   softMetricTileClass,
   softWhitePanelClass,
 } from '@/components/ui/tokens';
+import { getAppointmentClosePreview } from '@/features/appointments/lib/cancellation';
 import {
   getAppointmentStatusChipClassName,
   getStatusBannerClasses,
@@ -23,6 +24,8 @@ import type { Appointment } from '@/types/appointments';
 interface AppointmentDetailSheetProps {
   appointment: Appointment;
   onClose: () => void;
+  onBookAgain: () => void;
+  onOpenCancel: () => void;
   onOpenChat: () => void;
   onOpenReview: () => void;
   onPayNow: () => void;
@@ -31,6 +34,8 @@ interface AppointmentDetailSheetProps {
 export const AppointmentDetailSheet = ({
   appointment,
   onClose,
+  onBookAgain,
+  onOpenCancel,
   onOpenChat,
   onOpenReview,
   onPayNow,
@@ -42,6 +47,13 @@ export const AppointmentDetailSheet = ({
   const uiText = useUiText();
   const statusBanner = uiText.appointmentStatusBanners[appointment.status];
   const canChat = isAppointmentChatAvailable(appointment.status);
+  const customerCancelPreview = getAppointmentClosePreview({
+    actor: 'customer',
+    policySnapshot: appointment.cancellationPolicySnapshot,
+    scheduleSnapshot: appointment.scheduleSnapshot,
+    status: appointment.status,
+  });
+  const canCancel = customerCancelPreview.allowed;
   const modeLabel =
     appointment.requestedMode === 'online'
       ? profileT('modeLabels.online')
@@ -54,6 +66,18 @@ export const AppointmentDetailSheet = ({
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(new Date(appointment.requestedAt));
+  const cancelledAtLabel = appointment.cancellationResolution
+    ? new Intl.DateTimeFormat(locale === 'id' ? 'id-ID' : 'en-US', {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      }).format(new Date(appointment.cancellationResolution.cancelledAt))
+    : null;
+  const customerPolicyLabel =
+    customerCancelPreview.cutoffHours === null
+      ? uiText.appointmentCancellation.customerNoPaymentPolicy
+      : uiText.appointmentCancellation.getCutoffPolicyLabel(customerCancelPreview.cutoffHours);
+  const canBookAgain =
+    appointment.status === 'cancelled' || appointment.status === 'rejected' || appointment.status === 'expired';
 
   return (
     <div className="fixed inset-y-0 left-1/2 z-[60] flex w-full max-w-md -translate-x-1/2 flex-col bg-gray-50 animate-in fade-in slide-in-from-bottom-4 duration-300">
@@ -165,6 +189,81 @@ export const AppointmentDetailSheet = ({
               <p className="text-[13px] font-bold text-gray-500">{uiText.appointmentFieldLabels.totalPayment}</p>
               <p className="text-right text-[16px] font-bold text-pink-600">{appointment.totalPrice}</p>
             </div>
+
+            {canCancel ? (
+              <div className={`${softMetricTileClass} grid gap-3`}>
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400">
+                      {uiText.appointmentCancellation.outcomeTitle}
+                    </p>
+                    <p className="mt-1 text-[15px] font-bold text-gray-900">
+                      {uiText.appointmentCancellation.getOutcomeLabel(customerCancelPreview.financialOutcome || 'none')}
+                    </p>
+                    <p className="mt-1 text-[12px] leading-relaxed text-gray-500">
+                      {uiText.appointmentCancellation.getOutcomeDescription(
+                        customerCancelPreview.financialOutcome || 'none',
+                      )}
+                    </p>
+                  </div>
+                  {customerCancelPreview.cutoffHours !== null ? (
+                    <span className={neutralSoftPillClass}>
+                      {uiText.appointmentCancellation.getCutoffWindowLabel(customerCancelPreview.cutoffHours)}
+                    </span>
+                  ) : null}
+                </div>
+
+                <div className="grid gap-2 rounded-[18px] bg-gray-50 px-4 py-3">
+                  <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400">
+                    {uiText.appointmentCancellation.policyTitle}
+                  </p>
+                  <p className="text-[13px] leading-relaxed text-gray-600">{customerPolicyLabel}</p>
+                  <p className="text-[13px] leading-relaxed text-gray-600">
+                    {uiText.appointmentCancellation.professionalPolicy}
+                  </p>
+                  <p className="text-[12px] font-semibold text-pink-600">
+                    {uiText.appointmentCancellation.getTimingLabel(
+                      customerCancelPreview.isBeforeCutoff,
+                      customerCancelPreview.cutoffHours,
+                    )}
+                  </p>
+                </div>
+              </div>
+            ) : null}
+
+            {appointment.cancellationResolution ? (
+              <div className={`${softMetricTileClass} grid gap-3`}>
+                <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400">
+                  {uiText.appointmentCancellation.resolutionTitle}
+                </p>
+                {cancelledAtLabel ? (
+                  <div>
+                    <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400">
+                      {uiText.appointmentCancellation.resolutionCancelledAtLabel}
+                    </p>
+                    <p className="mt-1 text-[13px] font-semibold text-gray-900">{cancelledAtLabel}</p>
+                  </div>
+                ) : null}
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400">
+                    {uiText.appointmentCancellation.resolutionFinancialOutcomeLabel}
+                  </p>
+                  <p className="mt-1 text-[13px] font-semibold text-gray-900">
+                    {uiText.appointmentCancellation.getOutcomeLabel(
+                      appointment.cancellationResolution.financialOutcome,
+                    )}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400">
+                    {uiText.appointmentCancellation.resolutionReasonLabel}
+                  </p>
+                  <p className="mt-1 text-[13px] leading-relaxed text-gray-700">
+                    {appointment.cancellationResolution.cancellationReason}
+                  </p>
+                </div>
+              </div>
+            ) : null}
           </div>
         </div>
       </div>
@@ -174,7 +273,7 @@ export const AppointmentDetailSheet = ({
           <div className="flex gap-3">
             <button
               type="button"
-              onClick={onClose}
+              onClick={onOpenCancel}
               className="flex-1 rounded-xl bg-gray-100 py-3.5 text-[14px] font-bold text-gray-700 transition-colors hover:bg-gray-200"
             >
               {uiText.appointmentActionLabels.cancel}
@@ -189,6 +288,16 @@ export const AppointmentDetailSheet = ({
           </div>
         ) : null}
 
+        {appointment.status !== 'approved_waiting_payment' && canCancel ? (
+          <button
+            type="button"
+            onClick={onOpenCancel}
+            className="mb-3 w-full rounded-xl bg-gray-100 py-3.5 text-[14px] font-bold text-gray-700 transition-colors hover:bg-gray-200"
+          >
+            {uiText.appointmentActionLabels.cancel}
+          </button>
+        ) : null}
+
         {appointment.status === 'completed' ? (
           <button
             type="button"
@@ -196,6 +305,16 @@ export const AppointmentDetailSheet = ({
             className="w-full rounded-xl bg-gray-100 py-3.5 text-[14px] font-bold text-gray-700 transition-colors hover:bg-gray-200"
           >
             {uiText.review.title}
+          </button>
+        ) : null}
+
+        {canBookAgain ? (
+          <button
+            type="button"
+            onClick={onBookAgain}
+            className={`${accentPrimaryButtonClass} mb-3 w-full py-3.5 text-[14px]`}
+          >
+            {uiText.appointmentActionLabels.bookAgain}
           </button>
         ) : null}
 

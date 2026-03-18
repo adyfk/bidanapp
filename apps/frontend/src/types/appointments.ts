@@ -1,4 +1,10 @@
-import type { BookingFlow, Professional, ServiceDeliveryMode, ServiceModeFlags } from './catalog';
+import type {
+  BookingFlow,
+  Professional,
+  ProfessionalCancellationPolicy,
+  ServiceDeliveryMode,
+  ServiceModeFlags,
+} from './catalog';
 
 export type AppointmentStatus =
   | 'requested'
@@ -52,6 +58,13 @@ export interface AppointmentScheduleSnapshot {
 }
 
 export type AppointmentTimelineActor = 'customer' | 'professional' | 'system';
+export type AppointmentCancellationActor = Exclude<AppointmentTimelineActor, 'system'>;
+export type AppointmentFinancialOutcome =
+  | 'none'
+  | 'void_pending_payment'
+  | 'full_refund'
+  | 'no_refund'
+  | 'manual_refund_required';
 
 export interface AppointmentTimelineEvent {
   actor: AppointmentTimelineActor;
@@ -65,9 +78,20 @@ export interface AppointmentTimelineEvent {
   toStatus: AppointmentStatus;
 }
 
+export interface AppointmentCancellationPolicySnapshot extends ProfessionalCancellationPolicy {}
+
+export interface AppointmentCancellationResolution {
+  cancelledAt: string;
+  cancelledBy: AppointmentCancellationActor;
+  cancellationReason: string;
+  financialOutcome: AppointmentFinancialOutcome;
+}
+
 export interface Appointment {
   areaId: string;
   bookingFlow: BookingFlow;
+  cancellationPolicySnapshot: AppointmentCancellationPolicySnapshot;
+  cancellationResolution?: AppointmentCancellationResolution;
   consumerId: string;
   feedback?: AppointmentFeedback;
   id: string;

@@ -1,6 +1,6 @@
 'use client';
 
-import { KeyRound, LayoutDashboard, LogOut, MapPin, UserRound } from 'lucide-react';
+import { KeyRound, LayoutDashboard, LifeBuoy, LogOut, MapPin, UserRound } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { ProfessionalAccessScreen } from '@/components/screens/ProfessionalAccessScreen';
@@ -23,6 +23,7 @@ import {
   ProfileSettingsCard,
   ProfileSettingsRow,
 } from '@/features/profile/components/ProfilePagePrimitives';
+import { ProfileSupportEntryCard, ProfileSupportSheet } from '@/features/profile/components/ProfileSupportCenter';
 import { useRouter } from '@/i18n/routing';
 import { APP_ROUTES, professionalDashboardRoute, professionalRoute } from '@/lib/routes';
 import { useProfessionalPortal } from '@/lib/use-professional-portal';
@@ -61,6 +62,7 @@ export const ProfessionalProfileScreen = () => {
   const { activeProfessional, portalState, profileCompletionScore, saveBusinessSettings } = useProfessionalPortal();
   const [hasMounted, setHasMounted] = useState(false);
   const [activeSheet, setActiveSheet] = useState<ProfessionalProfileSheetKey>(null);
+  const [isSupportSheetOpen, setIsSupportSheetOpen] = useState(false);
   const [profileDraft, setProfileDraft] = useState<ProfessionalProfileDraft>(() =>
     buildProfileDraft({
       city: portalState.city,
@@ -125,7 +127,11 @@ export const ProfessionalProfileScreen = () => {
   const openSheet = (sheet: Exclude<ProfessionalProfileSheetKey, null>) => setActiveSheet(sheet);
   const closeSheet = () => setActiveSheet(null);
   const displayName = profileDraft.displayName || activeProfessional.name;
-  const locationLabel = profileDraft.city || activeProfessional.location;
+  const locationLabel =
+    portalState.practiceLabel ||
+    activeProfessional.practiceLocation?.label ||
+    profileDraft.city ||
+    activeProfessional.location;
 
   const updateProfileField = <K extends keyof ProfessionalProfileDraft>(
     field: K,
@@ -228,10 +234,10 @@ export const ProfessionalProfileScreen = () => {
 
   return (
     <>
-      <div className="flex h-full flex-col overflow-y-auto bg-gray-50 pb-10 custom-scrollbar">
+      <div className="flex h-full flex-col overflow-y-auto bg-[linear-gradient(180deg,#F8FAFC_0%,#F4F6FA_100%)] pb-10 custom-scrollbar">
         <ProfilePageHeader onBack={() => router.push(professionalDashboardRoute('requests'))} title={t('navTitle')} />
 
-        <div className="space-y-6 px-5 py-6">
+        <div className="space-y-5 px-5 py-6">
           <ProfileIdentityCard
             actionLabel={t('buttons.editProfile')}
             avatarName={displayName}
@@ -258,6 +264,8 @@ export const ProfessionalProfileScreen = () => {
             />
           </div>
 
+          <ProfileSupportEntryCard namespace="ProfessionalProfile" onOpen={() => setIsSupportSheetOpen(true)} />
+
           <ProfileSettingsCard>
             <ProfileSettingsRow
               icon={<span className="text-[12px] font-bold">ID/EN</span>}
@@ -279,6 +287,13 @@ export const ProfessionalProfileScreen = () => {
               title={t('security.title')}
               description={t('menu.securityDescription')}
               onClick={() => openSheet('security')}
+            />
+            <ProfileSettingsRow
+              icon={<LifeBuoy className="h-4 w-4" />}
+              iconClassName="bg-amber-50 text-amber-600"
+              title={t('support.title')}
+              description={t('menu.supportDescription')}
+              onClick={() => setIsSupportSheetOpen(true)}
               isLast
             />
           </ProfileSettingsCard>
@@ -311,6 +326,16 @@ export const ProfessionalProfileScreen = () => {
         resetSaveState={resetSaveState}
         securityErrorKey={securityErrorKey}
         securitySaveState={securitySaveState}
+      />
+
+      <ProfileSupportSheet
+        defaultContact={profileDraft.phone || portalState.phone}
+        isOpen={isSupportSheetOpen}
+        namespace="ProfessionalProfile"
+        onClose={() => setIsSupportSheetOpen(false)}
+        reporterName={profileDraft.displayName || activeProfessional.name}
+        reporterPhone={profileDraft.phone || portalState.phone}
+        supportRole="professional"
       />
     </>
   );

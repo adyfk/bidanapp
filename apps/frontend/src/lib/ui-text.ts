@@ -1,7 +1,11 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import type { AppointmentStatus } from '@/types/appointments';
+import type {
+  AppointmentCancellationActor,
+  AppointmentFinancialOutcome,
+  AppointmentStatus,
+} from '@/types/appointments';
 import type { ProfessionalGender, ServiceDeliveryMode } from '@/types/catalog';
 
 const GENDER_OPTION_KEYS = ['any', 'female', 'male'] as const;
@@ -28,6 +32,31 @@ export const useUiText = () => {
   const professionalGenderLabels: Record<ProfessionalGender, string> = {
     female: t('professionalGender.female'),
     male: t('professionalGender.male'),
+  };
+  const appointmentCancellationOutcomeLabels: Record<AppointmentFinancialOutcome, string> = {
+    none: t('appointment.cancellation.outcomes.none'),
+    void_pending_payment: t('appointment.cancellation.outcomes.void_pending_payment'),
+    full_refund: t('appointment.cancellation.outcomes.full_refund'),
+    no_refund: t('appointment.cancellation.outcomes.no_refund'),
+    manual_refund_required: t('appointment.cancellation.outcomes.manual_refund_required'),
+  };
+  const appointmentCancellationOutcomeDescriptions: Record<AppointmentFinancialOutcome, string> = {
+    none: t('appointment.cancellation.outcomeDescriptions.none'),
+    void_pending_payment: t('appointment.cancellation.outcomeDescriptions.void_pending_payment'),
+    full_refund: t('appointment.cancellation.outcomeDescriptions.full_refund'),
+    no_refund: t('appointment.cancellation.outcomeDescriptions.no_refund'),
+    manual_refund_required: t('appointment.cancellation.outcomeDescriptions.manual_refund_required'),
+  };
+  const appointmentCancellationNoticeMessages: Record<AppointmentFinancialOutcome, string> = {
+    none: t('alerts.appointmentCancelled.none'),
+    void_pending_payment: t('alerts.appointmentCancelled.void_pending_payment'),
+    full_refund: t('alerts.appointmentCancelled.full_refund'),
+    no_refund: t('alerts.appointmentCancelled.no_refund'),
+    manual_refund_required: t('alerts.appointmentCancelled.manual_refund_required'),
+  };
+  const appointmentCancellationActorLabels: Record<AppointmentCancellationActor, string> = {
+    customer: t('appointment.cancellation.actorLabels.customer'),
+    professional: t('appointment.cancellation.actorLabels.professional'),
   };
   const exploreGenderOptions = GENDER_OPTION_KEYS.map((key) => ({
     key,
@@ -69,6 +98,8 @@ export const useUiText = () => {
     paymentSuccessAlert: t('alerts.paymentSuccess'),
     chatSentAlert: t('alerts.chatSent'),
     chatUnavailableAlert: t('alerts.chatUnavailable'),
+    getAppointmentCancellationNotice: (financialOutcome: AppointmentFinancialOutcome) =>
+      appointmentCancellationNoticeMessages[financialOutcome],
     getReviewPhotoReadyNotice: (fileName: string) =>
       t('alerts.reviewPhotoReady', {
         fileName,
@@ -101,9 +132,48 @@ export const useUiText = () => {
       totalPayment: t('appointment.fieldLabels.totalPayment'),
     },
     appointmentActionLabels: {
+      bookAgain: t('appointment.actionLabels.bookAgain'),
       detail: t('appointment.actionLabels.detail'),
       cancel: t('appointment.actionLabels.cancel'),
       payNow: t('appointment.actionLabels.payNow'),
+    },
+    appointmentCancellation: {
+      title: t('appointment.cancellation.title'),
+      description: t('appointment.cancellation.description'),
+      submitLabel: t('appointment.cancellation.submitLabel'),
+      keepLabel: t('appointment.cancellation.keepLabel'),
+      reasonLabel: t('appointment.cancellation.reasonLabel'),
+      reasonPlaceholder: t('appointment.cancellation.reasonPlaceholder'),
+      policyTitle: t('appointment.cancellation.policyTitle'),
+      outcomeTitle: t('appointment.cancellation.outcomeTitle'),
+      customerNoPaymentPolicy: t('appointment.cancellation.customerNoPaymentPolicy'),
+      professionalPolicy: t('appointment.cancellation.professionalPolicy'),
+      resolutionTitle: t('appointment.cancellation.resolutionTitle'),
+      resolutionReasonLabel: t('appointment.cancellation.resolutionReasonLabel'),
+      resolutionFinancialOutcomeLabel: t('appointment.cancellation.resolutionFinancialOutcomeLabel'),
+      resolutionCancelledAtLabel: t('appointment.cancellation.resolutionCancelledAtLabel'),
+      getActorLabel: (actor: AppointmentCancellationActor) => appointmentCancellationActorLabels[actor],
+      getCutoffPolicyLabel: (hours: number) =>
+        t('appointment.cancellation.customerCutoffPolicy', {
+          hours: String(hours),
+        }),
+      getCutoffWindowLabel: (hours: number) =>
+        t('appointment.cancellation.cutoffWindowLabel', {
+          hours: String(hours),
+        }),
+      getTimingLabel: (isBeforeCutoff: boolean | null, hours: number | null) => {
+        if (hours === null || isBeforeCutoff === null) {
+          return t('appointment.cancellation.timing.notApplicable');
+        }
+
+        return isBeforeCutoff
+          ? t('appointment.cancellation.timing.beforeCutoff', { hours: String(hours) })
+          : t('appointment.cancellation.timing.afterCutoff', { hours: String(hours) });
+      },
+      getOutcomeLabel: (financialOutcome: AppointmentFinancialOutcome) =>
+        appointmentCancellationOutcomeLabels[financialOutcome],
+      getOutcomeDescription: (financialOutcome: AppointmentFinancialOutcome) =>
+        appointmentCancellationOutcomeDescriptions[financialOutcome],
     },
     appointmentStatusBanners,
     homeEmptyStateTitle: t('home.emptyStateTitle'),

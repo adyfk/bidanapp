@@ -26,6 +26,7 @@ Referensi onboarding detail tetap ada di `docs/professional-onboarding-flow.md`.
 - `appointments.json` adalah source of truth transaksi.
 - Request board profesional bukan tabel transaksi kedua. Ia hanyalah projection dari appointment record.
 - Data layanan saat order harus immutable. Harga, durasi, summary, mode, dan booking flow yang tampil di appointment lama tidak boleh berubah walaupun profesional mengubah offering sesudahnya.
+- Negosiasi perubahan jadwal atau mode tetap terjadi di chat. Sistem transaksi formal tidak membuat domain `reschedule`; perubahan formal dilakukan dengan `cancel -> refund/void bila berlaku -> buat order baru`.
 - CTA dari halaman service tidak boleh langsung membuat request. Semua order harus masuk lewat composer di halaman profesional agar validasi mode, coverage, dan slot selalu sama.
 - `availabilityRulesByMode` di dashboard profesional adalah source of truth jam kerja offline yang boleh dilihat customer. Customer tidak boleh melihat tanggal atau jam di luar aturan mingguan dan penyesuaian hari khusus yang aktif.
 
@@ -41,6 +42,8 @@ Referensi onboarding detail tetap ada di `docs/professional-onboarding-flow.md`.
   Jam kerja mingguan global per profesional untuk mode offline.
 - `professional_availability_policies.json`
   Policy availability per profesional dan mode, termasuk `minimumNoticeHours` untuk memfilter booking yang terlalu mepet.
+- `professional_cancellation_policies.json`
+  Policy pembatalan per profesional dan mode, termasuk cutoff pembatalan customer setelah order dibayar.
 - `professional_availability_date_overrides.json`
   Hari khusus untuk libur atau jam custom yang sementara menggantikan jam mingguan.
 
@@ -50,6 +53,8 @@ Referensi onboarding detail tetap ada di `docs/professional-onboarding-flow.md`.
   Menyimpan order final beserta snapshot immutable:
   - `serviceSnapshot`
   - `scheduleSnapshot`
+  - `cancellationPolicySnapshot`
+  - `cancellationResolution?`
   - `timeline`
   - `serviceOfferingId`
   - `bookingFlow`
@@ -133,7 +138,17 @@ Saat tombol booking dikirim:
    - `scheduleDayLabel?`
    - `timeSlotId?`
    - `timeSlotLabel?`
-4. Sistem membuat `timeline` awal sesuai booking flow.
+4. Sistem membentuk `cancellationPolicySnapshot` immutable dari policy profesional yang aktif saat order dibuat:
+   - `customerPaidCancelCutoffHours`
+   - `beforeCutoffOutcome`
+   - `afterCutoffOutcome`
+   - `professionalCancelOutcome`
+5. Bila order nanti dibatalkan, sistem dapat menyimpan `cancellationResolution`:
+   - `cancelledAt`
+   - `cancelledBy`
+   - `cancellationReason`
+   - `financialOutcome`
+6. Sistem membuat `timeline` awal sesuai booking flow.
 
 ## Booking flow matrix
 
@@ -166,7 +181,32 @@ Saat tombol booking dikirim:
 - `expired`
   Hanya valid pada tahap menunggu pembayaran.
 - `cancelled`
-  Hanya valid sebelum `completed`.
+  Hanya valid untuk order yang ditutup eksplisit sebelum `in_service`.
+
+### Cancel-centric change policy
+
+- Sistem tidak menyediakan workflow reschedule formal.
+- Jika customer atau profesional ingin mengganti jadwal/mode/layanan, mereka berdiskusi di chat.
+- Bila sepakat order lama tidak dilanjutkan:
+  - order lama ditutup dengan `cancelled` atau `rejected`
+  - jika nanti tetap jadi layanan, customer membuat order baru dari awal
+- Customer boleh cancel pada:
+  - `requested`
+  - `approved_waiting_payment`
+  - `paid`
+  - `confirmed`
+- Profesional boleh close request/order pada:
+  - `requested` -> `rejected`
+  - `approved_waiting_payment` -> `cancelled`
+  - `paid` -> `cancelled`
+  - `confirmed` -> `cancelled`
+- Setelah `in_service`, tidak ada cancel atau reschedule in-app. Kasus itu menjadi jalur manual/support.
+- Outcome finansial v1:
+  - customer cancel `requested` -> `cancelled` + `none`
+  - customer/professional cancel `approved_waiting_payment` -> `cancelled` + `void_pending_payment`
+  - customer cancel `paid` atau `confirmed` sebelum cutoff -> `cancelled` + `full_refund`
+  - customer cancel `paid` atau `confirmed` sesudah cutoff -> `cancelled` + `no_refund`
+  - professional cancel `paid` atau `confirmed` -> `cancelled` + `full_refund`
 
 ### Professional-side projection
 
@@ -226,7 +266,8 @@ Integrity contract untuk fixture ini dijaga oleh `apps/frontend/tests/appointmen
 - Service detail: discovery only.
 - Professional detail: booking composer tunggal.
 - Appointments screen: tampilkan `serviceSnapshot`, `scheduleSnapshot`, `requestNote`, dan status transaction.
-- Professional dashboard requests: tampilkan projection dari appointment timeline.
+- Appointments screen: tampilkan outcome pembatalan, policy pembatalan, dan CTA `book again` untuk order yang sudah ditutup.
+- Professional dashboard requests: tampilkan projection dari appointment timeline, plus CTA reject/cancel tanpa workflow approval dua pihak.
 
 ## Arah backend
 

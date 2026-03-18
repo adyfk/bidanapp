@@ -132,6 +132,15 @@ export interface ProfessionalAvailabilityRules {
   weeklyHours: ProfessionalWeeklyAvailabilityWindow[];
 }
 
+export type ProfessionalCancellationPolicyOutcome = 'full_refund' | 'no_refund';
+
+export interface ProfessionalCancellationPolicy {
+  customerPaidCancelCutoffHours: number;
+  professionalCancelOutcome: 'full_refund';
+  beforeCutoffOutcome: 'full_refund';
+  afterCutoffOutcome: 'no_refund';
+}
+
 export interface ProfessionalCredential {
   index: number;
   title: string;
@@ -255,5 +264,6 @@ export interface Professional {
   feedbackBreakdown: ProfessionalFeedbackBreakdown[];
   recentActivities: ProfessionalRecentActivity[];
   availabilityRulesByMode?: Partial<Record<OfflineServiceDeliveryMode, ProfessionalAvailabilityRules>>;
+  cancellationPoliciesByMode?: Partial<Record<ServiceDeliveryMode, ProfessionalCancellationPolicy>>;
   services: ProfessionalService[];
 }
