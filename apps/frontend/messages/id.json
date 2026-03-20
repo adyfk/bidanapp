@@ -910,17 +910,6 @@
           "normal": "<24 jam",
           "high": "<4 jam",
           "urgent": "<30 menit"
-        },
-        "samples": {
-          "first": {
-            "summary": "Klarifikasi pembatalan customer setelah jadwal dikonfirmasi"
-          },
-          "second": {
-            "summary": "Verifikasi nomor login untuk memulihkan akses akun"
-          },
-          "third": {
-            "summary": "Persetujuan koreksi refund untuk pembayaran ganda"
-          }
         }
       },
       "errors": {
@@ -1324,17 +1313,6 @@
           "normal": "<24 jam",
           "high": "<4 jam",
           "urgent": "<30 menit"
-        },
-        "samples": {
-          "first": {
-            "summary": "Follow-up refund untuk kunjungan rumah yang dibatalkan"
-          },
-          "second": {
-            "summary": "Laporan perubahan jadwal mendadak yang berulang"
-          },
-          "third": {
-            "summary": "Review komplain terkait ketepatan waktu sesi dan handover"
-          }
         }
       },
       "errors": {

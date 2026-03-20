@@ -66,15 +66,15 @@ const hydratedUserContextsById = new Map(
     return [
       userContextRow.id,
       {
-        index: userContextRow.index,
-        id: userContextRow.id,
         area,
         currentArea: area.label,
+        id: userContextRow.id,
+        index: userContextRow.index,
+        onlineStatusLabel: userContextRow.onlineStatusLabel,
         userLocation: {
           latitude: userContextRow.userLatitude,
           longitude: userContextRow.userLongitude,
         },
-        onlineStatusLabel: userContextRow.onlineStatusLabel,
       } satisfies UserContext,
     ] as const;
   }),
@@ -87,15 +87,9 @@ const hydratedHomeFeedsById = new Map(
     return [
       homeFeedRow.id,
       {
-        id: homeFeedRow.id,
-        title: homeFeedRow.title,
         currentUser: getRequiredItem(
           hydratedConsumersById.get(homeFeedRow.consumerId),
           `home_feed_snapshots.${homeFeedRow.id}.consumerId -> ${homeFeedRow.consumerId}`,
-        ),
-        sharedContext: getRequiredItem(
-          hydratedUserContextsById.get(homeFeedRow.userContextId),
-          `home_feed_snapshots.${homeFeedRow.id}.userContextId -> ${homeFeedRow.userContextId}`,
         ),
         featuredAppointment: featuredAppointmentRow
           ? {
@@ -104,25 +98,31 @@ const hydratedHomeFeedsById = new Map(
                 `home_feed_featured_appointments.${featuredAppointmentRow.id}.appointmentId -> ${featuredAppointmentRow.appointmentId}`,
               ),
               dateLabel: featuredAppointmentRow.dateLabel,
-              timeLabel: featuredAppointmentRow.timeLabel,
               professional: getRequiredItem(
                 getProfessionalById(featuredAppointmentRow.professionalId),
                 `home_feed_featured_appointments.${featuredAppointmentRow.id}.professionalId -> ${featuredAppointmentRow.professionalId}`,
               ),
+              timeLabel: featuredAppointmentRow.timeLabel,
             }
           : undefined,
-        popularServices: sortByIndex(popularServiceRowsByHomeFeedId.get(homeFeedRow.id) || []).map((row) =>
-          getRequiredItem(
-            getServiceById(row.serviceId),
-            `home_feed_popular_services.${row.id}.serviceId -> ${row.serviceId}`,
-          ),
-        ),
+        id: homeFeedRow.id,
         nearbyProfessionals: sortByIndex(nearbyProfessionalRowsByHomeFeedId.get(homeFeedRow.id) || []).map((row) =>
           getRequiredItem(
             getProfessionalById(row.professionalId),
             `home_feed_nearby_professionals.${row.id}.professionalId -> ${row.professionalId}`,
           ),
         ),
+        popularServices: sortByIndex(popularServiceRowsByHomeFeedId.get(homeFeedRow.id) || []).map((row) =>
+          getRequiredItem(
+            getServiceById(row.serviceId),
+            `home_feed_popular_services.${row.id}.serviceId -> ${row.serviceId}`,
+          ),
+        ),
+        sharedContext: getRequiredItem(
+          hydratedUserContextsById.get(homeFeedRow.userContextId),
+          `home_feed_snapshots.${homeFeedRow.id}.userContextId -> ${homeFeedRow.userContextId}`,
+        ),
+        title: homeFeedRow.title,
       } satisfies HomeFeedSnapshot,
     ] as const;
   }),

@@ -335,7 +335,6 @@ export const ProfessionalProfileScreen = () => {
         onClose={() => setIsSupportSheetOpen(false)}
         reporterName={profileDraft.displayName || activeProfessional.name}
         reporterPhone={profileDraft.phone || portalState.phone}
-        supportRole="professional"
       />
     </>
   );

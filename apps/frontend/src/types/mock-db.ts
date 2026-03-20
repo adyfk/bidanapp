@@ -1,4 +1,6 @@
 import type {
+  AdminFocusArea,
+  AdminStaffPresence,
   SupportCategoryId,
   SupportChannelId,
   SupportEtaKey,
@@ -267,6 +269,17 @@ export interface MediaPresetRow extends IndexedRow {
   onboardingHeroAlt: string;
   serviceDetailCoverImage: string;
   professionalMapBackgroundImage: string;
+}
+
+export interface AdminStaffRow extends IndexedRow {
+  email: string;
+  focusArea: AdminFocusArea;
+  id: string;
+  name: string;
+  phone: string;
+  presence: AdminStaffPresence;
+  shiftLabel: string;
+  title: string;
 }
 
 export interface AppointmentRow extends IndexedRow {

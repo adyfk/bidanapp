@@ -184,8 +184,8 @@ export const isOfflineServiceMode = (mode: ServiceDeliveryMode): mode is Offline
 const isDefined = <T>(value: T | undefined): value is T => value !== undefined;
 
 const buildServiceModes = (offering: ProfessionalServiceOfferingRow): ServiceModeFlags => ({
-  online: offering.supportsOnline,
   homeVisit: offering.supportsHomeVisit,
+  online: offering.supportsOnline,
   onsite: offering.supportsOnsite,
 });
 
@@ -225,10 +225,10 @@ const hydrateProfessionalCancellationPoliciesByMode = (
 
   return policyRows.reduce<Partial<Record<ServiceDeliveryMode, ProfessionalCancellationPolicy>>>((policies, row) => {
     policies[row.mode] = {
+      afterCutoffOutcome: row.afterCutoffOutcome,
+      beforeCutoffOutcome: row.beforeCutoffOutcome,
       customerPaidCancelCutoffHours: row.customerPaidCancelCutoffHours,
       professionalCancelOutcome: row.professionalCancelOutcome,
-      beforeCutoffOutcome: row.beforeCutoffOutcome,
-      afterCutoffOutcome: row.afterCutoffOutcome,
     };
     return policies;
   }, {});
@@ -313,14 +313,14 @@ const getGeneratedSlotStatus = (
 
 const hydrateProfessionalService = (offering: ProfessionalServiceOfferingRow): ProfessionalService => {
   return {
-    index: offering.index,
-    id: offering.id,
-    serviceId: offering.serviceId,
-    duration: offering.duration,
-    price: offering.price,
-    serviceModes: buildServiceModes(offering),
-    defaultMode: offering.defaultMode,
     bookingFlow: offering.bookingFlow,
+    defaultMode: offering.defaultMode,
+    duration: offering.duration,
+    id: offering.id,
+    index: offering.index,
+    price: offering.price,
+    serviceId: offering.serviceId,
+    serviceModes: buildServiceModes(offering),
     summary: offering.summary || undefined,
   };
 };
@@ -340,133 +340,133 @@ export const MOCK_PROFESSIONALS: Professional[] = professionals.map((professiona
   );
   const linkedTestimonials = sortByIndex(appointmentTestimonialsByProfessionalId.get(professionalRow.id) || []).map(
     (row) => ({
-      index: row.index,
       author: row.author,
-      role: row.role,
-      rating: row.rating,
       dateLabel: row.dateLabel,
-      quote: row.quote,
-      serviceId: row.serviceId,
       image: row.image,
+      index: row.index,
+      quote: row.quote,
+      rating: row.rating,
+      role: row.role,
+      serviceId: row.serviceId,
     }),
   );
   const seededTestimonials = sortByIndex(testimonialRowsByProfessionalId.get(professionalRow.id) || []).map(
     (row, index) => ({
-      index: linkedTestimonials.length + index + 1,
       author: row.author,
-      role: row.role,
-      rating: row.rating,
       dateLabel: row.dateLabel,
-      quote: row.quote,
-      serviceId: row.serviceId || undefined,
       image: row.image,
+      index: linkedTestimonials.length + index + 1,
+      quote: row.quote,
+      rating: row.rating,
+      role: row.role,
+      serviceId: row.serviceId || undefined,
     }),
   );
 
   return {
-    index: professionalRow.index,
-    id: professionalRow.id,
-    slug: professionalRow.slug,
-    name: professionalRow.name,
-    title: professionalRow.title,
-    gender: professionalRow.gender,
-    location: professionalRow.location,
-    rating: professionalRow.rating,
-    reviews: professionalRow.reviews,
-    experience: professionalRow.experience,
-    clientsServed: professionalRow.clientsServed,
-    image: professionalRow.image,
-    coverImage: professionalRow.coverImage || undefined,
-    badgeLabel: professionalRow.badgeLabel,
+    about: professionalRow.about,
+    activityStories: sortByIndex(activityStoryRowsByProfessionalId.get(professionalRow.id) || []).map((row) => ({
+      capturedAt: row.capturedAt,
+      image: row.image,
+      index: row.index,
+      location: row.location,
+      note: row.note,
+      title: row.title,
+    })),
     availability: {
       isAvailable: professionalRow.isAvailable,
     },
-    responseTime: professionalRow.responseTime,
-    specialties: sortByIndex(specialtyRowsByProfessionalId.get(professionalRow.id) || []).map((row) => row.label),
+    availabilityRulesByMode: hydrateProfessionalAvailabilityRulesByMode(professionalRow.id),
+    badgeLabel: professionalRow.badgeLabel,
+    cancellationPoliciesByMode: hydrateProfessionalCancellationPoliciesByMode(professionalRow.id),
+    clientsServed: professionalRow.clientsServed,
+    coverImage: professionalRow.coverImage || undefined,
+    coverage: {
+      areaIds: sortByIndex(coverageAreaRowsByProfessionalId.get(professionalRow.id) || []).map((row) => row.areaId),
+      center: {
+        latitude: coveragePolicy.centerLatitude,
+        longitude: coveragePolicy.centerLongitude,
+      },
+      homeVisitRadiusKm: coveragePolicy.homeVisitRadiusKm,
+    },
+    credentials: sortByIndex(credentialRowsByProfessionalId.get(professionalRow.id) || []).map((row) => ({
+      index: row.index,
+      issuer: row.issuer,
+      note: row.note,
+      title: row.title,
+      year: row.year,
+    })),
+    experience: professionalRow.experience,
+    feedbackBreakdown: sortByIndex(feedbackBreakdownRowsByProfessionalId.get(professionalRow.id) || []).map((row) => ({
+      index: row.index,
+      label: row.label,
+      percentage: row.percentage,
+      total: row.total,
+    })),
+    feedbackMetrics: sortByIndex(feedbackMetricRowsByProfessionalId.get(professionalRow.id) || []).map((row) => ({
+      detail: row.detail,
+      index: row.index,
+      label: row.label,
+      value: row.value,
+    })),
+    feedbackSummary: {
+      recommendationRate: feedbackSummary.recommendationRate,
+      repeatClientRate: feedbackSummary.repeatClientRate,
+    },
+    gallery: sortByIndex(galleryItemRowsByProfessionalId.get(professionalRow.id) || []).map((row) => ({
+      alt: row.alt,
+      id: row.id,
+      image: row.image,
+      index: row.index,
+      label: row.label,
+    })),
+    gender: professionalRow.gender,
+    id: professionalRow.id,
+    image: professionalRow.image,
+    index: professionalRow.index,
     languages: sortByIndex(languageRowsByProfessionalId.get(professionalRow.id) || []).map((row) => row.label),
+    location: professionalRow.location,
+    name: professionalRow.name,
+    portfolioEntries: sortByIndex(portfolioEntryRowsByProfessionalId.get(professionalRow.id) || []).map((row) => ({
+      id: row.id,
+      image: row.image,
+      index: row.index,
+      outcomes: row.outcomes,
+      periodLabel: row.periodLabel,
+      serviceId: row.serviceId || undefined,
+      summary: row.summary,
+      title: row.title,
+    })),
     practiceLocation: practiceLocation
       ? {
-          label: practiceLocation.label,
           address: practiceLocation.address,
           areaId: practiceLocation.areaId,
           coordinates: {
             latitude: practiceLocation.latitude,
             longitude: practiceLocation.longitude,
           },
+          label: practiceLocation.label,
         }
       : undefined,
-    coverage: {
-      areaIds: sortByIndex(coverageAreaRowsByProfessionalId.get(professionalRow.id) || []).map((row) => row.areaId),
-      homeVisitRadiusKm: coveragePolicy.homeVisitRadiusKm,
-      center: {
-        latitude: coveragePolicy.centerLatitude,
-        longitude: coveragePolicy.centerLongitude,
-      },
-    },
-    about: professionalRow.about,
-    credentials: sortByIndex(credentialRowsByProfessionalId.get(professionalRow.id) || []).map((row) => ({
-      index: row.index,
-      title: row.title,
-      issuer: row.issuer,
-      year: row.year,
-      note: row.note,
-    })),
-    activityStories: sortByIndex(activityStoryRowsByProfessionalId.get(professionalRow.id) || []).map((row) => ({
-      index: row.index,
-      title: row.title,
-      image: row.image,
-      capturedAt: row.capturedAt,
-      location: row.location,
-      note: row.note,
-    })),
-    portfolioEntries: sortByIndex(portfolioEntryRowsByProfessionalId.get(professionalRow.id) || []).map((row) => ({
-      id: row.id,
-      index: row.index,
-      title: row.title,
-      serviceId: row.serviceId || undefined,
-      periodLabel: row.periodLabel,
-      summary: row.summary,
-      outcomes: row.outcomes,
-      image: row.image,
-    })),
-    gallery: sortByIndex(galleryItemRowsByProfessionalId.get(professionalRow.id) || []).map((row) => ({
-      id: row.id,
-      index: row.index,
-      image: row.image,
-      alt: row.alt,
-      label: row.label,
-    })),
-    testimonials: [...linkedTestimonials, ...seededTestimonials],
-    feedbackSummary: {
-      recommendationRate: feedbackSummary.recommendationRate,
-      repeatClientRate: feedbackSummary.repeatClientRate,
-    },
-    feedbackMetrics: sortByIndex(feedbackMetricRowsByProfessionalId.get(professionalRow.id) || []).map((row) => ({
-      index: row.index,
-      label: row.label,
-      value: row.value,
-      detail: row.detail,
-    })),
-    feedbackBreakdown: sortByIndex(feedbackBreakdownRowsByProfessionalId.get(professionalRow.id) || []).map((row) => ({
-      index: row.index,
-      label: row.label,
-      total: row.total,
-      percentage: row.percentage,
-    })),
+    rating: professionalRow.rating,
     recentActivities: sortByIndex(appointmentRecentActivitiesByProfessionalId.get(professionalRow.id) || []).map(
       (row) => ({
-        index: row.index,
-        dateLabel: row.dateLabel,
-        title: row.title,
         channel: row.channel,
+        dateLabel: row.dateLabel,
+        index: row.index,
         summary: row.summary,
+        title: row.title,
       }),
     ),
-    availabilityRulesByMode: hydrateProfessionalAvailabilityRulesByMode(professionalRow.id),
-    cancellationPoliciesByMode: hydrateProfessionalCancellationPoliciesByMode(professionalRow.id),
+    responseTime: professionalRow.responseTime,
+    reviews: professionalRow.reviews,
     services: sortByIndex(serviceOfferingRowsByProfessionalId.get(professionalRow.id) || []).map(
       hydrateProfessionalService,
     ),
+    slug: professionalRow.slug,
+    specialties: sortByIndex(specialtyRowsByProfessionalId.get(professionalRow.id) || []).map((row) => row.label),
+    testimonials: [...linkedTestimonials, ...seededTestimonials],
+    title: professionalRow.title,
   };
 });
 
@@ -498,11 +498,11 @@ export const getEnabledServiceModes = (serviceModes: ServiceModeFlags) =>
 const mergeServiceModes = (...serviceModesList: ServiceModeFlags[]): ServiceModeFlags =>
   serviceModesList.reduce<ServiceModeFlags>(
     (accumulator, serviceModes) => ({
-      online: accumulator.online || serviceModes.online,
       homeVisit: accumulator.homeVisit || serviceModes.homeVisit,
+      online: accumulator.online || serviceModes.online,
       onsite: accumulator.onsite || serviceModes.onsite,
     }),
-    { online: false, homeVisit: false, onsite: false },
+    { homeVisit: false, online: false, onsite: false },
   );
 
 export const getProfessionalServiceModes = (professional: Professional) =>
@@ -589,12 +589,12 @@ export const getProfessionalCoverageStatus = (
   const isWithinHomeVisitRadius = distanceKm <= professional.coverage.homeVisitRadiusKm;
 
   return {
-    selectedArea,
     coveredAreas,
     distanceKm,
     isAreaCovered,
-    isWithinHomeVisitRadius,
     isHomeVisitCovered: isAreaCovered && isWithinHomeVisitRadius,
+    isWithinHomeVisitRadius,
+    selectedArea,
   };
 };
 

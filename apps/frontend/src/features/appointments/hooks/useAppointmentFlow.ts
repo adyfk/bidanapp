@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { type AppointmentClosePreview, getAppointmentClosePreview } from '@/features/appointments/lib/cancellation';
+import { getAppointmentClosePreview } from '@/features/appointments/lib/cancellation';
 import {
   ACTIVE_APPOINTMENT_STATUSES,
   type AppointmentStatusFilter,

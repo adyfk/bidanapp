@@ -914,17 +914,6 @@ declare const messages: {
           high: '<4 hours';
           urgent: '<30 minutes';
         };
-        samples: {
-          first: {
-            summary: 'Clarification for a customer cancellation after schedule confirmation';
-          };
-          second: {
-            summary: 'Phone verification needed to restore account access';
-          };
-          third: {
-            summary: 'Approval for a refund correction after duplicate payment';
-          };
-        };
       };
       errors: {
         categoryRequired: 'Choose the issue category first.';
@@ -1327,17 +1316,6 @@ declare const messages: {
           normal: '<24 hours';
           high: '<4 hours';
           urgent: '<30 minutes';
-        };
-        samples: {
-          first: {
-            summary: 'Refund follow-up for a cancelled home visit';
-          };
-          second: {
-            summary: 'Report about repeated last-minute schedule changes';
-          };
-          third: {
-            summary: 'Complaint review for session punctuality and handover';
-          };
         };
       };
       errors: {

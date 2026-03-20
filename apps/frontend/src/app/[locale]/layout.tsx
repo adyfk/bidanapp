@@ -5,7 +5,6 @@ import { getMessages } from 'next-intl/server';
 import { BottomNavBar } from '@/components/layout/BottomNavBar';
 import { routing } from '@/i18n/routing';
 import { APP_CONFIG } from '@/lib/config';
-import './globals.css';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -20,7 +19,6 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     },
     description: APP_CONFIG.seoDescription,
     manifest: '/manifest.json',
-    themeColor: APP_CONFIG.colors.primary,
     appleWebApp: {
       capable: true,
       statusBarStyle: 'default',
@@ -59,7 +57,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   };
 }
 
-export default async function RootLayout({
+export default async function LocaleLayout({
   children,
   params,
 }: Readonly<{
@@ -74,17 +72,13 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale}>
-      <body className="min-h-screen bg-gray-100 flex justify-center font-sans">
-        <NextIntlClientProvider messages={messages}>
-          {/* Global Mobile App Container */}
-          <div className="w-full max-w-md min-h-[100dvh] bg-white shadow-xl overflow-hidden relative flex flex-col">
-            <main className="flex-1 flex flex-col overflow-y-auto">{children}</main>
-            {/* Navigasi Bawah Otomatis by Pathname */}
-            <BottomNavBar />
-          </div>
-        </NextIntlClientProvider>
-      </body>
-    </html>
+    <NextIntlClientProvider messages={messages}>
+      <div className="min-h-screen bg-gray-100 flex justify-center font-sans">
+        <div className="w-full max-w-md min-h-[100dvh] bg-white shadow-xl overflow-hidden relative flex flex-col">
+          <main className="flex-1 flex flex-col overflow-y-auto">{children}</main>
+          <BottomNavBar />
+        </div>
+      </div>
+    </NextIntlClientProvider>
   );
 }

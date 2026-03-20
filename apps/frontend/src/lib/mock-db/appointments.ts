@@ -54,9 +54,9 @@ export const createHydratedAppointment = (appointmentSeed: AppointmentSeed): App
   scheduleSnapshot: appointmentSeed.scheduleSnapshot,
   service: appointmentSeed.serviceSnapshot,
   serviceSnapshot: appointmentSeed.serviceSnapshot,
+  status: appointmentSeed.status,
   time: appointmentSeed.scheduleSnapshot.scheduledTimeLabel,
   timeline: appointmentSeed.timeline,
-  status: appointmentSeed.status,
   totalPrice: appointmentSeed.serviceSnapshot.priceLabel,
 });
 

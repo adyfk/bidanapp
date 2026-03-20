@@ -59,7 +59,7 @@ export const DEFAULT_COMMAND_CENTER_STATE: AdminCommandCenterState = {
   highlightedProfessionalId: '4',
   incidentMode: 'monitoring',
   runtimeNarrative:
-    'Frontend demo masih berjalan di local mock repository. Setiap perubahan admin disimpan di browser.',
+    'Frontend demo masih berjalan dengan mock lokal di browser. Setiap perubahan operasional admin disimpan secara lokal.',
   watchAreaId: 'jakarta-selatan-kebayoran-baru',
 };
 

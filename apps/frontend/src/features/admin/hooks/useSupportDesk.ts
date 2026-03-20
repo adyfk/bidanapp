@@ -244,13 +244,30 @@ export const useSupportDesk = () => {
     }));
   };
 
+  const resetSupportDesk = () => {
+    const nextSnapshot = buildDefaultSupportDeskSnapshot();
+    setSnapshot(nextSnapshot);
+    persistSupportDeskSnapshot(nextSnapshot);
+  };
+
+  const importSnapshot = (value: string) => {
+    const parsed = JSON.parse(value) as unknown;
+    const nextSnapshot = normalizeSupportDeskSnapshot(parsed);
+    setSnapshot(nextSnapshot);
+    persistSupportDeskSnapshot(nextSnapshot);
+  };
+
   return {
     adminStaff: MOCK_ADMIN_STAFF,
     commandCenter: snapshot.commandCenter,
     customerTickets: snapshot.tickets.filter((ticket) => ticket.reporterRole === 'customer'),
     defaultCommandCenter: DEFAULT_COMMAND_CENTER_STATE,
     defaultTickets: DEFAULT_SUPPORT_TICKETS,
+    exportSnapshot: () => JSON.stringify(snapshot, null, 2),
+    importSnapshot,
     professionalTickets: snapshot.tickets.filter((ticket) => ticket.reporterRole === 'professional'),
+    resetSupportDesk,
+    savedAt: snapshot.savedAt,
     submitSupportTicket,
     tickets: snapshot.tickets,
     updateCommandCenter,

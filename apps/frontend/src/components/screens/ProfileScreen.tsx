@@ -171,9 +171,8 @@ export const ProfileScreen = () => {
         isOpen={isSupportSheetOpen}
         namespace="Profile"
         onClose={() => setIsSupportSheetOpen(false)}
-        reporterName={profileDraft.name || ACTIVE_CONSUMER.name}
+        reporterName={profileDraft.fullName || ACTIVE_CONSUMER.name}
         reporterPhone={profileDraft.phone || ACTIVE_CONSUMER.phone}
-        supportRole="customer"
       />
     </>
   );

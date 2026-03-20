@@ -164,11 +164,11 @@ function getTranslatorInfo(expression) {
   if (ts.isIdentifier(callee) && (callee.text === 'useTranslations' || callee.text === 'getTranslations')) {
     const namespaceArgument = current.arguments[0];
     if (!namespaceArgument) {
-      return { namespace: null };
+      return { namespaces: null };
     }
 
-    const namespace = getStaticStringValue(namespaceArgument);
-    return namespace ? { namespace } : null;
+    const namespaces = getNamespaceValuesFromExpression(namespaceArgument);
+    return namespaces ? { namespaces } : null;
   }
 
   if (ts.isIdentifier(callee) && callee.text === 'createTranslator') {
@@ -185,11 +185,11 @@ function getTranslatorInfo(expression) {
     );
 
     if (!namespaceProperty || !ts.isPropertyAssignment(namespaceProperty)) {
-      return { namespace: null };
+      return { namespaces: null };
     }
 
-    const namespace = getStaticStringValue(namespaceProperty.initializer);
-    return namespace ? { namespace } : null;
+    const namespaces = getNamespaceValuesFromExpression(namespaceProperty.initializer);
+    return namespaces ? { namespaces } : null;
   }
 
   return null;
@@ -208,7 +208,7 @@ function getTranslationCall(node) {
     return {
       call: node,
       keyExpression: node.arguments[0],
-      namespace: translator.namespace,
+      namespaces: translator.namespaces,
     };
   }
 
@@ -228,7 +228,7 @@ function getTranslationCall(node) {
     return {
       call: node,
       keyExpression: node.arguments[0],
-      namespace: translator.namespace,
+      namespaces: translator.namespaces,
     };
   }
 
@@ -241,7 +241,7 @@ function getTranslationCall(node) {
     return {
       call: node,
       keyExpression: node.arguments[0],
-      namespace: translator.namespace,
+      namespaces: translator.namespaces,
     };
   }
 
@@ -252,17 +252,17 @@ function getTranslatorInfoFromType(symbol, location) {
   const translatorType = checker.getTypeOfSymbolAtLocation(symbol, location);
 
   if (translatorType.aliasSymbol?.escapedName !== 'Translator') {
-    const namespaceFromAliasDeclaration = getNamespaceFromTranslatorAlias(translatorType.aliasSymbol);
-    return namespaceFromAliasDeclaration ? { namespace: namespaceFromAliasDeclaration } : null;
+    const namespacesFromAliasDeclaration = getNamespacesFromTranslatorAlias(translatorType.aliasSymbol);
+    return namespacesFromAliasDeclaration ? { namespaces: namespacesFromAliasDeclaration } : null;
   }
 
   const namespaceType = translatorType.aliasTypeArguments?.[1];
-  const namespace = namespaceType && namespaceType.flags & ts.TypeFlags.StringLiteral ? namespaceType.value : null;
+  const namespaces = namespaceType ? getLiteralValuesFromType(namespaceType) : [];
 
-  return { namespace };
+  return { namespaces: namespaces.length > 0 ? namespaces : null };
 }
 
-function getNamespaceFromTranslatorAlias(aliasSymbol) {
+function getNamespacesFromTranslatorAlias(aliasSymbol) {
   if (!aliasSymbol?.declarations) {
     return null;
   }
@@ -288,21 +288,16 @@ function getNamespaceFromTranslatorAlias(aliasSymbol) {
     }
 
     const namespaceTypeArgument = aliasType.typeArguments?.[1];
-    if (!namespaceTypeArgument || !ts.isLiteralTypeNode(namespaceTypeArgument)) {
-      continue;
+    const namespaces = namespaceTypeArgument ? getStringLiteralValuesFromTypeNode(namespaceTypeArgument) : [];
+    if (namespaces.length > 0) {
+      return namespaces;
     }
-
-    if (!ts.isStringLiteral(namespaceTypeArgument.literal)) {
-      continue;
-    }
-
-    return namespaceTypeArgument.literal.text;
   }
 
   return null;
 }
 
-function recordTranslationUsage({ call, keyExpression, namespace }) {
+function recordTranslationUsage({ call, keyExpression, namespaces }) {
   if (!keyExpression) {
     return;
   }
@@ -312,23 +307,51 @@ function recordTranslationUsage({ call, keyExpression, namespace }) {
   if (!expanded.ok) {
     unresolvedUsages.push({
       location: formatLocation(call),
-      namespace,
+      namespaces,
       reason: expanded.reason,
       snippet: keyExpression.getText(call.getSourceFile()),
     });
     return;
   }
 
-  for (const key of expanded.values) {
-    const fullKey = namespace ? `${namespace}.${key}` : key;
-    usedKeys.add(fullKey);
+  const namespaceValues = namespaces ?? [null];
 
-    if (!sourceKeySet.has(fullKey)) {
-      const refs = missingKeyRefs.get(fullKey) ?? [];
-      refs.push(formatLocation(call));
-      missingKeyRefs.set(fullKey, refs);
+  for (const namespace of namespaceValues) {
+    for (const key of expanded.values) {
+      const fullKey = namespace ? `${namespace}.${key}` : key;
+      usedKeys.add(fullKey);
+
+      if (!sourceKeySet.has(fullKey)) {
+        const refs = missingKeyRefs.get(fullKey) ?? [];
+        refs.push(formatLocation(call));
+        missingKeyRefs.set(fullKey, refs);
+      }
     }
   }
+}
+
+function getNamespaceValuesFromExpression(expression) {
+  const staticValue = getStaticStringValue(expression);
+  if (staticValue) {
+    return [staticValue];
+  }
+
+  const typeValues = getLiteralValuesFromType(checker.getTypeAtLocation(expression)).filter(
+    (value) => value.length > 0,
+  );
+  return typeValues.length > 0 ? typeValues : null;
+}
+
+function getStringLiteralValuesFromTypeNode(node) {
+  if (ts.isLiteralTypeNode(node)) {
+    return ts.isStringLiteral(node.literal) ? [node.literal.text] : [];
+  }
+
+  if (ts.isUnionTypeNode(node)) {
+    return uniqueStrings(node.types.flatMap((typeNode) => getStringLiteralValuesFromTypeNode(typeNode)));
+  }
+
+  return [];
 }
 
 function expandKeyExpression(expression, sourceFile) {
@@ -462,7 +485,7 @@ function getLiteralValuesFromType(type) {
   }
 }
 
-function combine(leftValues, rightValues, node, sourceFile) {
+function combine(leftValues, rightValues, _node, _sourceFile) {
   if (leftValues.length * rightValues.length > MAX_EXPANSIONS) {
     return null;
   }

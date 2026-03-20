@@ -1958,6 +1958,47 @@ export const useProfessionalPortal = () => {
     return true;
   };
 
+  const applyProfessionalAdminReviewBatch = (professionalIds: string[], status: 'changes_requested' | 'verified') => {
+    const uniqueProfessionalIds = Array.from(new Set(professionalIds.filter(Boolean)));
+    const reviewedAt = new Date().toISOString();
+    let appliedCount = 0;
+    const nextReviewStates = { ...reviewStatesByProfessionalId };
+
+    for (const professionalId of uniqueProfessionalIds) {
+      const currentReviewState = nextReviewStates[professionalId] || createDraftReviewState();
+
+      if (currentReviewState.status !== 'submitted') {
+        continue;
+      }
+
+      nextReviewStates[professionalId] =
+        status === 'changes_requested'
+          ? {
+              adminNote: PROFESSIONAL_LIFECYCLE_REVIEW_STATE_MOCKS.changesRequested.adminNote,
+              reviewedAt,
+              reviewerName:
+                PROFESSIONAL_LIFECYCLE_REVIEW_STATE_MOCKS.changesRequested.reviewerName || 'Admin BidanCare',
+              status,
+              submittedAt: currentReviewState.submittedAt,
+            }
+          : {
+              reviewedAt,
+              reviewerName:
+                PROFESSIONAL_LIFECYCLE_REVIEW_STATE_MOCKS.verifiedPendingPublish.reviewerName || 'Admin BidanCare',
+              status,
+              submittedAt: currentReviewState.submittedAt,
+            };
+      appliedCount += 1;
+    }
+
+    if (appliedCount === 0) {
+      return 0;
+    }
+
+    updatePortalState(portalState, undefined, nextReviewStates);
+    return appliedCount;
+  };
+
   const publishProfessionalProfile = () => {
     const activeReviewState =
       reviewStatesByProfessionalId[portalState.activeProfessionalId] || createDraftReviewState();
@@ -1983,6 +2024,44 @@ export const useProfessionalPortal = () => {
     );
 
     return true;
+  };
+
+  const publishProfessionalProfiles = (professionalIds: string[]) => {
+    const uniqueProfessionalIds = Array.from(new Set(professionalIds.filter(Boolean)));
+    let appliedCount = 0;
+    const nextReviewStates = { ...reviewStatesByProfessionalId };
+
+    for (const professionalId of uniqueProfessionalIds) {
+      const currentReviewState = nextReviewStates[professionalId] || createDraftReviewState();
+
+      if (currentReviewState.status !== 'verified') {
+        continue;
+      }
+
+      nextReviewStates[professionalId] = {
+        ...currentReviewState,
+        publishedAt: new Date().toISOString(),
+        status: 'published',
+      };
+      appliedCount += 1;
+    }
+
+    if (appliedCount === 0) {
+      return 0;
+    }
+
+    updatePortalState(
+      uniqueProfessionalIds.includes(portalState.activeProfessionalId)
+        ? {
+            ...portalState,
+            acceptingNewClients: true,
+          }
+        : portalState,
+      undefined,
+      nextReviewStates,
+    );
+
+    return appliedCount;
   };
 
   const createCustomerRequest = ({
@@ -2532,6 +2611,7 @@ export const useProfessionalPortal = () => {
     isPublishedProfessional,
     onboardingState,
     portalState,
+    publishProfessionalProfiles,
     profileCompletionScore,
     publicPortfolioEntries,
     publicProfessionals,
@@ -2540,6 +2620,7 @@ export const useProfessionalPortal = () => {
     reviewStatesByProfessionalId,
     serviceCategories: MOCK_CATEGORIES,
     serviceTemplates: MOCK_SERVICES,
+    applyProfessionalAdminReviewBatch,
     simulateProfessionalAdminReview,
     submitProfessionalProfileForReview,
     updateRequestStatus,

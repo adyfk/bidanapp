@@ -146,3 +146,35 @@ test(
   },
   { timeout: 120000 },
 );
+
+test(
+  'admin routes render outside locale middleware',
+  async () => {
+    const loginResponse = await fetch(`${baseUrl}/admin/login`, { redirect: 'manual' });
+    const loginHtml = await loginResponse.text();
+
+    assert.equal(loginResponse.status, 200);
+    assert.match(loginHtml, /BidanApp Ops Console/);
+    assert.match(loginHtml, /lang="id"/);
+
+    const routes = [
+      '/admin',
+      '/admin/overview',
+      '/admin/customers',
+      '/admin/professionals',
+      '/admin/services',
+      '/admin/appointments',
+      '/admin/support',
+      '/admin/mock',
+    ];
+
+    for (const route of routes) {
+      const response = await fetch(`${baseUrl}${route}`, { redirect: 'manual' });
+      const html = await response.text();
+
+      assert.equal(response.status, 200, `Expected 200 for ${route}`);
+      assert.match(html, /lang="id"/, `Expected default html lang for ${route}`);
+    }
+  },
+  { timeout: 120000 },
+);
