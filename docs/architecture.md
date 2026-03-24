@@ -4,6 +4,8 @@ This document explains how the repository is organized and how the main parts of
 
 For a maintainer-focused diagram pack that traces request paths, auth, portal writes, chat, QA seed flows, and deployment, read [System Flow Diagrams](./system-flow-diagrams.md).
 
+For a persona-centric walkthrough of visitor, customer, professional, and admin behavior, read [User-Facing Flow Diagrams](./user-facing-flow-diagrams.md).
+
 ## 1. Architectural Intent
 
 The codebase is designed around a few deliberate boundaries:

@@ -15,6 +15,7 @@ Read this together with:
 - [Architecture](./architecture.md)
 - [Backend Guide](./backend.md)
 - [Frontend Guide](./frontend.md)
+- [User-Facing Flow Diagrams](./user-facing-flow-diagrams.md)
 - [SDK And API Contract](./sdk.md)
 - [Production Rollout](./production-rollout.md)
 - [QA Seed Matrix](./qa-seed-matrix.md)

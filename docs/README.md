@@ -43,6 +43,10 @@ If you are new to the repository, read these documents in order:
   Pre-deploy checklist, env validation, migrations, Docker rollout, post-deploy smoke, and rollback flow.
 - [System Flow Diagrams](./system-flow-diagrams.md)
   Detailed maintenance-oriented diagrams for runtime ownership, request flow, auth, portal state, chat, QA seed, and deploy paths.
+- [User-Facing Flow Diagrams](./user-facing-flow-diagrams.md)
+  Persona-by-persona route maps, state transitions, and behavior diagrams for visitor, customer, professional, and admin journeys.
+- [User Flow Pack](./user-flows/README.md)
+  Deep-dive persona guides for customer, professional, and admin screen behavior, route guards, and side effects.
 - [API Contract Alignment](./api-contract.md)
   Concise explanation of backend-generated OpenAPI and generated TypeScript types.
 - [QA Seed Matrix](./qa-seed-matrix.md)
