@@ -1,7 +1,7 @@
-import { findNearestAreaByPoint } from '@/lib/mock-db/catalog';
+import { findNearestAreaByPoint } from '@/lib/catalog-selectors';
 import type { Area, GeoPoint, ResolvedLocation } from '@/types/catalog';
 
-const MOCK_AREA_POSTAL_CODES: Record<string, string> = {
+const DEFAULT_AREA_POSTAL_CODES: Record<string, string> = {
   'depok-sukmajaya': '16412',
   'depok-pancoran-mas': '16431',
   'jakarta-selatan-cilandak': '12430',
@@ -11,8 +11,22 @@ const MOCK_AREA_POSTAL_CODES: Record<string, string> = {
   'depok-cimanggis': '16452',
 };
 
+const EMPTY_AREA: Area = {
+  city: '',
+  district: '',
+  id: '',
+  index: 0,
+  label: '',
+  latitude: 0,
+  longitude: 0,
+  province: '',
+};
+
 const buildResolvedLocation = (point: GeoPoint, area: Area): ResolvedLocation => {
-  const postalCode = MOCK_AREA_POSTAL_CODES[area.id] || '00000';
+  const postalCode = DEFAULT_AREA_POSTAL_CODES[area.id] || '00000';
+  const locationParts = [area.district, area.city, area.province].filter((value) => value.length > 0);
+  const formattedAddress =
+    locationParts.length > 0 ? `${locationParts.join(', ')} ${postalCode}, Indonesia` : 'Indonesia';
 
   return {
     point,
@@ -23,24 +37,43 @@ const buildResolvedLocation = (point: GeoPoint, area: Area): ResolvedLocation =>
     province: area.province,
     postalCode,
     country: 'Indonesia',
-    formattedAddress: `${area.district}, ${area.city}, ${area.province} ${postalCode}, Indonesia`,
-    source: 'mock',
+    formattedAddress,
+    source: 'derived',
     precision: 'district',
   };
 };
 
-export const resolveLocationPointMockSync = (point: GeoPoint) => {
-  const area = findNearestAreaByPoint(point);
+export const resolveLocationPointSync = ({
+  areas,
+  fallbackArea,
+  point,
+}: {
+  areas: Area[];
+  fallbackArea?: Area;
+  point: GeoPoint;
+}) => {
+  const area = findNearestAreaByPoint({
+    areas,
+    point,
+  });
 
-  if (!area) {
-    throw new Error('No mock area available for location resolution.');
-  }
-
-  return buildResolvedLocation(point, area);
+  return buildResolvedLocation(point, area || fallbackArea || EMPTY_AREA);
 };
 
-export const resolveLocationPointMock = async (point: GeoPoint) => {
+export const resolveLocationPoint = async ({
+  areas,
+  fallbackArea,
+  point,
+}: {
+  areas: Area[];
+  fallbackArea?: Area;
+  point: GeoPoint;
+}) => {
   await new Promise((resolve) => globalThis.setTimeout(resolve, 250));
 
-  return resolveLocationPointMockSync(point);
+  return resolveLocationPointSync({
+    areas,
+    fallbackArea,
+    point,
+  });
 };

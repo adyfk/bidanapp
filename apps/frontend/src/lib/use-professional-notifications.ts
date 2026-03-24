@@ -1,13 +1,18 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  hydrateProfessionalNotificationStateFromApi,
+  syncProfessionalNotificationStateToApi,
+} from '@/lib/app-state-api';
 import { APP_ROUTES, professionalDashboardRequestsRoute, professionalDashboardRoute } from '@/lib/routes';
+import { useProfessionalAuthSession } from '@/lib/use-professional-auth-session';
 import { useProfessionalPortal } from '@/lib/use-professional-portal';
 import type { ProfessionalNotificationState } from '@/types/notifications';
 
-const professionalNotificationStorageKey = 'bidanapp:professional-notification-read-ids';
 const professionalNotificationEventName = 'bidanapp:professional-notification-change';
+let cachedProfessionalReadIds: Record<string, string[]> = {};
 
 const sanitizeStoredReadIds = (value: unknown): Record<string, string[]> => {
   if (typeof value !== 'object' || value === null) {
@@ -24,35 +29,32 @@ const sanitizeStoredReadIds = (value: unknown): Record<string, string[]> => {
   );
 };
 
-const readStoredReadIds = (): Record<string, string[]> => {
-  if (typeof window === 'undefined') {
-    return {};
-  }
+const readStoredReadIds = (): Record<string, string[]> => cachedProfessionalReadIds;
 
-  try {
-    const storedValue = window.localStorage.getItem(professionalNotificationStorageKey);
+const writeStoredReadIds = (nextValue: Record<string, string[]>) => {
+  cachedProfessionalReadIds = sanitizeStoredReadIds(nextValue);
 
-    if (!storedValue) {
-      return {};
-    }
-
-    return sanitizeStoredReadIds(JSON.parse(storedValue));
-  } catch {
-    return {};
-  }
-};
-
-const persistStoredReadIds = (nextValue: Record<string, string[]>) => {
   if (typeof window === 'undefined') {
     return;
   }
 
-  window.localStorage.setItem(professionalNotificationStorageKey, JSON.stringify(sanitizeStoredReadIds(nextValue)));
   window.dispatchEvent(new Event(professionalNotificationEventName));
+};
+
+const persistStoredReadIds = (nextValue: Record<string, string[]>, syncBackend: boolean) => {
+  const normalizedValue = sanitizeStoredReadIds(nextValue);
+  writeStoredReadIds(normalizedValue);
+
+  if (syncBackend) {
+    syncProfessionalNotificationStateToApi({
+      readIdsByProfessional: normalizedValue,
+    });
+  }
 };
 
 export const useProfessionalNotifications = () => {
   const t = useTranslations('ProfessionalPortal');
+  const { hasHydrated: hasHydratedAuth, isAuthenticated, session: professionalSession } = useProfessionalAuthSession();
   const {
     activeCoverageAreas,
     activeReviewState,
@@ -62,7 +64,8 @@ export const useProfessionalNotifications = () => {
     portalState,
   } = useProfessionalPortal();
   const [storedReadIds, setStoredReadIds] = useState<Record<string, string[]>>(readStoredReadIds);
-  const activeProfessionalId = portalState.activeProfessionalId;
+  const hasLoadedBackendRef = useRef(false);
+  const activeProfessionalId = professionalSession.professionalId || portalState.activeProfessionalId;
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -73,14 +76,44 @@ export const useProfessionalNotifications = () => {
       setStoredReadIds(readStoredReadIds());
     };
 
-    window.addEventListener('storage', syncReadIds);
     window.addEventListener(professionalNotificationEventName, syncReadIds);
 
     return () => {
-      window.removeEventListener('storage', syncReadIds);
       window.removeEventListener(professionalNotificationEventName, syncReadIds);
     };
   }, []);
+
+  useEffect(() => {
+    if (!hasHydratedAuth) {
+      return;
+    }
+
+    hasLoadedBackendRef.current = isAuthenticated;
+    if (!isAuthenticated || !activeProfessionalId) {
+      writeStoredReadIds({});
+      setStoredReadIds({});
+      return;
+    }
+
+    let isCancelled = false;
+
+    void hydrateProfessionalNotificationStateFromApi(activeProfessionalId).then((apiState) => {
+      if (!apiState || isCancelled) {
+        return;
+      }
+
+      const nextValue = sanitizeStoredReadIds({
+        ...readStoredReadIds(),
+        ...apiState.readIdsByProfessional,
+      });
+      setStoredReadIds(nextValue);
+      writeStoredReadIds(nextValue);
+    });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [activeProfessionalId, hasHydratedAuth, isAuthenticated]);
 
   const notifications = useMemo<ProfessionalNotificationState[]>(() => {
     const requestNotifications = [...portalState.requestBoard]
@@ -288,6 +321,10 @@ export const useProfessionalNotifications = () => {
   const unreadNotifications = notifications.filter((notification) => notification.isUnread);
 
   const updateReadIds = (nextIds: string[]) => {
+    if (!activeProfessionalId) {
+      return;
+    }
+
     const normalizedIds = Array.from(new Set(nextIds));
     const nextValue = sanitizeStoredReadIds({
       ...storedReadIds,
@@ -295,7 +332,7 @@ export const useProfessionalNotifications = () => {
     });
 
     setStoredReadIds(nextValue);
-    persistStoredReadIds(nextValue);
+    persistStoredReadIds(nextValue, hasLoadedBackendRef.current);
   };
 
   return {

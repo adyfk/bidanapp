@@ -29,6 +29,7 @@ export const PROFESSIONAL_PORTAL_API_ENDPOINTS = {
   services: '/professionals/me/services',
   session: '/professionals/portal/session',
   portfolio: '/professionals/me/portfolio',
+  trust: '/professionals/me/trust',
 } as const;
 
 export type ProfessionalPortalDataSource = 'api' | 'local';

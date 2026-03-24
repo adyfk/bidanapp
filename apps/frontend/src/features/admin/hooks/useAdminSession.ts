@@ -1,12 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { MOCK_ADMIN_STAFF } from '@/lib/mock-db/admin';
-import type { AdminSessionState, AdminStaffMember } from '@/types/admin';
+import {
+  hydrateAdminAuthSessionFromApi,
+  loginAdminWithApi,
+  logoutAdminFromApi,
+  syncAdminAuthSessionMetadataToApi,
+} from '@/lib/admin-auth-api';
+import { subscribeAdminAuthSessionHint } from '@/lib/admin-auth-storage';
+import { useAdminDirectory } from '@/lib/use-admin-directory';
+import type { AdminSessionState } from '@/types/admin';
+import { clearAdminConsoleSnapshotCache } from './useAdminConsoleData';
+import { clearSupportDeskSnapshotCache } from './useSupportDesk';
 
-export const ADMIN_DEMO_PASSWORD = 'Admin123!';
-
-const adminSessionStorageKey = 'bidanapp:admin-session';
 const adminSessionEventName = 'bidanapp:admin-session-change';
 
 const defaultAdminSession: AdminSessionState = {
@@ -15,59 +21,64 @@ const defaultAdminSession: AdminSessionState = {
   focusArea: 'support',
   isAuthenticated: false,
 };
+let cachedAdminSession = defaultAdminSession;
 
 const buildLoggedOutSession = (value?: Partial<AdminSessionState>): AdminSessionState => ({
   adminId: '',
   email: '',
+  expiresAt: value?.expiresAt,
   focusArea: value?.focusArea || 'support',
   isAuthenticated: false,
   lastLoginAt: value?.lastLoginAt,
   lastVisitedRoute: value?.lastVisitedRoute,
 });
 
-const readAdminSession = (): AdminSessionState => {
-  if (typeof window === 'undefined') {
-    return defaultAdminSession;
-  }
+const normalizeFocusArea = (value: unknown): AdminSessionState['focusArea'] =>
+  value === 'catalog' || value === 'ops' || value === 'reviews' || value === 'support' ? value : 'support';
 
-  try {
-    const storedValue = window.localStorage.getItem(adminSessionStorageKey);
-
-    if (!storedValue) {
-      return defaultAdminSession;
-    }
-
-    const parsedValue = JSON.parse(storedValue) as Partial<AdminSessionState>;
-
-    if (!parsedValue.isAuthenticated || !parsedValue.adminId || !parsedValue.email) {
-      return buildLoggedOutSession(parsedValue);
-    }
-
-    return {
-      adminId: parsedValue.adminId,
-      email: parsedValue.email,
-      focusArea: parsedValue.focusArea || 'support',
-      isAuthenticated: true,
-      lastLoginAt: parsedValue.lastLoginAt,
-      lastVisitedRoute: parsedValue.lastVisitedRoute,
-    };
-  } catch {
-    return defaultAdminSession;
-  }
+type NormalizableAdminSession = Partial<Omit<AdminSessionState, 'focusArea'>> & {
+  focusArea?: AdminSessionState['focusArea'] | string;
 };
 
-const persistAdminSession = (nextSession: AdminSessionState) => {
+const normalizeSession = (value: NormalizableAdminSession): AdminSessionState =>
+  !value.isAuthenticated || !value.adminId || !value.email
+    ? buildLoggedOutSession({
+        expiresAt: value.expiresAt,
+        focusArea: normalizeFocusArea(value.focusArea),
+        lastLoginAt: value.lastLoginAt || undefined,
+        lastVisitedRoute: value.lastVisitedRoute || undefined,
+      })
+    : {
+        adminId: value.adminId,
+        email: value.email,
+        expiresAt: value.expiresAt || undefined,
+        focusArea: normalizeFocusArea(value.focusArea),
+        isAuthenticated: true,
+        lastLoginAt: value.lastLoginAt || undefined,
+        lastVisitedRoute: value.lastVisitedRoute || undefined,
+      };
+
+const readAdminSession = () => cachedAdminSession;
+
+const writeAdminSession = (nextSession: AdminSessionState) => {
+  cachedAdminSession = nextSession;
+
   if (typeof window === 'undefined') {
     return;
   }
 
-  window.localStorage.setItem(adminSessionStorageKey, JSON.stringify(nextSession));
   window.dispatchEvent(new Event(adminSessionEventName));
 };
 
+const clearAdminWorkspaceState = () => {
+  clearAdminConsoleSnapshotCache();
+  clearSupportDeskSnapshotCache();
+};
+
 export const useAdminSession = () => {
-  const [session, setSession] = useState<AdminSessionState>(defaultAdminSession);
-  const [hasHydrated, setHasHydrated] = useState(false);
+  const { adminStaff, hasHydrated: hasHydratedDirectory } = useAdminDirectory();
+  const [session, setSession] = useState<AdminSessionState>(() => readAdminSession());
+  const [hasHydratedSession, setHasHydratedSession] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -78,45 +89,64 @@ export const useAdminSession = () => {
       setSession(readAdminSession());
     };
 
+    const hydrateFromBackend = async () => {
+      const apiState = await hydrateAdminAuthSessionFromApi();
+      if (!apiState) {
+        const nextSession = buildLoggedOutSession(readAdminSession());
+        clearAdminWorkspaceState();
+        setSession(nextSession);
+        writeAdminSession(nextSession);
+        setHasHydratedSession(true);
+        return;
+      }
+
+      const nextSession = normalizeSession(apiState);
+      setSession(nextSession);
+      writeAdminSession(nextSession);
+      setHasHydratedSession(true);
+    };
+
     syncSession();
-    setHasHydrated(true);
-    window.addEventListener('storage', syncSession);
     window.addEventListener(adminSessionEventName, syncSession);
+    const unsubscribeAuth = subscribeAdminAuthSessionHint(syncSession);
+
+    void hydrateFromBackend();
 
     return () => {
-      window.removeEventListener('storage', syncSession);
       window.removeEventListener(adminSessionEventName, syncSession);
+      unsubscribeAuth();
     };
   }, []);
 
-  const activeAdmin =
-    MOCK_ADMIN_STAFF.find((admin) => admin.id === session.adminId || admin.email === session.email) || null;
+  const activeAdmin = adminStaff.find((admin) => admin.id === session.adminId || admin.email === session.email) || null;
 
   const updateSession = (nextSession: AdminSessionState) => {
     setSession(nextSession);
-    persistAdminSession(nextSession);
+    writeAdminSession(nextSession);
   };
 
-  const login = ({ admin, email, password }: { admin: AdminStaffMember; email: string; password: string }) => {
-    if (password !== ADMIN_DEMO_PASSWORD || email.trim().toLowerCase() !== admin.email.toLowerCase()) {
+  const login = async ({ email, password }: { email: string; password: string }) => {
+    try {
+      const apiSession = await loginAdminWithApi(email.trim().toLowerCase(), password);
+      clearAdminWorkspaceState();
+      updateSession(
+        normalizeSession({
+          ...apiSession,
+          lastVisitedRoute: session.lastVisitedRoute,
+        }),
+      );
+      return true;
+    } catch {
       return false;
     }
-
-    updateSession({
-      adminId: admin.id,
-      email: admin.email,
-      focusArea: admin.focusArea,
-      isAuthenticated: true,
-      lastLoginAt: new Date().toISOString(),
-      lastVisitedRoute: session.lastVisitedRoute,
-    });
-
-    return true;
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await logoutAdminFromApi();
+    clearAdminWorkspaceState();
     updateSession(
       buildLoggedOutSession({
+        expiresAt: session.expiresAt,
         focusArea: session.focusArea,
         lastLoginAt: session.lastLoginAt,
         lastVisitedRoute: session.lastVisitedRoute,
@@ -124,43 +154,34 @@ export const useAdminSession = () => {
     );
   };
 
-  const switchAdminPersona = (adminId: string) => {
-    const nextAdmin = MOCK_ADMIN_STAFF.find((admin) => admin.id === adminId);
-
-    if (!nextAdmin || !session.isAuthenticated) {
-      return false;
-    }
-
-    updateSession({
-      ...session,
-      adminId: nextAdmin.id,
-      email: nextAdmin.email,
-      focusArea: nextAdmin.focusArea,
-    });
-
-    return true;
-  };
-
   const setLastVisitedRoute = (route: string) => {
     if (!session.isAuthenticated || session.lastVisitedRoute === route) {
       return;
     }
 
-    updateSession({
+    const nextSession = {
       ...session,
       lastVisitedRoute: route,
+    } satisfies AdminSessionState;
+    updateSession(nextSession);
+
+    void syncAdminAuthSessionMetadataToApi(route).then((apiSession) => {
+      if (!apiSession) {
+        return;
+      }
+
+      updateSession(normalizeSession(apiSession));
     });
   };
 
   return {
     activeAdmin,
-    adminStaff: MOCK_ADMIN_STAFF,
-    hasHydrated,
+    adminStaff,
+    hasHydrated: hasHydratedSession && (!session.isAuthenticated || hasHydratedDirectory),
     isAuthenticated: session.isAuthenticated,
     login,
     logout,
     session,
     setLastVisitedRoute,
-    switchAdminPersona,
   };
 };

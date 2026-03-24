@@ -1,6 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { hydrateViewerSessionFromApi, syncViewerSessionToApi } from '@/lib/app-state-api';
+import { hydrateCustomerAuthSessionFromApi } from '@/lib/customer-auth-api';
+import { hasCustomerAuthSessionHint, subscribeCustomerAuthSessionHint } from '@/lib/customer-auth-storage';
+import { hydrateProfessionalAuthSessionFromApi } from '@/lib/professional-auth-api';
+import { hasProfessionalAuthSessionHint, subscribeProfessionalAuthSessionHint } from '@/lib/professional-auth-storage';
 
 export type ViewerMode = 'visitor' | 'customer' | 'professional';
 
@@ -8,49 +13,47 @@ interface ViewerSessionState {
   mode: ViewerMode;
 }
 
-const viewerSessionStorageKey = 'bidanapp:viewer-session';
 const viewerSessionEventName = 'bidanapp:viewer-session-change';
 const defaultViewerSession: ViewerSessionState = {
   mode: 'visitor',
 };
+let cachedViewerSession = defaultViewerSession;
 
-const readViewerSession = (): ViewerSessionState => {
-  if (typeof window === 'undefined') {
-    return defaultViewerSession;
+const normalizeViewerSession = (mode: unknown): ViewerSessionState => {
+  if (mode === 'customer') {
+    return hasCustomerAuthSessionHint() ? { mode } : defaultViewerSession;
   }
 
-  try {
-    const storedValue = window.localStorage.getItem(viewerSessionStorageKey);
-
-    if (!storedValue) {
-      return defaultViewerSession;
-    }
-
-    const parsedValue = JSON.parse(storedValue) as Partial<ViewerSessionState>;
-
-    if (parsedValue.mode === 'visitor' || parsedValue.mode === 'customer' || parsedValue.mode === 'professional') {
-      return {
-        mode: parsedValue.mode,
-      };
-    }
-
-    return defaultViewerSession;
-  } catch {
-    return defaultViewerSession;
+  if (mode === 'professional') {
+    return hasProfessionalAuthSessionHint() ? { mode } : defaultViewerSession;
   }
+
+  return mode === 'visitor' ? { mode } : defaultViewerSession;
 };
 
-const persistViewerSession = (nextState: ViewerSessionState) => {
+const readViewerSession = (): ViewerSessionState => normalizeViewerSession(cachedViewerSession.mode);
+
+const writeViewerSession = (nextState: ViewerSessionState) => {
+  cachedViewerSession = normalizeViewerSession(nextState.mode);
+
   if (typeof window === 'undefined') {
     return;
   }
 
-  window.localStorage.setItem(viewerSessionStorageKey, JSON.stringify(nextState));
   window.dispatchEvent(new Event(viewerSessionEventName));
 };
 
+const persistViewerSession = (nextState: ViewerSessionState, syncBackend: boolean) => {
+  writeViewerSession(nextState);
+
+  if (syncBackend) {
+    syncViewerSessionToApi(nextState);
+  }
+};
+
 export const useViewerSession = () => {
-  const [viewerSession, setViewerSession] = useState<ViewerSessionState>(defaultViewerSession);
+  const [viewerSession, setViewerSession] = useState<ViewerSessionState>(() => readViewerSession());
+  const hasLoadedBackendRef = useRef(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -58,16 +61,43 @@ export const useViewerSession = () => {
     }
 
     const syncViewerSession = () => {
-      setViewerSession(readViewerSession());
+      const nextViewerSession = readViewerSession();
+      setViewerSession(nextViewerSession);
+
+      if (nextViewerSession.mode !== cachedViewerSession.mode) {
+        writeViewerSession(nextViewerSession);
+      }
     };
 
     syncViewerSession();
-    window.addEventListener('storage', syncViewerSession);
     window.addEventListener(viewerSessionEventName, syncViewerSession);
+    const unsubscribeCustomerAuth = subscribeCustomerAuthSessionHint(syncViewerSession);
+    const unsubscribeProfessionalAuth = subscribeProfessionalAuthSessionHint(syncViewerSession);
+
+    void Promise.all([
+      hydrateViewerSessionFromApi(),
+      hydrateCustomerAuthSessionFromApi(),
+      hydrateProfessionalAuthSessionFromApi(),
+    ])
+      .then(([apiState, customerSession, professionalSession]) => {
+        const nextMode = professionalSession?.isAuthenticated
+          ? 'professional'
+          : customerSession?.isAuthenticated
+            ? 'customer'
+            : (apiState?.mode ?? 'visitor');
+        const nextState = normalizeViewerSession(nextMode);
+
+        setViewerSession(nextState);
+        writeViewerSession(nextState);
+      })
+      .finally(() => {
+        hasLoadedBackendRef.current = true;
+      });
 
     return () => {
-      window.removeEventListener('storage', syncViewerSession);
       window.removeEventListener(viewerSessionEventName, syncViewerSession);
+      unsubscribeCustomerAuth();
+      unsubscribeProfessionalAuth();
     };
   }, []);
 
@@ -77,7 +107,7 @@ export const useViewerSession = () => {
     } satisfies ViewerSessionState;
 
     setViewerSession(nextState);
-    persistViewerSession(nextState);
+    persistViewerSession(nextState, hasLoadedBackendRef.current);
   };
 
   return {

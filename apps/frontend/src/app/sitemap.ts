@@ -1,11 +1,12 @@
 import type { MetadataRoute } from 'next';
 import { routing } from '@/i18n/routing';
 import { APP_CONFIG } from '@/lib/config';
-import { MOCK_PROFESSIONALS, MOCK_SERVICES } from '@/lib/mock-db/catalog';
+import { getPublicBootstrapData } from '@/lib/public-bootstrap';
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = APP_CONFIG.baseUrl;
   const locales = routing.locales;
+  const bootstrap = await getPublicBootstrapData();
 
   // Base routes that exist in the app
   const defaultRoutes = ['', '/home', '/explore', '/services', '/appointments', '/profile'];
@@ -21,7 +22,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   );
 
   // Map dynamic professional routes for all locales
-  const professionalRoutes: MetadataRoute.Sitemap = MOCK_PROFESSIONALS.flatMap((prof) =>
+  const professionalRoutes: MetadataRoute.Sitemap = bootstrap.catalog.professionals.flatMap((prof) =>
     locales.map((locale) => ({
       url: `${baseUrl}/${locale}/p/${prof.slug}`,
       lastModified: new Date(),
@@ -31,7 +32,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   );
 
   // Map dynamic service routes for all locales
-  const serviceRoutes: MetadataRoute.Sitemap = MOCK_SERVICES.flatMap((svc) =>
+  const serviceRoutes: MetadataRoute.Sitemap = bootstrap.catalog.services.flatMap((svc) =>
     locales.map((locale) => ({
       url: `${baseUrl}/${locale}/s/${svc.slug}`,
       lastModified: new Date(),

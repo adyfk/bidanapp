@@ -31,15 +31,16 @@ import {
 import { ProfessionalSectionTitle } from '@/features/professional-detail/components/ProfessionalSectionTitle';
 import type { ProfessionalServiceEntry } from '@/features/professional-detail/hooks/useProfessionalDetail';
 import { DEFAULT_AVAILABILITY_MINIMUM_NOTICE_HOURS, formatMinimumNoticeLabel } from '@/lib/availability-rules';
-import { APP_CONFIG } from '@/lib/config';
 import {
   getAccessibleServiceModes,
   getCategoryById,
   getEnabledServiceModes,
   isOfflineServiceMode,
   type ProfessionalCoverageStatus,
-} from '@/lib/mock-db/catalog';
+} from '@/lib/catalog-selectors';
+import { APP_CONFIG } from '@/lib/config';
 import type {
+  Category,
   OfflineServiceDeliveryMode,
   ProfessionalAvailabilityDay,
   ProfessionalAvailabilityRules,
@@ -48,6 +49,7 @@ import type {
 
 interface ProfessionalServicesSectionProps {
   availabilityRulesByMode?: Partial<Record<OfflineServiceDeliveryMode, ProfessionalAvailabilityRules>>;
+  categories: Category[];
   coverageStatus: ProfessionalCoverageStatus | null;
   isProfessionalAvailable: boolean;
   offeredServices: ProfessionalServiceEntry[];
@@ -229,6 +231,7 @@ const deriveDraftSelectionState = ({
 
 interface ServiceSelectionSheetProps {
   availabilityRulesByMode?: Partial<Record<OfflineServiceDeliveryMode, ProfessionalAvailabilityRules>>;
+  categories: Category[];
   draftSelection: DraftSelectionState;
   isOpen: boolean;
   locale: string;
@@ -241,6 +244,7 @@ interface ServiceSelectionSheetProps {
 
 const ServiceSelectionSheet = ({
   availabilityRulesByMode,
+  categories,
   draftSelection,
   isOpen,
   locale,
@@ -276,7 +280,7 @@ const ServiceSelectionSheet = ({
     weekday: 'short',
   });
   const selectedCategoryLabel =
-    getCategoryById(serviceEntry.catalogService.categoryId)?.name || serviceEntry.catalogService.name;
+    getCategoryById(categories, serviceEntry.catalogService.categoryId)?.name || serviceEntry.catalogService.name;
   const selectedServiceModes = getEnabledServiceModes(serviceEntry.serviceMapping.serviceModes);
   const selectedScheduleDay =
     scheduleDays.find((currentScheduleDay) => currentScheduleDay.id === scheduleDayId) || null;
@@ -546,6 +550,7 @@ const ServiceSelectionSheet = ({
 
 export const ProfessionalServicesSection = ({
   availabilityRulesByMode,
+  categories,
   coverageStatus,
   isProfessionalAvailable,
   offeredServices,
@@ -581,14 +586,14 @@ export const ProfessionalServicesSection = ({
     const categoryId = entry.catalogService.categoryId;
 
     if (!categoryFilterMap.has(categoryId)) {
-      categoryFilterMap.set(categoryId, getCategoryById(categoryId)?.name || entry.catalogService.name);
+      categoryFilterMap.set(categoryId, getCategoryById(categories, categoryId)?.name || entry.catalogService.name);
     }
   }
 
   const categoryFilters = [...categoryFilterMap.entries()].map(([id, label]) => ({ id, label }));
   const normalizedSearchQuery = deferredSearchQuery.trim().toLowerCase();
   const filteredServices = offeredServices.filter(({ serviceMapping, catalogService }) => {
-    const categoryLabel = getCategoryById(catalogService.categoryId)?.name || catalogService.name;
+    const categoryLabel = getCategoryById(categories, catalogService.categoryId)?.name || catalogService.name;
     const matchesCategory = activeCategoryId === 'all' || catalogService.categoryId === activeCategoryId;
     const matchesMode =
       activeModeFilter === 'all' ||
@@ -609,7 +614,8 @@ export const ProfessionalServicesSection = ({
   });
 
   const selectedCategoryLabel = selectedServiceEntry
-    ? getCategoryById(selectedServiceEntry.catalogService.categoryId)?.name || selectedServiceEntry.catalogService.name
+    ? getCategoryById(categories, selectedServiceEntry.catalogService.categoryId)?.name ||
+      selectedServiceEntry.catalogService.name
     : '';
   const selectedScheduleDay =
     selectedScheduleDays.find((scheduleDay) => scheduleDay.id === selectedScheduleDayId) || null;
@@ -958,7 +964,8 @@ export const ProfessionalServicesSection = ({
           {filteredServices.length > 0 ? (
             <div className="space-y-3">
               {filteredServices.map(({ serviceMapping, catalogService }) => {
-                const categoryName = getCategoryById(catalogService.categoryId)?.name || catalogService.name;
+                const categoryName =
+                  getCategoryById(categories, catalogService.categoryId)?.name || catalogService.name;
                 const enabledModes = getEnabledServiceModes(serviceMapping.serviceModes);
                 const isSelected = selectedService === serviceMapping.serviceId;
 
@@ -1068,6 +1075,7 @@ export const ProfessionalServicesSection = ({
 
       <ServiceSelectionSheet
         availabilityRulesByMode={availabilityRulesByMode}
+        categories={categories}
         draftSelection={draftSelection}
         isOpen={isServiceSheetOpen}
         locale={locale}

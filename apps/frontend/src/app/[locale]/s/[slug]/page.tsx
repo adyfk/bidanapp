@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ServiceDetailScreen } from '@/components/screens/ServiceDetailScreen';
 import { APP_CONFIG } from '@/lib/config';
-import { getServiceBySlug, MOCK_SERVICES } from '@/lib/mock-db/catalog';
+import { getPublicBootstrapData } from '@/lib/public-bootstrap';
 
 interface Props {
   params: Promise<{
@@ -10,17 +10,19 @@ interface Props {
   }>;
 }
 
-// Generate static params for all services
-export function generateStaticParams() {
-  return MOCK_SERVICES.map((svc) => ({
-    slug: svc.slug,
+export async function generateStaticParams() {
+  const bootstrap = await getPublicBootstrapData();
+
+  return bootstrap.catalog.services.map((service) => ({
+    slug: service.slug,
   }));
 }
 
 // Generate dynamic metadata for SEO
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
-  const service = getServiceBySlug(params.slug);
+  const bootstrap = await getPublicBootstrapData();
+  const service = bootstrap.catalog.services.find((candidateService) => candidateService.slug === params.slug);
 
   if (!service) {
     return {
@@ -47,11 +49,20 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
 export default async function ServiceRoute(props: Props) {
   const params = await props.params;
-  const service = getServiceBySlug(params.slug);
+  const bootstrap = await getPublicBootstrapData();
+  const service = bootstrap.catalog.services.find((candidateService) => candidateService.slug === params.slug);
 
   if (!service) {
     notFound();
   }
 
-  return <ServiceDetailScreen serviceId={service.id} />;
+  return (
+    <ServiceDetailScreen
+      areas={bootstrap.catalog.areas}
+      categories={bootstrap.catalog.categories}
+      professionals={bootstrap.catalog.professionals}
+      serviceId={service.id}
+      services={bootstrap.catalog.services}
+    />
+  );
 }

@@ -13,18 +13,24 @@ import {
 } from '@/components/ui/tokens';
 import { useRouter } from '@/i18n/routing';
 import { APP_CONFIG } from '@/lib/config';
-import { MOCK_CATEGORIES, MOCK_SERVICES } from '@/lib/mock-db/catalog';
 import { exploreRoute } from '@/lib/routes';
 import { useUiText } from '@/lib/ui-text';
-import { useProfessionalPortal } from '@/lib/use-professional-portal';
+import type { Category, GlobalService, Professional } from '@/types/catalog';
 
-export const ServicesScreen = () => {
+export const ServicesScreen = ({
+  categories,
+  professionals,
+  services,
+}: {
+  categories: Category[];
+  professionals: Professional[];
+  services: GlobalService[];
+}) => {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>('All');
   const t = useTranslations('Services');
   const uiText = useUiText();
-  const { publicProfessionals } = useProfessionalPortal();
 
   // Helper functions for ranges
   const parseDuration = (d?: string) => {
@@ -55,11 +61,11 @@ export const ServicesScreen = () => {
   };
 
   // Lógica per Service global yang menampung daftar profesional penjual
-  const enrichedServices = MOCK_SERVICES.map((svc) => {
-    const categoryName = MOCK_CATEGORIES.find((c) => c.id === svc.categoryId)?.name || '';
+  const enrichedServices = services.map((svc) => {
+    const categoryName = categories.find((c) => c.id === svc.categoryId)?.name || '';
 
     // Cari semua profesional yang menyediakan layanan ini
-    const providers = publicProfessionals
+    const providers = professionals
       .filter((prof) => prof.services.some((ps) => ps.serviceId === svc.id))
       .map((prof) => {
         const pSvc = prof.services.find((ps) => ps.serviceId === svc.id);
@@ -129,7 +135,7 @@ export const ServicesScreen = () => {
           >
             {t('allServices')}
           </button>
-          {MOCK_CATEGORIES.map((cat) => (
+          {categories.map((cat) => (
             <button
               type="button"
               key={cat.id}

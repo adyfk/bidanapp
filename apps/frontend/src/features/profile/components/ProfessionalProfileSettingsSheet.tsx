@@ -15,8 +15,20 @@ import {
 
 export type ProfessionalProfileSheetKey = 'account' | 'security' | null;
 export type ProfessionalProfileSaveState = 'idle' | 'success' | 'error';
-export type ProfessionalProfileErrorKey = 'displayNameRequired' | 'phoneRequired' | 'credentialRequired' | null;
-export type ProfessionalSecurityErrorKey = 'currentRequired' | 'newPasswordWeak' | 'confirmMismatch' | null;
+export type ProfessionalProfileErrorKey =
+  | 'displayNameRequired'
+  | 'phoneRequired'
+  | 'credentialRequired'
+  | 'saveFailed'
+  | null;
+export type ProfessionalSecurityErrorKey =
+  | 'currentRequired'
+  | 'currentPasswordInvalid'
+  | 'newPasswordWeak'
+  | 'confirmMismatch'
+  | 'saveFailed'
+  | null;
+export type ProfessionalSecurityResetErrorKey = 'resetPhoneRequired' | 'resetFailed' | null;
 
 export interface ProfessionalProfileDraft {
   city: string;
@@ -59,6 +71,7 @@ interface ProfessionalProfileSettingsSheetProps {
   profileDraft: ProfessionalProfileDraft;
   profileErrorKey: ProfessionalProfileErrorKey;
   profileSaveState: ProfessionalProfileSaveState;
+  resetErrorKey: ProfessionalSecurityResetErrorKey;
   resetSaveState: ProfessionalProfileSaveState;
   securityErrorKey: ProfessionalSecurityErrorKey;
   securitySaveState: ProfessionalProfileSaveState;
@@ -78,6 +91,7 @@ export const ProfessionalProfileSettingsSheet = ({
   profileDraft,
   profileErrorKey,
   profileSaveState,
+  resetErrorKey,
   resetSaveState,
   securityErrorKey,
   securitySaveState,
@@ -105,8 +119,8 @@ export const ProfessionalProfileSettingsSheet = ({
   const resetStatusMessage =
     resetSaveState === 'success'
       ? t('security.resetSuccess')
-      : resetSaveState === 'error'
-        ? t('security.errors.resetPhoneRequired')
+      : resetSaveState === 'error' && resetErrorKey
+        ? t(`security.errors.${resetErrorKey}`)
         : null;
 
   return (

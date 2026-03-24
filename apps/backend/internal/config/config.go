@@ -7,13 +7,17 @@ import (
 )
 
 type Config struct {
-	App           AppConfig
-	HTTP          HTTPConfig
-	CORS          CORSConfig
-	MockDB        MockDBConfig
-	Database      DatabaseConfig
-	Redis         RedisConfig
-	Observability ObservabilityConfig
+	App              AppConfig
+	HTTP             HTTPConfig
+	CORS             CORSConfig
+	SeedData         SeedDataConfig
+	Database         DatabaseConfig
+	AuthRateLimit    AuthRateLimitConfig
+	AdminAuth        AdminAuthConfig
+	CustomerAuth     CustomerAuthConfig
+	ProfessionalAuth ProfessionalAuthConfig
+	Redis            RedisConfig
+	Observability    ObservabilityConfig
 }
 
 type AppConfig struct {
@@ -49,12 +53,48 @@ func (c CORSConfig) PrimaryOrigin() string {
 	return c.AllowedOrigins[0]
 }
 
-type MockDBConfig struct {
+type SeedDataConfig struct {
 	DataDir string
 }
 
 type DatabaseConfig struct {
 	URL string
+}
+
+type SessionCookieConfig struct {
+	Domain   string
+	Name     string
+	Path     string
+	SameSite string
+	Secure   bool
+}
+
+type AuthRateLimitConfig struct {
+	MaxAttempts int
+	Window      time.Duration
+}
+
+type AdminAuthConfig struct {
+	Credentials []AdminCredentialConfig
+	Cookie      SessionCookieConfig
+	SessionTTL  time.Duration
+}
+
+type AdminCredentialConfig struct {
+	AdminID      string
+	Email        string
+	PasswordHash string
+	FocusArea    string
+}
+
+type CustomerAuthConfig struct {
+	Cookie     SessionCookieConfig
+	SessionTTL time.Duration
+}
+
+type ProfessionalAuthConfig struct {
+	Cookie     SessionCookieConfig
+	SessionTTL time.Duration
 }
 
 type RedisConfig struct {

@@ -18,6 +18,7 @@ export const ProfessionalDashboardCoverageScreen = () => {
     activeReviewState,
     activeServiceConfigurations,
     averageServicePriceLabel,
+    catalogAreas,
     clampedCompletionScore,
     dashboardLocationLabel,
     getAreaLabel,
@@ -116,7 +117,7 @@ export const ProfessionalDashboardCoverageScreen = () => {
         }
 
         setNotice(
-          status === 'changes_requested' ? t('onboarding.demoRevisionSuccess') : t('onboarding.demoVerifySuccess'),
+          status === 'changes_requested' ? t('onboarding.reviewRevisionSuccess') : t('onboarding.reviewVerifySuccess'),
         );
       }}
       onSubmitForReview={() => {
@@ -141,6 +142,7 @@ export const ProfessionalDashboardCoverageScreen = () => {
 
       {isCoverageEditorOpen ? (
         <ProfessionalDashboardCoverageEditorDialog
+          areas={catalogAreas}
           coverageDraft={coverageDraft}
           onChangeDraft={setCoverageDraft}
           onClose={closeCoverageEditor}

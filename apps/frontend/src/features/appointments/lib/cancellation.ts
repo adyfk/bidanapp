@@ -1,4 +1,4 @@
-import { ACTIVE_RUNTIME_CLOCK_ISO } from '@/lib/mock-db/runtime-selection';
+import { ACTIVE_RUNTIME_CLOCK_ISO } from '@/lib/app-runtime';
 import type {
   AppointmentCancellationActor,
   AppointmentCancellationPolicySnapshot,

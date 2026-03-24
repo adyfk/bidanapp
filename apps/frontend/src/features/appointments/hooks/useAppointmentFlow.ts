@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { getAppointmentClosePreview } from '@/features/appointments/lib/cancellation';
 import {
   ACTIVE_APPOINTMENT_STATUSES,
@@ -10,9 +10,10 @@ import {
   HISTORY_APPOINTMENT_STATUSES,
   isAppointmentChatAvailable,
 } from '@/features/appointments/lib/status';
-import { getAppointmentChatThread } from '@/lib/mock-db/chat';
 import { useUiText } from '@/lib/ui-text';
+import { useAppShell } from '@/lib/use-app-shell';
 import { useProfessionalPortal } from '@/lib/use-professional-portal';
+import { useRealtimeChatThread } from '@/lib/use-realtime-chat-thread';
 import type { Appointment } from '@/types/appointments';
 import type { ChatMessage } from '@/types/chat';
 
@@ -26,12 +27,6 @@ export interface AppointmentChatSession {
 const getStableChatMessageId = (seed: string) =>
   Array.from(seed).reduce((hash, character) => (hash * 31 + character.charCodeAt(0)) % 1_000_000_000, 17);
 
-const formatMessageTime = () =>
-  new Date().toLocaleTimeString([], {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-
 const createFallbackChatSession = (
   appointment: Appointment,
   uiText: ReturnType<typeof useUiText>,
@@ -41,7 +36,7 @@ const createFallbackChatSession = (
   autoReplyText: uiText.chatAutoReply,
   messages: [
     {
-      id: getStableChatMessageId(`${appointment.id}:${appointment.service.name}`),
+      id: String(getStableChatMessageId(`${appointment.id}:${appointment.service.name}`)),
       text: uiText.getAppointmentWelcomeMessage(appointment.service.name),
       sender: 'professional',
       time: '10:41',
@@ -49,39 +44,6 @@ const createFallbackChatSession = (
     },
   ],
 });
-
-const hasSameChatSessionReferences = (
-  currentSessions: Record<string, AppointmentChatSession>,
-  nextSessions: Record<string, AppointmentChatSession>,
-) => {
-  const currentAppointmentIds = Object.keys(currentSessions);
-  const nextAppointmentIds = Object.keys(nextSessions);
-
-  if (currentAppointmentIds.length !== nextAppointmentIds.length) {
-    return false;
-  }
-
-  return nextAppointmentIds.every((appointmentId) => currentSessions[appointmentId] === nextSessions[appointmentId]);
-};
-
-const buildInitialChatState = (appointments: Appointment[], uiText: ReturnType<typeof useUiText>) =>
-  Object.fromEntries(
-    appointments.map((appointment) => {
-      const existingThread = getAppointmentChatThread(appointment.id);
-
-      return [
-        appointment.id,
-        existingThread
-          ? {
-              dayLabel: existingThread.dayLabel,
-              inputPlaceholder: existingThread.inputPlaceholder,
-              autoReplyText: existingThread.autoReplyText || uiText.chatAutoReply,
-              messages: existingThread.messages,
-            }
-          : createFallbackChatSession(appointment, uiText),
-      ] as const;
-    }),
-  ) as Record<string, AppointmentChatSession>;
 
 export const useAppointmentFlow = ({
   initialSelectedAppointmentId = null,
@@ -93,6 +55,7 @@ export const useAppointmentFlow = ({
   initialTab?: AppointmentTab;
 } = {}) => {
   const uiText = useUiText();
+  const { currentConsumer } = useAppShell();
   const { cancelCustomerAppointment, customerAppointments, markCustomerAppointmentPaid } = useProfessionalPortal();
   const [activeTab, setActiveTab] = useState<AppointmentTab>(initialTab);
   const [searchQuery, setSearchQuery] = useState('');
@@ -107,38 +70,8 @@ export const useAppointmentFlow = ({
   const [reviewText, setReviewText] = useState('');
   const [reviewPhotoName, setReviewPhotoName] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const [chatSessions, setChatSessions] = useState<Record<string, AppointmentChatSession>>({});
-  const timeoutIdsRef = useRef<number[]>([]);
-
-  useEffect(() => {
-    const timeoutIds = timeoutIdsRef.current;
-
-    return () => {
-      timeoutIds.forEach((timeoutId) => {
-        window.clearTimeout(timeoutId);
-      });
-    };
-  }, []);
 
   const appointments = useMemo(() => customerAppointments, [customerAppointments]);
-
-  useEffect(() => {
-    setChatSessions((currentSessions) => {
-      const nextSessions = buildInitialChatState(appointments, uiText);
-
-      for (const [appointmentId, session] of Object.entries(currentSessions)) {
-        if (nextSessions[appointmentId]) {
-          nextSessions[appointmentId] = session;
-        }
-      }
-
-      if (hasSameChatSessionReferences(currentSessions, nextSessions)) {
-        return currentSessions;
-      }
-
-      return nextSessions;
-    });
-  }, [appointments, uiText]);
 
   const searchedAppointments = appointments.filter((appointment) => {
     const query = searchQuery.trim().toLowerCase();
@@ -179,13 +112,27 @@ export const useAppointmentFlow = ({
       ? null
       : appointments.find((appointment) => appointment.id === selectedAppointmentId) || null;
 
-  const selectedChatSession =
-    selectedAppointment === null
-      ? null
-      : chatSessions[selectedAppointment.id] || createFallbackChatSession(selectedAppointment, uiText);
+  const selectedChatSession = useMemo(
+    () => (selectedAppointment === null ? null : createFallbackChatSession(selectedAppointment, uiText)),
+    [selectedAppointment, uiText],
+  );
   const canChatSelectedAppointment = selectedAppointment
     ? isAppointmentChatAvailable(selectedAppointment.status)
     : false;
+  const { messages: realtimeMessages, sendMessage: sendRealtimeMessage } = useRealtimeChatThread({
+    enabled: Boolean(selectedAppointment && canChatSelectedAppointment && isChatOpen),
+    fallbackMessages: selectedChatSession?.messages ?? [],
+    professionalName: selectedAppointment?.professional.name || '',
+    senderName: currentConsumer.name,
+    threadId: selectedAppointment?.id || null,
+  });
+  const activeChatSession =
+    selectedChatSession === null
+      ? null
+      : {
+          ...selectedChatSession,
+          messages: realtimeMessages,
+        };
   const cancelPreview = useMemo(
     () =>
       selectedAppointment
@@ -287,59 +234,20 @@ export const useAppointmentFlow = ({
   const submitChatMessage = () => {
     if (
       !selectedAppointment ||
-      !selectedChatSession ||
+      !activeChatSession ||
       !chatInput.trim() ||
       !isAppointmentChatAvailable(selectedAppointment.status)
     ) {
       return;
     }
 
-    const trimmedMessage = chatInput.trim();
-    const sentMessage: ChatMessage = {
-      id: Date.now(),
-      text: trimmedMessage,
-      sender: 'user',
-      time: formatMessageTime(),
-      isRead: false,
-    };
+    if (!sendRealtimeMessage(chatInput)) {
+      setNotice(uiText.chatUnavailableAlert);
+      return;
+    }
 
-    setChatSessions((current) => ({
-      ...current,
-      [selectedAppointment.id]: {
-        ...selectedChatSession,
-        messages: [...selectedChatSession.messages, sentMessage],
-      },
-    }));
     setChatInput('');
     setNotice(uiText.chatSentAlert);
-
-    const timeoutId = window.setTimeout(() => {
-      setChatSessions((current) => {
-        const nextSession = current[selectedAppointment.id];
-
-        if (!nextSession) {
-          return current;
-        }
-
-        const replyMessage: ChatMessage = {
-          id: Date.now() + 1,
-          text: nextSession.autoReplyText,
-          sender: 'professional',
-          time: formatMessageTime(),
-          isRead: true,
-        };
-
-        return {
-          ...current,
-          [selectedAppointment.id]: {
-            ...nextSession,
-            messages: [...nextSession.messages, replyMessage],
-          },
-        };
-      });
-    }, 900);
-
-    timeoutIdsRef.current.push(timeoutId);
   };
 
   useEffect(() => {
@@ -390,7 +298,7 @@ export const useAppointmentFlow = ({
     selectAppointment,
     selectReviewPhoto,
     selectedAppointment,
-    selectedChatSession,
+    selectedChatSession: activeChatSession,
     setActiveTab,
     setCancelReason,
     setChatInput,

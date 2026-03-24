@@ -27,7 +27,7 @@ func NewHandler(hub *Hub, logger *slog.Logger, allowedOrigins []string) Handler 
 }
 
 func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	threadID := normalizeValue(r.URL.Query().Get("thread_id"), "demo-thread")
+	threadID := normalizeValue(r.URL.Query().Get("thread_id"), "default-thread")
 	clientID := normalizeValue(r.URL.Query().Get("client_id"), "web-client")
 	sender := normalizeValue(r.URL.Query().Get("sender"), clientID)
 
@@ -86,7 +86,15 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		h.hub.Publish(threadID, normalizeValue(message.Sender, sender), strings.TrimSpace(message.Text))
+		if _, err := h.hub.Publish(
+			threadID,
+			clientID,
+			normalizeValue(message.Sender, sender),
+			strings.TrimSpace(message.Text),
+		); err != nil {
+			h.logger.Warn("websocket publish failed", slog.String("error", err.Error()))
+			return
+		}
 
 		select {
 		case err := <-errCh:

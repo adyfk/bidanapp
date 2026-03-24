@@ -6,6 +6,8 @@ type PublicEnv = {
   siteUrl: string;
   apiBaseUrl: string;
   professionalPortalDataSource: ProfessionalPortalDataSource;
+  appStateDataSource: 'local' | 'api';
+  adminConsoleEnabled: boolean;
   nodeEnv: string;
   isDevelopment: boolean;
   isProduction: boolean;
@@ -20,7 +22,9 @@ function loadPublicEnv(): PublicEnv {
     appVersion: readText('NEXT_PUBLIC_APP_VERSION', 'dev'),
     siteUrl: readUrl('NEXT_PUBLIC_SITE_URL', APP_BRANDING.baseUrl),
     apiBaseUrl: readUrl('NEXT_PUBLIC_API_BASE_URL', 'http://localhost:8080/api/v1'),
-    professionalPortalDataSource: readEnum('NEXT_PUBLIC_PROFESSIONAL_PORTAL_DATA_SOURCE', ['local', 'api'], 'local'),
+    professionalPortalDataSource: readEnum('NEXT_PUBLIC_PROFESSIONAL_PORTAL_DATA_SOURCE', ['local', 'api'], 'api'),
+    appStateDataSource: readEnum('NEXT_PUBLIC_APP_STATE_DATA_SOURCE', ['local', 'api'], 'api'),
+    adminConsoleEnabled: readBool('NEXT_PUBLIC_ADMIN_CONSOLE_ENABLED', nodeEnv !== 'production'),
     nodeEnv,
     isDevelopment: nodeEnv === 'development',
     isProduction: nodeEnv === 'production',
@@ -55,6 +59,24 @@ function readEnum<const T extends string>(name: string, allowedValues: readonly 
   }
 
   return rawValue;
+}
+
+function readBool(name: string, fallback: boolean): boolean {
+  const rawValue = process.env[name];
+  if (typeof rawValue === 'undefined') {
+    return fallback;
+  }
+
+  const normalized = rawValue.trim().toLowerCase();
+  if (normalized === 'true') {
+    return true;
+  }
+
+  if (normalized === 'false') {
+    return false;
+  }
+
+  throw new Error(`${name} must be either true or false. Received: ${rawValue}`);
 }
 
 function normalizeUrl(value: URL): string {

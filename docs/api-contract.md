@@ -22,6 +22,7 @@ This repo now uses a backend-generated contract flow with a single integration p
 - REST endpoints are registered in backend with Huma and exported into OpenAPI.
 - TypeScript response types are generated with `openapi-typescript`.
 - `packages/sdk` owns the generated contract and wraps it for FE consumption.
+- Professional portal mutations now use typed resource adapters for `profile`, `coverage`, `services`, `requests`, `portfolio`, `gallery`, and `trust`, with the aggregate session endpoint kept as the coarse hydration fallback.
 - Realtime chat uses the websocket handshake endpoint `GET /api/v1/ws/chat`.
 - Because OpenAPI is not a strong format for bidirectional websocket frames, the handshake lives in OpenAPI while message event types live in `packages/sdk/src/realtime.ts`.
 
@@ -38,7 +39,7 @@ This repo now uses a backend-generated contract flow with a single integration p
 - Backend stays authoritative over actual response shapes.
 - Frontend gets compile-time validation from generated types.
 - SDK becomes the stable integration boundary for REST plus realtime helpers.
-- UI hydration stays isolated. This matters because some simulation endpoints still use normalized transport payloads, such as `GET /api/v1/appointments`, while screens may prefer hydrated UI models.
+- UI hydration stays isolated. This matters because some read-model endpoints still use normalized transport payloads, such as `GET /api/v1/appointments`, while screens may prefer hydrated UI models.
 
 ## Package Placement Recommendation
 

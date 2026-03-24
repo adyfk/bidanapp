@@ -194,14 +194,14 @@ Setelah fitur ini live, metrik yang paling masuk akal dipantau:
 
 ## Current Frontend Scope
 
-Implementasi saat ini bersifat frontend/demo:
+Implementasi saat ini sudah melewati tahap frontend-only awal:
 
 - UI entry point sudah tersedia di profile customer dan professional
 - form ticket sudah bisa diisi
-- recent ticket state bersifat local/demo
+- state support desk sekarang dipersist ke backend
 - belum ada upload file
-- belum ada integrasi backend, notif admin, atau tracking lintas device
+- belum ada upload attachment, notif admin async, atau tracking audit yang lebih detail
 
 ## Next Recommended Step
 
-Prioritas berikutnya seharusnya bukan menambah variasi UI lagi, tetapi menghubungkan flow ini ke backend support ticket yang benar. Begitu ticket punya ID server, status history, dan assignment admin, fitur ini baru benar-benar operasional.
+Prioritas berikutnya bukan lagi sekadar menyambungkan storage dasar, tetapi memecah snapshot support desk menjadi entitas support ticket yang lebih ter-normalisasi. Begitu ticket punya audit trail granular, attachment, assignment history, dan notification fanout, fitur ini baru benar-benar siap skala operasional.

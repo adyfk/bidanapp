@@ -3,12 +3,13 @@
 import { Save } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { accentPrimaryButtonClass, blushSubtlePanelClass, softWhitePanelClass } from '@/components/ui/tokens';
-import { MOCK_AREAS } from '@/lib/mock-db/catalog';
+import type { Area } from '@/types/catalog';
 import { dashboardInputClass, dashboardTextareaClass, dashboardTextareaTallClass } from './editorStyles';
 import { DashboardDialog, LabeledField, SelectableChip, SwitchRow } from './ProfessionalDashboardShared';
 import type { CoverageDraft } from './types';
 
 interface ProfessionalDashboardCoverageEditorDialogProps {
+  areas: Area[];
   coverageDraft: CoverageDraft;
   onChangeDraft: (draft: CoverageDraft) => void;
   onClose: () => void;
@@ -16,6 +17,7 @@ interface ProfessionalDashboardCoverageEditorDialogProps {
 }
 
 export const ProfessionalDashboardCoverageEditorDialog = ({
+  areas,
   coverageDraft,
   onChangeDraft,
   onClose,
@@ -130,7 +132,7 @@ export const ProfessionalDashboardCoverageEditorDialog = ({
           <div>
             <p className="mb-2 text-[12px] font-semibold text-slate-500">{t('coverage.fields.areaSelection')}</p>
             <div className="flex flex-wrap gap-2">
-              {MOCK_AREAS.map((area) => (
+              {areas.map((area) => (
                 <SelectableChip
                   key={area.id}
                   isActive={coverageDraft.coverageAreaIds.includes(area.id)}

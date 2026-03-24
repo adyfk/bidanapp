@@ -1,17 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import adminStaffData from '@/data/mock-db/admin_staff.json';
-import appRuntimeSelectionsData from '@/data/mock-db/app_runtime_selections.json';
-import appointmentsData from '@/data/mock-db/appointments.json';
-import consumersData from '@/data/mock-db/consumers.json';
-import homeFeedSnapshotsData from '@/data/mock-db/home_feed_snapshots.json';
-import professionalServiceOfferingsData from '@/data/mock-db/professional_service_offerings.json';
-import professionalsData from '@/data/mock-db/professionals.json';
-import referenceAppointmentStatusesData from '@/data/mock-db/reference_appointment_statuses.json';
-import serviceCategoriesData from '@/data/mock-db/service_categories.json';
-import servicesData from '@/data/mock-db/services.json';
-import userContextsData from '@/data/mock-db/user_contexts.json';
+import { useEffect, useRef, useState } from 'react';
+import { type AdminConsoleReadModelSnapshot, hydrateAdminConsoleReadModelFromApi } from '@/lib/admin-read-model-api';
+import {
+  hydrateAdminConsoleFromApi,
+  hydrateAdminConsoleTableFromApi,
+  syncAdminConsoleTableToApi,
+  syncAdminConsoleToApi,
+} from '@/lib/app-state-api';
 import type { AppointmentTimelineEvent } from '@/types/appointments';
 import type { Category, GlobalService, Professional } from '@/types/catalog';
 import type {
@@ -23,10 +19,9 @@ import type {
   ProfessionalRow,
   ProfessionalServiceOfferingRow,
   UserContextRow,
-} from '@/types/mock-db';
+} from '@/types/seed-data';
 
 const ADMIN_CONSOLE_SCHEMA_VERSION = 1;
-const adminConsoleStorageKey = 'bidanapp:admin-console';
 const adminConsoleEventName = 'bidanapp:admin-console-change';
 
 interface ReferenceAppointmentStatusRow {
@@ -74,6 +69,91 @@ interface AdminConsoleSnapshot {
   schemaVersion: typeof ADMIN_CONSOLE_SCHEMA_VERSION;
   tables: AdminConsoleTables;
 }
+let cachedAdminConsoleSnapshot: AdminConsoleSnapshot | null = null;
+
+const DEFAULT_REFERENCE_APPOINTMENT_STATUSES: ReferenceAppointmentStatusRow[] = [
+  {
+    code: 'requested',
+    description: 'Permintaan baru masuk dan menunggu tindak lanjut profesional.',
+    isActive: true,
+    isTerminal: false,
+    label: 'Requested',
+    nextStates: ['approved_waiting_payment', 'confirmed', 'rejected', 'expired'],
+    phase: 'intake',
+  },
+  {
+    code: 'approved_waiting_payment',
+    description: 'Permintaan sudah disetujui dan pelanggan menunggu untuk menyelesaikan pembayaran.',
+    isActive: true,
+    isTerminal: false,
+    label: 'Waiting Payment',
+    nextStates: ['paid', 'cancelled', 'expired'],
+    phase: 'payment',
+  },
+  {
+    code: 'paid',
+    description: 'Pembayaran sudah diterima dan layanan menunggu konfirmasi jadwal akhir.',
+    isActive: true,
+    isTerminal: false,
+    label: 'Paid',
+    nextStates: ['confirmed', 'cancelled', 'expired'],
+    phase: 'payment',
+  },
+  {
+    code: 'confirmed',
+    description: 'Jadwal layanan sudah dikonfirmasi kedua pihak.',
+    isActive: true,
+    isTerminal: false,
+    label: 'Confirmed',
+    nextStates: ['in_service', 'cancelled'],
+    phase: 'delivery',
+  },
+  {
+    code: 'in_service',
+    description: 'Layanan sedang berlangsung.',
+    isActive: true,
+    isTerminal: false,
+    label: 'In Service',
+    nextStates: ['completed', 'cancelled'],
+    phase: 'delivery',
+  },
+  {
+    code: 'completed',
+    description: 'Layanan selesai dan appointment ditutup.',
+    isActive: true,
+    isTerminal: true,
+    label: 'Completed',
+    nextStates: [],
+    phase: 'closed',
+  },
+  {
+    code: 'cancelled',
+    description: 'Appointment dibatalkan oleh salah satu pihak.',
+    isActive: true,
+    isTerminal: true,
+    label: 'Cancelled',
+    nextStates: [],
+    phase: 'closed',
+  },
+  {
+    code: 'rejected',
+    description: 'Permintaan ditolak sebelum layanan dikonfirmasi.',
+    isActive: true,
+    isTerminal: true,
+    label: 'Rejected',
+    nextStates: [],
+    phase: 'closed',
+  },
+  {
+    code: 'expired',
+    description: 'Permintaan melewati SLA atau batas waktu pembayaran.',
+    isActive: true,
+    isTerminal: true,
+    label: 'Expired',
+    nextStates: [],
+    phase: 'closed',
+  },
+];
 
 const cloneValue = <T>(value: T): T => {
   if (typeof structuredClone === 'function') {
@@ -92,25 +172,95 @@ const reindexRows = <TRow extends { index?: number }>(rows: TRow[]) =>
 const replaceRowById = <TRow extends { id: string }>(rows: TRow[], rowId: string, changes: Partial<TRow>) =>
   rows.map((row) => (row.id === rowId ? ({ ...row, ...changes } as TRow) : row));
 
-const buildSeedTables = (): AdminConsoleTables => ({
-  admin_staff: cloneValue(adminStaffData as AdminStaffRow[]),
-  app_runtime_selections: cloneValue(appRuntimeSelectionsData as AppRuntimeSelectionRow[]),
-  appointments: cloneValue(appointmentsData as AppointmentRow[]),
-  consumers: cloneValue(consumersData as ConsumerRow[]),
-  home_feed_snapshots: cloneValue(homeFeedSnapshotsData as HomeFeedSnapshotRow[]),
-  professional_service_offerings: cloneValue(professionalServiceOfferingsData as ProfessionalServiceOfferingRow[]),
-  professionals: cloneValue(professionalsData as ProfessionalRow[]),
-  reference_appointment_statuses: cloneValue(referenceAppointmentStatusesData as ReferenceAppointmentStatusRow[]),
-  service_categories: cloneValue(serviceCategoriesData as Category[]),
-  services: cloneValue(servicesData as GlobalService[]),
-  user_contexts: cloneValue(userContextsData as UserContextRow[]),
+const setTableRows = <TName extends AdminConsoleTableName>(
+  tables: AdminConsoleTables,
+  tableName: TName,
+  rows: AdminConsoleTables[TName],
+) => {
+  tables[tableName] = rows;
+};
+
+const setPartialTableRows = <TName extends AdminConsoleTableName>(
+  tables: Partial<AdminConsoleTables>,
+  tableName: TName,
+  rows: AdminConsoleTables[TName],
+) => {
+  tables[tableName] = rows;
+};
+
+const buildDefaultTables = (): AdminConsoleTables => ({
+  admin_staff: [],
+  app_runtime_selections: [],
+  appointments: [],
+  consumers: [],
+  home_feed_snapshots: [],
+  professional_service_offerings: [],
+  professionals: [],
+  reference_appointment_statuses: cloneValue(DEFAULT_REFERENCE_APPOINTMENT_STATUSES),
+  service_categories: [],
+  services: [],
+  user_contexts: [],
 });
 
 const buildDefaultSnapshot = (): AdminConsoleSnapshot => ({
   savedAt: new Date().toISOString(),
   schemaVersion: ADMIN_CONSOLE_SCHEMA_VERSION,
-  tables: buildSeedTables(),
+  tables: buildDefaultTables(),
 });
+
+const buildSnapshotFromReadModel = (readModel: AdminConsoleReadModelSnapshot): AdminConsoleSnapshot => {
+  const tables = buildDefaultTables();
+
+  return {
+    savedAt: new Date().toISOString(),
+    schemaVersion: ADMIN_CONSOLE_SCHEMA_VERSION,
+    tables: {
+      ...tables,
+      app_runtime_selections: reindexRows(cloneValue(readModel.appRuntimeSelections)),
+      appointments: reindexRows(cloneValue(readModel.appointments)),
+      consumers: reindexRows(cloneValue(readModel.consumers)),
+      home_feed_snapshots: reindexRows(cloneValue(readModel.homeFeedSnapshots)),
+      professional_service_offerings: reindexRows(cloneValue(readModel.professionalServiceOfferings)),
+      professionals: reindexRows(cloneValue(readModel.professionals)),
+      service_categories: reindexRows(cloneValue(readModel.serviceCategories)),
+      services: reindexRows(cloneValue(readModel.services)),
+      user_contexts: reindexRows(cloneValue(readModel.userContexts)),
+    },
+  };
+};
+
+const buildSnapshotFromSources = ({
+  readModel,
+  tableRows,
+}: {
+  readModel?: AdminConsoleReadModelSnapshot;
+  tableRows?: Partial<AdminConsoleTables>;
+}): AdminConsoleSnapshot => {
+  const snapshot = readModel ? buildSnapshotFromReadModel(readModel) : buildDefaultSnapshot();
+  const nextTables = cloneValue(snapshot.tables) as AdminConsoleTables;
+
+  if (tableRows) {
+    for (const tableName of ADMIN_CONSOLE_TABLE_NAMES) {
+      const rows = tableRows[tableName];
+
+      if (!Array.isArray(rows)) {
+        continue;
+      }
+
+      setTableRows(
+        nextTables,
+        tableName,
+        reindexRows(cloneValue(rows as { index?: number }[])) as AdminConsoleTables[typeof tableName],
+      );
+    }
+  }
+
+  return {
+    ...snapshot,
+    savedAt: new Date().toISOString(),
+    tables: nextTables,
+  };
+};
 
 const normalizeSnapshot = (value: unknown): AdminConsoleSnapshot => {
   const defaultSnapshot = buildDefaultSnapshot();
@@ -129,7 +279,7 @@ const normalizeSnapshot = (value: unknown): AdminConsoleSnapshot => {
     return defaultSnapshot;
   }
 
-  const tables = buildSeedTables();
+  const tables = buildDefaultTables();
   const nextTables = tables as Record<AdminConsoleTableName, AdminConsoleTables[AdminConsoleTableName]>;
 
   for (const tableName of ADMIN_CONSOLE_TABLE_NAMES) {
@@ -152,30 +302,89 @@ const normalizeSnapshot = (value: unknown): AdminConsoleSnapshot => {
 };
 
 const readAdminConsoleSnapshot = (): AdminConsoleSnapshot => {
-  if (typeof window === 'undefined') {
-    return buildDefaultSnapshot();
-  }
-
-  try {
-    const storedValue = window.localStorage.getItem(adminConsoleStorageKey);
-
-    if (!storedValue) {
-      return buildDefaultSnapshot();
-    }
-
-    return normalizeSnapshot(JSON.parse(storedValue));
-  } catch {
-    return buildDefaultSnapshot();
-  }
+  return cachedAdminConsoleSnapshot || buildDefaultSnapshot();
 };
 
-const persistAdminConsoleSnapshot = (snapshot: AdminConsoleSnapshot) => {
+const writeAdminConsoleSnapshotToStorage = (snapshot: AdminConsoleSnapshot) => {
+  cachedAdminConsoleSnapshot = normalizeSnapshot(snapshot);
+
   if (typeof window === 'undefined') {
     return;
   }
 
-  window.localStorage.setItem(adminConsoleStorageKey, JSON.stringify(snapshot));
   window.dispatchEvent(new Event(adminConsoleEventName));
+};
+
+export const clearAdminConsoleSnapshotCache = () => {
+  writeAdminConsoleSnapshotToStorage(buildDefaultSnapshot());
+};
+
+const hydrateAdminConsoleTablesFromApi = async (): Promise<Partial<AdminConsoleTables> | undefined> => {
+  if (typeof window === 'undefined') {
+    return undefined;
+  }
+
+  const entries = await Promise.all(
+    ADMIN_CONSOLE_TABLE_NAMES.map(async (tableName) => {
+      const apiState = await hydrateAdminConsoleTableFromApi(tableName);
+
+      return [tableName, apiState] as const;
+    }),
+  );
+  const nextTables: Partial<AdminConsoleTables> = {};
+  let hasHydratedTable = false;
+
+  for (const [tableName, apiState] of entries) {
+    if (!apiState || !Array.isArray(apiState.rows)) {
+      continue;
+    }
+
+    setPartialTableRows(
+      nextTables,
+      tableName,
+      reindexRows(cloneValue(apiState.rows as { index?: number }[])) as AdminConsoleTables[typeof tableName],
+    );
+    hasHydratedTable = true;
+  }
+
+  return hasHydratedTable ? nextTables : undefined;
+};
+
+const persistAdminConsoleSnapshot = (snapshot: AdminConsoleSnapshot, syncBackend: boolean) => {
+  writeAdminConsoleSnapshotToStorage(snapshot);
+
+  if (syncBackend) {
+    syncAdminConsoleToApi({
+      savedAt: snapshot.savedAt,
+      schemaVersion: snapshot.schemaVersion,
+      tables: Object.fromEntries(
+        ADMIN_CONSOLE_TABLE_NAMES.map((tableName) => [
+          tableName,
+          snapshot.tables[tableName] as unknown as Array<Record<string, unknown>>,
+        ]),
+      ),
+    });
+  }
+};
+
+const persistAdminConsoleTables = (
+  snapshot: AdminConsoleSnapshot,
+  tableNames: AdminConsoleTableName[],
+  syncBackend: boolean,
+) => {
+  writeAdminConsoleSnapshotToStorage(snapshot);
+
+  if (!syncBackend) {
+    return;
+  }
+
+  for (const tableName of tableNames) {
+    syncAdminConsoleTableToApi(tableName, {
+      rows: snapshot.tables[tableName] as unknown as Array<Record<string, unknown>>,
+      savedAt: snapshot.savedAt,
+      schemaVersion: snapshot.schemaVersion,
+    });
+  }
 };
 
 const parseNumber = (value: string, fallback = 0) => {
@@ -233,13 +442,14 @@ const createAdminRequestedTimeline = ({
     createdAtLabel: formatTimelineLabel(requestedAt),
     customerSummary: `Permintaan ${serviceName} dibuat ulang dari admin console dan menunggu tindak lanjut operasional.`,
     id: `${appointmentId}-timeline-requested`,
-    internalNote: `Booking ${appointmentId} dibuat dari admin console sebagai mock operasional baru.`,
+    internalNote: `Booking ${appointmentId} dibuat dari admin console sebagai data operasional baru.`,
     toStatus: 'requested',
   },
 ];
 
 export const useAdminConsoleData = () => {
   const [snapshot, setSnapshot] = useState<AdminConsoleSnapshot>(() => readAdminConsoleSnapshot());
+  const hasLoadedBackendRef = useRef(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -251,23 +461,64 @@ export const useAdminConsoleData = () => {
     };
 
     syncSnapshot();
-    window.addEventListener('storage', syncSnapshot);
     window.addEventListener(adminConsoleEventName, syncSnapshot);
 
+    void hydrateAdminConsoleFromApi()
+      .then(async (apiState) => {
+        if (apiState) {
+          const nextSnapshot = normalizeSnapshot(apiState);
+          setSnapshot(nextSnapshot);
+          writeAdminConsoleSnapshotToStorage(nextSnapshot);
+          return;
+        }
+
+        const [tableRows, readModel] = await Promise.all([
+          hydrateAdminConsoleTablesFromApi(),
+          hydrateAdminConsoleReadModelFromApi(),
+        ]);
+
+        if (!tableRows && !readModel) {
+          return;
+        }
+
+        const nextSnapshot = buildSnapshotFromSources({
+          readModel,
+          tableRows,
+        });
+        setSnapshot(nextSnapshot);
+        writeAdminConsoleSnapshotToStorage(nextSnapshot);
+      })
+      .finally(() => {
+        hasLoadedBackendRef.current = true;
+      });
+
     return () => {
-      window.removeEventListener('storage', syncSnapshot);
       window.removeEventListener(adminConsoleEventName, syncSnapshot);
     };
   }, []);
 
   const updateSnapshot = (updater: (currentSnapshot: AdminConsoleSnapshot) => AdminConsoleSnapshot) => {
     setSnapshot((currentSnapshot) => {
+      const updatedSnapshot = updater(currentSnapshot);
+
+      if (updatedSnapshot === currentSnapshot) {
+        return currentSnapshot;
+      }
+
       const nextSnapshot = {
-        ...updater(currentSnapshot),
+        ...updatedSnapshot,
         savedAt: new Date().toISOString(),
       };
+      const changedTableNames = ADMIN_CONSOLE_TABLE_NAMES.filter(
+        (tableName) => currentSnapshot.tables[tableName] !== nextSnapshot.tables[tableName],
+      );
 
-      persistAdminConsoleSnapshot(nextSnapshot);
+      if (changedTableNames.length > 0 && changedTableNames.length < ADMIN_CONSOLE_TABLE_NAMES.length) {
+        persistAdminConsoleTables(nextSnapshot, changedTableNames, hasLoadedBackendRef.current);
+      } else {
+        persistAdminConsoleSnapshot(nextSnapshot, hasLoadedBackendRef.current);
+      }
+
       return nextSnapshot;
     });
   };
@@ -323,8 +574,8 @@ export const useAdminConsoleData = () => {
         avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop',
         id: createTimestampId('consumer'),
         index: currentSnapshot.tables.consumers.length + 1,
-        name: 'Customer Demo Baru',
-        phone: '+62 812 0000 0000',
+        name: `Customer ${currentSnapshot.tables.consumers.length + 1}`,
+        phone: '',
       };
       nextRow = row;
 
@@ -337,7 +588,7 @@ export const useAdminConsoleData = () => {
   const deleteConsumer = (consumerId: string) => {
     if (snapshot.tables.consumers.length <= 1) {
       return {
-        message: 'Minimal harus ada satu customer demo.',
+        message: 'Minimal harus ada satu customer aktif.',
         ok: false,
       };
     }
@@ -397,7 +648,7 @@ export const useAdminConsoleData = () => {
   const deleteUserContext = (contextId: string) => {
     if (snapshot.tables.user_contexts.length <= 1) {
       return {
-        message: 'Minimal harus ada satu user context demo.',
+        message: 'Minimal harus ada satu user context aktif.',
         ok: false,
       };
     }
@@ -445,12 +696,12 @@ export const useAdminConsoleData = () => {
         index: currentSnapshot.tables.professionals.length + 1,
         isAvailable: false,
         location: 'Jakarta',
-        name: `Profesional Demo ${nextId}`,
+        name: `Profesional ${nextId}`,
         rating: 0,
         responseTime: '< 1 jam',
         reviews: '0',
-        slug: `profesional-demo-${nextId}`,
-        title: 'Profesional baru',
+        slug: `profesional-${nextId}`,
+        title: 'Tenaga kesehatan',
       };
       nextRow = row;
 
@@ -463,7 +714,7 @@ export const useAdminConsoleData = () => {
   const deleteProfessional = (professionalId: string) => {
     if (snapshot.tables.professionals.length <= 1) {
       return {
-        message: 'Minimal harus ada satu profesional demo.',
+        message: 'Minimal harus ada satu profesional aktif.',
         ok: false,
       };
     }
@@ -502,14 +753,14 @@ export const useAdminConsoleData = () => {
       const row: Category = {
         accentColor: '#E2E8F0',
         coverImage: 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=1200&auto=format&fit=crop',
-        description: 'Kategori baru dari admin console.',
+        description: 'Lengkapi deskripsi kategori layanan ini dari admin console.',
         iconImage: 'https://images.unsplash.com/photo-1544126592-807ade215a0b?q=80&w=200&auto=format&fit=crop',
         id: nextId,
         image: 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=600&auto=format&fit=crop',
         index: currentSnapshot.tables.service_categories.length + 1,
-        name: 'Kategori Baru',
+        name: `Kategori ${currentSnapshot.tables.service_categories.length + 1}`,
         overviewPoints: ['Lengkapi poin kategori', 'Tambahkan use case', 'Atur service terkait'],
-        shortLabel: 'Baru',
+        shortLabel: 'Layanan',
       };
       nextRow = row;
 
@@ -559,20 +810,20 @@ export const useAdminConsoleData = () => {
         categoryId: categoryId || currentSnapshot.tables.service_categories[0]?.id || 'general',
         coverImage: 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=1200&auto=format&fit=crop',
         defaultMode: 'home_visit',
-        description: 'Deskripsi layanan baru dari admin console.',
+        description: 'Lengkapi deskripsi layanan ini dari admin console.',
         highlights: ['Lengkapi highlights layanan', 'Atur provider terkait', 'Review mode delivery'],
         id: nextId,
         image: 'https://images.unsplash.com/photo-1544126592-807ade215a0b?q=80&w=400&auto=format&fit=crop',
         index: currentSnapshot.tables.services.length + 1,
-        name: `Layanan Baru ${nextId.toUpperCase()}`,
+        name: `Layanan ${nextId.toUpperCase()}`,
         serviceModes: {
           homeVisit: true,
           online: false,
           onsite: false,
         },
-        shortDescription: 'Ringkasan singkat layanan baru.',
+        shortDescription: 'Lengkapi ringkasan layanan ini.',
         slug: nextSlug,
-        tags: ['Baru', 'Admin'],
+        tags: ['Admin'],
       };
       nextRow = row;
 
@@ -650,7 +901,7 @@ export const useAdminConsoleData = () => {
         price: 'Rp 200.000',
         professionalId: targetProfessionalId,
         serviceId: targetServiceId,
-        summary: 'Offering baru dari admin console',
+        summary: 'Lengkapi ringkasan pricing dan cakupan offering ini.',
         supportsHomeVisit: true,
         supportsOnline: false,
         supportsOnsite: false,
@@ -755,13 +1006,13 @@ export const useAdminConsoleData = () => {
   };
 
   const resetTable = (tableName: AdminConsoleTableName) => {
-    const seedTables = buildSeedTables();
+    const baselineTables = buildDefaultTables();
 
     updateSnapshot((currentSnapshot) => ({
       ...currentSnapshot,
       tables: {
         ...currentSnapshot.tables,
-        [tableName]: seedTables[tableName],
+        [tableName]: baselineTables[tableName],
       },
     }));
   };
@@ -769,7 +1020,7 @@ export const useAdminConsoleData = () => {
   const resetAll = () => {
     const nextSnapshot = buildDefaultSnapshot();
     setSnapshot(nextSnapshot);
-    persistAdminConsoleSnapshot(nextSnapshot);
+    persistAdminConsoleSnapshot(nextSnapshot, hasLoadedBackendRef.current);
   };
 
   const importSnapshot = (value: string) => {
@@ -777,7 +1028,7 @@ export const useAdminConsoleData = () => {
     const nextSnapshot = normalizeSnapshot(parsed);
 
     setSnapshot(nextSnapshot);
-    persistAdminConsoleSnapshot(nextSnapshot);
+    persistAdminConsoleSnapshot(nextSnapshot, hasLoadedBackendRef.current);
   };
 
   const getServicesForProfessional = (professionalId: string) =>
@@ -786,7 +1037,7 @@ export const useAdminConsoleData = () => {
   const getProvidersCountForService = (serviceId: string) =>
     snapshot.tables.professional_service_offerings.filter((offering) => offering.serviceId === serviceId).length;
 
-  const seedTables = buildSeedTables();
+  const seedTables = buildDefaultTables();
   const getSeedTableRows = <TName extends AdminConsoleTableName>(tableName: TName) => seedTables[tableName];
   const getTableMeta = (tableName: AdminConsoleTableName) => {
     const currentRows = snapshot.tables[tableName];

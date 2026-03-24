@@ -11,6 +11,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres-data:/var/lib/postgresql
 
@@ -36,23 +38,51 @@ services:
       APP_ENV: ${APP_ENV}
       APP_NAME: bidanapp-backend
       APP_VERSION: ${APP_VERSION}
+      AUTH_COOKIE_DOMAIN: ${AUTH_COOKIE_DOMAIN:-}
+      AUTH_COOKIE_PATH: ${AUTH_COOKIE_PATH:-/api/v1}
+      AUTH_COOKIE_SECURE: ${AUTH_COOKIE_SECURE:-true}
+      AUTH_COOKIE_SAME_SITE: ${AUTH_COOKIE_SAME_SITE:-lax}
+      ADMIN_AUTH_COOKIE_NAME: ${ADMIN_AUTH_COOKIE_NAME:-bidanapp_admin_session}
+      CUSTOMER_AUTH_COOKIE_NAME: ${CUSTOMER_AUTH_COOKIE_NAME:-bidanapp_customer_session}
+      PROFESSIONAL_AUTH_COOKIE_NAME: ${PROFESSIONAL_AUTH_COOKIE_NAME:-bidanapp_professional_session}
+      AUTH_RATE_LIMIT_WINDOW: ${AUTH_RATE_LIMIT_WINDOW:-5m}
+      AUTH_RATE_LIMIT_MAX_ATTEMPTS: ${AUTH_RATE_LIMIT_MAX_ATTEMPTS:-10}
+      ADMIN_AUTH_SESSION_TTL: ${ADMIN_AUTH_SESSION_TTL:-24h}
+      CUSTOMER_AUTH_SESSION_TTL: ${CUSTOMER_AUTH_SESSION_TTL:-24h}
+      PROFESSIONAL_AUTH_SESSION_TTL: ${PROFESSIONAL_AUTH_SESSION_TTL:-24h}
+      ADMIN_CONSOLE_CREDENTIALS_JSON: ${ADMIN_CONSOLE_CREDENTIALS_JSON:-}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
       DATABASE_URL: ${DATABASE_URL}
       HTTP_HOST: 0.0.0.0
       HTTP_PORT: 8080
       LOG_FORMAT: ${LOG_FORMAT:-json}
       LOG_LEVEL: ${LOG_LEVEL:-info}
-      MOCK_DB_DIR: /app/mock-db
       REDIS_URL: ${REDIS_URL}
     image: ${BACKEND_IMAGE}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:8080/api/v1/health >/dev/null"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     ports:
       - "${BACKEND_PORT:-8080}:8080"
     restart: unless-stopped
 
   frontend:
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+    environment:
+      HOSTNAME: 0.0.0.0
+      PORT: 3000
     image: ${FRONTEND_IMAGE}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:3000 >/dev/null"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
     restart: unless-stopped

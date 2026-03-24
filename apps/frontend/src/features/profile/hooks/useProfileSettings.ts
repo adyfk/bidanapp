@@ -1,20 +1,18 @@
 'use client';
 
-import { useState } from 'react';
-import { ACTIVE_CONSUMER } from '@/lib/mock-db/runtime';
+import { useEffect, useState } from 'react';
+import { useAppShell } from '@/lib/use-app-shell';
+import type { CustomerAuthSessionState } from '@/types/customer-auth';
 
 export type ProfileSheetKey = 'account' | 'security' | null;
 export type ProfileSaveState = 'idle' | 'success' | 'error';
-export type ProfileSaveErrorKey = 'nameRequired' | 'phoneRequired' | 'supportContactIncomplete' | null;
-export type PasswordSaveErrorKey = 'currentRequired' | 'newPasswordWeak' | 'confirmMismatch' | null;
+export type ProfileSaveErrorKey = 'nameRequired' | 'phoneRequired' | 'saveFailed' | null;
+export type PasswordSaveErrorKey = 'currentRequired' | 'newPasswordWeak' | 'confirmMismatch' | 'saveFailed' | null;
 
 export interface ProfileDraft {
+  city: string;
   fullName: string;
   phone: string;
-  careFocus: string;
-  supportContactName: string;
-  supportContactRelation: string;
-  supportContactPhone: string;
 }
 
 export interface PasswordDraft {
@@ -23,14 +21,11 @@ export interface PasswordDraft {
   confirmPassword: string;
 }
 
-const initialProfileDraft: ProfileDraft = {
-  fullName: ACTIVE_CONSUMER.name,
-  phone: ACTIVE_CONSUMER.phone,
-  careFocus: 'Pendampingan rumah, edukasi keluarga, dan follow-up terjadwal.',
-  supportContactName: '',
-  supportContactRelation: '',
-  supportContactPhone: '',
-};
+const buildInitialProfileDraft = (fullName: string, phone: string, city: string): ProfileDraft => ({
+  city,
+  fullName,
+  phone,
+});
 
 const initialPasswordDraft: PasswordDraft = {
   currentPassword: '',
@@ -41,14 +36,39 @@ const initialPasswordDraft: PasswordDraft = {
 const sanitizePhone = (value: string) => value.replace(/[^\d+\s()-]/g, '');
 const hasValue = (value: string) => value.trim().length > 0;
 
-export const useProfileSettings = () => {
+interface UseProfileSettingsOptions {
+  customerSession: CustomerAuthSessionState;
+  updateAccount: (input: {
+    city?: string;
+    displayName: string;
+    phone: string;
+  }) => Promise<CustomerAuthSessionState | undefined>;
+  updatePassword: (input: {
+    currentPassword: string;
+    newPassword: string;
+  }) => Promise<CustomerAuthSessionState | undefined>;
+}
+
+export const useProfileSettings = ({ customerSession, updateAccount, updatePassword }: UseProfileSettingsOptions) => {
+  const { currentConsumer } = useAppShell();
   const [activeSheet, setActiveSheet] = useState<ProfileSheetKey>(null);
-  const [profileDraft, setProfileDraft] = useState<ProfileDraft>(initialProfileDraft);
+  const [profileDraft, setProfileDraft] = useState<ProfileDraft>(() =>
+    buildInitialProfileDraft(currentConsumer.name, currentConsumer.phone, customerSession.city || ''),
+  );
   const [passwordDraft, setPasswordDraft] = useState<PasswordDraft>(initialPasswordDraft);
   const [profileSaveState, setProfileSaveState] = useState<ProfileSaveState>('idle');
   const [profileErrorKey, setProfileErrorKey] = useState<ProfileSaveErrorKey>(null);
   const [passwordSaveState, setPasswordSaveState] = useState<ProfileSaveState>('idle');
   const [passwordErrorKey, setPasswordErrorKey] = useState<PasswordSaveErrorKey>(null);
+
+  useEffect(() => {
+    setProfileDraft((current) => ({
+      ...current,
+      city: customerSession.city || '',
+      fullName: currentConsumer.name,
+      phone: currentConsumer.phone,
+    }));
+  }, [currentConsumer.name, currentConsumer.phone, customerSession.city]);
 
   const passwordChecks = {
     minLength: passwordDraft.newPassword.length >= 8,
@@ -66,11 +86,11 @@ export const useProfileSettings = () => {
 
     setProfileDraft((current) => ({
       ...current,
-      [field]: field === 'phone' || field === 'supportContactPhone' ? sanitizePhone(String(value)) : value,
+      [field]: field === 'phone' ? sanitizePhone(String(value)) : value,
     }));
   };
 
-  const saveProfile = () => {
+  const saveProfile = async () => {
     if (!hasValue(profileDraft.fullName)) {
       setProfileSaveState('error');
       setProfileErrorKey('nameRequired');
@@ -83,27 +103,30 @@ export const useProfileSettings = () => {
       return false;
     }
 
-    const hasAnySupportField = [
-      profileDraft.supportContactName,
-      profileDraft.supportContactRelation,
-      profileDraft.supportContactPhone,
-    ].some(hasValue);
+    try {
+      const nextSession = await updateAccount({
+        city: profileDraft.city.trim(),
+        displayName: profileDraft.fullName.trim(),
+        phone: profileDraft.phone.trim(),
+      });
+      if (!nextSession) {
+        throw new Error('customer profile sync failed');
+      }
 
-    const hasEverySupportField = [
-      profileDraft.supportContactName,
-      profileDraft.supportContactRelation,
-      profileDraft.supportContactPhone,
-    ].every(hasValue);
-
-    if (hasAnySupportField && !hasEverySupportField) {
+      setProfileDraft((current) => ({
+        ...current,
+        city: nextSession.city || '',
+        fullName: nextSession.displayName,
+        phone: nextSession.phone,
+      }));
+      setProfileSaveState('success');
+      setProfileErrorKey(null);
+      return true;
+    } catch {
       setProfileSaveState('error');
-      setProfileErrorKey('supportContactIncomplete');
+      setProfileErrorKey('saveFailed');
       return false;
     }
-
-    setProfileSaveState('success');
-    setProfileErrorKey(null);
-    return true;
   };
 
   const updatePasswordField = <K extends keyof PasswordDraft>(field: K, value: PasswordDraft[K]) => {
@@ -116,7 +139,7 @@ export const useProfileSettings = () => {
     }));
   };
 
-  const savePassword = () => {
+  const savePassword = async () => {
     if (!hasValue(passwordDraft.currentPassword)) {
       setPasswordSaveState('error');
       setPasswordErrorKey('currentRequired');
@@ -135,10 +158,24 @@ export const useProfileSettings = () => {
       return false;
     }
 
-    setPasswordSaveState('success');
-    setPasswordErrorKey(null);
-    setPasswordDraft(initialPasswordDraft);
-    return true;
+    try {
+      const nextSession = await updatePassword({
+        currentPassword: passwordDraft.currentPassword,
+        newPassword: passwordDraft.newPassword,
+      });
+      if (!nextSession) {
+        throw new Error('customer password sync failed');
+      }
+
+      setPasswordSaveState('success');
+      setPasswordErrorKey(null);
+      setPasswordDraft(initialPasswordDraft);
+      return true;
+    } catch {
+      setPasswordSaveState('error');
+      setPasswordErrorKey('saveFailed');
+      return false;
+    }
   };
 
   return {

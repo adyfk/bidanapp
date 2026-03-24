@@ -30,9 +30,8 @@ apps/frontend/src
 │   ├── backend-integration
 │   ├── professional-detail
 │   └── service-detail
-├── data/mock-db               # normalized dummy data tables before PostgreSQL
 ├── i18n                       # next-intl locale routing and request helpers
-├── lib                        # config, env, routes, mock-db adapters, backend helpers
+├── lib                        # config, env, routes, backend adapters, shell/read-model helpers
 ├── messages                   # localized message catalogs
 └── types                      # TypeScript app-specific types
 ```
@@ -53,7 +52,6 @@ Current route files include:
 - `src/app/[locale]/p/[slug]/page.tsx`
 - `src/app/[locale]/s/[slug]/page.tsx`
 - `src/app/[locale]/profile/page.tsx`
-- `src/app/[locale]/examples/backend/page.tsx`
 
 Global metadata routes also exist:
 
@@ -95,7 +93,6 @@ Examples already in the repository:
 - appointments flow split into screen, feature components, and `useAppointmentFlow`
 - professional detail split into screen, feature sections, and `useProfessionalDetail`
 - service detail split into screen, feature sections, and `useServiceDetail`
-- backend integration example isolated under its own feature
 
 Why this matters:
 
@@ -124,43 +121,17 @@ If a component becomes page-aware, it probably belongs in `components/screens` o
 
 ## 7. Data Sources In The Frontend
 
-The frontend currently consumes data from two sources:
+The frontend is backend-first.
 
-### Mock-db content
-
-Normalized table seeds live under `src/data/mock-db`:
-
-- `services.json`
-- `professionals.json`
-- `appointments.json`
-- `chat_threads.json`
-- `chat_messages.json`
-- and related relation/reference tables
-
-Frontend hydration lives under `src/lib/mock-db`:
-
-- `catalog.ts`
-- `appointments.ts`
-- `chat.ts`
-- `runtime.ts`
-- `utils.ts`
-
-Use these when the screen is still fully frontend-owned and not yet migrated to live backend data.
-
-### Live backend integration
-
-Backend integration should go through:
+Runtime data should go through:
 
 - `@bidanapp/sdk` for typed transport
 - `src/lib/backend.ts` for frontend runtime URL helpers
-- optional adapters in SDK or frontend lib layer for UI-specific mapping
+- SDK adapters in `packages/sdk/src/adapters/*`
+- frontend composition helpers such as `src/lib/public-bootstrap.ts`, `src/lib/use-app-shell.ts`, and `src/lib/use-catalog-read-model.ts`
 
-The integration example page at `/[locale]/examples/backend` is the reference implementation for:
-
-- typed REST usage
-- websocket connection setup
-- runtime version display
-- OpenAPI discovery link
+Backend-owned seed data now lives under `apps/backend/seeddata`.
+Frontend app code should not import seed JSON directly. Direct seed reads are limited to backend bootstrap/import paths and contract-oriented tests.
 
 ## 8. Runtime Configuration
 
@@ -219,7 +190,7 @@ The smoke test runs a real Next.js dev server, so it is slower than a pure unit 
 
 Recommended checklist:
 
-1. Decide whether the feature is mock-db-backed, SDK-backed, or mixed.
+1. Decide which backend contract or read-model surface owns the feature data.
 2. Add or update route files under `src/app/[locale]` as needed.
 3. Create or update a screen container in `components/screens`.
 4. Split complex sections into `features/<feature>/components`.
@@ -227,6 +198,7 @@ Recommended checklist:
 6. Use `@/i18n/routing` and `@/lib/routes.ts` for navigation.
 7. If the feature consumes backend data, use `@bidanapp/sdk`.
 8. If the feature changes route coverage, update or extend the smoke test.
+9. If the feature needs new backend data, add the route or adapter first instead of reviving frontend seed hydration.
 
 ## 12. Common Mistakes To Avoid
 
@@ -235,4 +207,4 @@ Recommended checklist:
 - putting page-specific logic into shared UI primitives
 - reintroducing monolithic screen components when sections and hooks are more appropriate
 - forgetting to validate both `/id/*` and `/en/*`
-- treating mock-db seed content as if it were already persistent backend data
+- reading seed JSON directly from frontend runtime code instead of going through backend-owned contracts

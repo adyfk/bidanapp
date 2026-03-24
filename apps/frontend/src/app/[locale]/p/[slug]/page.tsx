@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ProfessionalDetailScreen } from '@/components/screens/ProfessionalDetailScreen';
+import { getProfessionalCategoryLabel } from '@/lib/catalog-selectors';
 import { APP_CONFIG } from '@/lib/config';
-import { getProfessionalBySlug, getProfessionalCategoryLabel } from '@/lib/mock-db/catalog';
+import { getPublicBootstrapData } from '@/lib/public-bootstrap';
 
 interface Props {
   params: Promise<{
@@ -10,9 +11,20 @@ interface Props {
   }>;
 }
 
+export async function generateStaticParams() {
+  const bootstrap = await getPublicBootstrapData();
+
+  return bootstrap.catalog.professionals.map((professional) => ({
+    slug: professional.slug,
+  }));
+}
+
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
-  const professional = getProfessionalBySlug(params.slug);
+  const bootstrap = await getPublicBootstrapData();
+  const professional = bootstrap.catalog.professionals.find(
+    (candidateProfessional) => candidateProfessional.slug === params.slug,
+  );
 
   if (!professional) {
     return {
@@ -20,7 +32,12 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     };
   }
 
-  const profCategory = getProfessionalCategoryLabel(professional) || 'Professional';
+  const profCategory =
+    getProfessionalCategoryLabel({
+      categories: bootstrap.catalog.categories,
+      professional,
+      services: bootstrap.catalog.services,
+    }) || 'Professional';
 
   return {
     title: `${professional.name} - ${profCategory} | ${APP_CONFIG.appName}`,
@@ -41,11 +58,22 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
 export default async function ProfessionalDetailRoute(props: Props) {
   const params = await props.params;
-  const professional = getProfessionalBySlug(params.slug);
+  const bootstrap = await getPublicBootstrapData();
+  const professional = bootstrap.catalog.professionals.find(
+    (candidateProfessional) => candidateProfessional.slug === params.slug,
+  );
 
   if (!professional) {
     notFound();
   }
 
-  return <ProfessionalDetailScreen professionalSlug={params.slug} />;
+  return (
+    <ProfessionalDetailScreen
+      areas={bootstrap.catalog.areas}
+      categories={bootstrap.catalog.categories}
+      initialProfessional={professional}
+      professionalSlug={params.slug}
+      services={bootstrap.catalog.services}
+    />
+  );
 }

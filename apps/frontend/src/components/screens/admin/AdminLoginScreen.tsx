@@ -1,18 +1,11 @@
 'use client';
 
-import { AlertCircle, ArrowRight, Building2, Clock3, KeyRound, LoaderCircle, Mail, Phone } from 'lucide-react';
+import { AlertCircle, ArrowRight, Building2, KeyRound, LoaderCircle, LockKeyhole, Mail } from 'lucide-react';
 import type { Route } from 'next';
 import { useRouter } from 'next/navigation';
-import { type ReactNode, useEffect, useState } from 'react';
-import { ADMIN_DEMO_PASSWORD, useAdminSession } from '@/features/admin/hooks/useAdminSession';
-import { ADMIN_NAV_ITEMS, ADMIN_ROUTES, getAdminNavItem } from '@/features/admin/lib/routes';
-
-const focusAreaDescriptions = {
-  catalog: 'Persona ini akan lebih sering bekerja di struktur katalog, mode layanan, dan offering.',
-  ops: 'Persona ini cocok untuk jalur customer, appointment, dan operasional harian.',
-  reviews: 'Persona ini diposisikan untuk approval FIFO, publish, dan QA profil profesional.',
-  support: 'Persona ini fokus di triage support, assignment PIC, dan eskalasi kasus aktif.',
-} as const;
+import { useEffect, useState } from 'react';
+import { useAdminSession } from '@/features/admin/hooks/useAdminSession';
+import { ADMIN_ROUTES, getAdminNavItem } from '@/features/admin/lib/routes';
 
 const formatDateLabel = (value?: string) => {
   if (!value) {
@@ -36,25 +29,21 @@ const InfoTile = ({ body, highlighted = false, title }: { body: string; highligh
   </div>
 );
 
-const PersonaMetaTile = ({ icon, label, value }: { icon: ReactNode; label: string; value: string }) => (
-  <div className="rounded-[22px] border border-slate-200 bg-slate-50 px-4 py-3">
-    <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-      {icon}
-      {label}
-    </div>
-    <p className="mt-2 text-sm font-semibold text-slate-800">{value}</p>
-  </div>
-);
-
 export const AdminLoginScreen = () => {
   const router = useRouter();
-  const { adminStaff, hasHydrated, isAuthenticated, login, session } = useAdminSession();
-  const [selectedAdminId, setSelectedAdminId] = useState(adminStaff[0]?.id || '');
-  const [email, setEmail] = useState(adminStaff[0]?.email || '');
-  const [password, setPassword] = useState(ADMIN_DEMO_PASSWORD);
+  const { hasHydrated, isAuthenticated, login, session } = useAdminSession();
+  const [email, setEmail] = useState(session.email || '');
+  const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const lastVisitedNavItem = getAdminNavItem(session.lastVisitedRoute);
+
+  useEffect(() => {
+    if (session.email) {
+      setEmail((currentEmail) => currentEmail || session.email);
+    }
+  }, [session.email]);
 
   useEffect(() => {
     if (hasHydrated && isAuthenticated) {
@@ -66,37 +55,18 @@ export const AdminLoginScreen = () => {
     }
   }, [hasHydrated, isAuthenticated, router, session.lastVisitedRoute]);
 
-  useEffect(() => {
-    const selectedAdmin = adminStaff.find((admin) => admin.id === selectedAdminId);
+  const canSubmit = hasHydrated && Boolean(email.trim()) && Boolean(password.trim()) && !isSubmitting;
 
-    if (selectedAdmin) {
-      setEmail(selectedAdmin.email);
-    }
-  }, [adminStaff, selectedAdminId]);
-
-  const selectedAdmin = adminStaff.find((admin) => admin.id === selectedAdminId) || adminStaff[0];
-  const selectedFocusModules = selectedAdmin
-    ? ADMIN_NAV_ITEMS.filter(
-        (item) =>
-          item.focusArea === selectedAdmin.focusArea || item.focusArea === 'all' || item.href === ADMIN_ROUTES.support,
-      ).slice(0, 4)
-    : [];
-  const canSubmit = hasHydrated && Boolean(selectedAdmin) && Boolean(email.trim()) && Boolean(password.trim());
-
-  const handleSubmit = () => {
-    if (!selectedAdmin) {
-      setErrorMessage('Roster admin tidak tersedia.');
-      return;
-    }
-
-    const didLogin = login({
-      admin: selectedAdmin,
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    const didLogin = await login({
       email: email.trim(),
       password,
     });
+    setIsSubmitting(false);
 
     if (!didLogin) {
-      setErrorMessage('Email harus sesuai dengan persona dan password demo harus benar.');
+      setErrorMessage('Email atau kata sandi admin tidak valid.');
       return;
     }
 
@@ -127,7 +97,7 @@ export const AdminLoginScreen = () => {
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,#DBEAFE_0%,transparent_34%),radial-gradient(circle_at_bottom_right,#FDE68A_0%,transparent_28%),linear-gradient(180deg,#E2E8F0_0%,#F8FAFC_34%,#F8FAFC_100%)] px-4 py-8 text-slate-900 lg:px-8">
-      <div className="mx-auto grid max-w-[1320px] gap-6 lg:grid-cols-[1.05fr_0.95fr]">
+      <div className="mx-auto grid max-w-[1280px] gap-6 lg:grid-cols-[1.05fr_0.95fr]">
         <section className="rounded-[36px] border border-white/70 bg-[linear-gradient(180deg,rgba(15,23,42,0.96)_0%,rgba(30,41,59,0.96)_100%)] p-8 text-white shadow-[0_40px_80px_-50px_rgba(15,23,42,0.75)]">
           <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/8 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-200">
             <Building2 className="h-4 w-4" />
@@ -137,24 +107,28 @@ export const AdminLoginScreen = () => {
             BidanApp Ops Console
           </h1>
           <p className="mt-5 max-w-[44ch] text-[15px] leading-7 text-slate-300">
-            Admin area ini dipisah dari shell mobile user dan professional. Gunakan untuk triage support, approval
-            profesional, kontrol katalog, operasional appointment, dan pengelolaan mock lokal.
+            Surface admin ini diproteksi oleh session backend. Gunakan email admin dan kata sandi yang diterbitkan tim
+            internal untuk masuk ke desk support, approval profesional, katalog, dan operasi appointment.
           </p>
 
           <div className="mt-10 grid gap-4 sm:grid-cols-2">
             <InfoTile
-              title="Scope aktif"
-              body="Support desk, queue approval FIFO, customer context, booking ops, catalog, dan raw mock studio."
+              title="Kontrol akses"
+              body="Autentikasi admin sekarang diterbitkan backend dan semua route admin memerlukan bearer session aktif."
+              highlighted
             />
             <InfoTile
-              title="Model data"
-              body="Perubahan admin hidup di snapshot lokal browser. Seed repo tetap aman dan tidak ditulis oleh UI."
+              title="State ops"
+              body="Desk support, data studio, dan snapshot admin hanya dihydrate setelah session tervalidasi."
             />
             <InfoTile
               title="Flow cepat"
-              body="Setelah login gunakan Ctrl/Cmd + K untuk pindah modul, lalu lanjut dari route terakhir bila tersedia."
+              body="Setelah login berhasil, console akan melanjutkan ke route terakhir bila tersedia dan quick jump tetap aktif."
             />
-            <InfoTile title="Password demo" body={ADMIN_DEMO_PASSWORD} highlighted />
+            <InfoTile
+              title="Boundary"
+              body="Kredensial admin tidak pernah divalidasi di browser. Semua verifikasi sesi berlangsung di backend."
+            />
           </div>
 
           <div className="mt-10 rounded-[30px] border border-white/10 bg-white/6 p-5">
@@ -171,7 +145,7 @@ export const AdminLoginScreen = () => {
             </div>
             <p className="mt-3 text-sm leading-7 text-slate-300">
               {lastVisitedNavItem
-                ? `Console akan melanjutkan ke ${lastVisitedNavItem.label} setelah login berhasil.`
+                ? `Session baru akan melanjutkan ke ${lastVisitedNavItem.label} setelah login berhasil.`
                 : 'Belum ada route yang tersimpan, jadi login akan memulai dari Overview.'}
             </p>
           </div>
@@ -189,138 +163,71 @@ export const AdminLoginScreen = () => {
           </div>
 
           <form
-            className="mt-8 grid gap-6"
+            className="mt-8 grid gap-5"
             onSubmit={(event) => {
               event.preventDefault();
-              handleSubmit();
+              void handleSubmit();
             }}
           >
-            <div className="grid gap-3">
-              {adminStaff.map((admin) => {
-                const isSelected = admin.id === selectedAdminId;
-
-                return (
-                  <button
-                    key={admin.id}
-                    type="button"
-                    onClick={() => setSelectedAdminId(admin.id)}
-                    className={`rounded-[24px] border px-4 py-4 text-left transition ${
-                      isSelected
-                        ? 'border-slate-900 bg-slate-900 text-white shadow-[0_18px_36px_-24px_rgba(15,23,42,0.6)]'
-                        : 'border-slate-200 bg-slate-50 text-slate-800 hover:border-slate-300 hover:bg-white'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="text-[15px] font-semibold">{admin.name}</p>
-                        <p className={`mt-1 text-[12px] ${isSelected ? 'text-slate-200' : 'text-slate-500'}`}>
-                          {admin.title}
-                        </p>
-                      </div>
-                      <span
-                        className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] ${
-                          isSelected ? 'bg-white/10 text-white' : 'bg-slate-200 text-slate-700'
-                        }`}
-                      >
-                        {admin.focusArea}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {selectedAdmin ? (
-              <div className="rounded-[30px] border border-slate-200 bg-slate-50/90 p-5">
-                <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-                      Persona preview
-                    </p>
-                    <h3 className="mt-2 text-[22px] font-black tracking-[-0.03em] text-slate-950">
-                      {selectedAdmin.name}
-                    </h3>
-                    <p className="mt-2 max-w-[52ch] text-sm leading-7 text-slate-600">
-                      {focusAreaDescriptions[selectedAdmin.focusArea]}
-                    </p>
-                  </div>
-                  <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-600">
-                    Shift {selectedAdmin.shiftLabel}
-                  </span>
-                </div>
-
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  <PersonaMetaTile icon={<Mail className="h-3.5 w-3.5" />} label="Email" value={selectedAdmin.email} />
-                  <PersonaMetaTile icon={<Phone className="h-3.5 w-3.5" />} label="Phone" value={selectedAdmin.phone} />
-                  <PersonaMetaTile
-                    icon={<Clock3 className="h-3.5 w-3.5" />}
-                    label="Presence"
-                    value={selectedAdmin.presence}
-                  />
-                  <PersonaMetaTile
-                    icon={<ArrowRight className="h-3.5 w-3.5" />}
-                    label="Priority modules"
-                    value={selectedFocusModules.map((item) => item.shortLabel).join(' · ')}
-                  />
-                </div>
-              </div>
-            ) : null}
-
-            <div className="grid gap-4">
-              <label className="grid gap-2">
-                <span className="text-[12px] font-semibold text-slate-500">Email admin</span>
+            <label className="grid gap-2">
+              <span className="text-[12px] font-semibold text-slate-500">Email admin</span>
+              <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                <Mail className="h-4 w-4 text-slate-400" />
                 <input
                   autoComplete="username"
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
-                  className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-slate-400 focus:bg-white"
-                  placeholder="admin@bidanapp.test"
+                  className="w-full bg-transparent text-sm outline-none"
+                  placeholder="admin@bidanapp.id"
                 />
-              </label>
+              </div>
+            </label>
 
-              <label className="grid gap-2">
-                <span className="text-[12px] font-semibold text-slate-500">Password demo</span>
+            <label className="grid gap-2">
+              <span className="text-[12px] font-semibold text-slate-500">Kata sandi admin</span>
+              <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                <LockKeyhole className="h-4 w-4 text-slate-400" />
                 <input
                   autoComplete="current-password"
                   type="password"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
-                  className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-slate-400 focus:bg-white"
-                  placeholder="Admin123!"
+                  className="w-full bg-transparent text-sm outline-none"
+                  placeholder="Masukkan kata sandi admin"
                 />
-              </label>
-
-              {errorMessage ? (
-                <div className="flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-                  <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
-                  <span>{errorMessage}</span>
-                </div>
-              ) : null}
-
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-                {hasHydrated
-                  ? `Setelah login, console akan membuka ${lastVisitedNavItem?.label || 'Overview'} dan quick jump siap dipakai untuk pindah modul.`
-                  : 'Memeriksa session admin lokal sebelum form diaktifkan.'}
               </div>
+            </label>
 
-              <button
-                type="submit"
-                disabled={!canSubmit}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
-              >
-                {hasHydrated ? (
-                  <>
-                    Masuk ke admin console
-                    <ArrowRight className="h-4 w-4" />
-                  </>
-                ) : (
-                  <>
-                    <LoaderCircle className="h-4 w-4 animate-spin" />
-                    Menyiapkan session
-                  </>
-                )}
-              </button>
+            {errorMessage ? (
+              <div className="flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+                <span>{errorMessage}</span>
+              </div>
+            ) : null}
+
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+              {hasHydrated
+                ? `Console akan membuka ${lastVisitedNavItem?.label || 'Overview'} setelah login, lalu seluruh modul admin akan hydrate dari backend sesuai session aktif.`
+                : 'Memeriksa session admin yang masih aktif sebelum form diaktifkan.'}
             </div>
+
+            <button
+              type="submit"
+              disabled={!canSubmit}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+            >
+              {!hasHydrated || isSubmitting ? (
+                <>
+                  <LoaderCircle className="h-4 w-4 animate-spin" />
+                  Memproses sesi
+                </>
+              ) : (
+                <>
+                  Masuk ke admin console
+                  <ArrowRight className="h-4 w-4" />
+                </>
+              )}
+            </button>
           </form>
         </section>
       </div>

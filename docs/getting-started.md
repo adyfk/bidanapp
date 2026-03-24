@@ -51,7 +51,7 @@ The current defaults are suitable for local development:
 - frontend public API base URL: `http://localhost:8080/api/v1`
 - backend port: `8080`
 - backend CORS origin: `http://localhost:3000`
-- backend mock-db dir: `../frontend/src/data/mock-db`
+- backend seed data dir: `./seeddata`
 - PostgreSQL URL: `postgres://postgres:postgres@localhost:5432/bidanapp?sslmode=disable`
 - Redis URL: `redis://localhost:6379`
 
@@ -116,6 +116,46 @@ Apply migrations:
 npm run atlas:apply --workspace @bidanapp/backend
 ```
 
+Seed the full backend runtime matrix used for QA and manual product checks:
+
+```bash
+npm run seed --workspace @bidanapp/backend
+```
+
+Emit the same seed result as structured JSON:
+
+```bash
+npm run seed:json --workspace @bidanapp/backend
+```
+
+This seeder resets and rehydrates:
+
+- public content documents
+- customer and professional auth registries
+- professional portal sessions
+- chat threads and messages
+- customer and professional notification state
+- consumer preferences
+- admin support desk and admin console tables
+
+The command prints seeded customer/professional login credentials and API bearer tokens for quick verification.
+See [QA Seed Matrix](./qa-seed-matrix.md) for the scenario map and suggested validation flow.
+
+For a self-contained backend smoke sweep on top of the seeded runtime:
+
+```bash
+npm run smoke:seeded
+```
+
+For a local Docker deployment rehearsal with the production compose topology:
+
+```bash
+cp ops/deploy/local-smoke.env.example ops/deploy/local-smoke.env
+node ./scripts/deploy/check-env.mjs ops/deploy/local-smoke.env
+sh ./scripts/deploy/build-images.sh ops/deploy/local-smoke.env
+sh ./scripts/deploy/deploy.sh local ops/deploy/local-smoke.env
+```
+
 ## 5. Local URLs To Verify
 
 After `npm run dev`, confirm these routes:
@@ -125,14 +165,6 @@ After `npm run dev`, confirm these routes:
 - backend health: `http://localhost:8080/api/v1/health`
 - backend docs: `http://localhost:8080/api/v1/docs`
 - backend OpenAPI JSON: `http://localhost:8080/api/v1/openapi.json`
-- integration example: `http://localhost:3000/id/examples/backend`
-
-The integration example is useful because it exercises:
-
-- typed REST calls through `@bidanapp/sdk`
-- backend health and professionals endpoints
-- websocket chat handshake and event flow
-- frontend runtime version display
 
 ## 6. Root Commands You Will Use Often
 
@@ -206,6 +238,7 @@ See [Development Workflow](./development-workflow.md) for the full governance ru
 - For backend work, read [Backend Guide](./backend.md).
 - For FE/BE alignment, read [SDK And API Contract](./sdk.md).
 - For environment details, read [Environment Setup](./environment.md).
+- For rollout and rollback steps, read [Production Rollout](./production-rollout.md).
 
 ## 9. Common First-Day Tasks
 
@@ -217,7 +250,7 @@ See [Development Workflow](./development-workflow.md) for the full governance ru
 - Work primarily in `apps/frontend`.
 - Read [Frontend Guide](./frontend.md).
 
-You usually do not need PostgreSQL or Redis yet because most current business data is still served from frontend-owned mock-db seed tables.
+You can still do purely presentational UI work without PostgreSQL, but mutable product flows now rely on backend persistence for chat history, professional portal state, viewer/app state, and admin/support operations. If you touch those flows, start PostgreSQL first.
 
 ### I need API contract changes
 
@@ -243,7 +276,7 @@ The backend is fail-fast. Common causes:
 - invalid URL in `DATABASE_URL`
 - invalid URL in `REDIS_URL`
 - invalid `CORS_ALLOWED_ORIGINS`
-- non-existent `MOCK_DB_DIR`
+- non-existent `SEED_DATA_DIR`
 - unsupported `APP_ENV`, `LOG_LEVEL`, or `LOG_FORMAT`
 
 Check [Environment Setup](./environment.md) and verify the env files you copied.

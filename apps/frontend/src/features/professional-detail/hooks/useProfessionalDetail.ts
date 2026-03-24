@@ -5,17 +5,23 @@ import type React from 'react';
 import { useEffect, useState } from 'react';
 import {
   getAccessibleServiceModes,
-  getProfessionalAvailabilityScheduleDays,
   getProfessionalCategoryLabel,
   getProfessionalCoverageStatus,
   isOfflineServiceMode,
-  MOCK_SERVICES,
-} from '@/lib/mock-db/catalog';
+} from '@/lib/catalog-selectors';
+import { getProfessionalAvailabilityScheduleDays } from '@/lib/professional-availability';
 import { useUiText } from '@/lib/ui-text';
 import { useProfessionalPortal } from '@/lib/use-professional-portal';
 import { useProfessionalUserPreferences } from '@/lib/use-professional-user-preferences';
 import { useViewerSession } from '@/lib/use-viewer-session';
-import type { Professional, ProfessionalAvailabilityDay, ServiceDeliveryMode } from '@/types/catalog';
+import type {
+  Area,
+  Category,
+  GlobalService,
+  Professional,
+  ProfessionalAvailabilityDay,
+  ServiceDeliveryMode,
+} from '@/types/catalog';
 
 const getDetailLocale = () => {
   if (typeof document !== 'undefined' && document.documentElement.lang.toLowerCase().startsWith('id')) {
@@ -39,11 +45,23 @@ export interface ProfessionalTrustIndicator {
 }
 
 export interface ProfessionalServiceEntry {
-  catalogService: (typeof MOCK_SERVICES)[number];
+  catalogService: GlobalService;
   serviceMapping: Professional['services'][number];
 }
 
-export const useProfessionalDetail = (professionalSlug: string | undefined) => {
+export const useProfessionalDetail = ({
+  areas,
+  categories,
+  initialProfessional = null,
+  professionalSlug,
+  services,
+}: {
+  areas: Area[];
+  categories: Category[];
+  initialProfessional?: Professional | null;
+  professionalSlug: string | undefined;
+  services: GlobalService[];
+}) => {
   const uiText = useUiText();
   const searchParams = useSearchParams();
   const [notice, setNotice] = useState<string | null>(null);
@@ -55,6 +73,7 @@ export const useProfessionalDetail = (professionalSlug: string | undefined) => {
   const { isProfessional } = useViewerSession();
   const {
     createCustomerRequest,
+    getAppointmentRecordsForProfessional,
     getCustomerRequestForProfessional,
     getPreviewProfessionalBySlug,
     getPublicProfessionalBySlug,
@@ -62,15 +81,23 @@ export const useProfessionalDetail = (professionalSlug: string | undefined) => {
 
   const professional = professionalSlug
     ? (isProfessional ? getPreviewProfessionalBySlug(professionalSlug) : null) ||
-      getPublicProfessionalBySlug(professionalSlug)
+      initialProfessional ||
+      getPublicProfessionalBySlug(professionalSlug) ||
+      null
     : null;
   const customerRequest = professional ? getCustomerRequestForProfessional(professional.id) : null;
-  const profCategory = professional ? getProfessionalCategoryLabel(professional) || 'Professional' : 'Professional';
+  const profCategory = professional
+    ? getProfessionalCategoryLabel({
+        categories,
+        professional,
+        services,
+      }) || 'Professional'
+    : 'Professional';
   const requestedServiceId = searchParams.get('service');
   const requestedModeParam = searchParams.get('mode');
   const offeredServices: ProfessionalServiceEntry[] = professional
     ? professional.services.flatMap((serviceMapping) => {
-        const catalogService = MOCK_SERVICES.find((service) => service.id === serviceMapping.serviceId);
+        const catalogService = services.find((service) => service.id === serviceMapping.serviceId);
 
         return catalogService ? [{ catalogService, serviceMapping }] : [];
       })
@@ -101,12 +128,22 @@ export const useProfessionalDetail = (professionalSlug: string | undefined) => {
   const selectedServiceEntry =
     offeredServices.find(({ serviceMapping }) => serviceMapping.serviceId === selectedService) || null;
   const coverageStatus = professional
-    ? getProfessionalCoverageStatus(professional, userLocation, selectedAreaId)
+    ? getProfessionalCoverageStatus({
+        areas,
+        professional,
+        selectedAreaId,
+        userLocation,
+      })
     : null;
+  const appointmentRecords = professional ? getAppointmentRecordsForProfessional(professional.id) : [];
   const scheduleDaysByMode: Partial<Record<ServiceDeliveryMode, ProfessionalAvailabilityDay[]>> = professional
     ? {
-        home_visit: getProfessionalAvailabilityScheduleDays(professional, 'home_visit'),
-        onsite: getProfessionalAvailabilityScheduleDays(professional, 'onsite'),
+        home_visit: getProfessionalAvailabilityScheduleDays(professional, 'home_visit', {
+          appointmentRecords,
+        }),
+        onsite: getProfessionalAvailabilityScheduleDays(professional, 'onsite', {
+          appointmentRecords,
+        }),
       }
     : {};
   const selectedAccessibleModes =
@@ -248,7 +285,7 @@ export const useProfessionalDetail = (professionalSlug: string | undefined) => {
   };
 
   const getServiceName = (serviceId?: string) =>
-    serviceId ? MOCK_SERVICES.find((service) => service.id === serviceId)?.name : undefined;
+    serviceId ? services.find((service) => service.id === serviceId)?.name : undefined;
 
   return {
     canRequestBooking,

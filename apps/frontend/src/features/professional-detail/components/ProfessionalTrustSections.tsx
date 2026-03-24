@@ -8,19 +8,20 @@ import {
   professionalSectionClassName,
 } from '@/features/professional-detail/components/ProfessionalSectionTitle';
 import { SectionPaginationControls } from '@/features/professional-detail/components/SectionPaginationControls';
-import { APP_CONFIG } from '@/lib/config';
+import { APP_MEDIA_PRESET } from '@/lib/app-media';
 import {
   estimateTravelTimeMinutes,
   getEnabledServiceModes,
   getProfessionalCoverageStatus,
   getProfessionalServiceModes,
-} from '@/lib/mock-db/catalog';
-import { ACTIVE_MEDIA_PRESET } from '@/lib/mock-db/runtime';
+} from '@/lib/catalog-selectors';
+import { APP_CONFIG } from '@/lib/config';
 import { useUiText } from '@/lib/ui-text';
 import { useProfessionalUserPreferences } from '@/lib/use-professional-user-preferences';
-import type { Professional } from '@/types/catalog';
+import type { Area, Professional } from '@/types/catalog';
 
 interface ProfessionalTrustSectionsProps {
+  areas: Area[];
   profileCopy: {
     credentialsTitle: string;
     feedbackTitle: string;
@@ -34,12 +35,17 @@ interface ProfessionalTrustSectionsProps {
 
 const formatCoordinate = (value: number) => value.toFixed(4);
 
-export const ProfessionalTrustSections = ({ profileCopy, professional }: ProfessionalTrustSectionsProps) => {
+export const ProfessionalTrustSections = ({ areas, profileCopy, professional }: ProfessionalTrustSectionsProps) => {
   const t = useTranslations('Professional');
   const uiText = useUiText();
   const [feedbackPage, setFeedbackPage] = useState(1);
   const { selectedArea, userLocation } = useProfessionalUserPreferences();
-  const coverageStatus = getProfessionalCoverageStatus(professional, userLocation, selectedArea.id);
+  const coverageStatus = getProfessionalCoverageStatus({
+    areas,
+    professional,
+    selectedAreaId: selectedArea.id,
+    userLocation,
+  });
   const enabledModes = getEnabledServiceModes(getProfessionalServiceModes(professional));
   const hasHomeVisit = enabledModes.includes('home_visit');
   const practiceCoordinates = professional.practiceLocation?.coordinates || professional.coverage.center;
@@ -153,7 +159,7 @@ export const ProfessionalTrustSections = ({ profileCopy, professional }: Profess
         <ProfessionalSectionTitle icon={<MapPin className="h-4 w-4" />} title={uiText.terms.location} />
         <div
           className="relative mb-4 h-[210px] overflow-hidden rounded-[24px] bg-cover bg-center"
-          style={{ backgroundImage: `url('${ACTIVE_MEDIA_PRESET.professionalMapBackgroundImage}')` }}
+          style={{ backgroundImage: `url('${APP_MEDIA_PRESET.professionalMapBackgroundImage}')` }}
         >
           <div className="absolute inset-0 bg-white/72 backdrop-blur-[1px]" />
           <svg aria-label="Coverage map preview" className="absolute inset-0 h-full w-full" role="img">

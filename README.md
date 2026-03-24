@@ -35,12 +35,20 @@ Open:
 - Backend health: `http://localhost:8080/api/v1/health`
 - Backend docs: `http://localhost:8080/api/v1/docs`
 - OpenAPI JSON: `http://localhost:8080/api/v1/openapi.json`
-- FE/BE example: `http://localhost:3000/id/examples/backend`
 
 If you need PostgreSQL and Redis locally:
 
 ```bash
 npm run infra:up
+```
+
+For a full local rehearsal of the production compose topology:
+
+```bash
+cp ops/deploy/local-smoke.env.example ops/deploy/local-smoke.env
+node ./scripts/deploy/check-env.mjs ops/deploy/local-smoke.env
+sh ./scripts/deploy/build-images.sh ops/deploy/local-smoke.env
+sh ./scripts/deploy/deploy.sh local ops/deploy/local-smoke.env
 ```
 
 ## Core Commands
@@ -72,7 +80,7 @@ npm run dev:backend
 - Backend is the API contract source of truth through Huma.
 - `packages/sdk` is the FE-facing transport boundary for generated types, typed REST, realtime helpers, and adapters.
 - Frontend navigation is localized through `next-intl` and `@/i18n/routing`.
-- Atlas schema and migrations are prepared for future persistence, while the frontend still uses normalized `mock-db` seed tables for dummy domain data today.
+- Atlas schema and migrations back mutable state plus PostgreSQL-backed public content documents, while `apps/backend/seeddata` now acts as bootstrap import material and test fixtures.
 - Validation is local-first: `npm run ci:check` is the canonical preflight before commit or PR.
 - The repository no longer ships a self-hosted Git platform stack. CI/CD can be attached later to any provider that runs the same local commands.
 
@@ -99,4 +107,6 @@ Read [docs/README.md](docs/README.md) first for the full handbook. The most usef
 - [docs/development-workflow.md](docs/development-workflow.md)
 - [docs/operations.md](docs/operations.md)
 - [docs/environment.md](docs/environment.md)
+- [docs/system-flow-diagrams.md](docs/system-flow-diagrams.md)
+- [docs/production-rollout.md](docs/production-rollout.md)
 - [docs/important-knowledge.md](docs/important-knowledge.md)

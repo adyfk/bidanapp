@@ -10,7 +10,6 @@ import {
   isProfessionalCloseAllowed,
 } from '@/features/appointments/lib/cancellation';
 import { validateProfessionalRequestStatusUpdate } from '@/features/professional-portal/lib/request-status';
-import { getProfessionalCancellationPolicy } from '@/lib/mock-db/catalog';
 import { requestStatuses } from './helpers';
 import { ProfessionalDashboardRequestCloseDialog } from './ProfessionalDashboardRequestCloseDialog';
 import { ProfessionalDashboardRequestStatusDialog } from './ProfessionalDashboardRequestStatusDialog';
@@ -93,7 +92,7 @@ export const ProfessionalDashboardRequestsScreen = () => {
     }
 
     const policySnapshot =
-      getProfessionalCancellationPolicy(activeProfessional.id, selectedRequest.requestedMode) ||
+      activeProfessional.cancellationPoliciesByMode?.[selectedRequest.requestedMode] ||
       createDefaultCancellationPolicySnapshot(selectedRequest.requestedMode);
 
     return getAppointmentClosePreview({
@@ -193,7 +192,7 @@ export const ProfessionalDashboardRequestsScreen = () => {
         }
 
         setNotice(
-          status === 'changes_requested' ? t('onboarding.demoRevisionSuccess') : t('onboarding.demoVerifySuccess'),
+          status === 'changes_requested' ? t('onboarding.reviewRevisionSuccess') : t('onboarding.reviewVerifySuccess'),
         );
       }}
       onSubmitForReview={() => {

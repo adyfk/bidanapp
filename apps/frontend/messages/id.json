@@ -38,7 +38,7 @@
   "CustomerAccess": {
     "navTitle": "Akses Customer",
     "eyebrow": "Customer Access",
-    "demoBadge": "Simulasi FE",
+    "accessBadge": "Akses Akun",
     "alreadyCustomer": "Anda sudah berada di mode customer. Lanjutkan ke halaman yang dibutuhkan.",
     "tabs": {
       "login": "Masuk",
@@ -79,22 +79,26 @@
     },
     "placeholders": {
       "phone": "Contoh: +62 812 3456 7890",
-      "password": "Masukkan password demo",
+      "password": "Masukkan password Anda",
       "fullName": "Nama Anda",
       "city": "Contoh: Depok"
     },
     "errors": {
-      "loginPhoneRequired": "Nomor WhatsApp wajib diisi untuk simulasi login.",
-      "loginPasswordRequired": "Password wajib diisi untuk simulasi login.",
-      "registerNameRequired": "Nama lengkap wajib diisi untuk simulasi pendaftaran.",
-      "registerPhoneRequired": "Nomor WhatsApp wajib diisi untuk simulasi pendaftaran."
+      "loginPhoneRequired": "Nomor WhatsApp wajib diisi untuk melanjutkan.",
+      "loginPasswordRequired": "Password wajib diisi untuk melanjutkan.",
+      "loginFailed": "Akses customer belum bisa diverifikasi. Periksa nomor dan password lalu coba lagi.",
+      "registerNameRequired": "Nama lengkap wajib diisi untuk membuat profil.",
+      "registerPhoneRequired": "Nomor WhatsApp wajib diisi untuk membuat profil.",
+      "registerPasswordRequired": "Password wajib diisi untuk membuat akun customer.",
+      "registerPasswordWeak": "Password customer harus minimal 8 karakter dan mengandung huruf besar serta angka.",
+      "registerFailed": "Akun customer belum bisa dibuat saat ini. Coba lagi sebentar lagi."
     },
     "actions": {
       "login": "Masuk dan lanjut",
       "register": "Daftar dan lanjut",
       "continueVisitor": "Lanjut sebagai pengunjung"
     },
-    "registerHelper": "Form ini masih simulasi frontend. Setelah submit, aplikasi akan berpindah ke mode pelanggan tanpa backend auth.",
+    "registerHelper": "Setelah detail profil dilengkapi, aplikasi akan melanjutkan sesi ini dalam mode customer.",
     "visitorEyebrow": "Mode pengunjung",
     "visitorDescription": "Pengunjung tetap bisa menjelajahi layanan dan profesional, tetapi aktivitas, booking, dan profil pelanggan akan diarahkan ke halaman ini.",
     "professional": {
@@ -142,6 +146,23 @@
       "openProfile": "Buka profil",
       "leaveReview": "Isi ulasan"
     },
+    "labels": {
+      "system": "Sistem"
+    },
+    "items": {
+      "requestSubmittedTitle": "Permintaan Anda sudah terkirim",
+      "requestSubmittedBody": "{professional} sudah menerima permintaan {service} Anda dan update berikutnya akan muncul di aktivitas.",
+      "paymentPendingTitle": "Pembayaran masih menunggu",
+      "paymentPendingBody": "Selesaikan pembayaran {price} untuk {service} agar slot pada {time} tetap aman.",
+      "scheduleConfirmedTitle": "Jadwal Anda sudah dikonfirmasi",
+      "scheduleConfirmedBody": "{professional} sudah mengonfirmasi {service}. Cek lagi detail jadwal untuk {time} sebelum sesi dimulai.",
+      "sessionInProgressTitle": "Ada update langsung dari profesional",
+      "sessionInProgressBody": "{professional} sedang menangani {service}. Buka percakapan untuk membalas atau mengonfirmasi detail terbaru.",
+      "reviewReminderTitle": "Saatnya memberi ulasan",
+      "reviewReminderBody": "{service} bersama {professional} sudah selesai. Tinggalkan ulasan singkat agar riwayat layanan Anda tetap lengkap.",
+      "profileReminderTitle": "Lengkapi profil customer",
+      "profileReminderBody": "Tambahkan konteks lokasi, profesional favorit, dan catatan keluarga supaya booking berikutnya terasa lebih rapi."
+    },
     "empty": {
       "title": "Tidak ada notifikasi di filter ini",
       "description": "Coba buka semua update untuk melihat jadwal, pembayaran, atau balasan profesional yang terbaru.",
@@ -151,10 +172,10 @@
   "ProfessionalAccess": {
     "navTitle": "Akses profesional",
     "eyebrow": "Akses profesional",
-    "demoBadge": "Simulasi FE",
+    "accessBadge": "Portal Profesional",
     "title": "Masuk ke portal profesional",
     "alreadyProfessional": "Anda sedang berada di mode profesional. Buka dashboard untuk melanjutkan.",
-    "loginHelper": "Gunakan nomor WhatsApp dan password demo. Jika lupa password, kirim tautan reset ke nomor yang dipakai login.",
+    "loginHelper": "Gunakan nomor WhatsApp yang terhubung ke akun profesional Anda. Jika lupa password, minta tautan reset ke nomor yang sama.",
     "connectedProfileLabel": "Profil publik yang terhubung",
     "language": {
       "title": "Bahasa",
@@ -164,8 +185,8 @@
       "login": "Masuk",
       "register": "Daftar"
     },
-    "profileSelectorLabel": "Pilih profil demo profesional",
-    "profileSelectorHint": "Profil demo ini menghubungkan login, dashboard, dan profil publik profesional.",
+    "profileSelectorLabel": "Pilih profil profesional Anda",
+    "profileSelectorHint": "Profil ini menghubungkan akses portal, dashboard, dan halaman publik profesional yang terkait.",
     "fields": {
       "phone": "Nomor WhatsApp",
       "password": "Password",
@@ -175,17 +196,21 @@
     },
     "placeholders": {
       "phone": "Contoh: +62 812 3000 0000",
-      "password": "Masukkan password demo",
+      "password": "Masukkan password Anda",
       "fullName": "Nama profesional",
       "city": "Contoh: Tangerang Selatan",
       "credential": "Contoh: STR-001-2026"
     },
     "errors": {
-      "loginPhoneRequired": "Nomor WhatsApp wajib diisi untuk simulasi login profesional.",
-      "loginPasswordRequired": "Password wajib diisi untuk simulasi login profesional.",
-      "registerNameRequired": "Nama lengkap wajib diisi untuk simulasi pendaftaran profesional.",
-      "registerPhoneRequired": "Nomor WhatsApp wajib diisi untuk simulasi pendaftaran profesional.",
-      "registerCredentialRequired": "Nomor STR / SIP wajib diisi untuk simulasi pendaftaran profesional."
+      "loginPhoneRequired": "Nomor WhatsApp wajib diisi untuk melanjutkan.",
+      "loginPasswordRequired": "Password wajib diisi untuk melanjutkan.",
+      "loginFailed": "Akses profesional belum bisa diverifikasi. Periksa nomor, password, dan profil yang dipilih lalu coba lagi.",
+      "registerNameRequired": "Nama lengkap wajib diisi untuk membuat profil profesional.",
+      "registerPhoneRequired": "Nomor WhatsApp wajib diisi untuk membuat profil profesional.",
+      "registerCredentialRequired": "Nomor STR / SIP wajib diisi untuk membuat profil profesional.",
+      "registerPasswordRequired": "Password wajib diisi untuk membuat akun profesional.",
+      "registerPasswordWeak": "Password profesional harus minimal 8 karakter dan mengandung huruf besar serta angka.",
+      "registerFailed": "Akun profesional belum bisa dibuat saat ini. Coba lagi sebentar lagi."
     },
     "actions": {
       "openDashboard": "Buka dashboard",
@@ -200,9 +225,9 @@
     },
     "forgotPassword": {
       "title": "Reset password profesional",
-      "description": "Ini simulasi frontend. Masukkan nomor WhatsApp profesional untuk menerima tautan reset password dan melanjutkan login.",
+      "description": "Masukkan nomor WhatsApp profesional yang terhubung ke akun untuk meminta tautan reset password.",
       "phoneLabel": "Nomor WhatsApp untuk reset",
-      "success": "Tautan reset password demo sudah dikirim ke nomor WhatsApp tersebut.",
+      "success": "Tautan reset password sudah dikirim ke nomor WhatsApp tersebut.",
       "error": "Masukkan nomor WhatsApp terlebih dahulu sebelum mengirim tautan reset."
     },
     "registerHelper": "Setelah daftar, Anda langsung masuk ke profil profesional untuk mulai mengelola portal. Fokus profil publik yang sedang terhubung: {category}.",
@@ -343,8 +368,8 @@
           "description": "Profil profesional sudah tampil di katalog publik."
         }
       },
-      "demoRevisionSuccess": "Demo review memindahkan profil ke status revisi.",
-      "demoVerifySuccess": "Demo review memindahkan profil ke status terverifikasi.",
+      "reviewRevisionSuccess": "Review memindahkan profil ke status revisi.",
+      "reviewVerifySuccess": "Review memindahkan profil ke status terverifikasi.",
       "publishSuccess": "Profil berhasil dipublish ke katalog.",
       "submitSuccess": "Profil berhasil diajukan ke admin untuk direview.",
       "validationNotice": "Lengkapi semua item onboarding yang memblokir sebelum mengajukan ke admin."
@@ -585,9 +610,9 @@
       "galleryDeleteButton": "Hapus aset",
       "featuredAsset": "Aset unggulan",
       "addSuccess": "Draft portofolio baru ditambahkan.",
-      "deleteSuccess": "Portofolio dihapus dari simulasi.",
+      "deleteSuccess": "Portofolio berhasil dihapus.",
       "galleryAddSuccess": "Aset galeri baru ditambahkan.",
-      "galleryDeleteSuccess": "Aset galeri dihapus dari simulasi.",
+      "galleryDeleteSuccess": "Aset galeri berhasil dihapus.",
       "gallerySaveSuccess": "Aset galeri berhasil diperbarui.",
       "saveSuccess": "Portofolio berhasil diperbarui."
     },
@@ -727,18 +752,19 @@
       "errors": {
         "displayNameRequired": "Nama profesional wajib diisi.",
         "phoneRequired": "Nomor WhatsApp wajib diisi.",
-        "credentialRequired": "Nomor STR / SIP wajib diisi."
+        "credentialRequired": "Nomor STR / SIP wajib diisi.",
+        "saveFailed": "Perubahan profil belum tersimpan ke backend. Coba lagi."
       }
     },
     "security": {
       "title": "Keamanan akun",
-      "description": "Atur password demo profesional dan siapkan jalur reset bila sewaktu-waktu lupa password.",
+      "description": "Atur password profesional dan siapkan jalur reset bila sewaktu-waktu lupa password.",
       "saveButton": "Simpan password baru",
-      "success": "Password demo profesional berhasil diperbarui.",
+      "success": "Password profesional berhasil diperbarui.",
       "resetTitle": "Lupa password?",
       "resetDescription": "Kirim tautan reset ke WhatsApp profesional agar akses akun bisa dipulihkan tanpa mengubah data profil.",
       "resetButton": "Kirim reset password",
-      "resetSuccess": "Tautan reset password demo berhasil dikirim.",
+      "resetSuccess": "Tautan reset password berhasil dikirim.",
       "fields": {
         "currentPassword": "Password saat ini",
         "newPassword": "Password baru",
@@ -757,9 +783,12 @@
       },
       "errors": {
         "currentRequired": "Masukkan password saat ini terlebih dahulu.",
+        "currentPasswordInvalid": "Password saat ini tidak cocok dengan akun profesional.",
         "newPasswordWeak": "Password baru belum memenuhi syarat keamanan minimum.",
         "confirmMismatch": "Konfirmasi password belum sama dengan password baru.",
-        "resetPhoneRequired": "Masukkan nomor WhatsApp tujuan reset terlebih dahulu."
+        "saveFailed": "Perubahan password belum tersimpan. Coba lagi.",
+        "resetPhoneRequired": "Masukkan nomor WhatsApp tujuan reset terlebih dahulu.",
+        "resetFailed": "Permintaan reset password belum berhasil dikirim. Coba lagi."
       }
     },
     "support": {
@@ -1049,8 +1078,8 @@
     "locationUnavailable": "Lokasi tidak tersedia dari perangkat saat ini.",
     "locationTimeout": "Deteksi lokasi melebihi batas waktu.",
     "locationFetchFailed": "Gagal mendeteksi lokasi saat ini.",
-    "locationResolveFailed": "Gagal memetakan koordinat ke detail lokasi dummy.",
-    "locationDummyHint": "Saat ini detail lokasi masih dummy di FE. Nanti bisa diganti ke API reverse geocoding tanpa ubah UI.",
+    "locationResolveFailed": "Gagal memetakan koordinat ke detail lokasi turunan area.",
+    "locationModelHint": "Saat ini detail lokasi diturunkan dari model area backend dan tetap selaras dengan area layanan yang aktif.",
     "categorySection": "Kategori",
     "availabilitySection": "Ketersediaan",
     "genderPreference": "Preferensi Gender",
@@ -1125,24 +1154,17 @@
     },
     "accountSheet": {
       "title": "Detail Akun",
-      "description": "Lengkapi identitas, fokus pendampingan, dan kontak keluarga agar follow-up lebih terarah.",
+      "description": "Rapikan identitas dan kota domisili agar booking dan follow-up tetap terarah.",
       "identityTitle": "Info utama",
       "nameLabel": "Nama lengkap",
       "phoneLabel": "Nomor WhatsApp",
-      "focusLabel": "Fokus pendampingan",
-      "focusPlaceholder": "Contoh: kunjungan rumah, edukasi keluarga, tindak lanjut rutin",
-      "supportTitle": "Kontak pendamping keluarga",
-      "supportDescription": "Tambahkan satu kontak yang paling relevan bila keluarga perlu koordinasi layanan.",
-      "supportNameLabel": "Nama pendamping",
-      "supportRelationLabel": "Hubungan",
-      "supportPhoneLabel": "Nomor pendamping",
-      "supportPlaceholder": "Pasangan / orang tua / caregiver",
+      "cityLabel": "Kota domisili",
       "save": "Simpan detail",
       "success": "Detail profil berhasil diperbarui.",
       "errors": {
         "nameRequired": "Nama lengkap wajib diisi.",
         "phoneRequired": "Nomor WhatsApp wajib diisi.",
-        "supportContactIncomplete": "Lengkapi nama, hubungan, dan nomor pendamping keluarga."
+        "saveFailed": "Perubahan profil belum tersimpan ke backend. Coba lagi."
       }
     },
     "securitySheet": {
@@ -1162,7 +1184,8 @@
       "errors": {
         "currentRequired": "Masukkan password saat ini terlebih dahulu.",
         "newPasswordWeak": "Password baru belum memenuhi syarat keamanan.",
-        "confirmMismatch": "Konfirmasi password belum sesuai."
+        "confirmMismatch": "Konfirmasi password belum sesuai.",
+        "saveFailed": "Perubahan password belum tersimpan. Coba lagi."
       }
     },
     "support": {
@@ -1346,8 +1369,8 @@
     },
     "alerts": {
       "chatAutoReply": "Baik, pesan Anda sudah saya terima.",
-      "paymentSuccess": "Simulasi pembayaran berhasil",
-      "chatSent": "Pesan terkirim dalam mode demo",
+      "paymentSuccess": "Pembayaran berhasil diproses",
+      "chatSent": "Pesan terkirim",
       "chatUnavailable": "Chat hanya tersedia untuk aktivitas yang masih aktif.",
       "appointmentCancelled": {
         "none": "Appointment berhasil dibatalkan.",
@@ -1478,36 +1501,8 @@
       "reviewLabel": "Ceritakan pengalaman Anda",
       "reviewPlaceholder": "Pelayanan sangat ramah dan profesional...",
       "submitLabel": "Kirim Ulasan",
-      "uploadAlert": "Simulasi Upload Foto",
+      "uploadAlert": "Upload foto belum tersedia",
       "successAlert": "Ulasan berhasil dikirim. Terima kasih atas feedback Anda."
     }
-  },
-  "Integration": {
-    "eyebrow": "Integrasi Backend",
-    "title": "Contoh Kontrak Backend + Realtime",
-    "description": "Halaman ini menunjukkan akses REST melalui SDK bersama yang digenerate dari dokumen OpenAPI backend, plus chat realtime lewat WebSocket.",
-    "restSection": "Kontrak REST",
-    "health": "Health",
-    "frontendVersion": "Versi Frontend",
-    "professionals": "Profesional",
-    "threads": "Thread Chat",
-    "openapiLink": "OpenAPI dari backend",
-    "refresh": "Muat ulang",
-    "restError": "Gagal memuat data backend. Pastikan backend berjalan di localhost:8080.",
-    "socketSection": "Chat Realtime",
-    "socketUrl": "URL WebSocket",
-    "emptyMessages": "Belum ada pesan live. Kirim satu pesan untuk memverifikasi alur websocket.",
-    "messagePlaceholder": "Kirim pesan live ke thread demo backend...",
-    "socketError": "Koneksi WebSocket gagal. Periksa endpoint websocket backend dan origin yang diizinkan.",
-    "socketState": {
-      "idle": "Idle",
-      "connecting": "Menghubungkan",
-      "connected": "Terhubung",
-      "error": "Error"
-    },
-    "notesSection": "Catatan Arsitektur",
-    "noteContract": "Dokumen OpenAPI diekspor dari registrasi route backend, bukan dipelihara manual di frontend.",
-    "noteSdk": "Integrasi frontend memakai package SDK bersama agar penggunaan fetch tetap typed saat development.",
-    "noteWebsocket": "Chat realtime dipisahkan dari OpenAPI karena transport websocket membutuhkan kontrak event tersendiri."
   }
 }

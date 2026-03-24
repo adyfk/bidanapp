@@ -75,9 +75,9 @@ PR titles must follow Conventional Commits.
 
 Examples:
 
-- `feat(api): add backend integration diagnostics`
+- `feat(api): extend read model catalog contract`
 - `fix(chat): sanitize websocket error handling`
-- `feat(api)!: replace simulation appointments contract`
+- `feat(api)!: replace read model appointments contract`
 
 Allowed types currently include:
 

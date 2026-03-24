@@ -11,8 +11,9 @@ import {
   neutralSoftPillClass,
 } from '@/components/ui/tokens';
 import type { ProfessionalServiceEntry } from '@/features/professional-detail/hooks/useProfessionalDetail';
-import { getCategoryById } from '@/lib/mock-db/catalog';
+import { getCategoryById } from '@/lib/catalog-selectors';
 import type {
+  Category,
   ProfessionalAvailabilityDay,
   ProfessionalAvailabilityTimeSlot,
   ServiceDeliveryMode,
@@ -20,6 +21,7 @@ import type {
 
 interface ProfessionalBookingBarProps {
   canRequestBooking: boolean;
+  categories: Category[];
   ctaLabel: string;
   notice: string | null;
   onDismissNotice: () => void;
@@ -47,6 +49,7 @@ const getModeLabel = (t: ProfessionalTranslations, mode: ServiceDeliveryMode) =>
 
 export const ProfessionalBookingBar = ({
   canRequestBooking,
+  categories,
   ctaLabel,
   notice,
   onDismissNotice,
@@ -76,7 +79,7 @@ export const ProfessionalBookingBar = ({
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className={accentSoftPillClass}>
-                    {getCategoryById(selectedServiceEntry.catalogService.categoryId)?.name ||
+                    {getCategoryById(categories, selectedServiceEntry.catalogService.categoryId)?.name ||
                       selectedServiceEntry.catalogService.name}
                   </span>
                   {selectedBookingMode ? (

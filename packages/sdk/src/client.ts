@@ -9,5 +9,6 @@ export type BidanappPaths = paths;
 export function createBidanappApiClient(baseUrl: string) {
   return createClient<paths>({
     baseUrl,
+    credentials: 'include',
   });
 }

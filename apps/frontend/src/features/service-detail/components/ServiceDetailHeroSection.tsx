@@ -3,7 +3,7 @@
 import { ChevronLeft, Heart, Share2 } from 'lucide-react';
 import Image from 'next/image';
 import { IconButton } from '@/components/ui/IconButton';
-import { ACTIVE_MEDIA_PRESET } from '@/lib/mock-db/runtime';
+import { APP_MEDIA_PRESET } from '@/lib/app-media';
 import type { GlobalService } from '@/types/catalog';
 
 interface ServiceDetailHeroSectionProps {
@@ -16,7 +16,7 @@ export const ServiceDetailHeroSection = ({ categoryName, onBack, service }: Serv
   return (
     <div className="relative h-64 w-full bg-gray-200">
       <Image
-        src={service.coverImage || ACTIVE_MEDIA_PRESET.serviceDetailCoverImage}
+        src={service.coverImage || APP_MEDIA_PRESET.serviceDetailCoverImage}
         alt={service.name}
         fill
         className="object-cover"

@@ -6,8 +6,9 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const frontendDir = resolve(__dirname, '..');
+const backendDir = resolve(frontendDir, '..', 'backend');
 
-const readJson = async (relativePath) => JSON.parse(await readFile(resolve(frontendDir, relativePath), 'utf8'));
+const readJson = async (relativePath) => JSON.parse(await readFile(resolve(backendDir, relativePath), 'utf8'));
 
 const [
   appointments,
@@ -21,16 +22,16 @@ const [
   availabilityPolicies,
   cancellationPolicies,
 ] = await Promise.all([
-  readJson('src/data/mock-db/appointments.json'),
-  readJson('src/data/mock-db/areas.json'),
-  readJson('src/data/mock-db/reference_booking_flows.json'),
-  readJson('src/data/mock-db/professional_availability_date_overrides.json'),
-  readJson('src/data/mock-db/professional_service_offerings.json'),
-  readJson('src/data/mock-db/app_runtime_selections.json'),
-  readJson('src/data/mock-db/services.json'),
-  readJson('src/data/mock-db/professional_availability_weekly_hours.json'),
-  readJson('src/data/mock-db/professional_availability_policies.json'),
-  readJson('src/data/mock-db/professional_cancellation_policies.json'),
+  readJson('seeddata/appointments.json'),
+  readJson('seeddata/areas.json'),
+  readJson('seeddata/reference_booking_flows.json'),
+  readJson('seeddata/professional_availability_date_overrides.json'),
+  readJson('seeddata/professional_service_offerings.json'),
+  readJson('seeddata/app_runtime_selections.json'),
+  readJson('seeddata/services.json'),
+  readJson('seeddata/professional_availability_weekly_hours.json'),
+  readJson('seeddata/professional_availability_policies.json'),
+  readJson('seeddata/professional_cancellation_policies.json'),
 ]);
 
 const areasById = new Map(areas.map((area) => [area.id, area]));

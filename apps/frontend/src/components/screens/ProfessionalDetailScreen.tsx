@@ -15,8 +15,21 @@ import { customerAccessRoute } from '@/lib/routes';
 import { useUiText } from '@/lib/ui-text';
 import { useProfessionalUserPreferences } from '@/lib/use-professional-user-preferences';
 import { useViewerSession } from '@/lib/use-viewer-session';
+import type { Area, Category, GlobalService, Professional } from '@/types/catalog';
 
-export const ProfessionalDetailScreen = ({ professionalSlug }: { professionalSlug?: string }) => {
+export const ProfessionalDetailScreen = ({
+  areas,
+  categories,
+  initialProfessional,
+  professionalSlug,
+  services,
+}: {
+  areas: Area[];
+  categories: Category[];
+  initialProfessional?: Professional | null;
+  professionalSlug?: string;
+  services: GlobalService[];
+}) => {
   const t = useTranslations('Professional');
   const uiText = useUiText();
   const router = useRouter();
@@ -67,7 +80,13 @@ export const ProfessionalDetailScreen = ({ professionalSlug }: { professionalSlu
     setSelectedScheduleDayId,
     setSelectedService,
     setSelectedTimeSlotId,
-  } = useProfessionalDetail(professionalSlug);
+  } = useProfessionalDetail({
+    areas,
+    categories,
+    initialProfessional,
+    professionalSlug,
+    services,
+  });
 
   if (!professional) {
     return null;
@@ -106,7 +125,7 @@ export const ProfessionalDetailScreen = ({ professionalSlug }: { professionalSlu
 
       <div className="relative z-10 mt-6 space-y-5 px-6 pb-52">
         {isCustomer && customerRequest ? (
-          <CustomerRequestStatusCard professionalName={professional.name} request={customerRequest} />
+          <CustomerRequestStatusCard areas={areas} professionalName={professional.name} request={customerRequest} />
         ) : null}
         <ProfessionalPracticeSections
           profCategory={profCategory}
@@ -118,9 +137,10 @@ export const ProfessionalDetailScreen = ({ professionalSlug }: { professionalSlu
           profileCopy={profileCopy}
           professional={professional}
         />
-        <ProfessionalTrustSections profileCopy={profileCopy} professional={professional} />
+        <ProfessionalTrustSections areas={areas} profileCopy={profileCopy} professional={professional} />
         <ProfessionalServicesSection
           availabilityRulesByMode={professional.availabilityRulesByMode}
+          categories={categories}
           coverageStatus={coverageStatus}
           isProfessionalAvailable={professional.availability.isAvailable}
           offeredServices={offeredServices}
@@ -141,6 +161,7 @@ export const ProfessionalDetailScreen = ({ professionalSlug }: { professionalSlu
 
       <ProfessionalBookingBar
         ctaLabel={t('makeAppointment')}
+        categories={categories}
         notice={notice}
         onDismissNotice={() => setNotice(null)}
         onRequestBooking={() => {

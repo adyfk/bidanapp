@@ -17,8 +17,8 @@ import {
   getStatusBannerClasses,
   isAppointmentChatAvailable,
 } from '@/features/appointments/lib/status';
-import { ACTIVE_USER_CONTEXT } from '@/lib/mock-db/runtime';
 import { useUiText } from '@/lib/ui-text';
+import { useAppShell } from '@/lib/use-app-shell';
 import type { Appointment } from '@/types/appointments';
 
 interface AppointmentDetailSheetProps {
@@ -43,6 +43,7 @@ export const AppointmentDetailSheet = ({
   const t = useTranslations('Appointments');
   const professionalT = useTranslations('Professional');
   const profileT = useTranslations('Profile');
+  const { currentUserContext } = useAppShell();
   const locale = useLocale();
   const uiText = useUiText();
   const statusBanner = uiText.appointmentStatusBanners[appointment.status];
@@ -101,7 +102,7 @@ export const AppointmentDetailSheet = ({
             </div>
             <div>
               <h3 className="text-[15px] font-bold text-gray-900">{appointment.professional.name}</h3>
-              <p className="text-[12px] font-bold text-green-500">{ACTIVE_USER_CONTEXT.onlineStatusLabel}</p>
+              <p className="text-[12px] font-bold text-green-500">{currentUserContext.onlineStatusLabel}</p>
             </div>
           </div>
           {canChat ? (

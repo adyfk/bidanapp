@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"bidanapp/apps/backend/internal/config"
 )
@@ -26,7 +27,23 @@ func TestRouterServesGeneratedOpenAPI(t *testing.T) {
 	}
 
 	body := recorder.Body.String()
-	if !strings.Contains(body, `"/professionals/{slug}"`) || !strings.Contains(body, `"/chat"`) {
+	if !strings.Contains(body, `"/professionals/{slug}"`) ||
+		!strings.Contains(body, `"/chat"`) ||
+		!strings.Contains(body, `"/bootstrap"`) ||
+		!strings.Contains(body, `"/admin/auth/session"`) ||
+		!strings.Contains(body, `"/customers/auth/register"`) ||
+		!strings.Contains(body, `"/customers/auth/session"`) ||
+		!strings.Contains(body, `"/professionals/auth/register"`) ||
+		!strings.Contains(body, `"/professionals/auth/session"`) ||
+		!strings.Contains(body, `"/professionals/portal/session"`) ||
+		!strings.Contains(body, `"/professionals/me/profile"`) ||
+		!strings.Contains(body, `"/professionals/me/coverage"`) ||
+		!strings.Contains(body, `"/professionals/me/services"`) ||
+		!strings.Contains(body, `"/professionals/me/requests"`) ||
+		!strings.Contains(body, `"/professionals/me/portfolio"`) ||
+		!strings.Contains(body, `"/professionals/me/gallery"`) ||
+		!strings.Contains(body, `"/professionals/me/trust"`) ||
+		!strings.Contains(body, `"/appointments/{appointment_id}"`) {
 		t.Fatalf("openapi output missing expected routes: %s", body)
 	}
 }
@@ -50,7 +67,7 @@ func TestRouterSanitizesInvalidSlugError(t *testing.T) {
 
 func TestRouterSanitizesInternalErrors(t *testing.T) {
 	cfg := testConfig(t)
-	cfg.MockDB.DataDir = t.TempDir()
+	cfg.SeedData.DataDir = t.TempDir()
 	router := NewRouter(cfg, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	request := httptest.NewRequest(http.MethodGet, "/api/v1/professionals/bidan-sari", nil)
 	recorder := httptest.NewRecorder()
@@ -64,6 +81,112 @@ func TestRouterSanitizesInternalErrors(t *testing.T) {
 	body := recorder.Body.String()
 	if !strings.Contains(body, `"message":"internal server error"`) {
 		t.Fatalf("unexpected response: %s", body)
+	}
+}
+
+func TestRouterRejectsUnauthorizedAdminConsoleRequests(t *testing.T) {
+	cfg := testConfig(t)
+	router := NewRouter(cfg, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	request := httptest.NewRequest(http.MethodGet, "/api/v1/admin/console", nil)
+	recorder := httptest.NewRecorder()
+
+	router.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusUnauthorized {
+		t.Fatalf("unexpected status: got %d want %d", recorder.Code, http.StatusUnauthorized)
+	}
+
+	if !strings.Contains(recorder.Body.String(), `"code":"missing_admin_session"`) {
+		t.Fatalf("unexpected response: %s", recorder.Body.String())
+	}
+}
+
+func TestRouterRejectsUnauthorizedProfessionalPortalRequests(t *testing.T) {
+	cfg := testConfig(t)
+	router := NewRouter(cfg, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	request := httptest.NewRequest(http.MethodGet, "/api/v1/professionals/me/profile", nil)
+	recorder := httptest.NewRecorder()
+
+	router.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusUnauthorized {
+		t.Fatalf("unexpected status: got %d want %d", recorder.Code, http.StatusUnauthorized)
+	}
+
+	if !strings.Contains(recorder.Body.String(), `"code":"missing_professional_session"`) {
+		t.Fatalf("unexpected response: %s", recorder.Body.String())
+	}
+}
+
+func TestRouterRejectsUnauthorizedProfessionalNotificationRequests(t *testing.T) {
+	cfg := testConfig(t)
+	router := NewRouter(cfg, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	request := httptest.NewRequest(http.MethodGet, "/api/v1/notifications/professional", nil)
+	recorder := httptest.NewRecorder()
+
+	router.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusUnauthorized {
+		t.Fatalf("unexpected status: got %d want %d", recorder.Code, http.StatusUnauthorized)
+	}
+
+	if !strings.Contains(recorder.Body.String(), `"code":"missing_professional_session"`) {
+		t.Fatalf("unexpected response: %s", recorder.Body.String())
+	}
+}
+
+func TestRouterRejectsUnauthorizedCustomerNotificationRequests(t *testing.T) {
+	cfg := testConfig(t)
+	router := NewRouter(cfg, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	request := httptest.NewRequest(http.MethodGet, "/api/v1/notifications/customer", nil)
+	recorder := httptest.NewRecorder()
+
+	router.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusUnauthorized {
+		t.Fatalf("unexpected status: got %d want %d", recorder.Code, http.StatusUnauthorized)
+	}
+
+	if !strings.Contains(recorder.Body.String(), `"code":"missing_customer_session"`) {
+		t.Fatalf("unexpected response: %s", recorder.Body.String())
+	}
+}
+
+func TestRouterRejectsCookieAuthenticatedMutationWithoutTrustedOrigin(t *testing.T) {
+	cfg := testConfig(t)
+	router := NewRouter(cfg, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	request := httptest.NewRequest(http.MethodPut, "/api/v1/notifications/customer", strings.NewReader(`{"readIds":[]}`))
+	request.AddCookie(&http.Cookie{Name: cfg.CustomerAuth.Cookie.Name, Value: "seed-cookie"})
+	request.Header.Set("Content-Type", "application/json")
+	recorder := httptest.NewRecorder()
+
+	router.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusForbidden {
+		t.Fatalf("unexpected status: got %d want %d", recorder.Code, http.StatusForbidden)
+	}
+
+	if !strings.Contains(recorder.Body.String(), `"code":"invalid_request_origin"`) {
+		t.Fatalf("unexpected response: %s", recorder.Body.String())
+	}
+}
+
+func TestRouterAllowsBearerMutationWithoutOriginGuard(t *testing.T) {
+	cfg := testConfig(t)
+	router := NewRouter(cfg, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	request := httptest.NewRequest(http.MethodPut, "/api/v1/notifications/customer", strings.NewReader(`{"readIds":[]}`))
+	request.Header.Set("Authorization", "Bearer invalid-token")
+	request.Header.Set("Content-Type", "application/json")
+	recorder := httptest.NewRecorder()
+
+	router.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusUnauthorized {
+		t.Fatalf("unexpected status: got %d want %d", recorder.Code, http.StatusUnauthorized)
+	}
+
+	if strings.Contains(recorder.Body.String(), `"code":"invalid_request_origin"`) {
+		t.Fatalf("unexpected response: %s", recorder.Body.String())
 	}
 }
 
@@ -86,7 +209,32 @@ func testConfig(t *testing.T) config.Config {
 		CORS: config.CORSConfig{
 			AllowedOrigins: []string{"http://localhost:3000"},
 		},
-		MockDB: config.MockDBConfig{
+		AuthRateLimit: config.AuthRateLimitConfig{
+			MaxAttempts: 5,
+			Window:      time.Minute,
+		},
+		AdminAuth: config.AdminAuthConfig{
+			Cookie: config.SessionCookieConfig{
+				Name:     "bidanapp_admin_session",
+				Path:     "/api/v1",
+				SameSite: "lax",
+			},
+		},
+		CustomerAuth: config.CustomerAuthConfig{
+			Cookie: config.SessionCookieConfig{
+				Name:     "bidanapp_customer_session",
+				Path:     "/api/v1",
+				SameSite: "lax",
+			},
+		},
+		ProfessionalAuth: config.ProfessionalAuthConfig{
+			Cookie: config.SessionCookieConfig{
+				Name:     "bidanapp_professional_session",
+				Path:     "/api/v1",
+				SameSite: "lax",
+			},
+		},
+		SeedData: config.SeedDataConfig{
 			DataDir: dataDir,
 		},
 	}

@@ -9,12 +9,31 @@ import { usePathname, useRouter } from '@/i18n/routing';
 import { APP_CONFIG } from '@/lib/config';
 import { customerAccessRoute } from '@/lib/routes';
 import { useViewerSession } from '@/lib/use-viewer-session';
+import type { Area, Category, GlobalService, Professional } from '@/types/catalog';
 
-export const ServiceDetailScreen = ({ serviceId }: { serviceId: string }) => {
+export const ServiceDetailScreen = ({
+  areas,
+  categories,
+  professionals,
+  serviceId,
+  services,
+}: {
+  areas: Area[];
+  categories: Category[];
+  professionals: Professional[];
+  serviceId: string;
+  services: GlobalService[];
+}) => {
   const router = useRouter();
   const pathname = usePathname();
   const { isCustomer } = useViewerSession();
-  const { categoryName, notice, providers, requestBooking, service, setNotice } = useServiceDetail(serviceId);
+  const { categoryName, notice, providers, requestBooking, service, setNotice } = useServiceDetail({
+    areas,
+    categories,
+    professionals,
+    serviceId,
+    services,
+  });
 
   if (!service) {
     return null;

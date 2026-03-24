@@ -2,6 +2,8 @@
 
 This document explains how the repository is organized and how the main parts of the system interact.
 
+For a maintainer-focused diagram pack that traces request paths, auth, portal writes, chat, QA seed flows, and deployment, read [System Flow Diagrams](./system-flow-diagrams.md).
+
 ## 1. Architectural Intent
 
 The codebase is designed around a few deliberate boundaries:
@@ -14,9 +16,9 @@ The codebase is designed around a few deliberate boundaries:
 
 The current implementation is transitional by design:
 
-- product data is still largely mock-db-backed
-- backend persistence is only partially prepared
-- chat websocket integration exists today, but persistent message storage does not yet power it
+- public catalog/feed read-models now hydrate from PostgreSQL-backed content documents, with seed data retained as bootstrap input
+- mutable product flows now persist in PostgreSQL behind backend-owned contracts
+- chat websocket integration is live and persists history in PostgreSQL
 
 This is acceptable as long as those boundaries remain explicit.
 
@@ -29,11 +31,12 @@ This is acceptable as long as those boundaries remain explicit.
 │   │   ├── src/app              # localized App Router entrypoints
 │   │   ├── src/components       # screens, layout, and shared UI pieces
 │   │   ├── src/features         # feature-level sections and hooks
-│   │   ├── src/lib              # config, env, routes, backend helpers, mock-db adapters
+│   │   ├── src/lib              # config, env, routes, backend adapters, shell/read-model helpers
 │   │   ├── src/i18n             # locale routing and request helpers
 │   │   └── tests                # frontend smoke tests
 │   └── backend
 │       ├── cmd                  # process entrypoints
+│       ├── seeddata             # backend-owned normalized seed dataset
 │       ├── internal/config      # env loading and validation
 │       ├── internal/http        # router and middleware
 │       ├── internal/modules     # vertical feature slices
@@ -62,8 +65,8 @@ Browser
   -> Next.js frontend
   -> @bidanapp/sdk
   -> Go backend
-  -> mock-db JSON today
-  -> PostgreSQL and Redis later
+  -> PostgreSQL for mutable state and public content documents
+  -> backend seed data only for bootstrap import and tests
 ```
 
 For realtime chat:
@@ -72,8 +75,8 @@ For realtime chat:
 Browser
   -> frontend websocket helper
   -> /api/v1/ws/chat
-  -> in-memory chat hub today
-  -> PostgreSQL-backed chat store later
+  -> chat hub
+  -> PostgreSQL-backed chat store
 ```
 
 ## 4. Frontend Boundary
@@ -84,8 +87,6 @@ The frontend owns:
 - page composition
 - screen containers
 - reusable UI primitives
-- frontend-only mock-db hydration
-- integration diagnostics screen
 - public runtime configuration
 
 The frontend should not own:
@@ -120,7 +121,8 @@ The backend currently exposes:
 - catalog
 - professionals list and detail
 - appointments
-- chat thread data from shared mock-db tables
+- app shell/bootstrap data
+- admin/support/viewer state documents
 - websocket chat handshake
 
 The backend is implemented using:
@@ -128,7 +130,8 @@ The backend is implemented using:
 - standard-library HTTP primitives
 - Huma for route registration and OpenAPI
 - middleware chain around `http.ServeMux`
-- mock-db table readers for current business payloads
+- PostgreSQL-backed stores for mutable state
+- PostgreSQL-backed content documents for public read-model/bootstrap content
 
 ## 6. Contract And SDK Flow
 
@@ -166,7 +169,7 @@ Chat integration follows this split:
 - websocket handshake is documented in OpenAPI
 - websocket event payload types live in `packages/sdk/src/realtime.ts`
 - backend handler accepts connections on `GET /api/v1/ws/chat`
-- current live chat hub stores thread history in memory
+- current live chat hub persists thread history in PostgreSQL
 - backend sends an initial `connected` event, then pushes `message` events
 
 Why this split exists:
@@ -181,18 +184,17 @@ The system currently mixes two realities:
 
 ### Live today
 
-- frontend reads mock-db content for most product screens
-- backend reads the same mock-db dataset for demo and contract alignment
-- websocket chat works in-memory for FE/BE integration
+- frontend reads backend APIs first for customer, professional, chat, and admin flows
+- backend persists mutable state in PostgreSQL
+- backend serves public catalog/feed/bootstrap content from PostgreSQL-backed content documents
+- websocket chat is live and persisted
 
-### Prepared for next phase
+### Remaining migration boundary
 
-- Atlas config exists
-- PostgreSQL schema exists for chat threads and chat messages
+- Atlas config and migrations continue to evolve as content documents are retired in favor of more granular relational or editorial pipelines
 - deployment stack includes PostgreSQL and Redis
 - environment contracts already expose DB and Redis URLs
-
-This means the codebase is ready for staged migration instead of a big-bang rewrite.
+- seed data still exists as bootstrap material until richer relational/content flows replace it
 
 ## 9. Request Lifecycle Examples
 
@@ -204,18 +206,18 @@ For a professionals page backed by the backend:
 2. frontend creates a typed client from `@bidanapp/sdk`
 3. frontend calls a generated path method such as `GET /professionals`
 4. backend route registered through Huma serves the request
-5. backend mock-db reader hydrates the relevant table set
+5. backend read-model hydrates the relevant PostgreSQL content documents and persisted overlays
 6. response is returned inside a stable `{ data: ... }` envelope
 7. frontend adapter or screen renders the normalized result
 
 ### Websocket example
 
-For the integration example page:
+For a customer chat thread:
 
 1. frontend builds a websocket URL with `createChatWebSocketUrl`
 2. browser opens a socket against `/api/v1/ws/chat`
 3. backend validates the origin and upgrades the connection
-4. backend subscribes the client to an in-memory thread
+4. backend subscribes the client to a live thread hub
 5. server emits a `connected` event with thread history
 6. browser sends `message` events
 7. hub broadcasts `message` events to subscribers
@@ -249,8 +251,7 @@ Supporting pieces:
 
 ## 11. Current Limitations
 
-- product data is not yet fully persistent
-- websocket history is not yet stored in PostgreSQL
+- public catalog/read-model composition is not yet fully relational or editorially managed
 - the app deploy stack is ready, but real production operations still require secret management and an external CI or release runner
 - `@changesets/changelog-github` still depends on GitHub mirror metadata for richer changelog links
 

@@ -5,13 +5,18 @@ import {
   getAccessibleServiceModes,
   getProfessionalCategoryLabel,
   getProfessionalCoverageStatus,
-  MOCK_CATEGORIES,
-  MOCK_SERVICES,
-} from '@/lib/mock-db/catalog';
+} from '@/lib/catalog-selectors';
 import { professionalRoute } from '@/lib/routes';
-import { useProfessionalPortal } from '@/lib/use-professional-portal';
 import { useProfessionalUserPreferences } from '@/lib/use-professional-user-preferences';
-import type { ProfessionalService, ServiceDeliveryMode, ServiceModeFlags } from '@/types/catalog';
+import type {
+  Area,
+  Category,
+  GlobalService,
+  Professional,
+  ProfessionalService,
+  ServiceDeliveryMode,
+  ServiceModeFlags,
+} from '@/types/catalog';
 
 export interface ServiceProviderSummary {
   accessibleModes: ServiceDeliveryMode[];
@@ -33,16 +38,25 @@ export interface ServiceProviderSummary {
   slug: string;
 }
 
-export const useServiceDetail = (serviceId: string) => {
+export const useServiceDetail = ({
+  areas,
+  categories,
+  professionals,
+  serviceId,
+  services,
+}: {
+  areas: Area[];
+  categories: Category[];
+  professionals: Professional[];
+  serviceId: string;
+  services: GlobalService[];
+}) => {
   const [notice, setNotice] = useState<string | null>(null);
   const { selectedAreaId, userLocation } = useProfessionalUserPreferences();
-  const { publicProfessionals } = useProfessionalPortal();
-  const service = MOCK_SERVICES.find((item) => item.id === serviceId) || null;
-  const categoryName = service
-    ? MOCK_CATEGORIES.find((category) => category.id === service.categoryId)?.name || ''
-    : '';
+  const service = services.find((item) => item.id === serviceId) || null;
+  const categoryName = service ? categories.find((category) => category.id === service.categoryId)?.name || '' : '';
   const providers: ServiceProviderSummary[] = service
-    ? publicProfessionals
+    ? professionals
         .filter((professional) =>
           professional.services.some((professionalService) => professionalService.serviceId === service.id),
         )
@@ -50,7 +64,12 @@ export const useServiceDetail = (serviceId: string) => {
           const professionalService = professional.services.find(
             (serviceMapping) => serviceMapping.serviceId === service.id,
           );
-          const coverageStatus = getProfessionalCoverageStatus(professional, userLocation, selectedAreaId);
+          const coverageStatus = getProfessionalCoverageStatus({
+            areas,
+            professional,
+            selectedAreaId,
+            userLocation,
+          });
           const accessibleModes = professionalService
             ? getAccessibleServiceModes(
                 professionalService.serviceModes,
@@ -68,7 +87,12 @@ export const useServiceDetail = (serviceId: string) => {
             badgeLabel: professional.badgeLabel,
             bookingFlow: professionalService?.bookingFlow || 'request',
             canBook: accessibleModes.length > 0,
-            categoryLabel: getProfessionalCategoryLabel(professional) || 'Professional',
+            categoryLabel:
+              getProfessionalCategoryLabel({
+                categories,
+                professional,
+                services,
+              }) || 'Professional',
             defaultMode: bookingMode,
             isAvailable: professional.availability.isAvailable,
             isHomeVisitCovered: coverageStatus.isHomeVisitCovered,

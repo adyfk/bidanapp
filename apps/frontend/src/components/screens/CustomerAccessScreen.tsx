@@ -4,10 +4,11 @@ import { ArrowRight, BriefcaseMedical, ChevronLeft, LogIn, ShieldCheck, UserPlus
 import type { Route } from 'next';
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
-import { useId, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { useRouter } from '@/i18n/routing';
 import { APP_CONFIG } from '@/lib/config';
 import { APP_ROUTES, type CustomerAccessIntent, professionalAccessRoute } from '@/lib/routes';
+import { useCustomerAuthSession } from '@/lib/use-customer-auth-session';
 import { useViewerSession } from '@/lib/use-viewer-session';
 
 interface CustomerAccessScreenProps {
@@ -19,8 +20,12 @@ type AccessTab = 'login' | 'register';
 type AccessErrorKey =
   | 'loginPhoneRequired'
   | 'loginPasswordRequired'
+  | 'loginFailed'
   | 'registerNameRequired'
   | 'registerPhoneRequired'
+  | 'registerPasswordRequired'
+  | 'registerPasswordWeak'
+  | 'registerFailed'
   | null;
 
 const intentKeyByValue: Record<CustomerAccessIntent, 'general' | 'activity' | 'profile' | 'booking' | 'notifications'> =
@@ -35,7 +40,8 @@ const intentKeyByValue: Record<CustomerAccessIntent, 'general' | 'activity' | 'p
 export const CustomerAccessScreen = ({ intent = 'general', nextHref = APP_ROUTES.home }: CustomerAccessScreenProps) => {
   const router = useRouter();
   const t = useTranslations('CustomerAccess');
-  const { continueAsCustomer, continueAsVisitor, isCustomer } = useViewerSession();
+  const { continueAsVisitor, isCustomer } = useViewerSession();
+  const { hasHydrated, isAuthenticated, login, register, session } = useCustomerAuthSession();
   const [activeTab, setActiveTab] = useState<AccessTab>('login');
   const [errorKey, setErrorKey] = useState<AccessErrorKey>(null);
   const [loginPhone, setLoginPhone] = useState('');
@@ -43,16 +49,30 @@ export const CustomerAccessScreen = ({ intent = 'general', nextHref = APP_ROUTES
   const [registerName, setRegisterName] = useState('');
   const [registerPhone, setRegisterPhone] = useState('');
   const [registerCity, setRegisterCity] = useState('');
+  const [registerPassword, setRegisterPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const intentKey = intentKeyByValue[intent];
   const resolvedNextHref = (nextHref.startsWith('/') ? nextHref : APP_ROUTES.home) as Route;
   const idPrefix = useId();
 
-  const completeCustomerEntry = () => {
-    continueAsCustomer();
-    router.push(resolvedNextHref);
-  };
+  useEffect(() => {
+    if (!hasHydrated) {
+      return;
+    }
 
-  const handleLogin = () => {
+    if (session.phone) {
+      setLoginPhone(session.phone);
+      setRegisterPhone(session.phone);
+    }
+    if (session.displayName) {
+      setRegisterName(session.displayName);
+    }
+    if (session.city) {
+      setRegisterCity(session.city);
+    }
+  }, [hasHydrated, session.city, session.displayName, session.phone]);
+
+  const handleLogin = async () => {
     if (!loginPhone.trim()) {
       setErrorKey('loginPhoneRequired');
       return;
@@ -63,11 +83,22 @@ export const CustomerAccessScreen = ({ intent = 'general', nextHref = APP_ROUTES
       return;
     }
 
-    setErrorKey(null);
-    completeCustomerEntry();
+    try {
+      setIsSubmitting(true);
+      setErrorKey(null);
+      await login({
+        password: loginPassword.trim(),
+        phone: loginPhone.trim(),
+      });
+      router.push(resolvedNextHref);
+    } catch {
+      setErrorKey('loginFailed');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (!registerName.trim()) {
       setErrorKey('registerNameRequired');
       return;
@@ -78,8 +109,31 @@ export const CustomerAccessScreen = ({ intent = 'general', nextHref = APP_ROUTES
       return;
     }
 
-    setErrorKey(null);
-    completeCustomerEntry();
+    if (!registerPassword.trim()) {
+      setErrorKey('registerPasswordRequired');
+      return;
+    }
+
+    if (!/\d/.test(registerPassword) || !/[A-Z]/.test(registerPassword) || registerPassword.length < 8) {
+      setErrorKey('registerPasswordWeak');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      setErrorKey(null);
+      await register({
+        city: registerCity.trim(),
+        displayName: registerName.trim(),
+        password: registerPassword,
+        phone: registerPhone.trim(),
+      });
+      router.push(resolvedNextHref);
+    } catch {
+      setErrorKey('registerFailed');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -108,7 +162,7 @@ export const CustomerAccessScreen = ({ intent = 'general', nextHref = APP_ROUTES
               {t('eyebrow')}
             </span>
             <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white/90">
-              {t('demoBadge')}
+              {t('accessBadge')}
             </span>
           </div>
 
@@ -124,7 +178,7 @@ export const CustomerAccessScreen = ({ intent = 'general', nextHref = APP_ROUTES
           </div>
         </section>
 
-        {isCustomer ? (
+        {hasHydrated && isAuthenticated && isCustomer ? (
           <div className="rounded-[24px] border border-emerald-100 bg-emerald-50 px-4 py-3 text-[13px] font-medium text-emerald-700">
             {t('alreadyCustomer')}
           </div>
@@ -176,6 +230,7 @@ export const CustomerAccessScreen = ({ intent = 'general', nextHref = APP_ROUTES
                 <input
                   id={`${idPrefix}-login-phone`}
                   type="tel"
+                  disabled={isSubmitting}
                   value={loginPhone}
                   onChange={(event) => setLoginPhone(event.target.value)}
                   placeholder={t('placeholders.phone')}
@@ -192,6 +247,7 @@ export const CustomerAccessScreen = ({ intent = 'general', nextHref = APP_ROUTES
                 <input
                   id={`${idPrefix}-login-password`}
                   type="password"
+                  disabled={isSubmitting}
                   value={loginPassword}
                   onChange={(event) => setLoginPassword(event.target.value)}
                   placeholder={t('placeholders.password')}
@@ -201,7 +257,8 @@ export const CustomerAccessScreen = ({ intent = 'general', nextHref = APP_ROUTES
               <button
                 type="button"
                 onClick={handleLogin}
-                className="mt-2 flex w-full items-center justify-center gap-2 rounded-full py-4 text-[14px] font-bold text-white shadow-lg shadow-pink-500/20 transition-transform active:scale-[0.99]"
+                disabled={isSubmitting}
+                className="mt-2 flex w-full items-center justify-center gap-2 rounded-full py-4 text-[14px] font-bold text-white shadow-lg shadow-pink-500/20 transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
                 style={{ backgroundColor: APP_CONFIG.colors.primary }}
               >
                 {t('actions.login')}
@@ -220,6 +277,7 @@ export const CustomerAccessScreen = ({ intent = 'general', nextHref = APP_ROUTES
                 <input
                   id={`${idPrefix}-register-name`}
                   type="text"
+                  disabled={isSubmitting}
                   value={registerName}
                   onChange={(event) => setRegisterName(event.target.value)}
                   placeholder={t('placeholders.fullName')}
@@ -236,6 +294,7 @@ export const CustomerAccessScreen = ({ intent = 'general', nextHref = APP_ROUTES
                 <input
                   id={`${idPrefix}-register-phone`}
                   type="tel"
+                  disabled={isSubmitting}
                   value={registerPhone}
                   onChange={(event) => setRegisterPhone(event.target.value)}
                   placeholder={t('placeholders.phone')}
@@ -252,9 +311,27 @@ export const CustomerAccessScreen = ({ intent = 'general', nextHref = APP_ROUTES
                 <input
                   id={`${idPrefix}-register-city`}
                   type="text"
+                  disabled={isSubmitting}
                   value={registerCity}
                   onChange={(event) => setRegisterCity(event.target.value)}
                   placeholder={t('placeholders.city')}
+                  className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-[14px] text-gray-800 outline-none transition-all focus:border-pink-300 focus:ring-2 focus:ring-pink-100"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor={`${idPrefix}-register-password`}
+                  className="mb-2 block text-[12px] font-semibold text-gray-500"
+                >
+                  {t('fields.password')}
+                </label>
+                <input
+                  id={`${idPrefix}-register-password`}
+                  type="password"
+                  disabled={isSubmitting}
+                  value={registerPassword}
+                  onChange={(event) => setRegisterPassword(event.target.value)}
+                  placeholder={t('placeholders.password')}
                   className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-[14px] text-gray-800 outline-none transition-all focus:border-pink-300 focus:ring-2 focus:ring-pink-100"
                 />
               </div>
@@ -264,7 +341,8 @@ export const CustomerAccessScreen = ({ intent = 'general', nextHref = APP_ROUTES
               <button
                 type="button"
                 onClick={handleRegister}
-                className="mt-2 flex w-full items-center justify-center gap-2 rounded-full py-4 text-[14px] font-bold text-white shadow-lg shadow-pink-500/20 transition-transform active:scale-[0.99]"
+                disabled={isSubmitting}
+                className="mt-2 flex w-full items-center justify-center gap-2 rounded-full py-4 text-[14px] font-bold text-white shadow-lg shadow-pink-500/20 transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
                 style={{ backgroundColor: APP_CONFIG.colors.primary }}
               >
                 {t('actions.register')}

@@ -250,7 +250,7 @@ Rule penting:
 
 ## Fixture matrix
 
-Fixture mock yang saat ini dipakai untuk menjaga alignment flow:
+Fixture seed yang saat ini dipakai untuk menjaga alignment flow:
 
 - `online + instant` -> `apt-003`, `apt-006`, `apt-009`
 - `online + request` -> `apt-010`
@@ -271,7 +271,7 @@ Integrity contract untuk fixture ini dijaga oleh `apps/frontend/tests/appointmen
 
 ## Arah backend
 
-Saat mock ini dipindah ke backend, kontrak minimal yang harus dipertahankan:
+Saat fixture ini dipindah penuh ke backend, kontrak minimal yang harus dipertahankan:
 
 - appointment create request harus cukup untuk membentuk snapshot immutable
 - appointment response harus mengembalikan snapshot immutable

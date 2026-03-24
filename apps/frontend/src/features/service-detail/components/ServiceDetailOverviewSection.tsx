@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { getEnabledServiceModes } from '@/lib/mock-db/catalog';
+import { getEnabledServiceModes } from '@/lib/catalog-selectors';
 import { useUiText } from '@/lib/ui-text';
 import type { GlobalService } from '@/types/catalog';
 

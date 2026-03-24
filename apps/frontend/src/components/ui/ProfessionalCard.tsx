@@ -4,32 +4,48 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { accentSoftPillClass, neutralSoftPillClass, softWhitePanelClass } from '@/components/ui/tokens';
 import { Link } from '@/i18n/routing';
+import { getProfessionalCategoryLabel, getProfessionalCoverageStatus } from '@/lib/catalog-selectors';
 import { APP_CONFIG } from '@/lib/config';
-import { getProfessionalCategoryLabel, getProfessionalCoverageStatus } from '@/lib/mock-db/catalog';
 import { useUiText } from '@/lib/ui-text';
-import type { GeoPoint, Professional } from '@/types/catalog';
+import type { Area, Category, GeoPoint, GlobalService, Professional } from '@/types/catalog';
 
 interface ProfessionalCardProps {
+  areas: Area[];
+  categories: Category[];
   professional: Professional;
   href: Route;
   isFavorite: boolean;
   onToggleFavorite: (professionalId: string) => void;
   selectedAreaId: string;
+  services: GlobalService[];
   userLocation: GeoPoint;
 }
 
 export const ProfessionalCard = ({
+  areas,
+  categories,
   professional,
   href,
   isFavorite,
   onToggleFavorite,
   selectedAreaId,
+  services,
   userLocation,
 }: ProfessionalCardProps) => {
   const t = useTranslations('Professional');
   const uiText = useUiText();
-  const categoryLabel = getProfessionalCategoryLabel(professional) || 'Professional';
-  const coverageStatus = getProfessionalCoverageStatus(professional, userLocation, selectedAreaId);
+  const categoryLabel =
+    getProfessionalCategoryLabel({
+      categories,
+      professional,
+      services,
+    }) || 'Professional';
+  const coverageStatus = getProfessionalCoverageStatus({
+    areas,
+    professional,
+    selectedAreaId,
+    userLocation,
+  });
   const hasHomeVisit = professional.services.some((service) => service.serviceModes.homeVisit);
   const genderLabel = uiText.getProfessionalGenderLabel(professional.gender);
 

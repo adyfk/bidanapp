@@ -6,7 +6,7 @@ COPY apps/backend/go.mod apps/backend/go.sum ./apps/backend/
 RUN cd apps/backend && go mod download
 
 COPY apps/backend ./apps/backend
-COPY apps/frontend/src/data/mock-db ./apps/frontend/src/data/mock-db
+COPY apps/backend/seeddata ./apps/backend/seeddata
 
 ARG OCI_CREATED=unknown
 ARG OCI_REVISION=unknown
@@ -32,14 +32,14 @@ LABEL org.opencontainers.image.created=$OCI_CREATED \
   org.opencontainers.image.version=$OCI_VERSION
 
 COPY --from=builder /tmp/bidanapp-api /app/bidanapp-api
-COPY --from=builder /src/apps/frontend/src/data/mock-db /app/mock-db
+COPY --from=builder /src/apps/backend/seeddata /app/seeddata
 
 ENV APP_NAME=bidanapp-backend \
   APP_ENV=production \
   APP_VERSION=dev \
   HTTP_HOST=0.0.0.0 \
   HTTP_PORT=8080 \
-  MOCK_DB_DIR=/app/mock-db
+  SEED_DATA_DIR=/app/seeddata
 
 EXPOSE 8080
 

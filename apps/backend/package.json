@@ -4,6 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "go run ./cmd/api",
+    "seed": "go run ./cmd/seed --reset",
+    "seed:no-reset": "go run ./cmd/seed --reset=false",
+    "seed:json": "go run ./cmd/seed --reset --format=json",
     "build": "mkdir -p ./bin && go build -o ./bin/api ./cmd/api",
     "start": "./bin/api",
     "db:up": "docker compose -f ../../docker-compose.dev.yml up -d postgres",

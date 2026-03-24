@@ -17,9 +17,9 @@ import { ProfessionalCard } from '@/components/ui/ProfessionalCard';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { getAppointmentTabForStatus } from '@/features/appointments/lib/status';
 import { Link, useRouter } from '@/i18n/routing';
+import { getEnabledServiceModes, getProfessionalCategoryLabel } from '@/lib/catalog-selectors';
 import { APP_CONFIG } from '@/lib/config';
-import { getEnabledServiceModes, getProfessionalCategoryLabel, MOCK_CATEGORIES } from '@/lib/mock-db/catalog';
-import { ACTIVE_HOME_FEED, APP_SECTION_CONFIG } from '@/lib/mock-db/runtime';
+import type { PublicHomeFeedData } from '@/lib/public-bootstrap';
 import {
   APP_ROUTES,
   activityRoute,
@@ -34,8 +34,23 @@ import { useUiText } from '@/lib/ui-text';
 import { useCustomerNotifications } from '@/lib/use-customer-notifications';
 import { useProfessionalUserPreferences } from '@/lib/use-professional-user-preferences';
 import { useViewerSession } from '@/lib/use-viewer-session';
+import type { Area, Category, GlobalService } from '@/types/catalog';
 
-export const HomeScreen = () => {
+export const HomeScreen = ({
+  areas,
+  categories,
+  homeFeed,
+  sectionConfig,
+  services,
+}: {
+  areas: Area[];
+  categories: Category[];
+  homeFeed: PublicHomeFeedData;
+  sectionConfig: {
+    homeCategoryIds: string[];
+  };
+  services: GlobalService[];
+}) => {
   const router = useRouter();
   const t = useTranslations('Home');
   const notificationsT = useTranslations('Notifications');
@@ -44,7 +59,7 @@ export const HomeScreen = () => {
   const { isCustomer, isProfessional } = useViewerSession();
   const { unreadCount } = useCustomerNotifications();
   const { isFavorite, selectedAreaId, toggleFavorite, userLocation } = useProfessionalUserPreferences();
-  const featuredAppointmentCard = ACTIVE_HOME_FEED.featuredAppointment;
+  const featuredAppointmentCard = homeFeed.featuredAppointment;
   const featuredProfessional = featuredAppointmentCard?.professional;
   const featuredAppointmentRoute = featuredAppointmentCard
     ? activityRoute(featuredAppointmentCard.appointment.id)
@@ -68,12 +83,12 @@ export const HomeScreen = () => {
       ? featuredAppointmentsRoute
       : customerActivityRoute;
   const homeCategories = (
-    APP_SECTION_CONFIG.homeCategoryIds?.length
-      ? APP_SECTION_CONFIG.homeCategoryIds
-          .map((categoryId) => MOCK_CATEGORIES.find((category) => category.id === categoryId))
+    sectionConfig.homeCategoryIds?.length
+      ? sectionConfig.homeCategoryIds
+          .map((categoryId) => categories.find((category) => category.id === categoryId))
           .filter(Boolean)
-      : MOCK_CATEGORIES
-  ) as typeof MOCK_CATEGORIES;
+      : categories
+  ) as Category[];
 
   return (
     <div
@@ -91,12 +106,7 @@ export const HomeScreen = () => {
           className="w-11 h-11 relative rounded-full bg-gray-200 overflow-hidden border-2 border-white shadow-sm hover:opacity-80 transition-opacity active:scale-95"
         >
           {isCustomer ? (
-            <Image
-              src={ACTIVE_HOME_FEED.currentUser.avatar}
-              alt={ACTIVE_HOME_FEED.currentUser.name}
-              fill
-              className="object-cover"
-            />
+            <Image src={homeFeed.currentUser.avatar} alt={homeFeed.currentUser.name} fill className="object-cover" />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-white/70 text-gray-700">
               <UserRound className="h-5 w-5" />
@@ -107,7 +117,7 @@ export const HomeScreen = () => {
           <span className="text-[11px] text-gray-400 font-medium tracking-wide">{t('location')}</span>
           <div className="flex items-center text-gray-900 font-bold text-[14px]">
             <MapPin className="w-4 h-4 mr-1" style={{ color: APP_CONFIG.colors.primary }} />
-            {ACTIVE_HOME_FEED.sharedContext.currentArea}
+            {homeFeed.sharedContext.currentArea}
           </div>
         </div>
         {isCustomer ? (
@@ -256,7 +266,11 @@ export const HomeScreen = () => {
                   <div>
                     <h3 className="font-bold text-[15px]">{featuredProfessional.name}</h3>
                     <p className="text-[12px] text-gray-500">
-                      {getProfessionalCategoryLabel(featuredProfessional) || uiText.terms.professional}
+                      {getProfessionalCategoryLabel({
+                        categories,
+                        professional: featuredProfessional,
+                        services,
+                      }) || uiText.terms.professional}
                     </p>
                   </div>
                 </div>
@@ -296,8 +310,8 @@ export const HomeScreen = () => {
             onSeeAll={() => router.push(APP_ROUTES.services)}
           />
           <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar -mx-6 px-6">
-            {ACTIVE_HOME_FEED.popularServices.map((svc) => {
-              const catName = MOCK_CATEGORIES.find((cat) => cat.id === svc.categoryId)?.name || '';
+            {homeFeed.popularServices.map((svc) => {
+              const catName = categories.find((cat) => cat.id === svc.categoryId)?.name || '';
               const enabledModes = getEnabledServiceModes(svc.serviceModes);
               const targetRoute = exploreRoute({ category: svc.categoryId, q: svc.name });
               return (
@@ -405,14 +419,17 @@ export const HomeScreen = () => {
             onSeeAll={() => router.push(APP_ROUTES.explore)}
           />
           <div className="space-y-4">
-            {ACTIVE_HOME_FEED.nearbyProfessionals.map((prof) => (
+            {homeFeed.nearbyProfessionals.map((prof) => (
               <ProfessionalCard
                 key={prof.id}
                 professional={prof}
+                areas={areas}
+                categories={categories}
                 href={professionalRoute(prof.slug)}
                 isFavorite={isFavorite(prof.id)}
                 onToggleFavorite={toggleFavorite}
                 selectedAreaId={selectedAreaId}
+                services={services}
                 userLocation={userLocation}
               />
             ))}

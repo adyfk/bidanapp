@@ -23,7 +23,7 @@ If you are new to the repository, read these documents in order:
 - [Architecture](./architecture.md)
   Monorepo boundaries, runtime flow, contract flow, realtime flow, and current system state.
 - [Frontend Guide](./frontend.md)
-  Next.js route layout, locale handling, screen decomposition, mock-db data, and frontend testing.
+  Next.js route layout, locale handling, screen decomposition, backend-first data flow, and frontend testing.
 - [Backend Guide](./backend.md)
   Go service boot flow, module structure, Huma contract generation, websocket chat, Atlas readiness, and backend testing.
 - [SDK And API Contract](./sdk.md)
@@ -39,12 +39,18 @@ If you are new to the repository, read these documents in order:
 
 - [Environment Setup](./environment.md)
   Detailed environment variable reference for frontend, backend, and deploy templates.
+- [Production Rollout](./production-rollout.md)
+  Pre-deploy checklist, env validation, migrations, Docker rollout, post-deploy smoke, and rollback flow.
+- [System Flow Diagrams](./system-flow-diagrams.md)
+  Detailed maintenance-oriented diagrams for runtime ownership, request flow, auth, portal state, chat, QA seed, and deploy paths.
 - [API Contract Alignment](./api-contract.md)
   Concise explanation of backend-generated OpenAPI and generated TypeScript types.
-- [Mock DB Contract](./mock-db-contract.md)
-  Shape and ownership of the normalized JSON table set used as dummy domain data before PostgreSQL.
-- [Mock DB Blueprint](./mock-db/README.md)
-  Entity, flow, state, and manifest reference for the normalized dummy table set.
+- [QA Seed Matrix](./qa-seed-matrix.md)
+  How to reset the full runtime seed, which states and actors it creates, and how to use the report for product verification.
+- [Seed Data Contract](./seed-data-contract.md)
+  Shape and ownership of the backend-owned normalized JSON seed dataset used by remaining read-model/bootstrap surfaces.
+- [Seed Data Blueprint](./seed-data/README.md)
+  Entity, flow, state, and manifest reference for the normalized seed table set.
 
 ## Who Should Read What
 
@@ -75,6 +81,7 @@ Start with:
 1. [Development Workflow](./development-workflow.md)
 2. [Operations](./operations.md)
 3. [Environment Setup](./environment.md)
+4. [Production Rollout](./production-rollout.md)
 
 ## Core Principles In This Repository
 
@@ -84,7 +91,7 @@ Start with:
 - Websocket handshake belongs in OpenAPI; websocket frame types belong in the SDK.
 - Route building should stay aligned with `@/i18n/routing` and route helpers, not hardcoded localized strings.
 - Local preflight is the default gate. External CI can be attached later, but it should reuse the same repository commands.
-- The current system is intentionally in transition from mock-db seed tables toward persistent storage. Documentation should state that clearly instead of pretending the migration is complete.
+- The current system is intentionally in transition from backend-owned seed-backed read-models toward full database-backed read models. Documentation should state that clearly instead of pretending the migration is complete.
 
 ## How To Maintain These Docs
 

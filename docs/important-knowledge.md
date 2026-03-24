@@ -6,19 +6,19 @@ This document collects the non-obvious facts and rules that are easy to miss whe
 
 The codebase is intentionally between two phases:
 
-- current product development still leans on mock-db seed data
-- future product development is moving toward backend-owned contracts and real persistence
+- current product development serves public read-model surfaces from PostgreSQL-backed content documents that are bootstrapped from backend-owned seed data
+- future product development is moving toward richer relational/content modeling on top of backend-owned contracts and real persistence
 
 Do not document or design features as if the migration is already complete.
 
-## 2. Frontend And Backend Currently Share Mock DB Data
+## 2. Frontend And Backend Currently Share Seed Data
 
 This is one of the most important facts in the repo.
 
 Today:
 
-- frontend reads normalized mock-db JSON tables for many product flows
-- backend reads the same mock-db dataset for its demo and contract endpoints
+- frontend now reads backend APIs first and only tests use the seed dataset directly
+- backend owns the normalized seed dataset as bootstrap input, while request-time public read-model content now comes from PostgreSQL-backed content documents
 
 This is useful because:
 
@@ -27,7 +27,7 @@ This is useful because:
 
 This is dangerous if misunderstood because:
 
-- a backend endpoint returning mock-db-backed data is not the same thing as a production persistence layer
+- a bootstrapped content-document layer is better than direct file reads, but it is still distinct from richer relational modeling or editorial tooling
 
 ## 3. Backend Owns REST Contract Truth
 
@@ -109,7 +109,7 @@ The backend and frontend already enforce some important negative behavior:
 
 If you change routing or backend detail lookup behavior, keep these guarantees intact.
 
-## 9. Chat Is Live, But Not Yet Persistent
+## 9. Chat Is Live And Persistent
 
 This is easy to misread.
 
@@ -117,13 +117,14 @@ Current status:
 
 - websocket chat integration works
 - connection, history, and message events work
-- history is stored in memory per backend process
-- Atlas schema exists for future persistent chat tables
+- history is persisted in PostgreSQL
+- professional portal runtime state is persisted in PostgreSQL
+- viewer/admin/support and notification state is persisted through backend app-state documents
 
 Current non-status:
 
-- chat messages are not yet being stored in PostgreSQL
 - Redis is not yet being used for distributed realtime fanout
+- public catalog/read-model content is served from PostgreSQL-backed content documents, but not yet modeled through richer relational or editorial pipelines
 
 ## 10. Release Versioning Has Two Different Roles
 

@@ -184,7 +184,7 @@ export const ProfessionalDashboardServicesScreen = () => {
         }
 
         setNotice(
-          status === 'changes_requested' ? t('onboarding.demoRevisionSuccess') : t('onboarding.demoVerifySuccess'),
+          status === 'changes_requested' ? t('onboarding.reviewRevisionSuccess') : t('onboarding.reviewVerifySuccess'),
         );
       }}
       onSubmitForReview={() => {

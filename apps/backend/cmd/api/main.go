@@ -12,7 +12,14 @@ import (
 
 	"bidanapp/apps/backend/internal/config"
 	apphttp "bidanapp/apps/backend/internal/http"
+	"bidanapp/apps/backend/internal/modules/chat"
+	"bidanapp/apps/backend/internal/modules/readmodel"
+	"bidanapp/apps/backend/internal/platform/contentstore"
+	"bidanapp/apps/backend/internal/platform/database"
+	"bidanapp/apps/backend/internal/platform/documentstore"
 	applog "bidanapp/apps/backend/internal/platform/log"
+	"bidanapp/apps/backend/internal/platform/portalstore"
+	"bidanapp/apps/backend/internal/platform/ratelimit"
 	"bidanapp/apps/backend/internal/server"
 )
 
@@ -24,7 +31,47 @@ func main() {
 	}
 
 	logger := applog.New(cfg.Observability.LogLevel, cfg.Observability.LogFormat)
-	router := apphttp.NewRouter(cfg, logger)
+	db, err := database.Open(context.Background(), cfg.Database.URL)
+	if err != nil {
+		logger.Error("database connection failed", slog.String("error", err.Error()))
+		os.Exit(1)
+	}
+	defer db.Close()
+
+	contentStore := contentstore.NewPostgresStore(db)
+	repository := readmodel.NewRepository(cfg.SeedData.DataDir, contentStore)
+	if err := repository.EnsureBootstrapped(context.Background()); err != nil {
+		logger.Error("read model bootstrap failed", slog.String("error", err.Error()))
+		os.Exit(1)
+	}
+
+	authRateLimiter, err := ratelimit.OpenRedisLimiter(context.Background(), cfg.Redis.URL, cfg.AuthRateLimit)
+	if err != nil {
+		if cfg.App.Environment == "development" || cfg.App.Environment == "test" {
+			logger.Warn(
+				"redis auth rate limiter unavailable, falling back to in-memory limiter",
+				slog.String("error", err.Error()),
+				slog.String("env", cfg.App.Environment),
+			)
+			authRateLimiter = ratelimit.NewMemoryLimiter(cfg.AuthRateLimit)
+		} else {
+			logger.Error("redis auth rate limiter connection failed", slog.String("error", err.Error()))
+			os.Exit(1)
+		}
+	}
+	if closer, ok := authRateLimiter.(interface{ Close() error }); ok {
+		defer func() {
+			_ = closer.Close()
+		}()
+	}
+
+	router := apphttp.NewRouter(cfg, logger, apphttp.Dependencies{
+		AuthRateLimiter: authRateLimiter,
+		ChatStore:       chat.NewPostgresStore(db),
+		PortalStore:     portalstore.NewPostgresStore(db),
+		ContentStore:    contentStore,
+		DocumentStore:   documentstore.NewPostgresStore(db),
+	})
 	httpServer := server.New(cfg, router)
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
@@ -38,7 +85,7 @@ func main() {
 			slog.String("env", cfg.App.Environment),
 			slog.String("addr", cfg.HTTP.Address()),
 			slog.Any("cors_allowed_origins", cfg.CORS.AllowedOrigins),
-			slog.String("mock_db_dir", cfg.MockDB.DataDir),
+			slog.String("seed_data_dir", cfg.SeedData.DataDir),
 		)
 		errCh <- httpServer.ListenAndServe()
 	}()

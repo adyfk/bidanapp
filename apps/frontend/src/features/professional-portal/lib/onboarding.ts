@@ -378,7 +378,7 @@ export const deriveProfessionalOnboardingState = (
   };
 };
 
-export const PROFESSIONAL_LIFECYCLE_REVIEW_STATE_MOCKS: Record<string, ProfessionalLifecycleReviewState> = {
+export const PROFESSIONAL_LIFECYCLE_REVIEW_STATE_TEMPLATES: Record<string, ProfessionalLifecycleReviewState> = {
   awaitingAdminReview: {
     status: 'submitted',
     submittedAt: '2026-03-17T09:00:00+07:00',

@@ -9,10 +9,10 @@ import (
 
 func TestLoadFromAppRootReadsEnvFilesAndNormalizesConfig(t *testing.T) {
 	appRoot := t.TempDir()
-	mockDBDir := filepath.Join(appRoot, "fixtures", "mock-db")
+	seedDataDir := filepath.Join(appRoot, "fixtures", "seeddata")
 
-	if err := os.MkdirAll(mockDBDir, 0o755); err != nil {
-		t.Fatalf("create mock db dir: %v", err)
+	if err := os.MkdirAll(seedDataDir, 0o755); err != nil {
+		t.Fatalf("create seed data dir: %v", err)
 	}
 
 	envFile := strings.Join([]string{
@@ -28,8 +28,11 @@ func TestLoadFromAppRootReadsEnvFilesAndNormalizesConfig(t *testing.T) {
 		"HTTP_SHUTDOWN_TIMEOUT=12s",
 		"HTTP_MAX_HEADER_BYTES=4096",
 		"CORS_ALLOWED_ORIGINS=https://example.com/, https://admin.example.com",
-		"MOCK_DB_DIR=./fixtures/mock-db",
+		"SEED_DATA_DIR=./fixtures/seeddata",
 		"DATABASE_URL=postgres://postgres:postgres@localhost:5432/bidanapp?sslmode=disable",
+		"CUSTOMER_AUTH_SESSION_TTL=10h",
+		"PROFESSIONAL_AUTH_SESSION_TTL=12h",
+		`ADMIN_CONSOLE_CREDENTIALS_JSON=[{"adminId":"adm-01","email":"naya@ops.bidanapp.id","passwordHash":"$2a$12$9kXq1E5j3H6m7L8n2P4rUeB9tJ0vC1xYzAqR4mTnV7pQwS6dF8gHi","focusArea":"support"}]`,
 		"REDIS_URL=redis://localhost:6379",
 		"LOG_LEVEL=warn",
 		"LOG_FORMAT=json",
@@ -52,8 +55,11 @@ func TestLoadFromAppRootReadsEnvFilesAndNormalizesConfig(t *testing.T) {
 		"HTTP_SHUTDOWN_TIMEOUT",
 		"HTTP_MAX_HEADER_BYTES",
 		"CORS_ALLOWED_ORIGINS",
-		"MOCK_DB_DIR",
+		"SEED_DATA_DIR",
 		"DATABASE_URL",
+		"CUSTOMER_AUTH_SESSION_TTL",
+		"PROFESSIONAL_AUTH_SESSION_TTL",
+		"ADMIN_CONSOLE_CREDENTIALS_JSON",
 		"REDIS_URL",
 		"LOG_LEVEL",
 		"LOG_FORMAT",
@@ -81,33 +87,53 @@ func TestLoadFromAppRootReadsEnvFilesAndNormalizesConfig(t *testing.T) {
 		t.Fatalf("unexpected normalized origin: got %s want %s", got, want)
 	}
 
-	if got, want := cfg.MockDB.DataDir, mockDBDir; got != want {
-		t.Fatalf("unexpected mock db dir: got %s want %s", got, want)
+	if got, want := cfg.SeedData.DataDir, seedDataDir; got != want {
+		t.Fatalf("unexpected seed data dir: got %s want %s", got, want)
 	}
 
 	if cfg.Observability.LogFormat != "json" {
 		t.Fatalf("unexpected log format: %s", cfg.Observability.LogFormat)
 	}
+
+	if got, want := cfg.CustomerAuth.SessionTTL.String(), "10h0m0s"; got != want {
+		t.Fatalf("unexpected customer auth ttl: got %s want %s", got, want)
+	}
+
+	if got, want := cfg.ProfessionalAuth.SessionTTL.String(), "12h0m0s"; got != want {
+		t.Fatalf("unexpected professional auth ttl: got %s want %s", got, want)
+	}
+
+	if got, want := cfg.AdminAuth.Cookie.Path, "/api/v1"; got != want {
+		t.Fatalf("unexpected auth cookie path: got %s want %s", got, want)
+	}
+
+	if !cfg.AdminAuth.Cookie.Secure {
+		t.Fatal("expected production auth cookies to default to secure")
+	}
+
+	if got, want := cfg.AuthRateLimit.MaxAttempts, 10; got != want {
+		t.Fatalf("unexpected auth rate limit max attempts: got %d want %d", got, want)
+	}
 }
 
 func TestLoadFromAppRootFailsForInvalidPort(t *testing.T) {
 	appRoot := t.TempDir()
-	mockDBDir := filepath.Join(appRoot, "mock-db")
+	seedDataDir := filepath.Join(appRoot, "seeddata")
 
-	if err := os.MkdirAll(mockDBDir, 0o755); err != nil {
-		t.Fatalf("create mock db dir: %v", err)
+	if err := os.MkdirAll(seedDataDir, 0o755); err != nil {
+		t.Fatalf("create seed data dir: %v", err)
 	}
 
 	envFile := strings.Join([]string{
 		"HTTP_PORT=not-a-number",
-		"MOCK_DB_DIR=./mock-db",
+		"SEED_DATA_DIR=./seeddata",
 	}, "\n")
 
 	if err := os.WriteFile(filepath.Join(appRoot, ".env"), []byte(envFile), 0o644); err != nil {
 		t.Fatalf("write env file: %v", err)
 	}
 
-	restore := clearEnv("HTTP_PORT", "MOCK_DB_DIR")
+	restore := clearEnv("HTTP_PORT", "SEED_DATA_DIR")
 	defer restore()
 
 	_, err := loadFromAppRoot(appRoot)
@@ -116,6 +142,175 @@ func TestLoadFromAppRootFailsForInvalidPort(t *testing.T) {
 	}
 
 	if !strings.Contains(err.Error(), "HTTP_PORT must be a valid integer") {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestLoadFromAppRootFailsWhenProductionAdminCredentialsAreMissing(t *testing.T) {
+	appRoot := t.TempDir()
+	seedDataDir := filepath.Join(appRoot, "seeddata")
+
+	if err := os.MkdirAll(seedDataDir, 0o755); err != nil {
+		t.Fatalf("create seed data dir: %v", err)
+	}
+
+	envFile := strings.Join([]string{
+		"APP_ENV=production",
+		"SEED_DATA_DIR=./seeddata",
+		"DATABASE_URL=postgres://postgres:postgres@localhost:5432/bidanapp?sslmode=disable",
+		"CORS_ALLOWED_ORIGINS=https://app.bidanapp.id",
+		"REDIS_URL=redis://localhost:6379",
+	}, "\n")
+
+	if err := os.WriteFile(filepath.Join(appRoot, ".env"), []byte(envFile), 0o644); err != nil {
+		t.Fatalf("write env file: %v", err)
+	}
+
+	restore := clearEnv("APP_ENV", "SEED_DATA_DIR", "DATABASE_URL", "CORS_ALLOWED_ORIGINS", "REDIS_URL", "ADMIN_CONSOLE_CREDENTIALS_JSON")
+	defer restore()
+
+	_, err := loadFromAppRoot(appRoot)
+	if err == nil {
+		t.Fatal("expected config load error")
+	}
+
+	if !strings.Contains(err.Error(), "ADMIN_CONSOLE_CREDENTIALS_JSON must contain at least one credential") {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestLoadFromAppRootFailsWhenProductionUsesDefaultAdminPasswordHash(t *testing.T) {
+	appRoot := t.TempDir()
+	seedDataDir := filepath.Join(appRoot, "seeddata")
+
+	if err := os.MkdirAll(seedDataDir, 0o755); err != nil {
+		t.Fatalf("create seed data dir: %v", err)
+	}
+
+	envFile := strings.Join([]string{
+		"APP_ENV=production",
+		"SEED_DATA_DIR=./seeddata",
+		"DATABASE_URL=postgres://postgres:postgres@localhost:5432/bidanapp?sslmode=disable",
+		"CORS_ALLOWED_ORIGINS=https://app.bidanapp.id",
+		`ADMIN_CONSOLE_CREDENTIALS_JSON=[{"adminId":"adm-01","email":"ops@bidanapp.id","passwordHash":"` + defaultAdminPassword + `","focusArea":"support"}]`,
+		"REDIS_URL=redis://localhost:6379",
+	}, "\n")
+
+	if err := os.WriteFile(filepath.Join(appRoot, ".env"), []byte(envFile), 0o644); err != nil {
+		t.Fatalf("write env file: %v", err)
+	}
+
+	restore := clearEnv("APP_ENV", "SEED_DATA_DIR", "DATABASE_URL", "CORS_ALLOWED_ORIGINS", "REDIS_URL", "ADMIN_CONSOLE_CREDENTIALS_JSON")
+	defer restore()
+
+	_, err := loadFromAppRoot(appRoot)
+	if err == nil {
+		t.Fatal("expected config load error")
+	}
+
+	if !strings.Contains(err.Error(), "must not use the development default in production") {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestLoadFromAppRootAllowsDevelopmentDefaultAdminCredentials(t *testing.T) {
+	appRoot := t.TempDir()
+	seedDataDir := filepath.Join(appRoot, "seeddata")
+
+	if err := os.MkdirAll(seedDataDir, 0o755); err != nil {
+		t.Fatalf("create seed data dir: %v", err)
+	}
+
+	envFile := strings.Join([]string{
+		"APP_ENV=development",
+		"SEED_DATA_DIR=./seeddata",
+		"DATABASE_URL=postgres://postgres:postgres@localhost:5432/bidanapp?sslmode=disable",
+		"CORS_ALLOWED_ORIGINS=http://localhost:3000",
+		"REDIS_URL=redis://localhost:6379",
+	}, "\n")
+
+	if err := os.WriteFile(filepath.Join(appRoot, ".env"), []byte(envFile), 0o644); err != nil {
+		t.Fatalf("write env file: %v", err)
+	}
+
+	restore := clearEnv("APP_ENV", "SEED_DATA_DIR", "DATABASE_URL", "CORS_ALLOWED_ORIGINS", "REDIS_URL", "ADMIN_CONSOLE_CREDENTIALS_JSON")
+	defer restore()
+
+	cfg, err := loadFromAppRoot(appRoot)
+	if err != nil {
+		t.Fatalf("load config: %v", err)
+	}
+
+	if len(cfg.AdminAuth.Credentials) == 0 {
+		t.Fatal("expected default development admin credentials")
+	}
+}
+
+func TestLoadFromAppRootFailsWhenProductionCookiesAreNotSecure(t *testing.T) {
+	appRoot := t.TempDir()
+	seedDataDir := filepath.Join(appRoot, "seeddata")
+
+	if err := os.MkdirAll(seedDataDir, 0o755); err != nil {
+		t.Fatalf("create seed data dir: %v", err)
+	}
+
+	envFile := strings.Join([]string{
+		"APP_ENV=production",
+		"SEED_DATA_DIR=./seeddata",
+		"DATABASE_URL=postgres://postgres:postgres@localhost:5432/bidanapp?sslmode=disable",
+		"CORS_ALLOWED_ORIGINS=https://app.bidanapp.id",
+		"AUTH_COOKIE_SECURE=false",
+		`ADMIN_CONSOLE_CREDENTIALS_JSON=[{"adminId":"adm-01","email":"ops@bidanapp.id","passwordHash":"$2a$12$9kXq1E5j3H6m7L8n2P4rUeB9tJ0vC1xYzAqR4mTnV7pQwS6dF8gHi","focusArea":"support"}]`,
+		"REDIS_URL=redis://localhost:6379",
+	}, "\n")
+
+	if err := os.WriteFile(filepath.Join(appRoot, ".env"), []byte(envFile), 0o644); err != nil {
+		t.Fatalf("write env file: %v", err)
+	}
+
+	restore := clearEnv("APP_ENV", "SEED_DATA_DIR", "DATABASE_URL", "CORS_ALLOWED_ORIGINS", "AUTH_COOKIE_SECURE", "ADMIN_CONSOLE_CREDENTIALS_JSON", "REDIS_URL")
+	defer restore()
+
+	_, err := loadFromAppRoot(appRoot)
+	if err == nil {
+		t.Fatal("expected config load error")
+	}
+
+	if !strings.Contains(err.Error(), "cookie secure must be true in production") {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestLoadFromAppRootFailsWhenProductionOriginIsNotHTTPS(t *testing.T) {
+	appRoot := t.TempDir()
+	seedDataDir := filepath.Join(appRoot, "seeddata")
+
+	if err := os.MkdirAll(seedDataDir, 0o755); err != nil {
+		t.Fatalf("create seed data dir: %v", err)
+	}
+
+	envFile := strings.Join([]string{
+		"APP_ENV=production",
+		"SEED_DATA_DIR=./seeddata",
+		"DATABASE_URL=postgres://postgres:postgres@localhost:5432/bidanapp?sslmode=disable",
+		"CORS_ALLOWED_ORIGINS=http://app.bidanapp.id",
+		`ADMIN_CONSOLE_CREDENTIALS_JSON=[{"adminId":"adm-01","email":"ops@bidanapp.id","passwordHash":"$2a$12$9kXq1E5j3H6m7L8n2P4rUeB9tJ0vC1xYzAqR4mTnV7pQwS6dF8gHi","focusArea":"support"}]`,
+		"REDIS_URL=redis://localhost:6379",
+	}, "\n")
+
+	if err := os.WriteFile(filepath.Join(appRoot, ".env"), []byte(envFile), 0o644); err != nil {
+		t.Fatalf("write env file: %v", err)
+	}
+
+	restore := clearEnv("APP_ENV", "SEED_DATA_DIR", "DATABASE_URL", "CORS_ALLOWED_ORIGINS", "ADMIN_CONSOLE_CREDENTIALS_JSON", "REDIS_URL")
+	defer restore()
+
+	_, err := loadFromAppRoot(appRoot)
+	if err == nil {
+		t.Fatal("expected config load error")
+	}
+
+	if !strings.Contains(err.Error(), "must use https in production") {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }

@@ -1,6 +1,6 @@
 # Backend Guide
 
-This guide explains how the Go backend is structured, how routes and OpenAPI are defined, what the current modules do, and how persistence readiness fits into the current architecture.
+This guide explains how the Go backend is structured, how routes and OpenAPI are defined, what the current modules do, and how PostgreSQL-backed content documents now support the public read-model surfaces.
 
 ## 1. Backend Stack
 
@@ -18,10 +18,12 @@ The backend app lives in `apps/backend` and uses:
 apps/backend
 ├── cmd
 │   ├── api                      # main HTTP server entrypoint
+│   ├── dev-api                  # lightweight dev server without PostgreSQL dependency
 │   └── openapi-export           # exports generated OpenAPI JSON for the SDK
 ├── db
 │   ├── migrations               # Atlas migration files
 │   └── schema.sql               # desired schema state
+├── seeddata                     # backend-owned normalized seed dataset used for bootstrap import and tests
 ├── internal
 │   ├── api/contract             # shared API contract helpers and types
 │   ├── config                   # env loading and validation
@@ -31,7 +33,8 @@ apps/backend
 │   ├── modules
 │   │   ├── chat
 │   │   ├── health
-│   │   └── simulation
+│   │   ├── professionalportal
+│   │   └── readmodel
 │   ├── platform
 │   │   ├── log                  # logger setup
 │   │   ├── openapi              # Huma/OpenAPI builder
@@ -48,13 +51,39 @@ The startup sequence is:
 
 1. load config through `internal/config`
 2. create logger through `internal/platform/log`
-3. create the router through `internal/http`
-4. create the HTTP server through `internal/server`
-5. start the server and log runtime metadata
-6. wait for `SIGINT` or `SIGTERM`
-7. perform graceful shutdown using configured timeout
+3. open the PostgreSQL connection used by runtime mutable state and content documents
+4. bootstrap content documents from `seeddata` when missing
+5. create the router through `internal/http`
+6. create the HTTP server through `internal/server`
+7. start the server and log runtime metadata
+8. wait for `SIGINT` or `SIGTERM`
+9. perform graceful shutdown using configured timeout and close the DB connection
 
 The backend fails fast when configuration is invalid.
+
+For local QA and functionality sweeps, use the runtime seeder:
+
+```bash
+npm run seed --workspace @bidanapp/backend
+```
+
+For automation-friendly output, use:
+
+```bash
+npm run seed:json --workspace @bidanapp/backend
+```
+
+The seeder truncates mutable runtime tables, bootstraps `content_documents`, repopulates `app_state_documents`, rebuilds `professional_portal_sessions`, restores chat history, and emits a login/token summary for manual checks.
+The JSON report additionally exposes customer, professional, and admin verification matrices so manual QA or smoke scripts can pick the right seeded branch deterministically. See [QA Seed Matrix](./qa-seed-matrix.md).
+
+To smoke the seeded runtime automatically against a real local API process:
+
+```bash
+npm run smoke:seeded
+```
+
+In `development` and `test`, the API now falls back to an in-memory auth rate limiter when Redis is unavailable so local smoke checks are still runnable. `staging` and `production` remain fail-fast on Redis connection errors.
+Cookie-authenticated unsafe requests are also origin-checked, and explicit `Authorization: Bearer ...` headers now take precedence over ambient cookies when both are present.
 
 ## 4. Environment Loading
 
@@ -77,7 +106,7 @@ Configuration validation covers:
 - port and timeouts
 - max header bytes
 - CORS origins
-- mock-db data directory existence
+- seed data directory existence
 - database URL shape
 - Redis URL shape
 - log level and log format
@@ -145,13 +174,13 @@ Current route:
 
 - `GET /api/v1/health`
 
-### `simulation`
+### `readmodel`
 
 Purpose:
 
-- serve catalog, professionals, appointments, and chat data from shared mock-db tables
-- act as a bridge while persistent storage is not yet the main source
-- keep FE and BE aligned around shared demo payloads
+- serve catalog, professionals, appointments, chat snapshots, and app bootstrap data from PostgreSQL-backed content documents plus persisted overlays
+- act as the primary backend read-model boundary while remaining catalog/feed surfaces are still being retired slice by slice
+- keep FE and BE aligned around shared contract payloads without reviving old aggregate simulation objects
 
 Current routes:
 
@@ -160,6 +189,7 @@ Current routes:
 - `GET /api/v1/professionals/{slug}`
 - `GET /api/v1/appointments`
 - `GET /api/v1/chat`
+- `GET /api/v1/bootstrap`
 
 Important details:
 
@@ -167,13 +197,50 @@ Important details:
 - invalid slugs return `400 invalid_slug`
 - missing resources return `404 not_found`
 - unexpected failures return sanitized `500 internal server error`
+- published professional portal data and persisted appointment/request state can overlay the stored content snapshot
+
+### `professionalportal`
+
+Purpose:
+
+- persist professional portal state that used to live only in frontend local storage
+- provide backend-owned resource boundaries for dashboard, onboarding, trust, portfolio, request board, and review state flows
+- keep FE mutations integrated with BE immediately while PostgreSQL persistence is still being introduced
+- project published portal snapshots back into the public read-model so FE public pages can reflect published updates
+
+Current routes:
+
+- `GET /api/v1/professionals/portal/session`
+- `PUT /api/v1/professionals/portal/session`
+- `GET /api/v1/professionals/me/profile`
+- `PUT /api/v1/professionals/me/profile`
+- `GET /api/v1/professionals/me/coverage`
+- `PUT /api/v1/professionals/me/coverage`
+- `GET /api/v1/professionals/me/services`
+- `PUT /api/v1/professionals/me/services`
+- `GET /api/v1/professionals/me/requests`
+- `PUT /api/v1/professionals/me/requests`
+- `GET /api/v1/professionals/me/portfolio`
+- `PUT /api/v1/professionals/me/portfolio`
+- `GET /api/v1/professionals/me/gallery`
+- `PUT /api/v1/professionals/me/gallery`
+- `GET /api/v1/professionals/me/trust`
+- `PUT /api/v1/professionals/me/trust`
+
+Current behavior:
+
+- stores the latest portal snapshot per professional in PostgreSQL
+- tracks the last active professional session so FE can restore the latest working state
+- lets FE sync the main portal resource slices independently while keeping the session snapshot coherent
+- overlays published portal snapshots on top of the public catalog/read-model payloads during backend reads
+- returns `200` with `hasSnapshot=false` when a professional has no persisted portal session yet
 
 ### `chat`
 
 Purpose:
 
 - accept websocket chat connections
-- store recent message history in memory
+- store recent message history in PostgreSQL
 - broadcast messages to subscribers per thread
 
 Current entrypoint:
@@ -183,13 +250,36 @@ Current entrypoint:
 Current behavior:
 
 - accepts optional `thread_id`, `client_id`, and `sender` query parameters
+- loads recent thread history from PostgreSQL during websocket connection bootstrap
 - emits an initial `connected` event
 - emits `message` events for live messages
-- retains up to 50 messages per thread in memory
+- persists outbound live messages into PostgreSQL before broadcasting them
 
-Important limitation:
+### `clientstate`
 
-- the chat hub does not persist to PostgreSQL yet
+Purpose:
+
+- persist viewer shell, notification read-state, consumer preferences, admin session, support desk, and admin console documents in PostgreSQL
+- expose both aggregate and granular resource boundaries so FE no longer relies on browser-only state for operational flows
+
+Current routes include:
+
+- `GET /api/v1/viewer/session`
+- `PUT /api/v1/viewer/session`
+- `GET /api/v1/customer/notifications`
+- `PUT /api/v1/customer/notifications`
+- `GET /api/v1/professional/notifications`
+- `PUT /api/v1/professional/notifications`
+- `GET /api/v1/preferences/consumer`
+- `PUT /api/v1/preferences/consumer`
+- `GET /api/v1/admin/session`
+- `PUT /api/v1/admin/session`
+- `GET /api/v1/admin/support-desk`
+- `PUT /api/v1/admin/support-desk`
+- `GET /api/v1/admin/console`
+- `PUT /api/v1/admin/console`
+- `GET /api/v1/admin/console/tables/{table_name}`
+- `PUT /api/v1/admin/console/tables/{table_name}`
 
 ## 8. OpenAPI And Contract Generation
 
@@ -227,8 +317,17 @@ Current schema contains:
 
 - `chat_threads`
 - `chat_messages`
+- `professional_portal_sessions`
+- `app_state_documents`
+- `content_documents`
 
-This schema prepares the repository for persistent chat history, but runtime chat still uses the in-memory hub today.
+Current runtime usage:
+
+- chat websocket history persists into `chat_threads` and `chat_messages`
+- professional portal session/resource persistence lives in `professional_portal_sessions`
+- viewer session, notifications, consumer preferences, admin session, support desk, and admin console snapshots persist into `app_state_documents`
+- read-model catalog/bootstrap content persists in `content_documents`, bootstrapped from `seeddata` when missing
+- published professional portal snapshots can overlay the stored content documents during reads
 
 ## 10. Testing Strategy
 
@@ -241,12 +340,12 @@ Current backend tests include:
 Useful commands:
 
 ```bash
-npm run test --workspace @bidanapp/backend
-npm run typecheck --workspace @bidanapp/backend
-npm run lint --workspace @bidanapp/backend
+go test ./...
+npm run atlas:apply --workspace @bidanapp/backend
+npm run contract:generate
 ```
 
-Because `typecheck` currently uses `go test ./...`, backend correctness is largely covered through compile and test execution together.
+For frontend smoke or route checks without local PostgreSQL, use `go run ./cmd/dev-api`.
 
 ## 11. Adding A New Backend Feature
 
@@ -266,5 +365,5 @@ Recommended flow:
 - returning raw internal errors to clients
 - skipping slug or input validation for path-based resource lookup
 - putting feature-specific logic directly in the router instead of a module
-- assuming the existing chat schema means chat persistence is already implemented
+- assuming bootstrapped content documents remove the need for richer relational/content modeling later
 - changing API shape without regenerating the SDK contract

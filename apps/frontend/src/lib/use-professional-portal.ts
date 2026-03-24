@@ -29,28 +29,20 @@ import {
 import {
   createProfessionalOnboardingDraft,
   deriveProfessionalOnboardingState,
-  PROFESSIONAL_LIFECYCLE_REVIEW_STATE_MOCKS,
+  PROFESSIONAL_LIFECYCLE_REVIEW_STATE_TEMPLATES,
 } from '@/features/professional-portal/lib/onboarding';
 import {
   createProfessionalPortalSnapshot,
   getProfessionalPortalRepository,
 } from '@/features/professional-portal/lib/repository';
 import { validateProfessionalRequestStatusUpdate } from '@/features/professional-portal/lib/request-status';
+import { ACTIVE_RUNTIME_CLOCK_ISO } from '@/lib/app-runtime';
+import { appointmentPriceLabelToNumber, createHydratedAppointment } from '@/lib/appointment-utils';
 import { normalizeAvailabilityRulesByMode } from '@/lib/availability-rules';
-import { getAppointmentRowsByProfessionalId } from '@/lib/mock-db/appointment-records';
-import { appointmentPriceLabelToNumber, createHydratedAppointment } from '@/lib/mock-db/appointments';
-import {
-  getAreaById,
-  getProfessionalAvailabilityScheduleDays,
-  getProfessionalById,
-  getProfessionalCancellationPolicy,
-  getProfessionalCategoryLabel,
-  MOCK_CATEGORIES,
-  MOCK_PROFESSIONALS,
-  MOCK_SERVICES,
-} from '@/lib/mock-db/catalog';
-import { ACTIVE_CONSUMER, ACTIVE_USER_CONTEXT } from '@/lib/mock-db/runtime';
-import { ACTIVE_RUNTIME_CLOCK_ISO } from '@/lib/mock-db/runtime-selection';
+import { getAreaById, getProfessionalCategoryLabel, getServiceById } from '@/lib/catalog-selectors';
+import { getProfessionalAvailabilityScheduleDays } from '@/lib/professional-availability';
+import { useAppShell } from '@/lib/use-app-shell';
+import { useCatalogReadModel } from '@/lib/use-catalog-read-model';
 import type {
   Appointment,
   AppointmentCancellationPolicySnapshot,
@@ -64,7 +56,9 @@ import type {
 import type {
   Area,
   BookingFlow,
+  Category,
   GeoPoint,
+  GlobalService,
   Professional,
   ProfessionalAvailabilityRules,
   ProfessionalGalleryItem,
@@ -72,7 +66,16 @@ import type {
   ServiceDeliveryMode,
   ServiceModeFlags,
 } from '@/types/catalog';
-import type { AppointmentRow } from '@/types/mock-db';
+import {
+  syncAppointmentRecordResource,
+  syncProfessionalPortalCoverageResource,
+  syncProfessionalPortalGalleryResource,
+  syncProfessionalPortalPortfolioResource,
+  syncProfessionalPortalProfileResource,
+  syncProfessionalPortalRequestsResource,
+  syncProfessionalPortalServicesResource,
+  syncProfessionalPortalTrustResource,
+} from './professional-portal-api';
 import { useViewerSession } from './use-viewer-session';
 
 export type {
@@ -95,11 +98,10 @@ export type {
   UpdateRequestStatusInput,
 } from '@/features/professional-portal/lib/contracts';
 
-const defaultProfessional = MOCK_PROFESSIONALS[0] || null;
 const professionalPortalRepository = getProfessionalPortalRepository();
 const professionalRequestStatuses: ProfessionalRequestStatus[] = ['new', 'quoted', 'scheduled', 'completed'];
-const publishedReviewStateTemplate = PROFESSIONAL_LIFECYCLE_REVIEW_STATE_MOCKS.published;
-const draftReviewStateTemplate = PROFESSIONAL_LIFECYCLE_REVIEW_STATE_MOCKS.draft;
+const publishedReviewStateTemplate = PROFESSIONAL_LIFECYCLE_REVIEW_STATE_TEMPLATES.published;
+const draftReviewStateTemplate = PROFESSIONAL_LIFECYCLE_REVIEW_STATE_TEMPLATES.draft;
 
 const isPracticeMode = (value: string): value is ServiceDeliveryMode =>
   value === 'online' || value === 'home_visit' || value === 'onsite';
@@ -196,23 +198,23 @@ const professionalPortalCopyByLocale = {
     defaults: {
       credentialIssuer: 'Certification body',
       credentialNote: 'Briefly explain what this credential covers for customers.',
-      credentialTitle: 'New credential',
+      credentialTitle: 'Credential',
       credentialYear: '2026',
       galleryAlt: 'Professional gallery asset',
-      galleryLabel: 'New asset',
+      galleryLabel: 'Gallery asset',
       newAssetAlt: 'Professional asset',
-      newOutcome: 'New outcome',
+      newOutcome: 'Outcome',
       portfolioOutcomePlaceholder: 'Key outcome not written yet',
       portfolioPeriodLabel: 'March 2026',
       portfolioSummary: 'Case study summary can be completed later.',
-      portfolioTitle: 'New portfolio entry',
-      requestClientName: 'New client',
-      requestNote: 'New request note.',
+      portfolioTitle: 'Portfolio entry',
+      requestClientName: 'Client',
+      requestNote: 'Request note',
       requestTodayLabel: 'Today',
       storyCapturedAt: 'March 2026',
       storyLocation: 'Practice location',
       storyNote: 'Share one concrete moment that strengthens customer trust.',
-      storyTitle: 'New practice story',
+      storyTitle: 'Practice story',
     },
     requestBoard: {
       notes: {
@@ -290,23 +292,23 @@ const professionalPortalCopyByLocale = {
     defaults: {
       credentialIssuer: 'Lembaga penerbit',
       credentialNote: 'Jelaskan singkat cakupan kredensial ini untuk pelanggan.',
-      credentialTitle: 'Kredensial baru',
+      credentialTitle: 'Kredensial',
       credentialYear: '2026',
       galleryAlt: 'Aset galeri profesional',
-      galleryLabel: 'Aset baru',
+      galleryLabel: 'Aset galeri',
       newAssetAlt: 'Aset profesional',
-      newOutcome: 'Hasil baru',
+      newOutcome: 'Hasil',
       portfolioOutcomePlaceholder: 'Hasil utama belum ditulis',
       portfolioPeriodLabel: 'Maret 2026',
       portfolioSummary: 'Ringkasan studi kasus masih bisa dilengkapi.',
-      portfolioTitle: 'Portofolio baru',
-      requestClientName: 'Klien baru',
-      requestNote: 'Catatan permintaan baru.',
+      portfolioTitle: 'Portofolio',
+      requestClientName: 'Klien',
+      requestNote: 'Catatan permintaan',
       requestTodayLabel: 'Hari ini',
       storyCapturedAt: 'Maret 2026',
       storyLocation: 'Titik layanan',
       storyNote: 'Ceritakan satu momen nyata yang memperkuat kepercayaan pelanggan.',
-      storyTitle: 'Cerita praktik baru',
+      storyTitle: 'Cerita praktik',
     },
     requestBoard: {
       notes: {
@@ -384,6 +386,50 @@ const professionalPortalCopyByLocale = {
 
 const getProfessionalPortalCopy = () => professionalPortalCopyByLocale[getProfessionalPortalLocale()];
 
+interface PortalCatalogData {
+  areas: Area[];
+  categories: Category[];
+  defaultProfessional: Professional | null;
+  professionals: Professional[];
+  services: GlobalService[];
+  serviceDefaultsByServiceId: Map<string, ProfessionalService>;
+}
+
+interface PortalCatalogLookupData extends PortalCatalogData {
+  getProfessionalById: (professionalId: string) => Professional | null;
+}
+
+const buildPortalCatalogData = ({
+  areas,
+  categories,
+  professionals,
+  services,
+}: {
+  areas: Area[];
+  categories: Category[];
+  professionals: Professional[];
+  services: GlobalService[];
+}): PortalCatalogData => {
+  const serviceDefaultsByServiceId = new Map<string, ProfessionalService>();
+
+  for (const professional of professionals) {
+    for (const service of professional.services) {
+      if (!serviceDefaultsByServiceId.has(service.serviceId)) {
+        serviceDefaultsByServiceId.set(service.serviceId, service);
+      }
+    }
+  }
+
+  return {
+    areas,
+    categories,
+    defaultProfessional: professionals[0] || null,
+    professionals,
+    services,
+    serviceDefaultsByServiceId,
+  };
+};
+
 const parseInteger = (value: unknown, fallback: number) => {
   if (typeof value === 'number' && Number.isFinite(value)) {
     return Math.max(0, Math.round(value));
@@ -430,16 +476,6 @@ const sanitizeAvailabilityRulesByMode = (
   value: unknown,
   fallback?: Partial<Record<'home_visit' | 'onsite', ProfessionalAvailabilityRules>>,
 ) => normalizeAvailabilityRulesByMode(value, fallback);
-
-const serviceDefaultsByServiceId = new Map<string, ProfessionalService>();
-
-for (const professional of MOCK_PROFESSIONALS) {
-  for (const service of professional.services) {
-    if (!serviceDefaultsByServiceId.has(service.serviceId)) {
-      serviceDefaultsByServiceId.set(service.serviceId, service);
-    }
-  }
-}
 
 const appointmentTimelineActors: AppointmentTimelineActor[] = ['customer', 'professional', 'system'];
 
@@ -581,37 +617,14 @@ const createAppointmentCancellationResolution = ({
 });
 
 const resolveAppointmentCancellationPolicySnapshot = (
-  professionalId: string,
+  _professionalId: string,
   requestedMode: ServiceDeliveryMode,
+  professional?: Professional | null,
   fallback?: AppointmentCancellationPolicySnapshot,
 ) =>
   fallback ||
-  getProfessionalCancellationPolicy(professionalId, requestedMode) ||
+  professional?.cancellationPoliciesByMode?.[requestedMode] ||
   createDefaultCancellationPolicySnapshot(requestedMode);
-
-const buildAppointmentRecordFromRow = (record: AppointmentRow): ProfessionalManagedAppointmentRecord => ({
-  areaId: record.areaId,
-  bookingFlow: record.bookingFlow,
-  cancellationPolicySnapshot: resolveAppointmentCancellationPolicySnapshot(
-    record.professionalId,
-    record.requestedMode,
-    record.cancellationPolicySnapshot,
-  ),
-  cancellationResolution: record.cancellationResolution || undefined,
-  consumerId: record.consumerId,
-  id: record.id,
-  index: record.index,
-  professionalId: record.professionalId,
-  requestNote: record.requestNote,
-  requestedAt: record.requestedAt,
-  requestedMode: record.requestedMode,
-  scheduleSnapshot: record.scheduleSnapshot,
-  serviceId: record.serviceId,
-  serviceOfferingId: record.serviceOfferingId,
-  serviceSnapshot: record.serviceSnapshot,
-  status: record.status,
-  timeline: record.timeline,
-});
 
 const getAppointmentRecordLastUpdatedAt = (record: ProfessionalManagedAppointmentRecord) =>
   record.timeline[record.timeline.length - 1]?.createdAt || record.requestedAt;
@@ -653,6 +666,7 @@ const buildRequestStatusHistoryFromTimeline = (
 
 const buildRequestFromAppointmentRecord = (
   record: ProfessionalManagedAppointmentRecord,
+  currentConsumerName: string,
 ): ProfessionalManagedRequest => {
   const requestedAtDate = new Date(record.requestedAt);
 
@@ -662,7 +676,7 @@ const buildRequestFromAppointmentRecord = (
     bookingFlow: record.bookingFlow,
     budgetLabel: record.serviceSnapshot.priceLabel,
     clientId: record.consumerId,
-    clientName: ACTIVE_CONSUMER.name,
+    clientName: currentConsumerName,
     customerStatus: record.status,
     id: `professional-request-linked-${record.id}`,
     note: record.requestNote,
@@ -680,41 +694,50 @@ const buildRequestFromAppointmentRecord = (
   };
 };
 
-const buildRequestBoardFromAppointmentRecords = (records: ProfessionalManagedAppointmentRecord[]) =>
+const buildRequestBoardFromAppointmentRecords = (
+  records: ProfessionalManagedAppointmentRecord[],
+  currentConsumerName: string,
+) =>
   [...records]
     .sort(
       (leftRecord, rightRecord) =>
         new Date(getAppointmentRecordLastUpdatedAt(rightRecord)).getTime() -
         new Date(getAppointmentRecordLastUpdatedAt(leftRecord)).getTime(),
     )
-    .map(buildRequestFromAppointmentRecord);
+    .map((record) => buildRequestFromAppointmentRecord(record, currentConsumerName));
 
 const buildDefaultAppointmentRecords = (professional: Professional | null): ProfessionalManagedAppointmentRecord[] => {
   if (!professional) {
     return [];
   }
 
-  return getAppointmentRowsByProfessionalId(professional.id).map(buildAppointmentRecordFromRow);
+  return [];
 };
 
-const buildDefaultAppointmentRecordsByProfessionalId = () =>
-  MOCK_PROFESSIONALS.reduce<Record<string, ProfessionalManagedAppointmentRecord[]>>((records, professional) => {
+const buildDefaultAppointmentRecordsByProfessionalId = (professionals: Professional[]) =>
+  professionals.reduce<Record<string, ProfessionalManagedAppointmentRecord[]>>((records, professional) => {
     records[professional.id] = buildDefaultAppointmentRecords(professional);
     return records;
   }, {});
 
-const buildDefaultRequestBoard = (professional: Professional | null): ProfessionalManagedRequest[] =>
-  buildRequestBoardFromAppointmentRecords(buildDefaultAppointmentRecords(professional));
+const buildDefaultRequestBoard = (
+  professional: Professional | null,
+  currentConsumerName: string,
+): ProfessionalManagedRequest[] =>
+  buildRequestBoardFromAppointmentRecords(buildDefaultAppointmentRecords(professional), currentConsumerName);
 
-const buildDefaultServiceConfigurations = (professional: Professional | null): ProfessionalManagedService[] => {
+const buildDefaultServiceConfigurations = (
+  catalogData: Pick<PortalCatalogData, 'serviceDefaultsByServiceId' | 'services'>,
+  professional: Professional | null,
+): ProfessionalManagedService[] => {
   const professionalServiceById = new Map(
     (professional?.services || []).map((service) => [service.serviceId, service]),
   );
   const featuredServiceId = professional?.services[0]?.serviceId || '';
 
-  return MOCK_SERVICES.map((serviceTemplate, index) => {
+  return catalogData.services.map((serviceTemplate, index) => {
     const existingService = professionalServiceById.get(serviceTemplate.id);
-    const templateService = existingService || serviceDefaultsByServiceId.get(serviceTemplate.id);
+    const templateService = existingService || catalogData.serviceDefaultsByServiceId.get(serviceTemplate.id);
 
     return {
       bookingFlow: existingService?.bookingFlow || templateService?.bookingFlow || 'request',
@@ -804,9 +827,15 @@ const normalizeManagedActivityStories = (
     index: index + 1,
   }));
 
-const buildDefaultPortalState = (professionalId = defaultProfessional?.id || ''): ProfessionalPortalState => {
-  const professional = getProfessionalById(professionalId) || defaultProfessional;
-  const primaryArea = professional?.coverage.areaIds[0] ? getAreaById(professional.coverage.areaIds[0]) : undefined;
+const buildDefaultPortalState = (
+  catalogData: PortalCatalogLookupData,
+  currentConsumerName: string,
+  professionalId = catalogData.defaultProfessional?.id || '',
+): ProfessionalPortalState => {
+  const professional = catalogData.getProfessionalById(professionalId) || catalogData.defaultProfessional;
+  const primaryArea = professional?.coverage.areaIds[0]
+    ? getAreaById(catalogData.areas, professional.coverage.areaIds[0])
+    : undefined;
 
   return {
     acceptingNewClients: professional?.availability.isAvailable ?? true,
@@ -833,9 +862,9 @@ const buildDefaultPortalState = (professionalId = defaultProfessional?.id || '')
     practiceAddress: professional?.practiceLocation?.address || professional?.about || '',
     practiceLabel: professional?.practiceLocation?.label || professional?.location || '',
     publicBio: professional?.about || '',
-    requestBoard: buildDefaultRequestBoard(professional),
+    requestBoard: buildDefaultRequestBoard(professional, currentConsumerName),
     responseTimeGoal: professional?.responseTime || '< 30 menit',
-    serviceConfigurations: buildDefaultServiceConfigurations(professional),
+    serviceConfigurations: buildDefaultServiceConfigurations(catalogData, professional),
     yearsExperience: professional?.experience || '',
   };
 };
@@ -953,7 +982,7 @@ const sanitizeManagedRequest = (
     budgetLabel: value.budgetLabel?.trim() || fallback?.budgetLabel || formatRupiah(150000),
     bookingFlow:
       value.bookingFlow && isBookingFlow(value.bookingFlow) ? value.bookingFlow : fallback?.bookingFlow || 'request',
-    clientId: value.clientId?.trim() || fallback?.clientId || `demo-client-${Date.now()}`,
+    clientId: value.clientId?.trim() || fallback?.clientId || `web-client-${Date.now()}`,
     clientName: value.clientName?.trim() || fallback?.clientName || copy.defaults.requestClientName,
     customerStatus:
       value.customerStatus &&
@@ -1199,6 +1228,7 @@ const sanitizeManagedAppointmentRecord = (
 
 const sanitizeAppointmentRecordsByProfessionalId = (
   value: unknown,
+  catalogData: PortalCatalogLookupData,
 ): Record<string, ProfessionalManagedAppointmentRecord[]> => {
   if (!value || typeof value !== 'object') {
     return {};
@@ -1207,7 +1237,7 @@ const sanitizeAppointmentRecordsByProfessionalId = (
   return Object.entries(value).reduce<Record<string, ProfessionalManagedAppointmentRecord[]>>(
     (records, [professionalId, board]) => {
       const fallbackRecords = buildDefaultAppointmentRecords(
-        getProfessionalById(professionalId) || defaultProfessional,
+        catalogData.getProfessionalById(professionalId) || catalogData.defaultProfessional,
       );
       records[professionalId] = Array.isArray(board)
         ? board.flatMap((item, index) => {
@@ -1230,9 +1260,11 @@ const sanitizeAppointmentRecordsByProfessionalId = (
 const sanitizeRequestBoard = (
   professionalId: string,
   requestBoard: Partial<ProfessionalManagedRequest>[] | null | undefined,
+  catalogData: PortalCatalogLookupData,
+  currentConsumerName: string,
 ): ProfessionalManagedRequest[] => {
-  const professional = getProfessionalById(professionalId) || defaultProfessional;
-  const fallbackRequestBoard = buildDefaultRequestBoard(professional);
+  const professional = catalogData.getProfessionalById(professionalId) || catalogData.defaultProfessional;
+  const fallbackRequestBoard = buildDefaultRequestBoard(professional, currentConsumerName);
 
   if (!Array.isArray(requestBoard)) {
     return fallbackRequestBoard;
@@ -1257,8 +1289,8 @@ const sanitizeReviewState = (
   submittedAt: value?.submittedAt?.trim() || fallback.submittedAt,
 });
 
-const buildDefaultReviewStates = () =>
-  MOCK_PROFESSIONALS.reduce<Record<string, ProfessionalLifecycleReviewState>>((states, professional) => {
+const buildDefaultReviewStates = (professionals: Professional[]) =>
+  professionals.reduce<Record<string, ProfessionalLifecycleReviewState>>((states, professional) => {
     states[professional.id] = createPublishedReviewState();
     return states;
   }, {});
@@ -1280,9 +1312,13 @@ const sanitizeReviewStatesByProfessionalId = (value: unknown): Record<string, Pr
   );
 };
 
-const sanitizePortalState = (value: Partial<ProfessionalPortalState> | null | undefined): ProfessionalPortalState => {
-  const professionalId = value?.activeProfessionalId || defaultProfessional?.id || '';
-  const baseState = buildDefaultPortalState(professionalId);
+const sanitizePortalState = (
+  value: Partial<ProfessionalPortalState> | null | undefined,
+  catalogData: PortalCatalogLookupData,
+  currentConsumerName: string,
+): ProfessionalPortalState => {
+  const professionalId = value?.activeProfessionalId || catalogData.defaultProfessional?.id || '';
+  const baseState = buildDefaultPortalState(catalogData, currentConsumerName, professionalId);
   const rawServiceMap = new Map((value?.serviceConfigurations || []).map((item) => [item.serviceId, item]));
   const activityStories = Array.isArray(value?.activityStories) ? value.activityStories : null;
   const credentials = Array.isArray(value?.credentials) ? value.credentials : null;
@@ -1291,6 +1327,8 @@ const sanitizePortalState = (value: Partial<ProfessionalPortalState> | null | un
   const requestBoard = sanitizeRequestBoard(
     professionalId,
     Array.isArray(value?.requestBoard) ? value.requestBoard : baseState.requestBoard,
+    catalogData,
+    currentConsumerName,
   );
   const coverageAreaIds = Array.isArray(value?.coverageAreaIds)
     ? value.coverageAreaIds.filter((areaId): areaId is string => typeof areaId === 'string' && areaId.length > 0)
@@ -1345,14 +1383,17 @@ const sanitizePortalState = (value: Partial<ProfessionalPortalState> | null | un
   };
 };
 
-const readProfessionalPortalData = (): {
+const readProfessionalPortalData = (
+  catalogData: PortalCatalogLookupData,
+  currentConsumerName: string,
+): {
   portalState: ProfessionalPortalState;
   appointmentRecordsByProfessionalId: Record<string, ProfessionalManagedAppointmentRecord[]>;
   reviewStatesByProfessionalId: Record<string, ProfessionalLifecycleReviewState>;
 } => {
-  const defaultState = buildDefaultPortalState();
-  const defaultAppointmentRecords = buildDefaultAppointmentRecordsByProfessionalId();
-  const defaultReviewStates = buildDefaultReviewStates();
+  const defaultState = buildDefaultPortalState(catalogData, currentConsumerName);
+  const defaultAppointmentRecords = buildDefaultAppointmentRecordsByProfessionalId(catalogData.professionals);
+  const defaultReviewStates = buildDefaultReviewStates(catalogData.professionals);
 
   if (typeof window === 'undefined') {
     return {
@@ -1377,7 +1418,9 @@ const readProfessionalPortalData = (): {
       storedSnapshot.schemaVersion !== PROFESSIONAL_PORTAL_SCHEMA_VERSION ||
       !storedSnapshot.appointmentRecordsByProfessionalId
     ) {
-      persistProfessionalPortalState(defaultState, defaultAppointmentRecords, defaultReviewStates);
+      if (professionalPortalRepository.source !== 'api') {
+        persistProfessionalPortalState(defaultState, defaultAppointmentRecords, defaultReviewStates);
+      }
 
       return {
         appointmentRecordsByProfessionalId: defaultAppointmentRecords,
@@ -1388,7 +1431,7 @@ const readProfessionalPortalData = (): {
 
     const sanitizedAppointmentRecords = {
       ...defaultAppointmentRecords,
-      ...sanitizeAppointmentRecordsByProfessionalId(storedSnapshot.appointmentRecordsByProfessionalId),
+      ...sanitizeAppointmentRecordsByProfessionalId(storedSnapshot.appointmentRecordsByProfessionalId, catalogData),
     };
     const sanitizedReviewStates = {
       ...defaultReviewStates,
@@ -1397,11 +1440,16 @@ const readProfessionalPortalData = (): {
     const activeProfessionalId = storedSnapshot.state?.activeProfessionalId || defaultState.activeProfessionalId;
     const requestBoard = buildRequestBoardFromAppointmentRecords(
       sanitizedAppointmentRecords[activeProfessionalId] || [],
+      currentConsumerName,
     );
-    const portalState = sanitizePortalState({
-      ...storedSnapshot.state,
-      requestBoard,
-    });
+    const portalState = sanitizePortalState(
+      {
+        ...storedSnapshot.state,
+        requestBoard,
+      },
+      catalogData,
+      currentConsumerName,
+    );
 
     return {
       appointmentRecordsByProfessionalId: sanitizedAppointmentRecords,
@@ -1445,11 +1493,13 @@ const getRequestLastUpdatedAt = (request: ProfessionalManagedRequest) =>
 
 const buildCustomerAppointmentsFromAppointmentRecords = (
   appointmentRecordsByProfessionalId: Record<string, ProfessionalManagedAppointmentRecord[]>,
+  currentConsumerId: string,
+  getProfessionalById: (professionalId: string) => Professional | null,
 ): Appointment[] =>
   Object.values(appointmentRecordsByProfessionalId)
     .flatMap((records) =>
       records
-        .filter((record) => record.consumerId === ACTIVE_CONSUMER.id)
+        .filter((record) => record.consumerId === currentConsumerId)
         .map((record) => ({
           record,
         })),
@@ -1460,22 +1510,25 @@ const buildCustomerAppointmentsFromAppointmentRecords = (
         new Date(getAppointmentRecordLastUpdatedAt(leftEntry.record)).getTime(),
     )
     .map(({ record }) =>
-      createHydratedAppointment({
-        areaId: record.areaId,
-        bookingFlow: record.bookingFlow,
-        cancellationPolicySnapshot: record.cancellationPolicySnapshot,
-        cancellationResolution: record.cancellationResolution,
-        consumerId: record.consumerId,
-        id: record.id,
-        professionalId: record.professionalId,
-        requestNote: record.requestNote,
-        requestedAt: record.requestedAt,
-        requestedMode: record.requestedMode,
-        scheduleSnapshot: record.scheduleSnapshot,
-        serviceSnapshot: record.serviceSnapshot,
-        status: record.status,
-        timeline: record.timeline,
-      }),
+      createHydratedAppointment(
+        {
+          areaId: record.areaId,
+          bookingFlow: record.bookingFlow,
+          cancellationPolicySnapshot: record.cancellationPolicySnapshot,
+          cancellationResolution: record.cancellationResolution,
+          consumerId: record.consumerId,
+          id: record.id,
+          professionalId: record.professionalId,
+          requestNote: record.requestNote,
+          requestedAt: record.requestedAt,
+          requestedMode: record.requestedMode,
+          scheduleSnapshot: record.scheduleSnapshot,
+          serviceSnapshot: record.serviceSnapshot,
+          status: record.status,
+          timeline: record.timeline,
+        },
+        getProfessionalById(record.professionalId),
+      ),
     );
 
 const mergeProfessionalWithPortalState = (
@@ -1578,53 +1631,84 @@ const mergeProfessionalWithPortalState = (
 };
 
 export const useProfessionalPortal = () => {
+  const { currentConsumer, currentUserContext } = useAppShell();
   const { continueAsProfessional } = useViewerSession();
-  const [portalState, setPortalState] = useState<ProfessionalPortalState>(
-    () => readProfessionalPortalData().portalState,
-  );
+  const catalogSnapshot = useCatalogReadModel();
+  const catalogData = buildPortalCatalogData(catalogSnapshot);
+  const getCatalogProfessionalById = (professionalId: string) =>
+    catalogData.professionals.find((professional) => professional.id === professionalId) || null;
+  const getCatalogServiceById = (serviceId: string) => getServiceById(catalogData.services, serviceId) || null;
+  const catalogLookupData: PortalCatalogLookupData = {
+    ...catalogData,
+    getProfessionalById: getCatalogProfessionalById,
+  };
+  const buildCatalogDefaultPortalState = (professionalId = catalogData.defaultProfessional?.id || '') =>
+    buildDefaultPortalState(catalogLookupData, currentConsumer.name, professionalId);
+  const readPortalData = () => readProfessionalPortalData(catalogLookupData, currentConsumer.name);
+  const [portalState, setPortalState] = useState<ProfessionalPortalState>(() => readPortalData().portalState);
   const [appointmentRecordsByProfessionalId, setAppointmentRecordsByProfessionalId] = useState<
     Record<string, ProfessionalManagedAppointmentRecord[]>
-  >(() => readProfessionalPortalData().appointmentRecordsByProfessionalId);
+  >(() => readPortalData().appointmentRecordsByProfessionalId);
   const [reviewStatesByProfessionalId, setReviewStatesByProfessionalId] = useState<
     Record<string, ProfessionalLifecycleReviewState>
-  >(() => readProfessionalPortalData().reviewStatesByProfessionalId);
+  >(() => readPortalData().reviewStatesByProfessionalId);
   const requestBoardsByProfessionalId = Object.fromEntries(
     Object.entries(appointmentRecordsByProfessionalId).map(([professionalId, records]) => [
       professionalId,
-      buildRequestBoardFromAppointmentRecords(records),
+      buildRequestBoardFromAppointmentRecords(records, currentConsumer.name),
     ]),
   );
 
   useEffect(() => {
+    const effectCatalogData = buildPortalCatalogData(catalogSnapshot);
+    const effectCatalogLookupData: PortalCatalogLookupData = {
+      ...effectCatalogData,
+      getProfessionalById: (professionalId: string) =>
+        effectCatalogData.professionals.find((professional) => professional.id === professionalId) || null,
+    };
+
     const syncPortalState = () => {
-      const nextData = readProfessionalPortalData();
+      const nextData = readProfessionalPortalData(effectCatalogLookupData, currentConsumer.name);
       setPortalState(nextData.portalState);
       setAppointmentRecordsByProfessionalId(nextData.appointmentRecordsByProfessionalId);
       setReviewStatesByProfessionalId(nextData.reviewStatesByProfessionalId);
     };
 
+    syncPortalState();
     return professionalPortalRepository.subscribe(syncPortalState);
+  }, [catalogSnapshot, currentConsumer.name]);
+
+  useEffect(() => {
+    void professionalPortalRepository.hydrate();
   }, []);
+
+  useEffect(() => {
+    if (!portalState.activeProfessionalId) {
+      return;
+    }
+
+    void professionalPortalRepository.hydrate(portalState.activeProfessionalId);
+  }, [portalState.activeProfessionalId]);
 
   const updatePortalState = (
     nextState: ProfessionalPortalState,
     nextAppointmentRecordsInput?: Record<string, ProfessionalManagedAppointmentRecord[]>,
     nextReviewStatesInput?: Record<string, ProfessionalLifecycleReviewState>,
   ) => {
-    const candidateState = sanitizePortalState(nextState);
+    const candidateState = sanitizePortalState(nextState, catalogLookupData, currentConsumer.name);
     const candidateAppointmentRecords = {
-      ...buildDefaultAppointmentRecordsByProfessionalId(),
+      ...buildDefaultAppointmentRecordsByProfessionalId(catalogData.professionals),
       ...appointmentRecordsByProfessionalId,
-      ...sanitizeAppointmentRecordsByProfessionalId(nextAppointmentRecordsInput),
+      ...sanitizeAppointmentRecordsByProfessionalId(nextAppointmentRecordsInput, catalogLookupData),
     };
     const candidateRequestBoards = Object.fromEntries(
       Object.entries(candidateAppointmentRecords).map(([professionalId, records]) => [
         professionalId,
-        buildRequestBoardFromAppointmentRecords(records),
+        buildRequestBoardFromAppointmentRecords(records, currentConsumer.name),
       ]),
     );
     const candidateReviewStates = {
-      ...buildDefaultReviewStates(),
+      ...buildDefaultReviewStates(catalogData.professionals),
       ...sanitizeReviewStatesByProfessionalId({
         ...reviewStatesByProfessionalId,
         ...nextReviewStatesInput,
@@ -1635,46 +1719,33 @@ export const useProfessionalPortal = () => {
         createPublishedReviewState(),
       ),
     };
-    const sanitizedState = sanitizePortalState({
-      ...candidateState,
-      requestBoard: candidateRequestBoards[candidateState.activeProfessionalId] || candidateState.requestBoard,
-    });
+    const sanitizedState = sanitizePortalState(
+      {
+        ...candidateState,
+        requestBoard: candidateRequestBoards[candidateState.activeProfessionalId] || candidateState.requestBoard,
+      },
+      catalogLookupData,
+      currentConsumer.name,
+    );
 
     setPortalState(sanitizedState);
     setAppointmentRecordsByProfessionalId(candidateAppointmentRecords);
     setReviewStatesByProfessionalId(candidateReviewStates);
     persistProfessionalPortalState(sanitizedState, candidateAppointmentRecords, candidateReviewStates);
+
+    return {
+      appointmentRecordsByProfessionalId: candidateAppointmentRecords,
+      portalState: sanitizedState,
+      reviewStatesByProfessionalId: candidateReviewStates,
+    };
   };
 
   const updatePortalStateWith = (updater: (currentState: ProfessionalPortalState) => ProfessionalPortalState) => {
-    updatePortalState(updater(portalState));
+    return updatePortalState(updater(portalState));
   };
 
-  const startProfessionalLogin = ({ phone, professionalId }: ProfessionalAccessDraft) => {
-    const baseState =
-      portalState.activeProfessionalId === professionalId ? portalState : buildDefaultPortalState(professionalId);
-    const appointmentRecords =
-      appointmentRecordsByProfessionalId[professionalId] ||
-      buildDefaultAppointmentRecords(getProfessionalById(professionalId) || defaultProfessional);
-    const requestBoard = buildRequestBoardFromAppointmentRecords(appointmentRecords);
-    const nextState = sanitizePortalState({
-      ...baseState,
-      activeProfessionalId: professionalId,
-      phone,
-      requestBoard,
-    });
-
-    updatePortalState(
-      nextState,
-      {
-        ...appointmentRecordsByProfessionalId,
-        [professionalId]: appointmentRecords,
-      },
-      {
-        ...reviewStatesByProfessionalId,
-        [professionalId]: reviewStatesByProfessionalId[professionalId] || createPublishedReviewState(),
-      },
-    );
+  const startProfessionalLogin = async ({ professionalId }: ProfessionalAccessDraft) => {
+    await professionalPortalRepository.hydrate(professionalId);
     continueAsProfessional();
   };
 
@@ -1687,16 +1758,18 @@ export const useProfessionalPortal = () => {
   }: ProfessionalAccessDraft) => {
     const nextState = sanitizePortalState(
       createProfessionalOnboardingDraft({
-        ...buildDefaultPortalState(professionalId),
+        ...buildCatalogDefaultPortalState(professionalId),
         activeProfessionalId: professionalId,
         city: city || '',
         credentialNumber: credentialNumber || '',
         displayName: displayName || '',
         phone,
       }),
+      catalogLookupData,
+      currentConsumer.name,
     );
 
-    updatePortalState(
+    const nextPortalData = updatePortalState(
       nextState,
       {
         ...appointmentRecordsByProfessionalId,
@@ -1707,18 +1780,26 @@ export const useProfessionalPortal = () => {
         [professionalId]: createDraftReviewState(),
       },
     );
+
+    syncProfessionalPortalProfileResource(
+      nextPortalData.portalState,
+      nextPortalData.reviewStatesByProfessionalId[professionalId] || createDraftReviewState(),
+    );
+    syncProfessionalPortalCoverageResource(nextPortalData.portalState);
+    syncProfessionalPortalServicesResource(professionalId, nextPortalData.portalState.serviceConfigurations);
+    syncProfessionalPortalRequestsResource(professionalId, []);
     continueAsProfessional();
   };
 
   const switchProfessionalProfile = (professionalId: string) => {
-    const professional = getProfessionalById(professionalId) || defaultProfessional;
+    const professional = getCatalogProfessionalById(professionalId) || catalogData.defaultProfessional;
     const appointmentRecords =
       appointmentRecordsByProfessionalId[professionalId] || buildDefaultAppointmentRecords(professional);
-    const requestBoard = buildRequestBoardFromAppointmentRecords(appointmentRecords);
+    const requestBoard = buildRequestBoardFromAppointmentRecords(appointmentRecords, currentConsumer.name);
 
     updatePortalState(
       {
-        ...buildDefaultPortalState(professionalId),
+        ...buildCatalogDefaultPortalState(professionalId),
         requestBoard,
       },
       undefined,
@@ -1730,12 +1811,17 @@ export const useProfessionalPortal = () => {
   };
 
   const saveServiceConfiguration = (serviceId: string, updates: Partial<ProfessionalManagedService>) => {
-    updatePortalStateWith((currentState) => ({
+    const nextPortalData = updatePortalStateWith((currentState) => ({
       ...currentState,
       serviceConfigurations: currentState.serviceConfigurations.map((service) =>
         service.serviceId === serviceId ? sanitizeManagedService({ ...service, ...updates }, service) : service,
       ),
     }));
+
+    syncProfessionalPortalServicesResource(
+      nextPortalData.portalState.activeProfessionalId,
+      nextPortalData.portalState.serviceConfigurations,
+    );
   };
 
   const activateTemplateService = (serviceId: string) => {
@@ -1747,12 +1833,17 @@ export const useProfessionalPortal = () => {
   };
 
   const savePortfolioEntry = (entryId: string, updates: Partial<ProfessionalManagedPortfolioEntry>) => {
-    updatePortalStateWith((currentState) => ({
+    const nextPortalData = updatePortalStateWith((currentState) => ({
       ...currentState,
       portfolioEntries: currentState.portfolioEntries.map((entry) =>
         entry.id === entryId ? sanitizeManagedPortfolioEntry({ ...entry, ...updates }, entry) : entry,
       ),
     }));
+
+    syncProfessionalPortalPortfolioResource(
+      nextPortalData.portalState.activeProfessionalId,
+      nextPortalData.portalState.portfolioEntries,
+    );
   };
 
   const createPortfolioEntry = () => {
@@ -1768,28 +1859,43 @@ export const useProfessionalPortal = () => {
       visibility: 'public',
     });
 
-    updatePortalStateWith((currentState) => ({
+    const nextPortalData = updatePortalStateWith((currentState) => ({
       ...currentState,
       portfolioEntries: [...currentState.portfolioEntries, nextEntry],
     }));
+
+    syncProfessionalPortalPortfolioResource(
+      nextPortalData.portalState.activeProfessionalId,
+      nextPortalData.portalState.portfolioEntries,
+    );
 
     return nextEntry.id;
   };
 
   const deletePortfolioEntry = (entryId: string) => {
-    updatePortalStateWith((currentState) => ({
+    const nextPortalData = updatePortalStateWith((currentState) => ({
       ...currentState,
       portfolioEntries: currentState.portfolioEntries.filter((entry) => entry.id !== entryId),
     }));
+
+    syncProfessionalPortalPortfolioResource(
+      nextPortalData.portalState.activeProfessionalId,
+      nextPortalData.portalState.portfolioEntries,
+    );
   };
 
   const saveGalleryItem = (galleryId: string, updates: Partial<ProfessionalManagedGalleryItem>) => {
-    updatePortalStateWith((currentState) => ({
+    const nextPortalData = updatePortalStateWith((currentState) => ({
       ...currentState,
       galleryItems: currentState.galleryItems.map((item) =>
         item.id === galleryId ? sanitizeManagedGalleryItem({ ...item, ...updates }, item) : item,
       ),
     }));
+
+    syncProfessionalPortalGalleryResource(
+      nextPortalData.portalState.activeProfessionalId,
+      nextPortalData.portalState.galleryItems,
+    );
   };
 
   const createGalleryItem = () => {
@@ -1803,19 +1909,29 @@ export const useProfessionalPortal = () => {
       label: copy.defaults.galleryLabel,
     });
 
-    updatePortalStateWith((currentState) => ({
+    const nextPortalData = updatePortalStateWith((currentState) => ({
       ...currentState,
       galleryItems: [...currentState.galleryItems, nextItem],
     }));
+
+    syncProfessionalPortalGalleryResource(
+      nextPortalData.portalState.activeProfessionalId,
+      nextPortalData.portalState.galleryItems,
+    );
 
     return nextItem.id;
   };
 
   const deleteGalleryItem = (galleryId: string) => {
-    updatePortalStateWith((currentState) => ({
+    const nextPortalData = updatePortalStateWith((currentState) => ({
       ...currentState,
       galleryItems: currentState.galleryItems.filter((item) => item.id !== galleryId),
     }));
+
+    syncProfessionalPortalGalleryResource(
+      nextPortalData.portalState.activeProfessionalId,
+      nextPortalData.portalState.galleryItems,
+    );
   };
 
   const upsertCredential = (input: Partial<ProfessionalManagedCredential> & { id?: string }) => {
@@ -1832,7 +1948,7 @@ export const useProfessionalPortal = () => {
       existingCredential,
     );
 
-    updatePortalStateWith((currentState) => ({
+    const nextPortalData = updatePortalStateWith((currentState) => ({
       ...currentState,
       credentials: normalizeManagedCredentials(
         existingCredential
@@ -1841,16 +1957,28 @@ export const useProfessionalPortal = () => {
       ),
     }));
 
+    syncProfessionalPortalTrustResource(
+      nextPortalData.portalState.activeProfessionalId,
+      nextPortalData.portalState.credentials,
+      nextPortalData.portalState.activityStories,
+    );
+
     return nextCredential.id;
   };
 
   const deleteCredential = (credentialId: string) => {
-    updatePortalStateWith((currentState) => ({
+    const nextPortalData = updatePortalStateWith((currentState) => ({
       ...currentState,
       credentials: normalizeManagedCredentials(
         currentState.credentials.filter((credential) => credential.id !== credentialId),
       ),
     }));
+
+    syncProfessionalPortalTrustResource(
+      nextPortalData.portalState.activeProfessionalId,
+      nextPortalData.portalState.credentials,
+      nextPortalData.portalState.activityStories,
+    );
   };
 
   const upsertActivityStory = (input: Partial<ProfessionalManagedActivityStory> & { id?: string }) => {
@@ -1864,7 +1992,7 @@ export const useProfessionalPortal = () => {
       existingStory,
     );
 
-    updatePortalStateWith((currentState) => ({
+    const nextPortalData = updatePortalStateWith((currentState) => ({
       ...currentState,
       activityStories: normalizeManagedActivityStories(
         existingStory
@@ -1873,35 +2001,56 @@ export const useProfessionalPortal = () => {
       ),
     }));
 
+    syncProfessionalPortalTrustResource(
+      nextPortalData.portalState.activeProfessionalId,
+      nextPortalData.portalState.credentials,
+      nextPortalData.portalState.activityStories,
+    );
+
     return nextStory.id;
   };
 
   const deleteActivityStory = (storyId: string) => {
-    updatePortalStateWith((currentState) => ({
+    const nextPortalData = updatePortalStateWith((currentState) => ({
       ...currentState,
       activityStories: normalizeManagedActivityStories(
         currentState.activityStories.filter((story) => story.id !== storyId),
       ),
     }));
+
+    syncProfessionalPortalTrustResource(
+      nextPortalData.portalState.activeProfessionalId,
+      nextPortalData.portalState.credentials,
+      nextPortalData.portalState.activityStories,
+    );
   };
 
   const saveBusinessSettings = (input: SaveBusinessSettingsInput) => {
-    updatePortalStateWith((currentState) => ({
+    const nextPortalData = updatePortalStateWith((currentState) => ({
       ...currentState,
       ...input,
     }));
+
+    syncProfessionalPortalProfileResource(
+      nextPortalData.portalState,
+      nextPortalData.reviewStatesByProfessionalId[nextPortalData.portalState.activeProfessionalId] ||
+        createPublishedReviewState(),
+    );
+    syncProfessionalPortalCoverageResource(nextPortalData.portalState);
   };
 
   const saveAvailabilityRulesByMode = (
     availabilityRulesByMode?: Partial<Record<'home_visit' | 'onsite', ProfessionalAvailabilityRules>>,
   ) => {
-    updatePortalStateWith((currentState) => ({
+    const nextPortalData = updatePortalStateWith((currentState) => ({
       ...currentState,
       availabilityRulesByMode: sanitizeAvailabilityRulesByMode(
         availabilityRulesByMode,
         currentState.availabilityRulesByMode,
       ),
     }));
+
+    syncProfessionalPortalCoverageResource(nextPortalData.portalState);
   };
 
   const submitProfessionalProfileForReview = () => {
@@ -1913,13 +2062,21 @@ export const useProfessionalPortal = () => {
 
     const submittedAt = new Date().toISOString();
 
-    updatePortalState(portalState, undefined, {
+    const nextPortalData = updatePortalState(portalState, undefined, {
       ...reviewStatesByProfessionalId,
       [portalState.activeProfessionalId]: {
         status: 'submitted',
         submittedAt,
       },
     });
+
+    syncProfessionalPortalProfileResource(
+      nextPortalData.portalState,
+      nextPortalData.reviewStatesByProfessionalId[portalState.activeProfessionalId] || {
+        status: 'submitted',
+        submittedAt,
+      },
+    );
 
     return true;
   };
@@ -1934,26 +2091,31 @@ export const useProfessionalPortal = () => {
 
     const reviewedAt = new Date().toISOString();
 
-    updatePortalState(portalState, undefined, {
+    const nextPortalData = updatePortalState(portalState, undefined, {
       ...reviewStatesByProfessionalId,
       [portalState.activeProfessionalId]:
         status === 'changes_requested'
           ? {
-              adminNote: PROFESSIONAL_LIFECYCLE_REVIEW_STATE_MOCKS.changesRequested.adminNote,
+              adminNote: PROFESSIONAL_LIFECYCLE_REVIEW_STATE_TEMPLATES.changesRequested.adminNote,
               reviewedAt,
               reviewerName:
-                PROFESSIONAL_LIFECYCLE_REVIEW_STATE_MOCKS.changesRequested.reviewerName || 'Admin BidanCare',
+                PROFESSIONAL_LIFECYCLE_REVIEW_STATE_TEMPLATES.changesRequested.reviewerName || 'Admin BidanCare',
               status,
               submittedAt: activeReviewState.submittedAt,
             }
           : {
               reviewedAt,
               reviewerName:
-                PROFESSIONAL_LIFECYCLE_REVIEW_STATE_MOCKS.verifiedPendingPublish.reviewerName || 'Admin BidanCare',
+                PROFESSIONAL_LIFECYCLE_REVIEW_STATE_TEMPLATES.verifiedPendingPublish.reviewerName || 'Admin BidanCare',
               status,
               submittedAt: activeReviewState.submittedAt,
             },
     });
+
+    syncProfessionalPortalProfileResource(
+      nextPortalData.portalState,
+      nextPortalData.reviewStatesByProfessionalId[portalState.activeProfessionalId] || createDraftReviewState(),
+    );
 
     return true;
   };
@@ -1974,17 +2136,17 @@ export const useProfessionalPortal = () => {
       nextReviewStates[professionalId] =
         status === 'changes_requested'
           ? {
-              adminNote: PROFESSIONAL_LIFECYCLE_REVIEW_STATE_MOCKS.changesRequested.adminNote,
+              adminNote: PROFESSIONAL_LIFECYCLE_REVIEW_STATE_TEMPLATES.changesRequested.adminNote,
               reviewedAt,
               reviewerName:
-                PROFESSIONAL_LIFECYCLE_REVIEW_STATE_MOCKS.changesRequested.reviewerName || 'Admin BidanCare',
+                PROFESSIONAL_LIFECYCLE_REVIEW_STATE_TEMPLATES.changesRequested.reviewerName || 'Admin BidanCare',
               status,
               submittedAt: currentReviewState.submittedAt,
             }
           : {
               reviewedAt,
               reviewerName:
-                PROFESSIONAL_LIFECYCLE_REVIEW_STATE_MOCKS.verifiedPendingPublish.reviewerName || 'Admin BidanCare',
+                PROFESSIONAL_LIFECYCLE_REVIEW_STATE_TEMPLATES.verifiedPendingPublish.reviewerName || 'Admin BidanCare',
               status,
               submittedAt: currentReviewState.submittedAt,
             };
@@ -2007,7 +2169,7 @@ export const useProfessionalPortal = () => {
       return false;
     }
 
-    updatePortalState(
+    const nextPortalData = updatePortalState(
       {
         ...portalState,
         acceptingNewClients: true,
@@ -2022,6 +2184,12 @@ export const useProfessionalPortal = () => {
         },
       },
     );
+
+    syncProfessionalPortalProfileResource(
+      nextPortalData.portalState,
+      nextPortalData.reviewStatesByProfessionalId[portalState.activeProfessionalId] || createPublishedReviewState(),
+    );
+    syncProfessionalPortalCoverageResource(nextPortalData.portalState);
 
     return true;
   };
@@ -2076,14 +2244,14 @@ export const useProfessionalPortal = () => {
   }: CreateCustomerRequestInput) => {
     const professional =
       publicProfessionals.find((candidateProfessional) => candidateProfessional.id === professionalId) ||
-      getProfessionalById(professionalId) ||
-      defaultProfessional;
+      getCatalogProfessionalById(professionalId) ||
+      catalogData.defaultProfessional;
 
     if (!professional) {
       return false;
     }
 
-    const catalogService = MOCK_SERVICES.find((service) => service.id === serviceId);
+    const catalogService = getCatalogServiceById(serviceId);
     const serviceMapping =
       professional.services.find((service) => service.id === serviceOfferingId && service.serviceId === serviceId) ||
       professional.services.find((service) => service.serviceId === serviceId);
@@ -2102,8 +2270,12 @@ export const useProfessionalPortal = () => {
     }
 
     const requiresSchedule = requestedMode !== 'online';
+    const baseAppointmentRecords =
+      appointmentRecordsByProfessionalId[professionalId] || buildDefaultAppointmentRecords(professional);
     const availabilityDays = requiresSchedule
-      ? getProfessionalAvailabilityScheduleDays(professional, requestedMode)
+      ? getProfessionalAvailabilityScheduleDays(professional, requestedMode, {
+          appointmentRecords: baseAppointmentRecords,
+        })
       : [];
     const selectedScheduleDay =
       requiresSchedule && scheduleDayId
@@ -2148,11 +2320,11 @@ export const useProfessionalPortal = () => {
           }),
     ];
     const nextRecord: ProfessionalManagedAppointmentRecord = {
-      areaId: ACTIVE_USER_CONTEXT.area.id,
+      areaId: currentUserContext.area.id,
       bookingFlow: serviceMapping.bookingFlow,
       cancellationPolicySnapshot: resolveAppointmentCancellationPolicySnapshot(professionalId, requestedMode),
       cancellationResolution: undefined,
-      consumerId: ACTIVE_CONSUMER.id,
+      consumerId: currentConsumer.id,
       id: appointmentId,
       index: requestTimestamp,
       professionalId,
@@ -2193,10 +2365,8 @@ export const useProfessionalPortal = () => {
       status: initialStatus,
       timeline,
     };
-    const baseAppointmentRecords =
-      appointmentRecordsByProfessionalId[professionalId] || buildDefaultAppointmentRecords(professional);
     const nextAppointmentRecords = [nextRecord, ...baseAppointmentRecords];
-    const nextRequestBoard = buildRequestBoardFromAppointmentRecords(nextAppointmentRecords);
+    const nextRequestBoard = buildRequestBoardFromAppointmentRecords(nextAppointmentRecords, currentConsumer.name);
 
     updatePortalState(
       portalState.activeProfessionalId === professionalId
@@ -2211,11 +2381,14 @@ export const useProfessionalPortal = () => {
       },
     );
 
+    syncAppointmentRecordResource(professionalId, nextRecord);
+
     return true;
   };
 
   const markCustomerAppointmentPaid = (appointmentId: string) => {
     let hasChanged = false;
+    let affectedProfessionalId = '';
     const nextAppointmentRecords = Object.fromEntries(
       Object.entries(appointmentRecordsByProfessionalId).map(([professionalId, records]) => [
         professionalId,
@@ -2225,6 +2398,7 @@ export const useProfessionalPortal = () => {
           }
 
           hasChanged = true;
+          affectedProfessionalId = professionalId;
           const updatedAt = new Date();
 
           return sanitizeManagedAppointmentRecord(
@@ -2255,15 +2429,27 @@ export const useProfessionalPortal = () => {
       return false;
     }
 
-    updatePortalState(
+    const nextPortalData = updatePortalState(
       {
         ...portalState,
         requestBoard:
-          buildRequestBoardFromAppointmentRecords(nextAppointmentRecords[portalState.activeProfessionalId] || []) ||
-          portalState.requestBoard,
+          buildRequestBoardFromAppointmentRecords(
+            nextAppointmentRecords[portalState.activeProfessionalId] || [],
+            currentConsumer.name,
+          ) || portalState.requestBoard,
       },
       nextAppointmentRecords,
     );
+
+    if (affectedProfessionalId) {
+      const updatedRecord =
+        nextPortalData.appointmentRecordsByProfessionalId[affectedProfessionalId]?.find(
+          (record) => record.id === appointmentId,
+        ) || null;
+      if (updatedRecord) {
+        syncAppointmentRecordResource(affectedProfessionalId, updatedRecord);
+      }
+    }
 
     return true;
   };
@@ -2279,6 +2465,7 @@ export const useProfessionalPortal = () => {
 
     const locale = getProfessionalPortalLocale();
     let hasChanged = false;
+    let affectedProfessionalId = '';
     const updatedAt = new Date(ACTIVE_RUNTIME_CLOCK_ISO);
     const nextAppointmentRecords = Object.fromEntries(
       Object.entries(appointmentRecordsByProfessionalId).map(([professionalId, records]) => [
@@ -2301,6 +2488,7 @@ export const useProfessionalPortal = () => {
           }
 
           hasChanged = true;
+          affectedProfessionalId = professionalId;
           const financialOutcomeLabel = formatFinancialOutcomeLabel(closePreview.financialOutcome, locale);
           const customerSummary =
             locale === 'id'
@@ -2349,15 +2537,27 @@ export const useProfessionalPortal = () => {
       };
     }
 
-    updatePortalState(
+    const nextPortalData = updatePortalState(
       {
         ...portalState,
         requestBoard:
-          buildRequestBoardFromAppointmentRecords(nextAppointmentRecords[portalState.activeProfessionalId] || []) ||
-          portalState.requestBoard,
+          buildRequestBoardFromAppointmentRecords(
+            nextAppointmentRecords[portalState.activeProfessionalId] || [],
+            currentConsumer.name,
+          ) || portalState.requestBoard,
       },
       nextAppointmentRecords,
     );
+
+    if (affectedProfessionalId) {
+      const updatedRecord =
+        nextPortalData.appointmentRecordsByProfessionalId[affectedProfessionalId]?.find(
+          (record) => record.id === appointmentId,
+        ) || null;
+      if (updatedRecord) {
+        syncAppointmentRecordResource(affectedProfessionalId, updatedRecord);
+      }
+    }
 
     return {
       ok: true as const,
@@ -2456,14 +2656,20 @@ export const useProfessionalPortal = () => {
 
     const nextRequestBoard = buildRequestBoardFromAppointmentRecords(
       nextAppointmentRecords[portalState.activeProfessionalId] || [],
+      currentConsumer.name,
     );
 
-    updatePortalState(
+    const nextPortalData = updatePortalState(
       {
         ...portalState,
         requestBoard: nextRequestBoard,
       },
       nextAppointmentRecords,
+    );
+
+    syncProfessionalPortalRequestsResource(
+      portalState.activeProfessionalId,
+      nextPortalData.appointmentRecordsByProfessionalId[portalState.activeProfessionalId] || [],
     );
 
     return {
@@ -2530,9 +2736,10 @@ export const useProfessionalPortal = () => {
     };
     const nextRequestBoard = buildRequestBoardFromAppointmentRecords(
       nextAppointmentRecords[portalState.activeProfessionalId] || [],
+      currentConsumer.name,
     );
 
-    updatePortalState(
+    const nextPortalData = updatePortalState(
       {
         ...portalState,
         requestBoard: nextRequestBoard,
@@ -2540,26 +2747,36 @@ export const useProfessionalPortal = () => {
       nextAppointmentRecords,
     );
 
+    syncProfessionalPortalRequestsResource(
+      portalState.activeProfessionalId,
+      nextPortalData.appointmentRecordsByProfessionalId[portalState.activeProfessionalId] || [],
+    );
+
     return {
       ok: true as const,
     };
   };
 
-  const baseProfessional = getProfessionalById(portalState.activeProfessionalId) || defaultProfessional;
+  const baseProfessional =
+    getCatalogProfessionalById(portalState.activeProfessionalId) || catalogData.defaultProfessional;
   const activeReviewState =
     reviewStatesByProfessionalId[portalState.activeProfessionalId] || createPublishedReviewState();
   const onboardingState = deriveProfessionalOnboardingState(portalState, activeReviewState);
   const previewProfessional = baseProfessional ? mergeProfessionalWithPortalState(baseProfessional, portalState) : null;
   const activeProfessional = previewProfessional;
-  const publicProfessionals = MOCK_PROFESSIONALS.map((professional) =>
+  const publicProfessionals = catalogData.professionals.map((professional) =>
     professional.id === previewProfessional?.id && activeReviewState.status === 'published'
       ? previewProfessional
       : professional,
   );
   const activeCoverageAreas = portalState.coverageAreaIds
-    .map((areaId) => getAreaById(areaId))
+    .map((areaId) => getAreaById(catalogData.areas, areaId))
     .filter((area): area is Area => Boolean(area));
-  const customerAppointments = buildCustomerAppointmentsFromAppointmentRecords(appointmentRecordsByProfessionalId);
+  const customerAppointments = buildCustomerAppointmentsFromAppointmentRecords(
+    appointmentRecordsByProfessionalId,
+    currentConsumer.id,
+    getCatalogProfessionalById,
+  );
   const activeServiceConfigurations = [...portalState.serviceConfigurations]
     .filter((service) => service.isActive)
     .sort((leftService, rightService) => {
@@ -2600,12 +2817,19 @@ export const useProfessionalPortal = () => {
   return {
     activeCoverageAreas,
     activeProfessional,
-    activeProfessionalCategoryLabel: activeProfessional ? getProfessionalCategoryLabel(activeProfessional) : '',
+    activeProfessionalCategoryLabel: activeProfessional
+      ? getProfessionalCategoryLabel({
+          categories: catalogData.categories,
+          professional: activeProfessional,
+          services: catalogData.services,
+        })
+      : '',
     activeReviewState,
     activeServiceConfigurations,
     averageServicePriceLabel,
+    catalogAreas: catalogData.areas,
     customerAppointments,
-    demoProfessionals: MOCK_PROFESSIONALS.slice(0, 4),
+    highlightedProfessionals: publicProfessionals.slice(0, 4),
     featuredServiceConfiguration,
     inactiveServiceTemplates,
     isPublishedProfessional,
@@ -2618,8 +2842,8 @@ export const useProfessionalPortal = () => {
     publishProfessionalProfile,
     requestStatusCounts,
     reviewStatesByProfessionalId,
-    serviceCategories: MOCK_CATEGORIES,
-    serviceTemplates: MOCK_SERVICES,
+    serviceCategories: catalogData.categories,
+    serviceTemplates: catalogData.services,
     applyProfessionalAdminReviewBatch,
     simulateProfessionalAdminReview,
     submitProfessionalProfileForReview,
@@ -2643,7 +2867,7 @@ export const useProfessionalPortal = () => {
 
       return (
         requestBoard
-          .filter((request) => request.clientId === ACTIVE_CONSUMER.id)
+          .filter((request) => request.clientId === currentConsumer.id)
           .sort(
             (leftRequest, rightRequest) =>
               new Date(getRequestLastUpdatedAt(rightRequest)).getTime() -
@@ -2663,14 +2887,16 @@ export const useProfessionalPortal = () => {
     startProfessionalLogin,
     startProfessionalRegistration,
     switchProfessionalProfile,
-    getAreaLabel: (areaId: string) => getAreaById(areaId)?.label || areaId,
     getPreviewProfessionalBySlug: (professionalSlug: string) =>
       previewProfessional?.slug === professionalSlug ? previewProfessional : null,
     getPublicProfessionalById: (professionalId: string) =>
       publicProfessionals.find((professional) => professional.id === professionalId) || null,
     getPublicProfessionalBySlug: (professionalSlug: string) =>
       publicProfessionals.find((professional) => professional.slug === professionalSlug) || null,
-    getServiceLabel: (serviceId: string) =>
-      MOCK_SERVICES.find((service) => service.id === serviceId)?.name || serviceId,
+    getAppointmentRecordsForProfessional: (professionalId: string) =>
+      appointmentRecordsByProfessionalId[professionalId] ||
+      buildDefaultAppointmentRecords(getCatalogProfessionalById(professionalId)),
+    getServiceLabel: (serviceId: string) => getCatalogServiceById(serviceId)?.name || serviceId,
+    getAreaLabel: (areaId: string) => getAreaById(catalogData.areas, areaId)?.label || areaId,
   };
 };

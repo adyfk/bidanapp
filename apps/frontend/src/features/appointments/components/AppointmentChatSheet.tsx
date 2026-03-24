@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useEffect, useRef } from 'react';
 import type { AppointmentChatSession } from '@/features/appointments/hooks/useAppointmentFlow';
 import { APP_CONFIG } from '@/lib/config';
-import { ACTIVE_USER_CONTEXT } from '@/lib/mock-db/runtime';
+import { useAppShell } from '@/lib/use-app-shell';
 import type { Appointment } from '@/types/appointments';
 
 interface AppointmentChatSheetProps {
@@ -26,10 +26,11 @@ export const AppointmentChatSheet = ({
   onSend,
 }: AppointmentChatSheetProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { currentUserContext } = useAppShell();
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, []);
+  });
 
   return (
     <div className="fixed inset-y-0 left-1/2 z-[70] flex w-full max-w-md -translate-x-1/2 flex-col bg-gray-50 animate-in fade-in slide-in-from-bottom-4 duration-300">
@@ -48,7 +49,7 @@ export const AppointmentChatSheet = ({
           </div>
           <div>
             <h2 className="text-[15px] font-bold leading-tight text-gray-900">{appointment.professional.name}</h2>
-            <p className="mt-0.5 text-[11px] font-bold text-green-500">{ACTIVE_USER_CONTEXT.onlineStatusLabel}</p>
+            <p className="mt-0.5 text-[11px] font-bold text-green-500">{currentUserContext.onlineStatusLabel}</p>
           </div>
         </div>
       </div>

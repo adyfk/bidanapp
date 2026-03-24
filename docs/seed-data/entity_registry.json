@@ -1,0 +1,327 @@
+[
+  {
+    "index": 1,
+    "tableName": "app_runtime_selections.json",
+    "group": "runtime",
+    "entityKind": "runtime_pointer",
+    "description": "Pointer ke seed aktif saat aplikasi boot, termasuk runtime clock seed.",
+    "keyRelations": [
+      "currentConsumerId -> consumers.id",
+      "currentUserContextId -> user_contexts.id",
+      "activeHomeFeedId -> home_feed_snapshots.id",
+      "activeMediaPresetId -> media_presets.id"
+    ]
+  },
+  {
+    "index": 2,
+    "tableName": "app_section_configs.json",
+    "group": "runtime",
+    "entityKind": "section_config",
+    "description": "Override komposisi section per surface UI.",
+    "keyRelations": ["entityId -> service_categories.id"]
+  },
+  {
+    "index": 3,
+    "tableName": "reference_service_delivery_modes.json",
+    "group": "reference",
+    "entityKind": "enum_reference",
+    "description": "Master mode layanan.",
+    "keyRelations": []
+  },
+  {
+    "index": 4,
+    "tableName": "reference_booking_flows.json",
+    "group": "reference",
+    "entityKind": "enum_reference",
+    "description": "Master flow booking.",
+    "keyRelations": []
+  },
+  {
+    "index": 5,
+    "tableName": "reference_time_slot_statuses.json",
+    "group": "reference",
+    "entityKind": "enum_reference",
+    "description": "Master status slot jadwal.",
+    "keyRelations": []
+  },
+  {
+    "index": 6,
+    "tableName": "reference_appointment_statuses.json",
+    "group": "reference",
+    "entityKind": "state_reference",
+    "description": "Master lifecycle appointment dan transisinya.",
+    "keyRelations": []
+  },
+  {
+    "index": 7,
+    "tableName": "areas.json",
+    "group": "geo",
+    "entityKind": "master",
+    "description": "Master area geografis.",
+    "keyRelations": []
+  },
+  {
+    "index": 8,
+    "tableName": "service_categories.json",
+    "group": "catalog",
+    "entityKind": "master",
+    "description": "Kategori layanan.",
+    "keyRelations": []
+  },
+  {
+    "index": 9,
+    "tableName": "services.json",
+    "group": "catalog",
+    "entityKind": "master",
+    "description": "Layanan global lintas profesional.",
+    "keyRelations": ["categoryId -> service_categories.id"]
+  },
+  {
+    "index": 10,
+    "tableName": "professionals.json",
+    "group": "catalog",
+    "entityKind": "master",
+    "description": "Data inti profesional.",
+    "keyRelations": []
+  },
+  {
+    "index": 11,
+    "tableName": "professional_specialties.json",
+    "group": "catalog",
+    "entityKind": "child_collection",
+    "description": "Specialty profesional.",
+    "keyRelations": ["professionalId -> professionals.id"]
+  },
+  {
+    "index": 12,
+    "tableName": "professional_languages.json",
+    "group": "catalog",
+    "entityKind": "child_collection",
+    "description": "Bahasa profesional.",
+    "keyRelations": ["professionalId -> professionals.id"]
+  },
+  {
+    "index": 13,
+    "tableName": "professional_practice_locations.json",
+    "group": "catalog",
+    "entityKind": "child_singleton",
+    "description": "Alamat dan koordinat titik layanan profesional.",
+    "keyRelations": ["professionalId -> professionals.id", "areaId -> areas.id"]
+  },
+  {
+    "index": 14,
+    "tableName": "professional_coverage_policies.json",
+    "group": "catalog",
+    "entityKind": "child_singleton",
+    "description": "Policy radius dan titik pusat coverage home visit.",
+    "keyRelations": ["professionalId -> professionals.id"]
+  },
+  {
+    "index": 15,
+    "tableName": "professional_coverage_areas.json",
+    "group": "catalog",
+    "entityKind": "join",
+    "description": "Join profesional dengan area coverage.",
+    "keyRelations": ["professionalId -> professionals.id", "areaId -> areas.id"]
+  },
+  {
+    "index": 16,
+    "tableName": "professional_service_offerings.json",
+    "group": "catalog",
+    "entityKind": "join",
+    "description": "Relasi profesional ke layanan dengan harga, durasi, mode, dan flow.",
+    "keyRelations": ["professionalId -> professionals.id", "serviceId -> services.id"]
+  },
+  {
+    "index": 17,
+    "tableName": "professional_availability_weekly_hours.json",
+    "group": "catalog",
+    "entityKind": "availability_rules",
+    "description": "Jam kerja mingguan global profesional untuk mode offline.",
+    "keyRelations": ["professionalId -> professionals.id", "mode -> reference_service_delivery_modes.code"]
+  },
+  {
+    "index": 18,
+    "tableName": "professional_availability_date_overrides.json",
+    "group": "catalog",
+    "entityKind": "availability_override",
+    "description": "Tanggal khusus profesional untuk libur atau jam custom yang menimpa jam mingguan.",
+    "keyRelations": ["professionalId -> professionals.id", "mode -> reference_service_delivery_modes.code"]
+  },
+  {
+    "index": 19,
+    "tableName": "professional_portfolio_stats.json",
+    "group": "trust",
+    "entityKind": "child_collection",
+    "description": "Statistik ringkas profesional.",
+    "keyRelations": ["professionalId -> professionals.id"]
+  },
+  {
+    "index": 20,
+    "tableName": "professional_credentials.json",
+    "group": "trust",
+    "entityKind": "child_collection",
+    "description": "Sertifikasi dan legalitas profesional.",
+    "keyRelations": ["professionalId -> professionals.id"]
+  },
+  {
+    "index": 21,
+    "tableName": "professional_activity_stories.json",
+    "group": "trust",
+    "entityKind": "child_collection",
+    "description": "Story aktivitas profesional.",
+    "keyRelations": ["professionalId -> professionals.id"]
+  },
+  {
+    "index": 22,
+    "tableName": "professional_portfolio_entries.json",
+    "group": "trust",
+    "entityKind": "child_collection",
+    "description": "Portofolio tindakan atau layanan profesional.",
+    "keyRelations": ["professionalId -> professionals.id", "serviceId -> services.id"]
+  },
+  {
+    "index": 23,
+    "tableName": "professional_gallery_items.json",
+    "group": "trust",
+    "entityKind": "child_collection",
+    "description": "Galeri visual profesional.",
+    "keyRelations": ["professionalId -> professionals.id"]
+  },
+  {
+    "index": 24,
+    "tableName": "professional_testimonials.json",
+    "group": "trust",
+    "entityKind": "child_collection",
+    "description": "Testimoni terkurasi untuk profesional.",
+    "keyRelations": ["professionalId -> professionals.id", "serviceId -> services.id"]
+  },
+  {
+    "index": 25,
+    "tableName": "professional_feedback_summaries.json",
+    "group": "trust",
+    "entityKind": "aggregate",
+    "description": "Ringkasan feedback agregat profesional.",
+    "keyRelations": ["professionalId -> professionals.id"]
+  },
+  {
+    "index": 26,
+    "tableName": "professional_feedback_metrics.json",
+    "group": "trust",
+    "entityKind": "aggregate_detail",
+    "description": "Metrik feedback tambahan profesional.",
+    "keyRelations": ["professionalId -> professionals.id"]
+  },
+  {
+    "index": 27,
+    "tableName": "professional_feedback_breakdowns.json",
+    "group": "trust",
+    "entityKind": "aggregate_detail",
+    "description": "Breakdown distribusi feedback profesional.",
+    "keyRelations": ["professionalId -> professionals.id"]
+  },
+  {
+    "index": 28,
+    "tableName": "professional_recent_activities.json",
+    "group": "trust",
+    "entityKind": "child_collection",
+    "description": "Aktivitas operasional terbaru profesional.",
+    "keyRelations": ["professionalId -> professionals.id"]
+  },
+  {
+    "index": 29,
+    "tableName": "consumers.json",
+    "group": "consumer",
+    "entityKind": "master",
+    "description": "Profil consumer dummy.",
+    "keyRelations": []
+  },
+  {
+    "index": 30,
+    "tableName": "user_contexts.json",
+    "group": "consumer",
+    "entityKind": "context",
+    "description": "Context area dan lokasi consumer.",
+    "keyRelations": ["selectedAreaId -> areas.id"]
+  },
+  {
+    "index": 31,
+    "tableName": "home_feed_snapshots.json",
+    "group": "experience",
+    "entityKind": "composed_view_seed",
+    "description": "Snapshot home feed untuk consumer tertentu.",
+    "keyRelations": ["consumerId -> consumers.id", "userContextId -> user_contexts.id"]
+  },
+  {
+    "index": 32,
+    "tableName": "home_feed_featured_appointments.json",
+    "group": "experience",
+    "entityKind": "child_singleton",
+    "description": "Featured appointment di home feed.",
+    "keyRelations": ["homeFeedId -> home_feed_snapshots.id", "professionalId -> professionals.id"]
+  },
+  {
+    "index": 33,
+    "tableName": "home_feed_popular_services.json",
+    "group": "experience",
+    "entityKind": "join",
+    "description": "Layanan populer di home feed.",
+    "keyRelations": ["homeFeedId -> home_feed_snapshots.id", "serviceId -> services.id"]
+  },
+  {
+    "index": 34,
+    "tableName": "home_feed_nearby_professionals.json",
+    "group": "experience",
+    "entityKind": "join",
+    "description": "Profesional sekitar di home feed.",
+    "keyRelations": ["homeFeedId -> home_feed_snapshots.id", "professionalId -> professionals.id"]
+  },
+  {
+    "index": 35,
+    "tableName": "media_presets.json",
+    "group": "experience",
+    "entityKind": "presentation_config",
+    "description": "Preset asset visual untuk UI.",
+    "keyRelations": []
+  },
+  {
+    "index": 36,
+    "tableName": "appointments.json",
+    "group": "transaction",
+    "entityKind": "transaction",
+    "description": "Transaksi booking utama antara consumer dan profesional.",
+    "keyRelations": ["consumerId -> consumers.id", "professionalId -> professionals.id", "serviceId -> services.id"]
+  },
+  {
+    "index": 37,
+    "tableName": "chat_threads.json",
+    "group": "communication",
+    "entityKind": "conversation_parent",
+    "description": "Header thread chat direct atau appointment.",
+    "keyRelations": ["professionalId -> professionals.id", "appointmentId -> appointments.id"]
+  },
+  {
+    "index": 38,
+    "tableName": "chat_messages.json",
+    "group": "communication",
+    "entityKind": "conversation_event",
+    "description": "Pesan individual dalam thread chat.",
+    "keyRelations": ["threadId -> chat_threads.id"]
+  },
+  {
+    "index": 39,
+    "tableName": "table_manifest.json",
+    "group": "ops",
+    "entityKind": "audit_manifest",
+    "description": "Audit jumlah row per tabel hasil generator.",
+    "keyRelations": []
+  },
+  {
+    "index": 40,
+    "tableName": "professional_availability_policies.json",
+    "group": "catalog",
+    "entityKind": "availability_policy",
+    "description": "Policy availability global per profesional dan mode, termasuk minimum notice booking.",
+    "keyRelations": ["professionalId -> professionals.id", "mode -> reference_service_delivery_modes.code"]
+  }
+]

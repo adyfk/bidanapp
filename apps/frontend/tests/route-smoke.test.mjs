@@ -8,19 +8,23 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const frontendDir = resolve(__dirname, '..');
+const backendDir = resolve(frontendDir, '..', 'backend');
 const require = createRequire(import.meta.url);
 const nextBin = require.resolve('next/dist/bin/next');
-const port = 3201;
-const baseUrl = `http://127.0.0.1:${port}`;
+const frontendPort = 3201;
+const backendPort = 3202;
+const baseUrl = `http://127.0.0.1:${frontendPort}`;
+const backendApiBaseUrl = `http://127.0.0.1:${backendPort}/api/v1`;
 
-const professionalsJsonPath = resolve(frontendDir, 'src/data/mock-db/professionals.json');
-const servicesJsonPath = resolve(frontendDir, 'src/data/mock-db/services.json');
+const professionalsJsonPath = resolve(backendDir, 'seeddata/professionals.json');
+const servicesJsonPath = resolve(backendDir, 'seeddata/services.json');
 const professionals = JSON.parse(await readFile(professionalsJsonPath, 'utf8'));
 const services = JSON.parse(await readFile(servicesJsonPath, 'utf8'));
 const professionalSlug = professionals[0]?.slug;
 const serviceSlug = services[0]?.slug;
 
 let nextProcess;
+let backendProcess;
 let processOutput = '';
 
 const appendOutput = (chunk) => {
@@ -28,6 +32,58 @@ const appendOutput = (chunk) => {
 };
 
 const wait = (timeMs) => new Promise((resolveWait) => setTimeout(resolveWait, timeMs));
+const cleanupProcess = (childProcess) => {
+  childProcess?.stdout?.removeAllListeners();
+  childProcess?.stderr?.removeAllListeners();
+  childProcess?.stdout?.destroy();
+  childProcess?.stderr?.destroy();
+  childProcess?.removeAllListeners();
+};
+
+const waitForExit = (childProcess) =>
+  new Promise((resolveExit) => {
+    if (!childProcess || childProcess.exitCode !== null) {
+      resolveExit();
+      return;
+    }
+
+    childProcess.once('exit', () => resolveExit());
+  });
+
+const stopProcess = async (childProcess) => {
+  if (!childProcess || childProcess.exitCode !== null) {
+    return;
+  }
+
+  childProcess.kill('SIGTERM');
+  await Promise.race([waitForExit(childProcess), wait(1000)]);
+
+  if (childProcess.exitCode === null) {
+    childProcess.kill('SIGKILL');
+    await Promise.race([waitForExit(childProcess), wait(1000)]);
+  }
+
+  cleanupProcess(childProcess);
+};
+
+const waitForBackend = async () => {
+  for (let attempt = 0; attempt < 120; attempt += 1) {
+    if (backendProcess?.exitCode !== null) {
+      throw new Error(`Backend dev server exited early.\n${processOutput}`);
+    }
+
+    try {
+      const response = await fetch(`${backendApiBaseUrl}/bootstrap`, { redirect: 'manual' });
+      if (response.status >= 200 && response.status < 400) {
+        return;
+      }
+    } catch {}
+
+    await wait(1000);
+  }
+
+  throw new Error(`Timed out waiting for backend dev server.\n${processOutput}`);
+};
 
 const waitForServer = async () => {
   for (let attempt = 0; attempt < 120; attempt += 1) {
@@ -50,11 +106,29 @@ const waitForServer = async () => {
 
 before(
   async () => {
-    nextProcess = spawn(process.execPath, [nextBin, 'dev', '--hostname', '127.0.0.1', '--port', String(port)], {
+    backendProcess = spawn('go', ['run', './cmd/dev-api'], {
+      cwd: backendDir,
+      env: {
+        ...process.env,
+        APP_ENV: 'test',
+        CORS_ALLOWED_ORIGINS: baseUrl,
+        HTTP_HOST: '127.0.0.1',
+        HTTP_PORT: String(backendPort),
+      },
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+
+    backendProcess.stdout.on('data', appendOutput);
+    backendProcess.stderr.on('data', appendOutput);
+
+    await waitForBackend();
+
+    nextProcess = spawn(process.execPath, [nextBin, 'dev', '--hostname', '127.0.0.1', '--port', String(frontendPort)], {
       cwd: frontendDir,
       env: {
         ...process.env,
         CI: '1',
+        NEXT_PUBLIC_API_BASE_URL: backendApiBaseUrl,
       },
       stdio: ['ignore', 'pipe', 'pipe'],
     });
@@ -69,15 +143,13 @@ before(
 
 after(async () => {
   if (!nextProcess || nextProcess.exitCode !== null) {
-    return;
+    if (!backendProcess || backendProcess.exitCode !== null) {
+      return;
+    }
   }
 
-  nextProcess.kill('SIGTERM');
-  await wait(1000);
-
-  if (nextProcess.exitCode === null) {
-    nextProcess.kill('SIGKILL');
-  }
+  await stopProcess(nextProcess);
+  await stopProcess(backendProcess);
 });
 
 test(
@@ -107,7 +179,6 @@ test(
       '/for-professionals/profile',
       '/for-professionals/dashboard/overview',
       '/for-professionals/dashboard/trust',
-      '/examples/backend',
       `/p/${professionalSlug}`,
       `/s/${serviceSlug}`,
     ];
@@ -165,7 +236,7 @@ test(
       '/admin/services',
       '/admin/appointments',
       '/admin/support',
-      '/admin/mock',
+      '/admin/studio',
     ];
 
     for (const route of routes) {

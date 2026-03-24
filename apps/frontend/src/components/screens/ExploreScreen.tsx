@@ -13,29 +13,35 @@ import {
   insetSurfaceClass,
   mutedInputClass,
 } from '@/components/ui/tokens';
+import { getProfessionalCategories, getProfessionalCategoryLabel } from '@/lib/catalog-selectors';
 import { APP_CONFIG } from '@/lib/config';
-import {
-  getProfessionalCategories,
-  getProfessionalCategoryLabel,
-  MOCK_CATEGORIES,
-  MOCK_SERVICES,
-} from '@/lib/mock-db/catalog';
-import { ACTIVE_USER_CONTEXT } from '@/lib/mock-db/runtime';
 import { professionalRoute } from '@/lib/routes';
 import { useUiText } from '@/lib/ui-text';
-import { useProfessionalPortal } from '@/lib/use-professional-portal';
 import { useProfessionalUserPreferences } from '@/lib/use-professional-user-preferences';
-import type { GeoPoint, ProfessionalGender } from '@/types/catalog';
+import type { UserContext } from '@/types/app-state';
+import type { Area, Category, GeoPoint, GlobalService, Professional, ProfessionalGender } from '@/types/catalog';
 
 const formatCoordinate = (value: number) => value.toFixed(6);
 
-const ExploreContent = () => {
+const ExploreContent = ({
+  areas,
+  categories,
+  professionals,
+  services,
+  userContext,
+}: {
+  areas: Area[];
+  categories: Category[];
+  professionals: Professional[];
+  services: GlobalService[];
+  userContext: UserContext;
+}) => {
   const searchParams = useSearchParams();
   const searchParam = searchParams.get('q');
   const categoryParam = searchParams.get('category');
   const initialSearch = searchParam ? decodeURIComponent(searchParam) : '';
   const initialCategoryId =
-    categoryParam && MOCK_CATEGORIES.some((category) => category.id === categoryParam) ? categoryParam : 'all';
+    categoryParam && categories.some((category) => category.id === categoryParam) ? categoryParam : 'all';
 
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [activeFilter, setActiveFilter] = useState<'all' | 'top_rated' | 'available'>('all');
@@ -46,11 +52,10 @@ const ExploreContent = () => {
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
   const [isResolvingLocation, setIsResolvingLocation] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
-  const [latitudeInput, setLatitudeInput] = useState(formatCoordinate(ACTIVE_USER_CONTEXT.userLocation.latitude));
-  const [longitudeInput, setLongitudeInput] = useState(formatCoordinate(ACTIVE_USER_CONTEXT.userLocation.longitude));
+  const [latitudeInput, setLatitudeInput] = useState(formatCoordinate(userContext.userLocation.latitude));
+  const [longitudeInput, setLongitudeInput] = useState(formatCoordinate(userContext.userLocation.longitude));
   const t = useTranslations('Explore');
   const uiText = useUiText();
-  const { publicProfessionals } = useProfessionalPortal();
   const {
     favoriteProfessionalIds,
     isCustomLocation,
@@ -169,8 +174,8 @@ const ExploreContent = () => {
     setActiveCategoryId('all');
     setSelectedGender('any');
     setFavoritesOnly(false);
-    setLatitudeInput(formatCoordinate(ACTIVE_USER_CONTEXT.userLocation.latitude));
-    setLongitudeInput(formatCoordinate(ACTIVE_USER_CONTEXT.userLocation.longitude));
+    setLatitudeInput(formatCoordinate(userContext.userLocation.latitude));
+    setLongitudeInput(formatCoordinate(userContext.userLocation.longitude));
     setLocationError(null);
     try {
       setIsResolvingLocation(true);
@@ -182,14 +187,18 @@ const ExploreContent = () => {
     }
   };
 
-  const filteredProfessionals = publicProfessionals.filter((professional) => {
-    const categoryName = getProfessionalCategoryLabel(professional).toLowerCase();
+  const filteredProfessionals = professionals.filter((professional) => {
+    const categoryName = getProfessionalCategoryLabel({
+      categories,
+      professional,
+      services,
+    }).toLowerCase();
     const query = searchQuery.toLowerCase();
     const matchesServiceName =
       query.length === 0
         ? true
         : professional.services.some((serviceMapping) =>
-            (MOCK_SERVICES.find((service) => service.id === serviceMapping.serviceId)?.name || '')
+            (services.find((service) => service.id === serviceMapping.serviceId)?.name || '')
               .toLowerCase()
               .includes(query),
           );
@@ -209,7 +218,11 @@ const ExploreContent = () => {
     const matchesCategory =
       activeCategoryId === 'all'
         ? true
-        : getProfessionalCategories(professional).some((category) => category.id === activeCategoryId);
+        : getProfessionalCategories({
+            categories,
+            professional,
+            services,
+          }).some((category) => category.id === activeCategoryId);
     const matchesGender = selectedGender === 'any' ? true : professional.gender === selectedGender;
     const matchesFavorites = favoritesOnly ? isFavorite(professional.id) : true;
 
@@ -295,12 +308,15 @@ const ExploreContent = () => {
               <div className="space-y-4">
                 {filteredProfessionals.map((professional) => (
                   <ProfessionalCard
+                    areas={areas}
+                    categories={categories}
                     key={professional.id}
                     professional={professional}
                     href={professionalRoute(professional.slug)}
                     isFavorite={isFavorite(professional.id)}
                     onToggleFavorite={toggleFavorite}
                     selectedAreaId={selectedAreaId}
+                    services={services}
                     userLocation={userLocation}
                   />
                 ))}
@@ -428,7 +444,7 @@ const ExploreContent = () => {
                 </div>
 
                 <p className="text-[12px] leading-relaxed text-gray-500">{t('locationPointHint')}</p>
-                <p className="text-[12px] leading-relaxed text-gray-400">{t('locationDummyHint')}</p>
+                <p className="text-[12px] leading-relaxed text-gray-400">{t('locationModelHint')}</p>
                 {locationError ? <p className="text-[12px] font-medium text-red-500">{locationError}</p> : null}
               </div>
 
@@ -442,7 +458,7 @@ const ExploreContent = () => {
                   >
                     {t('allCategories')}
                   </button>
-                  {MOCK_CATEGORIES.map((category) => (
+                  {categories.map((category) => (
                     <button
                       type="button"
                       key={category.id}
@@ -554,7 +570,19 @@ const ExploreContent = () => {
   );
 };
 
-export const ExploreScreen = () => {
+export const ExploreScreen = ({
+  areas,
+  categories,
+  professionals,
+  services,
+  userContext,
+}: {
+  areas: Area[];
+  categories: Category[];
+  professionals: Professional[];
+  services: GlobalService[];
+  userContext: UserContext;
+}) => {
   return (
     <Suspense
       fallback={
@@ -563,7 +591,13 @@ export const ExploreScreen = () => {
         </div>
       }
     >
-      <ExploreContent />
+      <ExploreContent
+        areas={areas}
+        categories={categories}
+        professionals={professionals}
+        services={services}
+        userContext={userContext}
+      />
     </Suspense>
   );
 };

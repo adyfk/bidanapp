@@ -1011,7 +1011,7 @@ export const AdminOverviewScreen = () => {
           icon={<UsersRound className="h-5 w-5" />}
           title="Customers"
           value={formatInteger(consumers.length)}
-          detail="Customer demo tetap terlihat sebagai basis relasi untuk support dan appointment."
+          detail="Customer aktif tetap terlihat sebagai basis relasi untuk support dan appointment."
         />
         <StatCard
           icon={<Stethoscope className="h-5 w-5" />}
@@ -1184,9 +1184,9 @@ export const AdminOverviewScreen = () => {
                 body="Perbaiki status booking, waktu sesi, dan ringkasan operasional."
               />
               <QuickLinkCard
-                href={ADMIN_ROUTES.mock}
-                title="Mock studio"
-                body="Inspect raw tables, import/export snapshot, atau reset ke seed."
+                href={ADMIN_ROUTES.studio}
+                title="Data studio"
+                body="Inspect raw tables, import/export snapshot, atau reset ke baseline operasional."
               />
             </div>
           </div>
@@ -1216,7 +1216,7 @@ export const AdminOverviewScreen = () => {
                 ))
               ) : (
                 <span className="text-sm text-slate-500">
-                  Belum ada perubahan dari seed. Mock studio masih identik dengan data awal.
+                  Belum ada perubahan dari seed. Data studio masih identik dengan data awal.
                 </span>
               )}
             </div>
@@ -1383,7 +1383,7 @@ export const AdminCustomersScreen = () => {
       <SectionHeader
         eyebrow="Customers"
         title="Customer profiles dan runtime"
-        description="Edit profil customer demo, lihat relasi appointment/support, dan kontrol consumer/context aktif yang dipakai surface user."
+        description="Edit profil customer, lihat relasi appointment/support, dan kontrol consumer/context aktif yang dipakai surface user."
       />
 
       <section className="grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
@@ -1502,7 +1502,7 @@ export const AdminCustomersScreen = () => {
             <div>
               <PanelHeader
                 title="Edit profil customer"
-                description="Perubahan di sini dipakai sebagai data operasional mock customer yang sedang dipilih."
+                description="Perubahan di sini dipakai sebagai data operasional customer yang sedang dipilih."
               />
               <div className="mt-5 grid gap-4">
                 <Field label="Nama">
@@ -1548,7 +1548,7 @@ export const AdminCustomersScreen = () => {
             <div>
               <PanelHeader
                 title="Runtime selection"
-                description="Atur consumer, context, home feed, dan jam simulasi yang sedang aktif untuk surface user."
+                description="Atur consumer, context, home feed, dan jam operasional aktif untuk surface user."
               />
               <div className="mt-5 grid gap-4">
                 <Field label="Current consumer">
@@ -1691,8 +1691,8 @@ export const AdminCustomersScreen = () => {
             <div className="rounded-[28px] bg-slate-50 p-5">
               <PanelHeader
                 eyebrow="Catatan"
-                title="Pattern mock tetap sederhana"
-                description="Runtime selection di admin console disimpan sebagai snapshot lokal browser untuk kebutuhan operasional mock. Jadi tim bisa menyiapkan data tanpa mengubah pattern mock publik yang sekarang."
+                title="Pattern operasional tetap sederhana"
+                description="Runtime selection di admin console sekarang dipersist ke backend snapshot operasional. Jadi tim bisa menyiapkan data tanpa mengubah seed publik yang ada."
               />
             </div>
           </div>
@@ -1984,7 +1984,7 @@ export const AdminProfessionalsScreen = () => {
     if (nextProfessional) {
       setSelectedProfessionalId(nextProfessional.id);
       setMessage(
-        `Profesional baru ${nextProfessional.id} ditambahkan. Profil ini masih lokal sampai dihubungkan ke portal mock.`,
+        `Profesional baru ${nextProfessional.id} ditambahkan. Profil ini masih lokal sampai dihubungkan ke portal profesional.`,
       );
     }
   };
@@ -2027,7 +2027,7 @@ export const AdminProfessionalsScreen = () => {
       <SectionHeader
         eyebrow="Professionals"
         title="Review dan kontrol profesional"
-        description="Edit profil publik demo, pantau approval queue FIFO, dan jalankan aksi changes requested, verified, atau publish dari state professional portal mock yang sudah ada."
+        description="Edit profil publik, pantau approval queue FIFO, dan jalankan aksi changes requested, verified, atau publish dari state professional portal yang sudah ada."
       />
 
       <section className={`${panelClass} grid gap-5 xl:grid-cols-[0.95fr_1.05fr]`}>
@@ -2543,7 +2543,7 @@ export const AdminProfessionalsScreen = () => {
                 <PanelHeader
                   eyebrow="Review actions"
                   title="Kontrol lifecycle approval"
-                  description="Jalankan submit, changes requested, verified, dan publish dari state portal mock yang sinkron."
+                  description="Jalankan submit, changes requested, verified, dan publish dari state portal yang sinkron."
                 />
                 <div className="mt-4 grid gap-3">
                   <button
@@ -2605,12 +2605,12 @@ export const AdminProfessionalsScreen = () => {
                 </div>
                 {!isPortalManaged ? (
                   <p className="mt-3 text-xs text-amber-600">
-                    Profil ini belum terhubung ke state professional portal mock. Review action hanya aktif untuk roster
+                    Profil ini belum terhubung ke state professional portal. Review action hanya aktif untuk roster
                     portal yang sudah ada.
                   </p>
                 ) : !isSynced ? (
                   <p className="mt-3 text-xs text-amber-600">
-                    Menunggu switch ke profesional ini di professional portal demo.
+                    Menunggu switch ke profesional ini di professional portal.
                   </p>
                 ) : null}
               </div>
@@ -4876,7 +4876,7 @@ export const AdminSupportScreen = () => {
         <div>
           <PanelHeader
             title="Support desk snapshot"
-            description="Snapshot support desk terpisah dari mock studio utama. Gunakan panel ini untuk backup atau reset queue support."
+            description="Snapshot support desk dipersist terpisah dari data studio utama. Gunakan panel ini untuk backup atau reset queue support."
           />
           <div className="mt-4 flex flex-wrap gap-3">
             <CountBadge value={`Saved ${formatDateTime(savedAt)}`} />
@@ -4885,7 +4885,7 @@ export const AdminSupportScreen = () => {
               className={buttonSecondaryClass}
               onClick={() => {
                 resetSupportDesk();
-                setMessage('Support desk direset ke seed lokal.');
+                setMessage('Support desk direset ke baseline default dan disinkronkan ulang ke backend.');
               }}
             >
               <RefreshCcw className="mr-2 h-4 w-4" />
@@ -4920,7 +4920,7 @@ export const AdminSupportScreen = () => {
   );
 };
 
-export const AdminMockStudioScreen = () => {
+export const AdminDataStudioScreen = () => {
   const {
     exportSnapshot,
     getTableMeta,
@@ -4940,7 +4940,7 @@ export const AdminMockStudioScreen = () => {
   const [draftJson, setDraftJson] = useState('');
   const [importJson, setImportJson] = useState('');
   const [message, setMessage] = useState('');
-  const [savedMockView, setSavedMockView] = useStoredView('bidanapp:admin-view:mock-studio', {
+  const [savedStudioView, setSavedStudioView] = useStoredView('bidanapp:admin-view:data-studio', {
     savedAt: '',
     selectedTable: 'services' as AdminConsoleTableName,
     tableSearchQuery: '',
@@ -4993,7 +4993,7 @@ export const AdminMockStudioScreen = () => {
   return (
     <div className="space-y-5">
       <SectionHeader
-        eyebrow="Mock Studio"
+        eyebrow="Data Studio"
         title="Raw table editor dan snapshot control"
         description="Edit raw JSON untuk table admin console, import/export snapshot lokal, reset per table, dan kontrol runtime default dari satu studio."
       />
@@ -5024,7 +5024,7 @@ export const AdminMockStudioScreen = () => {
                   type="button"
                   className={buttonSecondaryClass}
                   onClick={() =>
-                    setSavedMockView({
+                    setSavedStudioView({
                       savedAt: new Date().toISOString(),
                       selectedTable,
                       tableSearchQuery,
@@ -5033,13 +5033,13 @@ export const AdminMockStudioScreen = () => {
                 >
                   Simpan view
                 </button>
-                {savedMockView.savedAt ? (
+                {savedStudioView.savedAt ? (
                   <button
                     type="button"
                     className={buttonSecondaryClass}
                     onClick={() => {
-                      setTableSearchQuery(savedMockView.tableSearchQuery);
-                      setSelectedTable(savedMockView.selectedTable);
+                      setTableSearchQuery(savedStudioView.tableSearchQuery);
+                      setSelectedTable(savedStudioView.selectedTable);
                     }}
                   >
                     Muat view
@@ -5165,7 +5165,7 @@ export const AdminMockStudioScreen = () => {
             <div className={panelClass}>
               <PanelHeader
                 title="Runtime quick controls"
-                description="Kontrol cepat ini mengubah consumer, context, home feed, dan jam simulasi tanpa membuka modul lain."
+                description="Kontrol cepat ini mengubah consumer, context, home feed, dan jam operasional tanpa membuka modul lain."
               />
               <div className="mt-5 grid gap-4 md:grid-cols-2">
                 <Field label="Current consumer id">

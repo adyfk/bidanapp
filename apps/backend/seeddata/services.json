@@ -1,0 +1,243 @@
+[
+  {
+    "index": 1,
+    "id": "s1",
+    "slug": "pijat-bayi",
+    "name": "Pijat Bayi",
+    "categoryId": "newborn",
+    "description": "Membantu tumbuh kembang dan relaksasi bayi Anda melalui pijatan lembut yang aman.",
+    "shortDescription": "Stimulasi lembut untuk relaksasi dan bonding bayi.",
+    "image": "https://images.unsplash.com/photo-1544126592-807ade215a0b?q=80&w=400&auto=format&fit=crop",
+    "coverImage": "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=1200&auto=format&fit=crop",
+    "tags": ["Newborn", "Home Visit", "Bonding"],
+    "highlights": [
+      "Teknik aman untuk bayi baru lahir",
+      "Membantu kualitas tidur dan relaksasi",
+      "Cocok untuk sesi rutin mingguan"
+    ],
+    "serviceModes": {
+      "online": false,
+      "homeVisit": true,
+      "onsite": true
+    },
+    "defaultMode": "home_visit"
+  },
+  {
+    "index": 2,
+    "id": "s5",
+    "slug": "konsultasi-laktasi",
+    "name": "Konsultasi Laktasi",
+    "categoryId": "konsultasi",
+    "description": "Bantuan profesional untuk ibu menyusui, pelekatan, dan jadwal pumping.",
+    "shortDescription": "Sesi konsultasi menyusui untuk masalah pelekatan dan supply.",
+    "image": "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=400&auto=format&fit=crop",
+    "coverImage": "https://images.unsplash.com/photo-1584515933487-779824d29309?q=80&w=1200&auto=format&fit=crop",
+    "tags": ["Video Call", "Laktasi", "ASI"],
+    "highlights": ["Bisa dilakukan jarak jauh", "Cocok untuk follow up mingguan", "Membantu evaluasi pumping plan"],
+    "serviceModes": {
+      "online": true,
+      "homeVisit": true,
+      "onsite": true
+    },
+    "defaultMode": "online"
+  },
+  {
+    "index": 3,
+    "id": "s7",
+    "slug": "pendampingan-nifas",
+    "name": "Pendampingan Nifas",
+    "categoryId": "postpartum",
+    "description": "Kunjungan pendampingan masa nifas untuk ibu dengan fokus pemulihan dan monitoring dasar.",
+    "shortDescription": "Kunjungan rumah untuk pemulihan ibu pasca persalinan.",
+    "image": "https://images.unsplash.com/photo-1493894473891-10fc1e5dbd22?q=80&w=400&auto=format&fit=crop",
+    "coverImage": "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=1200&auto=format&fit=crop",
+    "tags": ["Postpartum", "Home Visit", "Recovery"],
+    "highlights": [
+      "Monitoring pemulihan ibu",
+      "Edukasi keluarga untuk support harian",
+      "Bisa digabung dengan evaluasi laktasi"
+    ],
+    "serviceModes": {
+      "online": false,
+      "homeVisit": true,
+      "onsite": false
+    },
+    "defaultMode": "home_visit"
+  },
+  {
+    "index": 4,
+    "id": "s8",
+    "slug": "konsultasi-tumbuh-kembang",
+    "name": "Konsultasi Tumbuh Kembang",
+    "categoryId": "konsultasi",
+    "description": "Diskusi terstruktur untuk memantau milestone bayi dan evaluasi stimulasi harian.",
+    "shortDescription": "Review milestone dan stimulasi bayi secara terstruktur.",
+    "image": "https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=400&auto=format&fit=crop",
+    "coverImage": "https://images.unsplash.com/photo-1515377905703-c4788e51af15?q=80&w=1200&auto=format&fit=crop",
+    "tags": ["Milestone", "Consultation", "Parenting"],
+    "highlights": [
+      "Membahas perkembangan usia spesifik",
+      "Membantu susun stimulasi harian",
+      "Cocok untuk review dua mingguan"
+    ],
+    "serviceModes": {
+      "online": true,
+      "homeVisit": false,
+      "onsite": false
+    },
+    "defaultMode": "online"
+  },
+  {
+    "index": 5,
+    "id": "s6",
+    "slug": "terapi-gerak-stroke",
+    "name": "Terapi Gerak Motorik",
+    "categoryId": "stroke",
+    "description": "Latihan motorik rutin untuk membantu penderita stroke mengembalikan fungsi saraf dan otot.",
+    "shortDescription": "Latihan rumah untuk progres pemulihan motorik pasca stroke.",
+    "image": "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?q=80&w=400&auto=format&fit=crop",
+    "coverImage": "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?q=80&w=1200&auto=format&fit=crop",
+    "tags": ["Stroke", "Rehabilitation", "Motoric"],
+    "highlights": [
+      "Pendampingan gerak dasar dan motorik",
+      "Cocok untuk home program rutin",
+      "Progress bisa dimonitor mingguan"
+    ],
+    "serviceModes": {
+      "online": true,
+      "homeVisit": true,
+      "onsite": false
+    },
+    "defaultMode": "home_visit"
+  },
+  {
+    "index": 6,
+    "id": "s4",
+    "slug": "bekam",
+    "name": "Bekam",
+    "categoryId": "sunnah",
+    "description": "Terapi bekam kebugaran sterilisasi medis standar tinggi untuk mendetoksifikasi tubuh.",
+    "shortDescription": "Terapi sunnah dengan prosedur steril dan fokus kebugaran.",
+    "image": "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?q=80&w=400&auto=format&fit=crop",
+    "coverImage": "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=1200&auto=format&fit=crop",
+    "tags": ["Sunnah", "Detox", "Wellness"],
+    "highlights": ["Peralatan steril sekali pakai", "Bisa untuk kebugaran rutin", "Tersedia opsi home visit"],
+    "serviceModes": {
+      "online": false,
+      "homeVisit": true,
+      "onsite": true
+    },
+    "defaultMode": "home_visit"
+  },
+  {
+    "index": 7,
+    "id": "s3",
+    "slug": "pijat-full-body",
+    "name": "Pijat Full Body",
+    "categoryId": "pijat-cape",
+    "description": "Pijat seluruh tubuh untuk menghilangkan penat, stres, dan kelelahan otot.",
+    "shortDescription": "Relaksasi tubuh penuh untuk stres dan kelelahan otot.",
+    "image": "https://images.unsplash.com/photo-1519823551278-64ac92734fb1?q=80&w=400&auto=format&fit=crop",
+    "coverImage": "https://images.unsplash.com/photo-1519823551278-64ac92734fb1?q=80&w=1200&auto=format&fit=crop",
+    "tags": ["Massage", "Recovery", "Relax"],
+    "highlights": [
+      "Durasi fleksibel sesuai kebutuhan",
+      "Cocok untuk pemulihan ringan",
+      "Bisa dipilih tekanan ringan hingga sedang"
+    ],
+    "serviceModes": {
+      "online": false,
+      "homeVisit": true,
+      "onsite": true
+    },
+    "defaultMode": "onsite"
+  },
+  {
+    "index": 8,
+    "id": "s2",
+    "slug": "cukur-rambut-bayi",
+    "name": "Cukur Rambut Bayi",
+    "categoryId": "newborn",
+    "description": "Proses cukur rambut pertama bayi dengan standar kebersihan tinggi dan profesional.",
+    "shortDescription": "Layanan cukur rambut bayi pertama dengan standar higienis.",
+    "image": "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=400&auto=format&fit=crop",
+    "coverImage": "https://images.unsplash.com/photo-1544126592-807ade215a0b?q=80&w=1200&auto=format&fit=crop",
+    "tags": ["Baby Care", "Hygiene", "Home Visit"],
+    "highlights": ["Peralatan higienis dan aman", "Bisa digabung dengan pijat bayi", "Cocok untuk sesi perawatan awal"],
+    "serviceModes": {
+      "online": false,
+      "homeVisit": true,
+      "onsite": true
+    },
+    "defaultMode": "home_visit"
+  },
+  {
+    "index": 9,
+    "id": "s9",
+    "slug": "pijat-refleksi-rumah",
+    "name": "Pijat Refleksi Rumah",
+    "categoryId": "pijat-cape",
+    "description": "Relaksasi singkat berbasis titik refleksi untuk pemulihan tubuh ringan di rumah.",
+    "shortDescription": "Sesi singkat untuk relaksasi dan pemulihan ringan di rumah.",
+    "image": "https://images.unsplash.com/photo-1515377905703-c4788e51af15?q=80&w=400&auto=format&fit=crop",
+    "coverImage": "https://images.unsplash.com/photo-1519823551278-64ac92734fb1?q=80&w=1200&auto=format&fit=crop",
+    "tags": ["Reflexology", "Home Visit", "After Work"],
+    "highlights": [
+      "Durasi singkat dan efisien",
+      "Cocok untuk sesi sepulang kerja",
+      "Bisa dipadukan dengan stretching ringan"
+    ],
+    "serviceModes": {
+      "online": false,
+      "homeVisit": true,
+      "onsite": true
+    },
+    "defaultMode": "home_visit"
+  },
+  {
+    "index": 10,
+    "id": "s10",
+    "slug": "kelas-menyusui-online",
+    "name": "Kelas Menyusui Online",
+    "categoryId": "konsultasi",
+    "description": "Sesi kelas singkat mengenai teknik menyusui, penyimpanan ASI, dan troubleshooting harian.",
+    "shortDescription": "Kelas online singkat untuk teknik menyusui dan penyimpanan ASI.",
+    "image": "https://images.unsplash.com/photo-1584515933487-779824d29309?q=80&w=400&auto=format&fit=crop",
+    "coverImage": "https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=1200&auto=format&fit=crop",
+    "tags": ["Lactation", "Online Class", "ASI"],
+    "highlights": [
+      "Sesi padat untuk kebutuhan praktis",
+      "Cocok untuk pasangan baru",
+      "Materi mudah diulang untuk pendampingan di rumah"
+    ],
+    "serviceModes": {
+      "online": true,
+      "homeVisit": false,
+      "onsite": false
+    },
+    "defaultMode": "online"
+  },
+  {
+    "index": 11,
+    "id": "s11",
+    "slug": "konseling-pasca-melahirkan",
+    "name": "Konseling Pasca Melahirkan",
+    "categoryId": "postpartum",
+    "description": "Sesi konseling untuk kesiapan fisik dan emosional ibu setelah persalinan.",
+    "shortDescription": "Konseling pendampingan masa adaptasi ibu pasca persalinan.",
+    "image": "https://images.unsplash.com/photo-1493894473891-10fc1e5dbd22?q=80&w=400&auto=format&fit=crop",
+    "coverImage": "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=1200&auto=format&fit=crop",
+    "tags": ["Mental Health", "Postpartum", "Consultation"],
+    "highlights": [
+      "Membantu adaptasi awal ibu",
+      "Bisa untuk sesi follow up ringan",
+      "Mudah dipakai untuk flow konsultasi"
+    ],
+    "serviceModes": {
+      "online": true,
+      "homeVisit": false,
+      "onsite": false
+    },
+    "defaultMode": "online"
+  }
+]

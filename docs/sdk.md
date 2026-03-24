@@ -9,7 +9,7 @@ The repository needs one FE-facing integration boundary that is:
 - generated from backend-owned contracts
 - usable by the frontend without duplicating schemas
 - capable of handling REST and realtime concerns together
-- stable enough to support screen-by-screen migration from mock-db seed data to live backend data
+- stable enough to support screen-by-screen migration from bootstrapped content documents to richer backend persistence
 
 `packages/sdk` is that boundary.
 
@@ -24,7 +24,7 @@ packages/sdk
     ├── generated/types.ts      # generated TypeScript types
     ├── client.ts               # typed REST client factory
     ├── realtime.ts             # websocket URL helper and event types
-    ├── adapters/integration.ts # frontend-facing adapter example
+    ├── adapters/*.ts           # frontend-facing transport adapters
     └── index.ts                # public exports
 ```
 
@@ -102,15 +102,12 @@ REST and websocket concerns are not identical:
 
 The SDK can also expose thin frontend-facing adapters.
 
-Current example:
+Current adapters cover:
 
-- `src/adapters/integration.ts`
-
-This adapter:
-
-- calls multiple backend endpoints in parallel
-- normalizes them into one small UI-friendly shape
-- prevents page code from repeating transport details
+- public bootstrap
+- professional portal
+- admin/app state
+- catalog and appointment read-model payloads
 
 This is the recommended place for shared FE-facing normalization when multiple screens need the same view of backend data.
 
@@ -157,8 +154,8 @@ If only a frontend mapping changes and backend contract is unchanged:
 
 - `@bidanapp/sdk` is not intended for npm publishing at this stage
 - it is a workspace integration boundary for this monorepo
-- some frontend screens still consume mock-db-hydrated data and have not migrated to SDK-backed transport
-- websocket event contracts are typed, but not yet persisted to database-backed chat storage
+- some public read-model surfaces still use bootstrapped content documents until richer relational or editorial pipelines land
+- websocket frame contracts are modeled outside raw OpenAPI because the REST contract is not the right abstraction for bidirectional events
 
 ## 11. Key Commands
 

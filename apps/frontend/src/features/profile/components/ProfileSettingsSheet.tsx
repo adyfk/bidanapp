@@ -1,6 +1,6 @@
 'use client';
 
-import { KeyRound, ShieldCheck, User, Users } from 'lucide-react';
+import { KeyRound, ShieldCheck, User } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useId } from 'react';
 import type {
@@ -122,52 +122,12 @@ export const ProfileSettingsSheet = ({
                   />
                 </ProfileSheetField>
 
-                <ProfileSheetField label={t('accountSheet.focusLabel')}>
-                  <textarea
-                    id={`${identityPrefix}-care-focus`}
-                    value={profileDraft.careFocus}
-                    onChange={(event) => onUpdateProfileField('careFocus', event.target.value)}
-                    placeholder={t('accountSheet.focusPlaceholder')}
-                    className={`${profileSheetInputClassName} h-28 resize-none`}
-                  />
-                </ProfileSheetField>
-              </div>
-            </ProfileSheetSection>
-
-            <ProfileSheetSection
-              icon={<Users className="h-5 w-5" />}
-              iconClassName="bg-blue-50 text-blue-600"
-              title={t('accountSheet.supportTitle')}
-              description={t('accountSheet.supportDescription')}
-            >
-              <div className="space-y-4">
-                <ProfileSheetField label={t('accountSheet.supportNameLabel')}>
+                <ProfileSheetField label={t('accountSheet.cityLabel')}>
                   <input
-                    id={`${identityPrefix}-support-name`}
+                    id={`${identityPrefix}-city`}
                     type="text"
-                    value={profileDraft.supportContactName}
-                    onChange={(event) => onUpdateProfileField('supportContactName', event.target.value)}
-                    className={profileSheetInputClassName}
-                  />
-                </ProfileSheetField>
-
-                <ProfileSheetField label={t('accountSheet.supportRelationLabel')}>
-                  <input
-                    id={`${identityPrefix}-support-relation`}
-                    type="text"
-                    value={profileDraft.supportContactRelation}
-                    onChange={(event) => onUpdateProfileField('supportContactRelation', event.target.value)}
-                    placeholder={t('accountSheet.supportPlaceholder')}
-                    className={profileSheetInputClassName}
-                  />
-                </ProfileSheetField>
-
-                <ProfileSheetField label={t('accountSheet.supportPhoneLabel')}>
-                  <input
-                    id={`${identityPrefix}-support-phone`}
-                    type="tel"
-                    value={profileDraft.supportContactPhone}
-                    onChange={(event) => onUpdateProfileField('supportContactPhone', event.target.value)}
+                    value={profileDraft.city}
+                    onChange={(event) => onUpdateProfileField('city', event.target.value)}
                     className={profileSheetInputClassName}
                   />
                 </ProfileSheetField>

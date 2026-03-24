@@ -1,16 +1,18 @@
 package chat
 
 import (
+	"context"
 	"strconv"
 	"sync"
 	"time"
 )
 
 type Hub struct {
-	mu       sync.RWMutex
-	history  map[string][]LiveMessage
-	threads  map[string]map[*subscriber]struct{}
-	sequence int64
+	history map[string][]LiveMessage
+	loaded  map[string]bool
+	mu      sync.RWMutex
+	store   Store
+	threads map[string]map[*subscriber]struct{}
 }
 
 type subscriber struct {
@@ -18,9 +20,16 @@ type subscriber struct {
 	send     chan ServerEvent
 }
 
-func NewHub() *Hub {
+func NewHub(stores ...Store) *Hub {
+	store := Store(NewMemoryStore())
+	if len(stores) > 0 && stores[0] != nil {
+		store = stores[0]
+	}
+
 	return &Hub{
 		history: make(map[string][]LiveMessage),
+		loaded:  make(map[string]bool),
+		store:   store,
 		threads: make(map[string]map[*subscriber]struct{}),
 	}
 }
@@ -38,6 +47,13 @@ func (h *Hub) Subscribe(threadID string, clientID string) (*subscriber, []LiveMe
 		send:     make(chan ServerEvent, 16),
 	}
 	h.threads[threadID][sub] = struct{}{}
+
+	if !h.loaded[threadID] {
+		if history, err := h.store.LoadHistory(context.Background(), threadID, 50); err == nil {
+			h.history[threadID] = history
+			h.loaded[threadID] = true
+		}
+	}
 
 	history := append([]LiveMessage(nil), h.history[threadID]...)
 	return sub, history
@@ -60,20 +76,17 @@ func (h *Hub) Unsubscribe(threadID string, sub *subscriber) {
 	}
 }
 
-func (h *Hub) Publish(threadID string, sender string, text string) LiveMessage {
+func (h *Hub) Publish(threadID string, senderID string, sender string, text string) (LiveMessage, error) {
+	message, err := h.store.AppendMessage(context.Background(), threadID, senderID, sender, text, time.Now().UTC())
+	if err != nil {
+		return LiveMessage{}, err
+	}
+
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
-	h.sequence++
-	message := LiveMessage{
-		ID:       time.Now().UTC().Format("20060102150405") + "-" + strconv.FormatInt(h.sequence, 10),
-		ThreadID: threadID,
-		Sender:   sender,
-		Text:     text,
-		SentAt:   time.Now().UTC(),
-	}
-
 	h.history[threadID] = append(h.history[threadID], message)
+	h.loaded[threadID] = true
 	if len(h.history[threadID]) > 50 {
 		h.history[threadID] = append([]LiveMessage(nil), h.history[threadID][len(h.history[threadID])-50:]...)
 	}
@@ -92,5 +105,9 @@ func (h *Hub) Publish(threadID string, sender string, text string) LiveMessage {
 		}
 	}
 
-	return message
+	return message, nil
+}
+
+func buildMessageID(sentAt time.Time) string {
+	return strconv.FormatInt(sentAt.UnixNano(), 10)
 }

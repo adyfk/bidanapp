@@ -14,24 +14,27 @@ import {
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import type React from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { IconButton } from '@/components/ui/IconButton';
 import { PROFESSIONAL_REQUEST_STATUS_ORDER } from '@/features/professional-portal/lib/request-status';
 import { useRouter } from '@/i18n/routing';
 import { APP_CONFIG } from '@/lib/config';
-import { CHAT_THREADS, getAppointmentChatThread, getChatThreadByProfessionalSlug } from '@/lib/mock-db/chat';
-import { ACTIVE_USER_CONTEXT } from '@/lib/mock-db/runtime';
 import { professionalRoute } from '@/lib/routes';
+import { useUiText } from '@/lib/ui-text';
+import { useAppShell } from '@/lib/use-app-shell';
 import { useProfessionalPortal } from '@/lib/use-professional-portal';
+import { useRealtimeChatThread } from '@/lib/use-realtime-chat-thread';
 import type { ChatMessage } from '@/types/chat';
 
 export const ChatScreen = ({ professionalId }: { professionalId: string }) => {
   const router = useRouter();
   const professionalT = useTranslations('Professional');
   const portalT = useTranslations('ProfessionalPortal');
+  const uiText = useUiText();
+  const { currentConsumer, currentUserContext } = useAppShell();
   const [inputText, setInputText] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { getCustomerRequestForProfessional, getPublicProfessionalBySlug, publicProfessionals } =
+  const { getCustomerRequestForProfessional, getPublicProfessionalBySlug, getServiceLabel, publicProfessionals } =
     useProfessionalPortal();
 
   const professional = getPublicProfessionalBySlug(professionalId) || publicProfessionals[0];
@@ -39,11 +42,28 @@ export const ChatScreen = ({ professionalId }: { professionalId: string }) => {
   const latestStatusEvidence = customerRequest
     ? [...customerRequest.statusHistory].reverse().find((item) => item.status === customerRequest.status)
     : null;
-  const chatThread =
-    (customerRequest?.appointmentId ? getAppointmentChatThread(customerRequest.appointmentId) : null) ||
-    getChatThreadByProfessionalSlug(professional?.slug || '') ||
-    CHAT_THREADS[0];
-  const [messages, setMessages] = useState<ChatMessage[]>(() => chatThread.messages);
+  const fallbackMessages = useMemo<ChatMessage[]>(
+    () =>
+      customerRequest
+        ? [
+            {
+              id: `${customerRequest.id}-welcome`,
+              isRead: true,
+              sender: 'professional',
+              text: uiText.getAppointmentWelcomeMessage(getServiceLabel(customerRequest.serviceId)),
+              time: '10:41',
+            },
+          ]
+        : [],
+    [customerRequest, getServiceLabel, uiText],
+  );
+  const { messages, sendMessage } = useRealtimeChatThread({
+    enabled: Boolean(professional),
+    fallbackMessages,
+    professionalName: professional?.name || '',
+    senderName: currentConsumer.name,
+    threadId: customerRequest?.appointmentId || (professional ? `professional:${professional.id}` : null),
+  });
 
   useEffect(() => {
     if (messages.length === 0) {
@@ -53,41 +73,21 @@ export const ChatScreen = ({ professionalId }: { professionalId: string }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  useEffect(() => {
-    setMessages(chatThread.messages);
-  }, [chatThread]);
-
   if (!professional) {
     return null;
   }
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputText.trim()) return;
+    if (!inputText.trim()) {
+      return;
+    }
 
-    const newMessage: ChatMessage = {
-      id: Date.now(),
-      text: inputText,
-      sender: 'user',
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      isRead: false,
-    };
+    if (!sendMessage(inputText)) {
+      return;
+    }
 
-    setMessages([...messages, newMessage]);
     setInputText('');
-
-    // Simulate reply
-    setTimeout(() => {
-      const replyMessage: ChatMessage = {
-        id: Date.now() + 1,
-        text: chatThread.autoReplyText || '',
-        sender: 'professional',
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        isRead: true,
-      };
-
-      setMessages((prev) => [...prev, replyMessage]);
-    }, 1500);
   };
 
   return (
@@ -120,7 +120,7 @@ export const ChatScreen = ({ professionalId }: { professionalId: string }) => {
             <div className="flex flex-col flex-1 min-w-0 pr-2">
               <h2 className="text-[16px] font-bold text-gray-900 leading-tight truncate">{professional.name}</h2>
               <span className="text-[12px] text-green-500 font-medium leading-none mt-1">
-                {ACTIVE_USER_CONTEXT.onlineStatusLabel}
+                {currentUserContext.onlineStatusLabel}
               </span>
             </div>
           </div>
@@ -137,7 +137,7 @@ export const ChatScreen = ({ professionalId }: { professionalId: string }) => {
       <div className="flex-1 overflow-y-auto w-full pb-4 pt-6 px-4 space-y-4" style={{ backgroundColor: '#F8F9FA' }}>
         <div className="text-center mb-6">
           <span className="text-[11px] font-semibold text-gray-500 bg-gray-200 px-3 py-1 rounded-full border border-gray-100 uppercase tracking-wider">
-            {chatThread.dayLabel}
+            {uiText.appointmentChatDayLabel}
           </span>
         </div>
 
@@ -238,7 +238,7 @@ export const ChatScreen = ({ professionalId }: { professionalId: string }) => {
               rows={1}
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              placeholder={chatThread.inputPlaceholder}
+              placeholder={uiText.appointmentChatInputPlaceholder}
               className="w-full bg-transparent border-none outline-none resize-none max-h-32 text-[15px] py-2 px-1 text-gray-800 placeholder:text-gray-400 leading-relaxed"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {

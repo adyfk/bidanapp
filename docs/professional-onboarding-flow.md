@@ -1,6 +1,6 @@
 # Professional Onboarding Flow
 
-Dokumen ini merangkum flow profesional yang lebih rapi untuk kondisi saat ini, dengan acuan fitur yang sudah ada di frontend dan tanpa menduplikasi data mock yang sebenarnya sudah tersedia.
+Dokumen ini merangkum flow profesional yang lebih rapi untuk kondisi saat ini, dengan acuan fitur yang sudah ada di frontend dan tanpa menduplikasi seed data yang sebenarnya sudah tersedia.
 
 ## Ringkasan Kondisi Existing
 
@@ -192,7 +192,7 @@ Recommended, tetapi tidak memblok submit:
 Catatan domain:
 
 - `Coverage` hanya menyimpan jangkauan, titik pusat, alamat praktik, dan switch operasional.
-- mode layanan aktif tetap melekat di layanan, sedangkan jam kerja offline dikelola global di `availabilityRulesByMode` agar mock-data tidak redundan.
+- mode layanan aktif tetap melekat di layanan, sedangkan jam kerja offline dikelola global di `availabilityRulesByMode` agar seed data tidak redundan.
 - source of truth untuk waktu booking ada di `availabilityRulesByMode`, termasuk `minimumNoticeHours`, bukan di tiap service configuration.
 
 ## Strategi Mock Yang Tidak Redundan
@@ -200,7 +200,7 @@ Catatan domain:
 Prinsipnya:
 
 1. Jangan buat tabel baru untuk services, coverage, portfolio, atau profile fields yang sudah ada di `ProfessionalPortalState`.
-2. Tambahkan data mock hanya untuk lifecycle review admin.
+2. Tambahkan seed data hanya untuk lifecycle review admin.
 3. Derive checklist dan progress dari state existing, jangan simpan ulang dalam JSON lain.
 
 Implementasi yang sudah disiapkan:

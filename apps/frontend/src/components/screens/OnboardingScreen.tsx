@@ -5,8 +5,8 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { useRouter } from '@/i18n/routing';
+import { APP_MEDIA_PRESET } from '@/lib/app-media';
 import { APP_CONFIG } from '@/lib/config';
-import { ACTIVE_MEDIA_PRESET } from '@/lib/mock-db/runtime';
 import { APP_ROUTES, customerAccessRoute, professionalAccessRoute } from '@/lib/routes';
 import { useViewerSession } from '@/lib/use-viewer-session';
 
@@ -60,8 +60,8 @@ export const OnboardingScreen = () => {
             </div>
             <div className="absolute inset-x-0 bottom-0 top-14">
               <Image
-                src={ACTIVE_MEDIA_PRESET.onboardingHeroImage}
-                alt={ACTIVE_MEDIA_PRESET.onboardingHeroAlt}
+                src={APP_MEDIA_PRESET.onboardingHeroImage}
+                alt={APP_MEDIA_PRESET.onboardingHeroAlt}
                 fill
                 className="object-contain object-bottom"
                 sizes="100vw"

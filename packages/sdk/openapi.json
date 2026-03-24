@@ -22,6 +22,414 @@
         ],
         "type": "object"
       },
+      "AdminAuthCreateSessionRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/AdminAuthCreateSessionRequest.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ],
+        "type": "object"
+      },
+      "AdminAuthSessionData": {
+        "additionalProperties": false,
+        "properties": {
+          "adminId": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string"
+          },
+          "focusArea": {
+            "type": "string"
+          },
+          "isAuthenticated": {
+            "type": "boolean"
+          },
+          "lastLoginAt": {
+            "type": "string"
+          },
+          "lastVisitedRoute": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "adminId",
+          "email",
+          "focusArea",
+          "isAuthenticated"
+        ],
+        "type": "object"
+      },
+      "AdminAuthSessionResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/AdminAuthSessionResponseBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdminAuthSessionData"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "AdminAuthSessionUpdateRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/AdminAuthSessionUpdateRequest.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "lastVisitedRoute": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdminCommandCenterStateData": {
+        "additionalProperties": false,
+        "properties": {
+          "activeAdminId": {
+            "type": "string"
+          },
+          "commandNote": {
+            "type": "string"
+          },
+          "focusArea": {
+            "type": "string"
+          },
+          "highlightedProfessionalId": {
+            "type": "string"
+          },
+          "incidentMode": {
+            "type": "string"
+          },
+          "runtimeNarrative": {
+            "type": "string"
+          },
+          "watchAreaId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "activeAdminId",
+          "commandNote",
+          "focusArea",
+          "highlightedProfessionalId",
+          "incidentMode",
+          "runtimeNarrative",
+          "watchAreaId"
+        ],
+        "type": "object"
+      },
+      "AdminConsoleData": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/AdminConsoleData.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "savedAt": {
+            "type": "string"
+          },
+          "schemaVersion": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "tables": {
+            "additionalProperties": {
+              "items": {
+                "additionalProperties": {},
+                "type": "object"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "tables"
+        ],
+        "type": "object"
+      },
+      "AdminConsoleResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/AdminConsoleResponseBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdminConsoleData"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "AdminConsoleTableData": {
+        "additionalProperties": false,
+        "properties": {
+          "rows": {
+            "items": {
+              "additionalProperties": {},
+              "type": "object"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "savedAt": {
+            "type": "string"
+          },
+          "schemaVersion": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "tableName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "tableName",
+          "schemaVersion",
+          "rows"
+        ],
+        "type": "object"
+      },
+      "AdminConsoleTableResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/AdminConsoleTableResponseBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdminConsoleTableData"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "AdminConsoleTableUpsertData": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/AdminConsoleTableUpsertData.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "additionalProperties": {},
+              "type": "object"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "savedAt": {
+            "type": "string"
+          },
+          "schemaVersion": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "rows"
+        ],
+        "type": "object"
+      },
+      "AdminSessionData": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/AdminSessionData.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "adminId": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "focusArea": {
+            "type": "string"
+          },
+          "isAuthenticated": {
+            "type": "boolean"
+          },
+          "lastLoginAt": {
+            "type": "string"
+          },
+          "lastVisitedRoute": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "adminId",
+          "email",
+          "focusArea",
+          "isAuthenticated"
+        ],
+        "type": "object"
+      },
+      "AdminSessionResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/AdminSessionResponseBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdminSessionData"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "AppSectionConfig": {
+        "additionalProperties": false,
+        "properties": {
+          "homeCategoryIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "homeCategoryIds"
+        ],
+        "type": "object"
+      },
+      "AppointmentCancellationPolicySnapshot": {
+        "additionalProperties": false,
+        "properties": {
+          "afterCutoffOutcome": {
+            "type": "string"
+          },
+          "beforeCutoffOutcome": {
+            "type": "string"
+          },
+          "customerPaidCancelCutoffHours": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "professionalCancelOutcome": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "customerPaidCancelCutoffHours",
+          "professionalCancelOutcome",
+          "beforeCutoffOutcome",
+          "afterCutoffOutcome"
+        ],
+        "type": "object"
+      },
+      "AppointmentCancellationResolution": {
+        "additionalProperties": false,
+        "properties": {
+          "cancellationReason": {
+            "type": "string"
+          },
+          "cancelledAt": {
+            "type": "string"
+          },
+          "cancelledBy": {
+            "type": "string"
+          },
+          "financialOutcome": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "cancelledAt",
+          "cancelledBy",
+          "cancellationReason",
+          "financialOutcome"
+        ],
+        "type": "object"
+      },
       "AppointmentData": {
         "additionalProperties": false,
         "properties": {
@@ -40,9 +448,161 @@
         ],
         "type": "object"
       },
+      "AppointmentFeedback": {
+        "additionalProperties": false,
+        "properties": {
+          "author": {
+            "type": "string"
+          },
+          "dateLabel": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string"
+          },
+          "quote": {
+            "type": "string"
+          },
+          "rating": {
+            "format": "double",
+            "type": "number"
+          },
+          "role": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "author",
+          "dateLabel",
+          "image",
+          "quote",
+          "rating",
+          "role"
+        ],
+        "type": "object"
+      },
+      "AppointmentRecentActivity": {
+        "additionalProperties": false,
+        "properties": {
+          "channel": {
+            "type": "string"
+          },
+          "dateLabel": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "dateLabel",
+          "title",
+          "channel",
+          "summary"
+        ],
+        "type": "object"
+      },
+      "AppointmentRecordUpsertData": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/AppointmentRecordUpsertData.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "appointmentRecord": {
+            "$ref": "#/components/schemas/ProfessionalPortalManagedAppointmentRecord"
+          },
+          "professionalId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "appointmentRecord",
+          "professionalId"
+        ],
+        "type": "object"
+      },
+      "AppointmentRequestsResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/AppointmentRequestsResponseBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProfessionalPortalRequestsData"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "AppointmentScheduleSnapshot": {
+        "additionalProperties": false,
+        "properties": {
+          "dateIso": {
+            "type": "string"
+          },
+          "requiresSchedule": {
+            "type": "boolean"
+          },
+          "scheduleDayId": {
+            "type": "string"
+          },
+          "scheduleDayLabel": {
+            "type": "string"
+          },
+          "scheduledTimeLabel": {
+            "type": "string"
+          },
+          "timeSlotId": {
+            "type": "string"
+          },
+          "timeSlotLabel": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "requiresSchedule",
+          "scheduledTimeLabel"
+        ],
+        "type": "object"
+      },
       "AppointmentSeed": {
         "additionalProperties": false,
         "properties": {
+          "areaId": {
+            "type": "string"
+          },
+          "bookingFlow": {
+            "type": "string"
+          },
+          "cancellationPolicySnapshot": {
+            "$ref": "#/components/schemas/AppointmentCancellationPolicySnapshot"
+          },
+          "cancellationResolution": {
+            "$ref": "#/components/schemas/AppointmentCancellationResolution"
+          },
+          "consumerId": {
+            "type": "string"
+          },
+          "customerFeedback": {
+            "$ref": "#/components/schemas/AppointmentFeedback"
+          },
           "id": {
             "type": "string"
           },
@@ -53,27 +613,201 @@
           "professionalId": {
             "type": "string"
           },
+          "recentActivity": {
+            "$ref": "#/components/schemas/AppointmentRecentActivity"
+          },
+          "requestNote": {
+            "type": "string"
+          },
+          "requestedAt": {
+            "type": "string"
+          },
+          "requestedMode": {
+            "type": "string"
+          },
+          "scheduleSnapshot": {
+            "$ref": "#/components/schemas/AppointmentScheduleSnapshot"
+          },
+          "scheduledTimeLabel": {
+            "type": "string"
+          },
           "serviceId": {
             "type": "string"
+          },
+          "serviceOfferingId": {
+            "type": "string"
+          },
+          "serviceSnapshot": {
+            "$ref": "#/components/schemas/AppointmentServiceSnapshot"
           },
           "status": {
             "type": "string"
           },
-          "time": {
-            "type": "string"
+          "timeline": {
+            "items": {
+              "$ref": "#/components/schemas/AppointmentTimelineEvent"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           },
-          "totalPrice": {
+          "totalPriceLabel": {
             "type": "string"
           }
         },
         "required": [
           "index",
           "id",
+          "consumerId",
           "professionalId",
           "serviceId",
-          "time",
+          "areaId",
+          "requestedMode",
+          "requestNote",
+          "requestedAt",
           "status",
-          "totalPrice"
+          "scheduledTimeLabel",
+          "totalPriceLabel",
+          "bookingFlow",
+          "cancellationPolicySnapshot",
+          "scheduleSnapshot",
+          "serviceOfferingId",
+          "serviceSnapshot",
+          "timeline"
+        ],
+        "type": "object"
+      },
+      "AppointmentServiceSnapshot": {
+        "additionalProperties": false,
+        "properties": {
+          "bookingFlow": {
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "string"
+          },
+          "coverImage": {
+            "type": "string"
+          },
+          "defaultMode": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "durationLabel": {
+            "type": "string"
+          },
+          "highlights": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "image": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "priceAmount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "priceLabel": {
+            "type": "string"
+          },
+          "serviceId": {
+            "type": "string"
+          },
+          "serviceModes": {
+            "$ref": "#/components/schemas/ServiceMode"
+          },
+          "serviceOfferingId": {
+            "type": "string"
+          },
+          "shortDescription": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "bookingFlow",
+          "categoryId",
+          "coverImage",
+          "defaultMode",
+          "description",
+          "durationLabel",
+          "highlights",
+          "image",
+          "name",
+          "priceAmount",
+          "priceLabel",
+          "serviceId",
+          "serviceModes",
+          "serviceOfferingId",
+          "shortDescription",
+          "slug",
+          "summary",
+          "tags"
+        ],
+        "type": "object"
+      },
+      "AppointmentTimelineEvent": {
+        "additionalProperties": false,
+        "properties": {
+          "actor": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "createdAtLabel": {
+            "type": "string"
+          },
+          "customerSummary": {
+            "type": "string"
+          },
+          "evidenceUrl": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "internalNote": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "actor",
+          "createdAt",
+          "createdAtLabel",
+          "id",
+          "toStatus"
         ],
         "type": "object"
       },
@@ -98,9 +832,110 @@
         ],
         "type": "object"
       },
+      "Area": {
+        "additionalProperties": false,
+        "properties": {
+          "city": {
+            "type": "string"
+          },
+          "district": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "index": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "label": {
+            "type": "string"
+          },
+          "latitude": {
+            "format": "double",
+            "type": "number"
+          },
+          "longitude": {
+            "format": "double",
+            "type": "number"
+          },
+          "province": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "index",
+          "id",
+          "city",
+          "district",
+          "province",
+          "label",
+          "latitude",
+          "longitude"
+        ],
+        "type": "object"
+      },
+      "BootstrapData": {
+        "additionalProperties": false,
+        "properties": {
+          "activeHomeFeed": {
+            "$ref": "#/components/schemas/HomeFeedSnapshot"
+          },
+          "appSectionConfig": {
+            "$ref": "#/components/schemas/AppSectionConfig"
+          },
+          "catalog": {
+            "$ref": "#/components/schemas/CatalogData"
+          },
+          "currentConsumer": {
+            "$ref": "#/components/schemas/ConsumerProfile"
+          },
+          "currentUserContext": {
+            "$ref": "#/components/schemas/UserContext"
+          }
+        },
+        "required": [
+          "catalog",
+          "currentConsumer",
+          "currentUserContext",
+          "appSectionConfig",
+          "activeHomeFeed"
+        ],
+        "type": "object"
+      },
+      "BootstrapResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/BootstrapResponseBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/BootstrapData"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
       "CatalogData": {
         "additionalProperties": false,
         "properties": {
+          "areas": {
+            "items": {
+              "$ref": "#/components/schemas/Area"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "categories": {
             "items": {
               "$ref": "#/components/schemas/Category"
@@ -130,6 +965,7 @@
           }
         },
         "required": [
+          "areas",
           "categories",
           "services",
           "professionals"
@@ -333,6 +1169,332 @@
         ],
         "type": "object"
       },
+      "ConsumerPreferencesData": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ConsumerPreferencesData.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "consumerId": {
+            "type": "string"
+          },
+          "favoriteProfessionalIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "resolvedLocation": {
+            "$ref": "#/components/schemas/ResolvedLocationData"
+          },
+          "selectedAreaId": {
+            "type": "string"
+          },
+          "userLocation": {
+            "$ref": "#/components/schemas/GeoPointData"
+          }
+        },
+        "required": [
+          "favoriteProfessionalIds",
+          "resolvedLocation",
+          "userLocation"
+        ],
+        "type": "object"
+      },
+      "ConsumerPreferencesResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ConsumerPreferencesResponseBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ConsumerPreferencesData"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "ConsumerProfile": {
+        "additionalProperties": false,
+        "properties": {
+          "avatar": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "index": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "index",
+          "id",
+          "name",
+          "phone",
+          "avatar"
+        ],
+        "type": "object"
+      },
+      "CoverageResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/CoverageResponseBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProfessionalPortalCoverageData"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "CustomerAuthCreateSessionRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/CustomerAuthCreateSessionRequest.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "phone",
+          "password"
+        ],
+        "type": "object"
+      },
+      "CustomerAuthRegisterRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/CustomerAuthRegisterRequest.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "displayName",
+          "password",
+          "phone"
+        ],
+        "type": "object"
+      },
+      "CustomerAuthSessionData": {
+        "additionalProperties": false,
+        "properties": {
+          "city": {
+            "type": "string"
+          },
+          "consumerId": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string"
+          },
+          "isAuthenticated": {
+            "type": "boolean"
+          },
+          "lastLoginAt": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "registeredAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "consumerId",
+          "isAuthenticated",
+          "phone"
+        ],
+        "type": "object"
+      },
+      "CustomerAuthSessionResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/CustomerAuthSessionResponseBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/CustomerAuthSessionData"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "CustomerAuthUpdateAccountRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/CustomerAuthUpdateAccountRequest.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "displayName",
+          "phone"
+        ],
+        "type": "object"
+      },
+      "CustomerAuthUpdatePasswordRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/CustomerAuthUpdatePasswordRequest.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "currentPassword": {
+            "type": "string"
+          },
+          "newPassword": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "currentPassword",
+          "newPassword"
+        ],
+        "type": "object"
+      },
+      "CustomerNotificationStateData": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/CustomerNotificationStateData.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "readIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "readIds"
+        ],
+        "type": "object"
+      },
+      "CustomerNotificationsResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/CustomerNotificationsResponseBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/CustomerNotificationStateData"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
       "ErrorPayload": {
         "additionalProperties": false,
         "properties": {
@@ -349,6 +1511,63 @@
         ],
         "type": "object"
       },
+      "GalleryResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/GalleryResponseBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProfessionalPortalGalleryData"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "GeoPoint": {
+        "additionalProperties": false,
+        "properties": {
+          "latitude": {
+            "format": "double",
+            "type": "number"
+          },
+          "longitude": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "latitude",
+          "longitude"
+        ],
+        "type": "object"
+      },
+      "GeoPointData": {
+        "additionalProperties": false,
+        "properties": {
+          "latitude": {
+            "format": "double",
+            "type": "number"
+          },
+          "longitude": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "latitude",
+          "longitude"
+        ],
+        "type": "object"
+      },
       "GlobalService": {
         "additionalProperties": false,
         "properties": {
@@ -359,6 +1578,9 @@
             "type": "string"
           },
           "coverImage": {
+            "type": "string"
+          },
+          "defaultMode": {
             "type": "string"
           },
           "description": {
@@ -385,6 +1607,9 @@
           },
           "name": {
             "type": "string"
+          },
+          "serviceModes": {
+            "$ref": "#/components/schemas/ServiceMode"
           },
           "shortDescription": {
             "type": "string"
@@ -418,11 +1643,100 @@
           "coverImage",
           "badge",
           "tags",
-          "highlights"
+          "highlights",
+          "defaultMode",
+          "serviceModes"
         ],
         "type": "object"
       },
-      "HealthInfo": {
+      "HomeFeedAppointmentSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "status"
+        ],
+        "type": "object"
+      },
+      "HomeFeedFeaturedAppointment": {
+        "additionalProperties": false,
+        "properties": {
+          "appointment": {
+            "$ref": "#/components/schemas/HomeFeedAppointmentSummary"
+          },
+          "dateLabel": {
+            "type": "string"
+          },
+          "professional": {
+            "$ref": "#/components/schemas/Professional"
+          },
+          "timeLabel": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "appointment",
+          "dateLabel",
+          "timeLabel",
+          "professional"
+        ],
+        "type": "object"
+      },
+      "HomeFeedSnapshot": {
+        "additionalProperties": false,
+        "properties": {
+          "currentUser": {
+            "$ref": "#/components/schemas/ConsumerProfile"
+          },
+          "featuredAppointment": {
+            "$ref": "#/components/schemas/HomeFeedFeaturedAppointment"
+          },
+          "id": {
+            "type": "string"
+          },
+          "nearbyProfessionals": {
+            "items": {
+              "$ref": "#/components/schemas/Professional"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "popularServices": {
+            "items": {
+              "$ref": "#/components/schemas/GlobalService"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "sharedContext": {
+            "$ref": "#/components/schemas/UserContext"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "currentUser",
+          "sharedContext",
+          "popularServices",
+          "nearbyProfessionals"
+        ],
+        "type": "object"
+      },
+      "Info": {
         "additionalProperties": false,
         "properties": {
           "environment": {
@@ -446,20 +1760,20 @@
         ],
         "type": "object"
       },
-      "HealthResponseBody": {
+      "PortfolioResponseBody": {
         "additionalProperties": false,
         "properties": {
           "$schema": {
             "description": "A URL to the JSON Schema for this object.",
             "examples": [
-              "https://example.com/schemas/HealthResponseBody.json"
+              "https://example.com/schemas/PortfolioResponseBody.json"
             ],
             "format": "uri",
             "readOnly": true,
             "type": "string"
           },
           "data": {
-            "$ref": "#/components/schemas/HealthInfo"
+            "$ref": "#/components/schemas/ProfessionalPortalPortfolioData"
           }
         },
         "required": [
@@ -491,11 +1805,26 @@
               "null"
             ]
           },
+          "availability": {
+            "$ref": "#/components/schemas/ProfessionalAvailability"
+          },
           "availabilityLabel": {
             "type": "string"
           },
+          "availabilityRulesByMode": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ProfessionalAvailabilityRules"
+            },
+            "type": "object"
+          },
           "badgeLabel": {
             "type": "string"
+          },
+          "cancellationPoliciesByMode": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ProfessionalCancellationPolicy"
+            },
+            "type": "object"
           },
           "categoryId": {
             "type": "string"
@@ -505,6 +1834,9 @@
           },
           "coverImage": {
             "type": "string"
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/ProfessionalCoverage"
           },
           "credentials": {
             "items": {
@@ -548,6 +1880,9 @@
               "null"
             ]
           },
+          "gender": {
+            "type": "string"
+          },
           "id": {
             "type": "string"
           },
@@ -590,6 +1925,9 @@
               "array",
               "null"
             ]
+          },
+          "practiceLocation": {
+            "$ref": "#/components/schemas/ProfessionalPracticeLocation"
           },
           "rating": {
             "format": "double",
@@ -650,6 +1988,7 @@
           "slug",
           "name",
           "title",
+          "gender",
           "categoryId",
           "location",
           "rating",
@@ -659,10 +1998,12 @@
           "image",
           "badgeLabel",
           "availabilityLabel",
+          "availability",
           "responseTime",
           "specialties",
           "languages",
           "addressLines",
+          "coverage",
           "about",
           "portfolioStats",
           "credentials",
@@ -675,6 +2016,388 @@
           "feedbackBreakdown",
           "recentActivities",
           "services"
+        ],
+        "type": "object"
+      },
+      "ProfessionalAuthCreateSessionRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ProfessionalAuthCreateSessionRequest.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "professionalId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "professionalId",
+          "phone",
+          "password"
+        ],
+        "type": "object"
+      },
+      "ProfessionalAuthPasswordRecoveryData": {
+        "additionalProperties": false,
+        "properties": {
+          "accepted": {
+            "type": "boolean"
+          },
+          "requestedAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "accepted",
+          "requestedAt"
+        ],
+        "type": "object"
+      },
+      "ProfessionalAuthPasswordRecoveryResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ProfessionalAuthPasswordRecoveryResponseBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProfessionalAuthPasswordRecoveryData"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "ProfessionalAuthRegisterRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ProfessionalAuthRegisterRequest.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "credentialNumber": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "professionalId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "credentialNumber",
+          "displayName",
+          "password",
+          "phone",
+          "professionalId"
+        ],
+        "type": "object"
+      },
+      "ProfessionalAuthRequestPasswordRecoveryRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ProfessionalAuthRequestPasswordRecoveryRequest.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "professionalId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "phone",
+          "professionalId"
+        ],
+        "type": "object"
+      },
+      "ProfessionalAuthSessionData": {
+        "additionalProperties": false,
+        "properties": {
+          "city": {
+            "type": "string"
+          },
+          "credentialNumber": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string"
+          },
+          "isAuthenticated": {
+            "type": "boolean"
+          },
+          "lastLoginAt": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "professionalId": {
+            "type": "string"
+          },
+          "registeredAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "isAuthenticated",
+          "phone",
+          "professionalId"
+        ],
+        "type": "object"
+      },
+      "ProfessionalAuthSessionResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ProfessionalAuthSessionResponseBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProfessionalAuthSessionData"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "ProfessionalAuthUpdateAccountRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ProfessionalAuthUpdateAccountRequest.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "credentialNumber": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "credentialNumber",
+          "displayName",
+          "phone"
+        ],
+        "type": "object"
+      },
+      "ProfessionalAuthUpdatePasswordRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ProfessionalAuthUpdatePasswordRequest.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "currentPassword": {
+            "type": "string"
+          },
+          "newPassword": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "currentPassword",
+          "newPassword"
+        ],
+        "type": "object"
+      },
+      "ProfessionalAvailability": {
+        "additionalProperties": false,
+        "properties": {
+          "isAvailable": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "isAvailable"
+        ],
+        "type": "object"
+      },
+      "ProfessionalAvailabilityDateOverride": {
+        "additionalProperties": false,
+        "properties": {
+          "dateIso": {
+            "type": "string"
+          },
+          "endTime": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "index": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "isClosed": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "slotIntervalMinutes": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "startTime": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "dateIso",
+          "id",
+          "index",
+          "isClosed"
+        ],
+        "type": "object"
+      },
+      "ProfessionalAvailabilityRules": {
+        "additionalProperties": false,
+        "properties": {
+          "dateOverrides": {
+            "items": {
+              "$ref": "#/components/schemas/ProfessionalAvailabilityDateOverride"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "minimumNoticeHours": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "weeklyHours": {
+            "items": {
+              "$ref": "#/components/schemas/ProfessionalWeeklyAvailabilityWindow"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "dateOverrides",
+          "minimumNoticeHours",
+          "weeklyHours"
+        ],
+        "type": "object"
+      },
+      "ProfessionalCancellationPolicy": {
+        "additionalProperties": false,
+        "properties": {
+          "afterCutoffOutcome": {
+            "type": "string"
+          },
+          "beforeCutoffOutcome": {
+            "type": "string"
+          },
+          "customerPaidCancelCutoffHours": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "professionalCancelOutcome": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "customerPaidCancelCutoffHours",
+          "professionalCancelOutcome",
+          "beforeCutoffOutcome",
+          "afterCutoffOutcome"
+        ],
+        "type": "object"
+      },
+      "ProfessionalCoverage": {
+        "additionalProperties": false,
+        "properties": {
+          "areaIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "center": {
+            "$ref": "#/components/schemas/GeoPoint"
+          },
+          "homeVisitRadiusKm": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "areaIds",
+          "homeVisitRadiusKm",
+          "center"
         ],
         "type": "object"
       },
@@ -780,6 +2503,9 @@
           "alt": {
             "type": "string"
           },
+          "id": {
+            "type": "string"
+          },
           "image": {
             "type": "string"
           },
@@ -792,6 +2518,7 @@
           }
         },
         "required": [
+          "id",
           "index",
           "image",
           "alt",
@@ -799,9 +2526,904 @@
         ],
         "type": "object"
       },
+      "ProfessionalNotificationStateData": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ProfessionalNotificationStateData.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "readIdsByProfessional": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "readIdsByProfessional"
+        ],
+        "type": "object"
+      },
+      "ProfessionalNotificationsResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ProfessionalNotificationsResponseBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProfessionalNotificationStateData"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "ProfessionalPortalActivityStory": {
+        "additionalProperties": false,
+        "properties": {
+          "capturedAt": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string"
+          },
+          "index": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "location": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "capturedAt",
+          "id",
+          "image",
+          "index",
+          "location",
+          "note",
+          "title"
+        ],
+        "type": "object"
+      },
+      "ProfessionalPortalAppointmentCancellationResolution": {
+        "additionalProperties": false,
+        "properties": {
+          "cancellationReason": {
+            "type": "string"
+          },
+          "cancelledAt": {
+            "type": "string"
+          },
+          "cancelledBy": {
+            "type": "string"
+          },
+          "financialOutcome": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "cancelledAt",
+          "cancelledBy",
+          "cancellationReason",
+          "financialOutcome"
+        ],
+        "type": "object"
+      },
+      "ProfessionalPortalAppointmentScheduleSnapshot": {
+        "additionalProperties": false,
+        "properties": {
+          "dateIso": {
+            "type": "string"
+          },
+          "requiresSchedule": {
+            "type": "boolean"
+          },
+          "scheduleDayId": {
+            "type": "string"
+          },
+          "scheduleDayLabel": {
+            "type": "string"
+          },
+          "scheduledTimeLabel": {
+            "type": "string"
+          },
+          "timeSlotId": {
+            "type": "string"
+          },
+          "timeSlotLabel": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "requiresSchedule",
+          "scheduledTimeLabel"
+        ],
+        "type": "object"
+      },
+      "ProfessionalPortalAppointmentServiceSnapshot": {
+        "additionalProperties": false,
+        "properties": {
+          "bookingFlow": {
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "string"
+          },
+          "coverImage": {
+            "type": "string"
+          },
+          "defaultMode": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "durationLabel": {
+            "type": "string"
+          },
+          "highlights": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "image": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "priceAmount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "priceLabel": {
+            "type": "string"
+          },
+          "serviceId": {
+            "type": "string"
+          },
+          "serviceModes": {
+            "$ref": "#/components/schemas/ServiceMode"
+          },
+          "serviceOfferingId": {
+            "type": "string"
+          },
+          "shortDescription": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "bookingFlow",
+          "categoryId",
+          "coverImage",
+          "defaultMode",
+          "description",
+          "durationLabel",
+          "highlights",
+          "image",
+          "name",
+          "priceAmount",
+          "priceLabel",
+          "serviceId",
+          "serviceModes",
+          "serviceOfferingId",
+          "shortDescription",
+          "slug",
+          "summary",
+          "tags"
+        ],
+        "type": "object"
+      },
+      "ProfessionalPortalAppointmentTimelineEvent": {
+        "additionalProperties": false,
+        "properties": {
+          "actor": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "createdAtLabel": {
+            "type": "string"
+          },
+          "customerSummary": {
+            "type": "string"
+          },
+          "evidenceUrl": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "internalNote": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "actor",
+          "createdAt",
+          "createdAtLabel",
+          "id",
+          "toStatus"
+        ],
+        "type": "object"
+      },
+      "ProfessionalPortalCoverageData": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ProfessionalPortalCoverageData.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "acceptingNewClients": {
+            "type": "boolean"
+          },
+          "autoApproveInstantBookings": {
+            "type": "boolean"
+          },
+          "availabilityRulesByMode": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ProfessionalAvailabilityRules"
+            },
+            "type": "object"
+          },
+          "city": {
+            "type": "string"
+          },
+          "coverageAreaIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "coverageCenter": {
+            "$ref": "#/components/schemas/GeoPoint"
+          },
+          "homeVisitRadiusKm": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "practiceAddress": {
+            "type": "string"
+          },
+          "practiceLabel": {
+            "type": "string"
+          },
+          "professionalId": {
+            "type": "string"
+          },
+          "publicBio": {
+            "type": "string"
+          },
+          "responseTimeGoal": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "acceptingNewClients",
+          "autoApproveInstantBookings",
+          "city",
+          "coverageAreaIds",
+          "coverageCenter",
+          "homeVisitRadiusKm",
+          "practiceAddress",
+          "practiceLabel",
+          "professionalId",
+          "publicBio",
+          "responseTimeGoal"
+        ],
+        "type": "object"
+      },
+      "ProfessionalPortalCredential": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "index": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "issuer": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "year": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "index",
+          "issuer",
+          "note",
+          "title",
+          "year"
+        ],
+        "type": "object"
+      },
+      "ProfessionalPortalGalleryData": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ProfessionalPortalGalleryData.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "galleryItems": {
+            "items": {
+              "$ref": "#/components/schemas/ProfessionalPortalGalleryItem"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "professionalId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "galleryItems",
+          "professionalId"
+        ],
+        "type": "object"
+      },
+      "ProfessionalPortalGalleryItem": {
+        "additionalProperties": false,
+        "properties": {
+          "alt": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string"
+          },
+          "index": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "isFeatured": {
+            "type": "boolean"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "alt",
+          "id",
+          "image",
+          "index",
+          "isFeatured",
+          "label"
+        ],
+        "type": "object"
+      },
+      "ProfessionalPortalManagedAppointmentRecord": {
+        "additionalProperties": false,
+        "properties": {
+          "areaId": {
+            "type": "string"
+          },
+          "bookingFlow": {
+            "type": "string"
+          },
+          "cancellationPolicySnapshot": {
+            "$ref": "#/components/schemas/ProfessionalCancellationPolicy"
+          },
+          "cancellationResolution": {
+            "$ref": "#/components/schemas/ProfessionalPortalAppointmentCancellationResolution"
+          },
+          "consumerId": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "index": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "professionalId": {
+            "type": "string"
+          },
+          "requestNote": {
+            "type": "string"
+          },
+          "requestedAt": {
+            "type": "string"
+          },
+          "requestedMode": {
+            "type": "string"
+          },
+          "scheduleSnapshot": {
+            "$ref": "#/components/schemas/ProfessionalPortalAppointmentScheduleSnapshot"
+          },
+          "serviceId": {
+            "type": "string"
+          },
+          "serviceOfferingId": {
+            "type": "string"
+          },
+          "serviceSnapshot": {
+            "$ref": "#/components/schemas/ProfessionalPortalAppointmentServiceSnapshot"
+          },
+          "status": {
+            "type": "string"
+          },
+          "timeline": {
+            "items": {
+              "$ref": "#/components/schemas/ProfessionalPortalAppointmentTimelineEvent"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "areaId",
+          "bookingFlow",
+          "cancellationPolicySnapshot",
+          "consumerId",
+          "id",
+          "index",
+          "professionalId",
+          "requestNote",
+          "requestedAt",
+          "requestedMode",
+          "scheduleSnapshot",
+          "serviceId",
+          "serviceOfferingId",
+          "serviceSnapshot",
+          "status",
+          "timeline"
+        ],
+        "type": "object"
+      },
+      "ProfessionalPortalManagedService": {
+        "additionalProperties": false,
+        "properties": {
+          "bookingFlow": {
+            "type": "string"
+          },
+          "defaultMode": {
+            "type": "string"
+          },
+          "duration": {
+            "type": "string"
+          },
+          "featured": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string"
+          },
+          "index": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "price": {
+            "type": "string"
+          },
+          "serviceId": {
+            "type": "string"
+          },
+          "serviceModes": {
+            "$ref": "#/components/schemas/ServiceMode"
+          },
+          "source": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "bookingFlow",
+          "defaultMode",
+          "duration",
+          "featured",
+          "id",
+          "index",
+          "isActive",
+          "price",
+          "serviceId",
+          "serviceModes",
+          "source",
+          "summary"
+        ],
+        "type": "object"
+      },
+      "ProfessionalPortalPortfolioData": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ProfessionalPortalPortfolioData.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "portfolioEntries": {
+            "items": {
+              "$ref": "#/components/schemas/ProfessionalPortalPortfolioEntry"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "professionalId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "portfolioEntries",
+          "professionalId"
+        ],
+        "type": "object"
+      },
+      "ProfessionalPortalPortfolioEntry": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string"
+          },
+          "index": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "outcomes": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "periodLabel": {
+            "type": "string"
+          },
+          "serviceId": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "visibility": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "index",
+          "image",
+          "outcomes",
+          "periodLabel",
+          "summary",
+          "title",
+          "visibility"
+        ],
+        "type": "object"
+      },
+      "ProfessionalPortalProfileData": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ProfessionalPortalProfileData.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "acceptingNewClients": {
+            "type": "boolean"
+          },
+          "autoApproveInstantBookings": {
+            "type": "boolean"
+          },
+          "city": {
+            "type": "string"
+          },
+          "credentialNumber": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "professionalId": {
+            "type": "string"
+          },
+          "publicBio": {
+            "type": "string"
+          },
+          "responseTimeGoal": {
+            "type": "string"
+          },
+          "reviewState": {
+            "$ref": "#/components/schemas/ProfessionalPortalReviewState"
+          },
+          "yearsExperience": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "acceptingNewClients",
+          "autoApproveInstantBookings",
+          "city",
+          "credentialNumber",
+          "displayName",
+          "phone",
+          "professionalId",
+          "publicBio",
+          "responseTimeGoal",
+          "reviewState",
+          "yearsExperience"
+        ],
+        "type": "object"
+      },
+      "ProfessionalPortalRequestsData": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ProfessionalPortalRequestsData.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "appointmentRecords": {
+            "items": {
+              "$ref": "#/components/schemas/ProfessionalPortalManagedAppointmentRecord"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "professionalId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "appointmentRecords",
+          "professionalId"
+        ],
+        "type": "object"
+      },
+      "ProfessionalPortalReviewState": {
+        "additionalProperties": false,
+        "properties": {
+          "adminNote": {
+            "type": "string"
+          },
+          "publishedAt": {
+            "type": "string"
+          },
+          "reviewedAt": {
+            "type": "string"
+          },
+          "reviewerName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
+      "ProfessionalPortalServicesData": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ProfessionalPortalServicesData.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "professionalId": {
+            "type": "string"
+          },
+          "serviceConfigurations": {
+            "items": {
+              "$ref": "#/components/schemas/ProfessionalPortalManagedService"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "professionalId",
+          "serviceConfigurations"
+        ],
+        "type": "object"
+      },
+      "ProfessionalPortalSessionData": {
+        "additionalProperties": false,
+        "properties": {
+          "availableProfessionalIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "hasSnapshot": {
+            "type": "boolean"
+          },
+          "lastActiveProfessionalId": {
+            "type": "string"
+          },
+          "professionalId": {
+            "type": "string"
+          },
+          "savedAt": {
+            "type": "string"
+          },
+          "snapshot": {
+            "additionalProperties": {},
+            "type": "object"
+          }
+        },
+        "required": [
+          "hasSnapshot"
+        ],
+        "type": "object"
+      },
+      "ProfessionalPortalTrustData": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ProfessionalPortalTrustData.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "activityStories": {
+            "items": {
+              "$ref": "#/components/schemas/ProfessionalPortalActivityStory"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "credentials": {
+            "items": {
+              "$ref": "#/components/schemas/ProfessionalPortalCredential"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "professionalId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "activityStories",
+          "credentials",
+          "professionalId"
+        ],
+        "type": "object"
+      },
       "ProfessionalPortfolioEntry": {
         "additionalProperties": false,
         "properties": {
+          "id": {
+            "type": "string"
+          },
           "image": {
             "type": "string"
           },
@@ -832,6 +3454,7 @@
           }
         },
         "required": [
+          "id",
           "index",
           "title",
           "periodLabel",
@@ -863,6 +3486,30 @@
           "label",
           "value",
           "detail"
+        ],
+        "type": "object"
+      },
+      "ProfessionalPracticeLocation": {
+        "additionalProperties": false,
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "areaId": {
+            "type": "string"
+          },
+          "coordinates": {
+            "$ref": "#/components/schemas/GeoPoint"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "label",
+          "address",
+          "areaId",
+          "coordinates"
         ],
         "type": "object"
       },
@@ -919,7 +3566,16 @@
       "ProfessionalService": {
         "additionalProperties": false,
         "properties": {
+          "bookingFlow": {
+            "type": "string"
+          },
+          "defaultMode": {
+            "type": "string"
+          },
           "duration": {
+            "type": "string"
+          },
+          "id": {
             "type": "string"
           },
           "index": {
@@ -932,15 +3588,22 @@
           "serviceId": {
             "type": "string"
           },
+          "serviceModes": {
+            "$ref": "#/components/schemas/ServiceMode"
+          },
           "summary": {
             "type": "string"
           }
         },
         "required": [
           "index",
+          "id",
           "serviceId",
           "duration",
-          "price"
+          "price",
+          "serviceModes",
+          "defaultMode",
+          "bookingFlow"
         ],
         "type": "object"
       },
@@ -1018,6 +3681,44 @@
         ],
         "type": "object"
       },
+      "ProfessionalWeeklyAvailabilityWindow": {
+        "additionalProperties": false,
+        "properties": {
+          "endTime": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "index": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "isEnabled": {
+            "type": "boolean"
+          },
+          "slotIntervalMinutes": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "startTime": {
+            "type": "string"
+          },
+          "weekday": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "endTime",
+          "id",
+          "index",
+          "isEnabled",
+          "slotIntervalMinutes",
+          "startTime",
+          "weekday"
+        ],
+        "type": "object"
+      },
       "ProfessionalsResponseBody": {
         "additionalProperties": false,
         "properties": {
@@ -1044,6 +3745,465 @@
           "data"
         ],
         "type": "object"
+      },
+      "ProfileResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ProfileResponseBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProfessionalPortalProfileData"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "RequestsResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/RequestsResponseBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProfessionalPortalRequestsData"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "ResolvedLocationData": {
+        "additionalProperties": false,
+        "properties": {
+          "areaId": {
+            "type": "string"
+          },
+          "areaLabel": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "district": {
+            "type": "string"
+          },
+          "formattedAddress": {
+            "type": "string"
+          },
+          "point": {
+            "$ref": "#/components/schemas/GeoPointData"
+          },
+          "postalCode": {
+            "type": "string"
+          },
+          "precision": {
+            "type": "string"
+          },
+          "province": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "areaId",
+          "areaLabel",
+          "city",
+          "country",
+          "district",
+          "formattedAddress",
+          "point",
+          "postalCode",
+          "precision",
+          "province",
+          "source"
+        ],
+        "type": "object"
+      },
+      "ResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ResponseBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/Info"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "ServiceMode": {
+        "additionalProperties": false,
+        "properties": {
+          "homeVisit": {
+            "type": "boolean"
+          },
+          "online": {
+            "type": "boolean"
+          },
+          "onsite": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "online",
+          "homeVisit",
+          "onsite"
+        ],
+        "type": "object"
+      },
+      "ServicesResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ServicesResponseBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProfessionalPortalServicesData"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "SessionResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/SessionResponseBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProfessionalPortalSessionData"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "SupportDeskData": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/SupportDeskData.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "commandCenter": {
+            "$ref": "#/components/schemas/AdminCommandCenterStateData"
+          },
+          "savedAt": {
+            "type": "string"
+          },
+          "schemaVersion": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "tickets": {
+            "items": {
+              "$ref": "#/components/schemas/SupportTicketData"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "commandCenter",
+          "schemaVersion",
+          "tickets"
+        ],
+        "type": "object"
+      },
+      "SupportDeskResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/SupportDeskResponseBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/SupportDeskData"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "SupportTicketData": {
+        "additionalProperties": false,
+        "properties": {
+          "assignedAdminId": {
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "string"
+          },
+          "contactValue": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "details": {
+            "type": "string"
+          },
+          "etaKey": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "preferredChannel": {
+            "type": "string"
+          },
+          "referenceCode": {
+            "type": "string"
+          },
+          "relatedAppointmentId": {
+            "type": "string"
+          },
+          "relatedProfessionalId": {
+            "type": "string"
+          },
+          "reporterName": {
+            "type": "string"
+          },
+          "reporterPhone": {
+            "type": "string"
+          },
+          "reporterRole": {
+            "type": "string"
+          },
+          "sourceSurface": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "urgency": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "categoryId",
+          "contactValue",
+          "createdAt",
+          "details",
+          "etaKey",
+          "id",
+          "preferredChannel",
+          "reporterName",
+          "reporterPhone",
+          "reporterRole",
+          "sourceSurface",
+          "status",
+          "summary",
+          "updatedAt",
+          "urgency"
+        ],
+        "type": "object"
+      },
+      "TrustResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/TrustResponseBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProfessionalPortalTrustData"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "UpsertProfessionalPortalSessionRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/UpsertProfessionalPortalSessionRequest.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "professionalId": {
+            "type": "string"
+          },
+          "snapshot": {
+            "additionalProperties": {},
+            "type": "object"
+          }
+        },
+        "required": [
+          "snapshot"
+        ],
+        "type": "object"
+      },
+      "UserContext": {
+        "additionalProperties": false,
+        "properties": {
+          "area": {
+            "$ref": "#/components/schemas/Area"
+          },
+          "currentArea": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "index": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "onlineStatusLabel": {
+            "type": "string"
+          },
+          "userLocation": {
+            "$ref": "#/components/schemas/GeoPoint"
+          }
+        },
+        "required": [
+          "index",
+          "id",
+          "area",
+          "currentArea",
+          "userLocation",
+          "onlineStatusLabel"
+        ],
+        "type": "object"
+      },
+      "ViewerSessionData": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ViewerSessionData.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "mode": {
+            "description": "Viewer mode: visitor, customer, or professional",
+            "type": "string"
+          }
+        },
+        "required": [
+          "mode"
+        ],
+        "type": "object"
+      },
+      "ViewerSessionResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ViewerSessionResponseBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ViewerSessionData"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "AdminSessionAuth": {
+        "description": "Admin session cookie issued by POST /api/v1/admin/auth/session.",
+        "in": "cookie",
+        "name": "bidanapp_admin_session",
+        "type": "apiKey"
+      },
+      "CustomerSessionAuth": {
+        "description": "Customer session cookie issued by POST /api/v1/customers/auth/session.",
+        "in": "cookie",
+        "name": "bidanapp_customer_session",
+        "type": "apiKey"
+      },
+      "ProfessionalSessionAuth": {
+        "description": "Professional session cookie issued by POST /api/v1/professionals/auth/session.",
+        "in": "cookie",
+        "name": "bidanapp_professional_session",
+        "type": "apiKey"
       }
     }
   },
@@ -1054,6 +4214,797 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/admin/auth/session": {
+      "delete": {
+        "operationId": "delete-admin-auth-session",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminAuthSessionResponseBody"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "AdminSessionAuth": []
+          }
+        ],
+        "summary": "Revoke the authenticated admin session",
+        "tags": [
+          "Admin Auth"
+        ]
+      },
+      "get": {
+        "operationId": "get-admin-auth-session",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminAuthSessionResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "AdminSessionAuth": []
+          }
+        ],
+        "summary": "Get the authenticated admin session",
+        "tags": [
+          "Admin Auth"
+        ]
+      },
+      "post": {
+        "operationId": "create-admin-auth-session",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminAuthCreateSessionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminAuthSessionResponseBody"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Create an authenticated admin session",
+        "tags": [
+          "Admin Auth"
+        ]
+      },
+      "put": {
+        "operationId": "update-admin-auth-session",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminAuthSessionUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminAuthSessionResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "AdminSessionAuth": []
+          }
+        ],
+        "summary": "Update authenticated admin session metadata",
+        "tags": [
+          "Admin Auth"
+        ]
+      }
+    },
+    "/admin/console": {
+      "get": {
+        "operationId": "get-admin-console",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminConsoleResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "AdminSessionAuth": []
+          }
+        ],
+        "summary": "Get persisted admin console snapshot",
+        "tags": [
+          "Admin"
+        ]
+      },
+      "put": {
+        "operationId": "upsert-admin-console",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminConsoleData"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminConsoleResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "AdminSessionAuth": []
+          }
+        ],
+        "summary": "Persist admin console snapshot",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/console/tables/{table_name}": {
+      "get": {
+        "operationId": "get-admin-console-table",
+        "parameters": [
+          {
+            "description": "Admin console table name",
+            "in": "path",
+            "name": "table_name",
+            "required": true,
+            "schema": {
+              "description": "Admin console table name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminConsoleTableResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "AdminSessionAuth": []
+          }
+        ],
+        "summary": "Get persisted admin console table snapshot",
+        "tags": [
+          "Admin"
+        ]
+      },
+      "put": {
+        "operationId": "upsert-admin-console-table",
+        "parameters": [
+          {
+            "description": "Admin console table name",
+            "in": "path",
+            "name": "table_name",
+            "required": true,
+            "schema": {
+              "description": "Admin console table name",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminConsoleTableUpsertData"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminConsoleTableResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "AdminSessionAuth": []
+          }
+        ],
+        "summary": "Persist admin console table snapshot",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/session": {
+      "get": {
+        "operationId": "get-admin-session",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminSessionResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "AdminSessionAuth": []
+          }
+        ],
+        "summary": "Get persisted admin session state",
+        "tags": [
+          "Admin"
+        ]
+      },
+      "put": {
+        "operationId": "upsert-admin-session",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminSessionData"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminSessionResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "AdminSessionAuth": []
+          }
+        ],
+        "summary": "Persist admin session state",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/support-desk": {
+      "get": {
+        "operationId": "get-admin-support-desk",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportDeskResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "AdminSessionAuth": []
+          }
+        ],
+        "summary": "Get persisted admin support desk snapshot",
+        "tags": [
+          "Admin"
+        ]
+      },
+      "put": {
+        "operationId": "upsert-admin-support-desk",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupportDeskData"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportDeskResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "AdminSessionAuth": []
+          }
+        ],
+        "summary": "Persist admin support desk snapshot",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
     "/appointments": {
       "get": {
         "operationId": "get-appointments",
@@ -1079,9 +5030,113 @@
             "description": "Internal Server Error"
           }
         },
-        "summary": "Get normalized appointment simulation payload",
+        "summary": "Get appointment read model payload",
         "tags": [
-          "Simulation"
+          "Appointments"
+        ]
+      }
+    },
+    "/appointments/{appointment_id}": {
+      "put": {
+        "operationId": "upsert-appointment-record",
+        "parameters": [
+          {
+            "description": "Appointment record identifier",
+            "in": "path",
+            "name": "appointment_id",
+            "required": true,
+            "schema": {
+              "description": "Appointment record identifier",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppointmentRecordUpsertData"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppointmentRequestsResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Create or update a persisted appointment record",
+        "tags": [
+          "Appointments"
+        ]
+      }
+    },
+    "/bootstrap": {
+      "get": {
+        "operationId": "get-bootstrap",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BootstrapResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Get frontend-ready bootstrap payload",
+        "tags": [
+          "Bootstrap"
         ]
       }
     },
@@ -1112,7 +5167,7 @@
         },
         "summary": "Get categories, services, and professionals",
         "tags": [
-          "Simulation"
+          "Directory"
         ]
       }
     },
@@ -1141,9 +5196,636 @@
             "description": "Internal Server Error"
           }
         },
-        "summary": "Get direct and appointment chat threads",
+        "summary": "Get chat thread read model payload",
         "tags": [
-          "Simulation"
+          "Chat"
+        ]
+      }
+    },
+    "/consumers/preferences": {
+      "get": {
+        "operationId": "get-consumer-preferences",
+        "parameters": [
+          {
+            "description": "Optional consumer id to scope consumer preference state",
+            "explode": false,
+            "in": "query",
+            "name": "consumer_id",
+            "schema": {
+              "description": "Optional consumer id to scope consumer preference state",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsumerPreferencesResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "CustomerSessionAuth": []
+          }
+        ],
+        "summary": "Get persisted consumer preference state",
+        "tags": [
+          "App State"
+        ]
+      },
+      "put": {
+        "operationId": "upsert-consumer-preferences",
+        "parameters": [
+          {
+            "description": "Optional consumer id to scope consumer preference state",
+            "explode": false,
+            "in": "query",
+            "name": "consumer_id",
+            "schema": {
+              "description": "Optional consumer id to scope consumer preference state",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsumerPreferencesData"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsumerPreferencesResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "CustomerSessionAuth": []
+          }
+        ],
+        "summary": "Persist consumer preference state",
+        "tags": [
+          "App State"
+        ]
+      }
+    },
+    "/customers/auth/account": {
+      "put": {
+        "operationId": "update-customer-auth-account",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerAuthUpdateAccountRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerAuthSessionResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "CustomerSessionAuth": []
+          }
+        ],
+        "summary": "Update authenticated customer account metadata",
+        "tags": [
+          "Customer Auth"
+        ]
+      }
+    },
+    "/customers/auth/password": {
+      "put": {
+        "operationId": "update-customer-auth-password",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerAuthUpdatePasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerAuthSessionResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "CustomerSessionAuth": []
+          }
+        ],
+        "summary": "Change the authenticated customer password",
+        "tags": [
+          "Customer Auth"
+        ]
+      }
+    },
+    "/customers/auth/register": {
+      "post": {
+        "operationId": "register-customer-auth-account",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerAuthRegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerAuthSessionResponseBody"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Register a customer account",
+        "tags": [
+          "Customer Auth"
+        ]
+      }
+    },
+    "/customers/auth/session": {
+      "delete": {
+        "operationId": "delete-customer-auth-session",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerAuthSessionResponseBody"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "CustomerSessionAuth": []
+          }
+        ],
+        "summary": "Revoke the authenticated customer session",
+        "tags": [
+          "Customer Auth"
+        ]
+      },
+      "get": {
+        "operationId": "get-customer-auth-session",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerAuthSessionResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "CustomerSessionAuth": []
+          }
+        ],
+        "summary": "Get the authenticated customer session",
+        "tags": [
+          "Customer Auth"
+        ]
+      },
+      "post": {
+        "operationId": "create-customer-auth-session",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerAuthCreateSessionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerAuthSessionResponseBody"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Create an authenticated customer session",
+        "tags": [
+          "Customer Auth"
         ]
       }
     },
@@ -1155,7 +5837,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HealthResponseBody"
+                  "$ref": "#/components/schemas/ResponseBody"
                 }
               }
             },
@@ -1175,6 +5857,300 @@
         "summary": "Get health status",
         "tags": [
           "Health"
+        ]
+      }
+    },
+    "/notifications/customer": {
+      "get": {
+        "operationId": "get-customer-notifications-state",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerNotificationsResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "CustomerSessionAuth": []
+          }
+        ],
+        "summary": "Get persisted customer notification read state",
+        "tags": [
+          "Notifications"
+        ]
+      },
+      "put": {
+        "operationId": "upsert-customer-notifications-state",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerNotificationStateData"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerNotificationsResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "CustomerSessionAuth": []
+          }
+        ],
+        "summary": "Persist customer notification read state",
+        "tags": [
+          "Notifications"
+        ]
+      }
+    },
+    "/notifications/professional": {
+      "get": {
+        "operationId": "get-professional-notifications-state",
+        "parameters": [
+          {
+            "description": "Optional professional id to scope professional notification read state",
+            "explode": false,
+            "in": "query",
+            "name": "professional_id",
+            "schema": {
+              "description": "Optional professional id to scope professional notification read state",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfessionalNotificationsResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ProfessionalSessionAuth": []
+          }
+        ],
+        "summary": "Get persisted professional notification read state",
+        "tags": [
+          "Notifications"
+        ]
+      },
+      "put": {
+        "operationId": "upsert-professional-notifications-state",
+        "parameters": [
+          {
+            "description": "Optional professional id to scope professional notification read state",
+            "explode": false,
+            "in": "query",
+            "name": "professional_id",
+            "schema": {
+              "description": "Optional professional id to scope professional notification read state",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfessionalNotificationStateData"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfessionalNotificationsResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ProfessionalSessionAuth": []
+          }
+        ],
+        "summary": "Persist professional notification read state",
+        "tags": [
+          "Notifications"
         ]
       }
     },
@@ -1205,7 +6181,1747 @@
         },
         "summary": "List professionals",
         "tags": [
-          "Simulation"
+          "Directory"
+        ]
+      }
+    },
+    "/professionals/auth/account": {
+      "put": {
+        "operationId": "update-professional-auth-account",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfessionalAuthUpdateAccountRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfessionalAuthSessionResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ProfessionalSessionAuth": []
+          }
+        ],
+        "summary": "Update authenticated professional account metadata",
+        "tags": [
+          "Professional Auth"
+        ]
+      }
+    },
+    "/professionals/auth/password": {
+      "put": {
+        "operationId": "update-professional-auth-password",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfessionalAuthUpdatePasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfessionalAuthSessionResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ProfessionalSessionAuth": []
+          }
+        ],
+        "summary": "Change the authenticated professional password",
+        "tags": [
+          "Professional Auth"
+        ]
+      }
+    },
+    "/professionals/auth/password-recovery": {
+      "post": {
+        "operationId": "request-professional-password-recovery",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfessionalAuthRequestPasswordRecoveryRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfessionalAuthPasswordRecoveryResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Request a professional password recovery link",
+        "tags": [
+          "Professional Auth"
+        ]
+      }
+    },
+    "/professionals/auth/register": {
+      "post": {
+        "operationId": "register-professional-auth-account",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfessionalAuthRegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfessionalAuthSessionResponseBody"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Register a professional portal account",
+        "tags": [
+          "Professional Auth"
+        ]
+      }
+    },
+    "/professionals/auth/session": {
+      "delete": {
+        "operationId": "delete-professional-auth-session",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfessionalAuthSessionResponseBody"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ProfessionalSessionAuth": []
+          }
+        ],
+        "summary": "Revoke the authenticated professional session",
+        "tags": [
+          "Professional Auth"
+        ]
+      },
+      "get": {
+        "operationId": "get-professional-auth-session",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfessionalAuthSessionResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ProfessionalSessionAuth": []
+          }
+        ],
+        "summary": "Get the authenticated professional session",
+        "tags": [
+          "Professional Auth"
+        ]
+      },
+      "post": {
+        "operationId": "create-professional-auth-session",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfessionalAuthCreateSessionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfessionalAuthSessionResponseBody"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Create an authenticated professional session",
+        "tags": [
+          "Professional Auth"
+        ]
+      }
+    },
+    "/professionals/me/coverage": {
+      "get": {
+        "operationId": "get-professional-portal-coverage",
+        "parameters": [
+          {
+            "description": "Optional professional id to load a specific coverage resource",
+            "explode": false,
+            "in": "query",
+            "name": "professional_id",
+            "schema": {
+              "description": "Optional professional id to load a specific coverage resource",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoverageResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ProfessionalSessionAuth": []
+          }
+        ],
+        "summary": "Get persisted professional coverage resource",
+        "tags": [
+          "Professional Portal"
+        ]
+      },
+      "put": {
+        "operationId": "upsert-professional-portal-coverage",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfessionalPortalCoverageData"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoverageResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ProfessionalSessionAuth": []
+          }
+        ],
+        "summary": "Persist professional coverage resource",
+        "tags": [
+          "Professional Portal"
+        ]
+      }
+    },
+    "/professionals/me/gallery": {
+      "get": {
+        "operationId": "get-professional-portal-gallery",
+        "parameters": [
+          {
+            "description": "Optional professional id to load a specific gallery resource",
+            "explode": false,
+            "in": "query",
+            "name": "professional_id",
+            "schema": {
+              "description": "Optional professional id to load a specific gallery resource",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GalleryResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ProfessionalSessionAuth": []
+          }
+        ],
+        "summary": "Get persisted professional gallery resource",
+        "tags": [
+          "Professional Portal"
+        ]
+      },
+      "put": {
+        "operationId": "upsert-professional-portal-gallery",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfessionalPortalGalleryData"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GalleryResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ProfessionalSessionAuth": []
+          }
+        ],
+        "summary": "Persist professional gallery resource",
+        "tags": [
+          "Professional Portal"
+        ]
+      }
+    },
+    "/professionals/me/portfolio": {
+      "get": {
+        "operationId": "get-professional-portal-portfolio",
+        "parameters": [
+          {
+            "description": "Optional professional id to load a specific portfolio resource",
+            "explode": false,
+            "in": "query",
+            "name": "professional_id",
+            "schema": {
+              "description": "Optional professional id to load a specific portfolio resource",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortfolioResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ProfessionalSessionAuth": []
+          }
+        ],
+        "summary": "Get persisted professional portfolio resource",
+        "tags": [
+          "Professional Portal"
+        ]
+      },
+      "put": {
+        "operationId": "upsert-professional-portal-portfolio",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfessionalPortalPortfolioData"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortfolioResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ProfessionalSessionAuth": []
+          }
+        ],
+        "summary": "Persist professional portfolio resource",
+        "tags": [
+          "Professional Portal"
+        ]
+      }
+    },
+    "/professionals/me/profile": {
+      "get": {
+        "operationId": "get-professional-portal-profile",
+        "parameters": [
+          {
+            "description": "Optional professional id to load a specific profile resource",
+            "explode": false,
+            "in": "query",
+            "name": "professional_id",
+            "schema": {
+              "description": "Optional professional id to load a specific profile resource",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ProfessionalSessionAuth": []
+          }
+        ],
+        "summary": "Get persisted professional profile resource",
+        "tags": [
+          "Professional Portal"
+        ]
+      },
+      "put": {
+        "operationId": "upsert-professional-portal-profile",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfessionalPortalProfileData"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ProfessionalSessionAuth": []
+          }
+        ],
+        "summary": "Persist professional profile resource",
+        "tags": [
+          "Professional Portal"
+        ]
+      }
+    },
+    "/professionals/me/requests": {
+      "get": {
+        "operationId": "get-professional-portal-requests",
+        "parameters": [
+          {
+            "description": "Optional professional id to load a specific requests resource",
+            "explode": false,
+            "in": "query",
+            "name": "professional_id",
+            "schema": {
+              "description": "Optional professional id to load a specific requests resource",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestsResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ProfessionalSessionAuth": []
+          }
+        ],
+        "summary": "Get persisted professional request records resource",
+        "tags": [
+          "Professional Portal"
+        ]
+      },
+      "put": {
+        "operationId": "upsert-professional-portal-requests",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfessionalPortalRequestsData"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestsResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ProfessionalSessionAuth": []
+          }
+        ],
+        "summary": "Persist professional request records resource",
+        "tags": [
+          "Professional Portal"
+        ]
+      }
+    },
+    "/professionals/me/services": {
+      "get": {
+        "operationId": "get-professional-portal-services",
+        "parameters": [
+          {
+            "description": "Optional professional id to load a specific services resource",
+            "explode": false,
+            "in": "query",
+            "name": "professional_id",
+            "schema": {
+              "description": "Optional professional id to load a specific services resource",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServicesResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ProfessionalSessionAuth": []
+          }
+        ],
+        "summary": "Get persisted professional services resource",
+        "tags": [
+          "Professional Portal"
+        ]
+      },
+      "put": {
+        "operationId": "upsert-professional-portal-services",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfessionalPortalServicesData"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServicesResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ProfessionalSessionAuth": []
+          }
+        ],
+        "summary": "Persist professional services resource",
+        "tags": [
+          "Professional Portal"
+        ]
+      }
+    },
+    "/professionals/me/trust": {
+      "get": {
+        "operationId": "get-professional-portal-trust",
+        "parameters": [
+          {
+            "description": "Optional professional id to load a specific trust resource",
+            "explode": false,
+            "in": "query",
+            "name": "professional_id",
+            "schema": {
+              "description": "Optional professional id to load a specific trust resource",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrustResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ProfessionalSessionAuth": []
+          }
+        ],
+        "summary": "Get persisted professional trust resource",
+        "tags": [
+          "Professional Portal"
+        ]
+      },
+      "put": {
+        "operationId": "upsert-professional-portal-trust",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfessionalPortalTrustData"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrustResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ProfessionalSessionAuth": []
+          }
+        ],
+        "summary": "Persist professional trust resource",
+        "tags": [
+          "Professional Portal"
+        ]
+      }
+    },
+    "/professionals/portal/session": {
+      "get": {
+        "operationId": "get-professional-portal-session",
+        "parameters": [
+          {
+            "description": "Optional professional id to load a specific portal snapshot",
+            "explode": false,
+            "in": "query",
+            "name": "professional_id",
+            "schema": {
+              "description": "Optional professional id to load a specific portal snapshot",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ProfessionalSessionAuth": []
+          }
+        ],
+        "summary": "Get persisted professional portal session",
+        "tags": [
+          "Professional Portal"
+        ]
+      },
+      "put": {
+        "operationId": "upsert-professional-portal-session",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertProfessionalPortalSessionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ProfessionalSessionAuth": []
+          }
+        ],
+        "summary": "Persist professional portal session",
+        "tags": [
+          "Professional Portal"
         ]
       }
     },
@@ -1278,7 +7994,97 @@
         },
         "summary": "Get professional by slug",
         "tags": [
-          "Simulation"
+          "Directory"
+        ]
+      }
+    },
+    "/viewer/session": {
+      "get": {
+        "operationId": "get-viewer-session",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ViewerSessionResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Get persisted viewer session state",
+        "tags": [
+          "App State"
+        ]
+      },
+      "put": {
+        "operationId": "upsert-viewer-session",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ViewerSessionData"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ViewerSessionResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Persist viewer session state",
+        "tags": [
+          "App State"
         ]
       }
     },
@@ -1288,8 +8094,8 @@
         "operationId": "connect-chat-websocket",
         "parameters": [
           {
-            "description": "Chat thread identifier. Defaults to demo-thread when omitted.",
-            "example": "integration-demo",
+            "description": "Chat thread identifier. Defaults to default-thread when omitted.",
+            "example": "integration-thread",
             "in": "query",
             "name": "thread_id",
             "schema": {
@@ -1298,7 +8104,7 @@
           },
           {
             "description": "Unique client identifier. Defaults to web-client when omitted.",
-            "example": "frontend-demo",
+            "example": "web-client",
             "in": "query",
             "name": "client_id",
             "schema": {
@@ -1307,7 +8113,7 @@
           },
           {
             "description": "Display name used as the sender fallback for outbound messages.",
-            "example": "Frontend Demo",
+            "example": "Web Client",
             "in": "query",
             "name": "sender",
             "schema": {
@@ -1331,7 +8137,7 @@
           "incoming": [
             {
               "shape": {
-                "sender": "Frontend Demo",
+                "sender": "Web Client",
                 "text": "Halo dari frontend",
                 "type": "message"
               },
@@ -1341,9 +8147,9 @@
           "outgoing": [
             {
               "shape": {
-                "clientId": "frontend-demo",
+                "clientId": "web-client",
                 "messages": [],
-                "threadId": "integration-demo",
+                "threadId": "integration-thread",
                 "timestamp": "2026-03-15T09:00:00Z",
                 "type": "connected"
               },
@@ -1353,12 +8159,12 @@
               "shape": {
                 "message": {
                   "id": "20260315090000-1",
-                  "sender": "Frontend Demo",
+                  "sender": "Web Client",
                   "sentAt": "2026-03-15T09:00:00Z",
                   "text": "Halo dari frontend",
-                  "threadId": "integration-demo"
+                  "threadId": "integration-thread"
                 },
-                "threadId": "integration-demo",
+                "threadId": "integration-thread",
                 "timestamp": "2026-03-15T09:00:00Z",
                 "type": "message"
               },

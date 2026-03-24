@@ -3,15 +3,17 @@
 import { ArrowUpRight, ClipboardList, MapPin } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { PROFESSIONAL_REQUEST_STATUS_ORDER } from '@/features/professional-portal/lib/request-status';
-import { getAreaById } from '@/lib/mock-db/catalog';
+import { getAreaById } from '@/lib/catalog-selectors';
 import type { ProfessionalManagedRequest } from '@/lib/use-professional-portal';
+import type { Area } from '@/types/catalog';
 
 interface CustomerRequestStatusCardProps {
+  areas: Area[];
   professionalName: string;
   request: ProfessionalManagedRequest;
 }
 
-export const CustomerRequestStatusCard = ({ professionalName, request }: CustomerRequestStatusCardProps) => {
+export const CustomerRequestStatusCard = ({ areas, professionalName, request }: CustomerRequestStatusCardProps) => {
   const t = useTranslations('Professional');
   const portalT = useTranslations('ProfessionalPortal');
   const latestStatusEvidence = [...request.statusHistory].reverse().find((item) => item.status === request.status);
@@ -74,7 +76,7 @@ export const CustomerRequestStatusCard = ({ professionalName, request }: Custome
             <span>{t('requestUpdates.area')}</span>
           </div>
           <p className="mt-2 text-[14px] font-bold text-slate-900">
-            {getAreaById(request.areaId)?.label || request.areaId}
+            {getAreaById(areas, request.areaId)?.label || request.areaId}
           </p>
         </div>
       </div>

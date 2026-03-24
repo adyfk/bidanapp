@@ -10,7 +10,7 @@ export const ADMIN_ROUTES = {
   services: '/admin/services' as Route,
   appointments: '/admin/appointments' as Route,
   support: '/admin/support' as Route,
-  mock: '/admin/mock' as Route,
+  studio: '/admin/studio' as Route,
 } as const;
 
 export interface AdminNavItem {
@@ -72,12 +72,12 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     shortLabel: 'Desk',
   },
   {
-    description: 'Raw tables, import-export snapshot, reset seed, dan audit mock lokal.',
+    description: 'Raw tables, import-export snapshot, reset seed, dan audit data operasional.',
     focusArea: 'all',
-    href: ADMIN_ROUTES.mock,
-    keywords: ['mock', 'snapshot', 'seed', 'import', 'export', 'reset'],
-    label: 'Mock Studio',
-    shortLabel: 'Mock',
+    href: ADMIN_ROUTES.studio,
+    keywords: ['studio', 'snapshot', 'seed', 'import', 'export', 'reset'],
+    label: 'Data Studio',
+    shortLabel: 'Data',
   },
 ];
 

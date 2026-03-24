@@ -38,7 +38,7 @@ export interface ResolvedLocation {
   postalCode: string;
   country: string;
   formattedAddress: string;
-  source: 'mock';
+  source: 'derived';
   precision: 'district';
 }
 

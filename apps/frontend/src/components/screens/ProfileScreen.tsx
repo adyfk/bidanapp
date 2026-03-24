@@ -17,14 +17,24 @@ import { ProfileSettingsSheet } from '@/features/profile/components/ProfileSetti
 import { ProfileSupportEntryCard, ProfileSupportSheet } from '@/features/profile/components/ProfileSupportCenter';
 import { useProfileSettings } from '@/features/profile/hooks/useProfileSettings';
 import { useRouter } from '@/i18n/routing';
-import { ACTIVE_CONSUMER, ACTIVE_USER_CONTEXT } from '@/lib/mock-db/runtime';
 import { APP_ROUTES, professionalAccessRoute } from '@/lib/routes';
+import { useAppShell } from '@/lib/use-app-shell';
+import { useCustomerAuthSession } from '@/lib/use-customer-auth-session';
 import { useViewerSession } from '@/lib/use-viewer-session';
 
 export const ProfileScreen = () => {
   const router = useRouter();
   const t = useTranslations('Profile');
-  const { continueAsVisitor, isCustomer, isProfessional } = useViewerSession();
+  const {
+    hasHydrated,
+    isAuthenticated,
+    logout,
+    session: customerSession,
+    updateAccount,
+    updatePassword,
+  } = useCustomerAuthSession();
+  const { isProfessional } = useViewerSession();
+  const { currentConsumer, currentUserContext } = useAppShell();
   const [isSupportSheetOpen, setIsSupportSheetOpen] = useState(false);
   const {
     activeSheet,
@@ -41,7 +51,11 @@ export const ProfileScreen = () => {
     saveProfile,
     updatePasswordField,
     updateProfileField,
-  } = useProfileSettings();
+  } = useProfileSettings({
+    customerSession,
+    updateAccount,
+    updatePassword,
+  });
 
   useEffect(() => {
     if (isProfessional) {
@@ -53,7 +67,11 @@ export const ProfileScreen = () => {
     return null;
   }
 
-  if (!isCustomer) {
+  if (!hasHydrated) {
+    return null;
+  }
+
+  if (!isAuthenticated) {
     return <CustomerAccessScreen intent="profile" nextHref={APP_ROUTES.profile} />;
   }
 
@@ -65,13 +83,13 @@ export const ProfileScreen = () => {
         <div className="space-y-6 px-5 py-6">
           <ProfileIdentityCard
             actionLabel={t('buttons.editProfile')}
-            avatarName={ACTIVE_CONSUMER.name}
-            avatarSrc={ACTIVE_CONSUMER.avatar}
+            avatarName={currentConsumer.name}
+            avatarSrc={currentConsumer.avatar}
             chipIcon={<MapPin className="h-3.5 w-3.5" />}
-            chipLabel={ACTIVE_USER_CONTEXT.currentArea}
+            chipLabel={customerSession.city || currentUserContext.currentArea}
             onAction={() => openSheet('account')}
-            subtitle={ACTIVE_CONSUMER.phone}
-            title={ACTIVE_CONSUMER.name}
+            subtitle={currentConsumer.phone}
+            title={currentConsumer.name}
           />
 
           <div className="grid grid-cols-2 gap-3">
@@ -143,8 +161,9 @@ export const ProfileScreen = () => {
             icon={<LogOut className="h-5 w-5" />}
             label={t('logout')}
             onClick={() => {
-              continueAsVisitor();
-              router.push(APP_ROUTES.home);
+              void logout().finally(() => {
+                router.push(APP_ROUTES.home);
+              });
             }}
           />
         </div>
@@ -167,12 +186,12 @@ export const ProfileScreen = () => {
       />
 
       <ProfileSupportSheet
-        defaultContact={profileDraft.phone || ACTIVE_CONSUMER.phone}
+        defaultContact={profileDraft.phone || currentConsumer.phone}
         isOpen={isSupportSheetOpen}
         namespace="Profile"
         onClose={() => setIsSupportSheetOpen(false)}
-        reporterName={profileDraft.fullName || ACTIVE_CONSUMER.name}
-        reporterPhone={profileDraft.phone || ACTIVE_CONSUMER.phone}
+        reporterName={profileDraft.fullName || currentConsumer.name}
+        reporterPhone={profileDraft.phone || currentConsumer.phone}
       />
     </>
   );

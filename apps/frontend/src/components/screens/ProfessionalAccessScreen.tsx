@@ -7,9 +7,10 @@ import { useEffect, useId, useState } from 'react';
 import { AppAvatar } from '@/components/ui/AppAvatar';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { useRouter } from '@/i18n/routing';
+import { getProfessionalCategoryLabel } from '@/lib/catalog-selectors';
 import { APP_CONFIG } from '@/lib/config';
-import { getProfessionalCategoryLabel } from '@/lib/mock-db/catalog';
 import { APP_ROUTES, type ProfessionalAccessTab } from '@/lib/routes';
+import { useProfessionalAuthSession } from '@/lib/use-professional-auth-session';
 import { useProfessionalPortal } from '@/lib/use-professional-portal';
 import { useViewerSession } from '@/lib/use-viewer-session';
 
@@ -20,9 +21,13 @@ interface ProfessionalAccessScreenProps {
 type AccessErrorKey =
   | 'loginPhoneRequired'
   | 'loginPasswordRequired'
+  | 'loginFailed'
   | 'registerNameRequired'
   | 'registerPhoneRequired'
   | 'registerCredentialRequired'
+  | 'registerPasswordRequired'
+  | 'registerPasswordWeak'
+  | 'registerFailed'
   | null;
 
 const fieldClass =
@@ -47,49 +52,76 @@ export const ProfessionalAccessScreen = ({ defaultTab = 'login' }: ProfessionalA
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations('ProfessionalAccess');
-  const { continueAsCustomer, continueAsVisitor, isProfessional } = useViewerSession();
+  const { continueAsCustomer, continueAsProfessional, continueAsVisitor } = useViewerSession();
+  const {
+    isAuthenticated,
+    login,
+    logout,
+    register,
+    requestPasswordRecovery,
+    session: professionalSession,
+  } = useProfessionalAuthSession();
   const {
     activeProfessionalCategoryLabel,
-    demoProfessionals,
+    highlightedProfessionals,
     portalState,
+    serviceCategories,
+    serviceTemplates,
     startProfessionalLogin,
     startProfessionalRegistration,
   } = useProfessionalPortal();
   const [activeTab, setActiveTab] = useState<ProfessionalAccessTab>(defaultTab);
   const [errorKey, setErrorKey] = useState<AccessErrorKey>(null);
   const [selectedProfessionalId, setSelectedProfessionalId] = useState(
-    portalState.activeProfessionalId || demoProfessionals[0]?.id || '',
+    professionalSession.professionalId || portalState.activeProfessionalId || highlightedProfessionals[0]?.id || '',
   );
-  const [loginPhone, setLoginPhone] = useState(portalState.phone);
+  const [loginPhone, setLoginPhone] = useState(professionalSession.phone || portalState.phone);
   const [loginPassword, setLoginPassword] = useState('');
   const [registerName, setRegisterName] = useState(portalState.displayName);
-  const [registerPhone, setRegisterPhone] = useState(portalState.phone);
+  const [registerPhone, setRegisterPhone] = useState(professionalSession.phone || portalState.phone);
   const [registerCity, setRegisterCity] = useState(portalState.city);
   const [registerCredential, setRegisterCredential] = useState(portalState.credentialNumber);
+  const [registerPassword, setRegisterPassword] = useState('');
   const [hasMounted, setHasMounted] = useState(false);
   const [showAccountSwitcher, setShowAccountSwitcher] = useState(false);
   const [isRecoveryOpen, setIsRecoveryOpen] = useState(false);
-  const [recoveryPhone, setRecoveryPhone] = useState(portalState.phone);
+  const [recoveryPhone, setRecoveryPhone] = useState(professionalSession.phone || portalState.phone);
   const [recoveryState, setRecoveryState] = useState<'idle' | 'success' | 'error'>('idle');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const inputIdPrefix = useId();
 
   useEffect(() => {
     setHasMounted(true);
   }, []);
 
+  useEffect(() => {
+    if (professionalSession.professionalId) {
+      setSelectedProfessionalId(professionalSession.professionalId);
+    }
+    if (professionalSession.phone) {
+      setLoginPhone(professionalSession.phone);
+      setRegisterPhone(professionalSession.phone);
+      setRecoveryPhone(professionalSession.phone);
+    }
+  }, [professionalSession.phone, professionalSession.professionalId]);
+
   const selectedProfessional =
-    demoProfessionals.find((professional) => professional.id === selectedProfessionalId) ||
-    demoProfessionals[0] ||
+    highlightedProfessionals.find((professional) => professional.id === selectedProfessionalId) ||
+    highlightedProfessionals[0] ||
     null;
   const selectedProfessionalTitle = selectedProfessional
     ? getLocalizedProfessionalTitle(
-        getProfessionalCategoryLabel(selectedProfessional) || selectedProfessional.title,
+        getProfessionalCategoryLabel({
+          categories: serviceCategories,
+          professional: selectedProfessional,
+          services: serviceTemplates,
+        }) || selectedProfessional.title,
         locale,
       )
     : activeProfessionalCategoryLabel || t('fallbackCategory');
-  const showProfessionalShortcut = hasMounted && isProfessional && !showAccountSwitcher;
+  const showProfessionalShortcut = hasMounted && isAuthenticated && !showAccountSwitcher;
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!loginPhone.trim()) {
       setErrorKey('loginPhoneRequired');
       return;
@@ -100,15 +132,27 @@ export const ProfessionalAccessScreen = ({ defaultTab = 'login' }: ProfessionalA
       return;
     }
 
-    setErrorKey(null);
-    startProfessionalLogin({
-      phone: loginPhone.trim(),
-      professionalId: selectedProfessionalId,
-    });
-    router.push(APP_ROUTES.professionalDashboard);
+    try {
+      setIsSubmitting(true);
+      setErrorKey(null);
+      await login({
+        password: loginPassword.trim(),
+        phone: loginPhone.trim(),
+        professionalId: selectedProfessionalId,
+      });
+      await startProfessionalLogin({
+        phone: loginPhone.trim(),
+        professionalId: selectedProfessionalId,
+      });
+      router.push(APP_ROUTES.professionalDashboard);
+    } catch {
+      setErrorKey('loginFailed');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (!registerName.trim()) {
       setErrorKey('registerNameRequired');
       return;
@@ -124,24 +168,60 @@ export const ProfessionalAccessScreen = ({ defaultTab = 'login' }: ProfessionalA
       return;
     }
 
-    setErrorKey(null);
-    startProfessionalRegistration({
-      city: registerCity.trim(),
-      credentialNumber: registerCredential.trim(),
-      displayName: registerName.trim(),
-      phone: registerPhone.trim(),
-      professionalId: selectedProfessionalId,
-    });
-    router.push(APP_ROUTES.professionalDashboard);
+    if (!registerPassword.trim()) {
+      setErrorKey('registerPasswordRequired');
+      return;
+    }
+
+    if (!/\d/.test(registerPassword) || !/[A-Z]/.test(registerPassword) || registerPassword.length < 8) {
+      setErrorKey('registerPasswordWeak');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      setErrorKey(null);
+      await register({
+        city: registerCity.trim(),
+        credentialNumber: registerCredential.trim(),
+        displayName: registerName.trim(),
+        password: registerPassword,
+        phone: registerPhone.trim(),
+        professionalId: selectedProfessionalId,
+      });
+      startProfessionalRegistration({
+        city: registerCity.trim(),
+        credentialNumber: registerCredential.trim(),
+        displayName: registerName.trim(),
+        phone: registerPhone.trim(),
+        professionalId: selectedProfessionalId,
+      });
+      router.push(APP_ROUTES.professionalDashboard);
+    } catch {
+      setErrorKey('registerFailed');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleRecovery = () => {
+  const handleRecovery = async () => {
     if (!recoveryPhone.trim()) {
       setRecoveryState('error');
       return;
     }
 
-    setRecoveryState('success');
+    try {
+      setIsSubmitting(true);
+      await requestPasswordRecovery({
+        phone: recoveryPhone.trim(),
+        professionalId: selectedProfessionalId,
+      });
+      setRecoveryState('success');
+    } catch {
+      setRecoveryState('error');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!hasMounted) {
@@ -178,7 +258,7 @@ export const ProfessionalAccessScreen = ({ defaultTab = 'login' }: ProfessionalA
                   {t('eyebrow')}
                 </span>
                 <span className="rounded-full bg-gray-100 px-3 py-1 text-[11px] font-semibold text-gray-500">
-                  {t('demoBadge')}
+                  {t('accessBadge')}
                 </span>
               </div>
               <h1 className="mt-3 text-[22px] font-bold leading-tight text-gray-900">{t('title')}</h1>
@@ -218,7 +298,10 @@ export const ProfessionalAccessScreen = ({ defaultTab = 'login' }: ProfessionalA
             <div className="mt-5 flex flex-col gap-3">
               <button
                 type="button"
-                onClick={() => router.push(APP_ROUTES.professionalDashboard)}
+                onClick={() => {
+                  continueAsProfessional();
+                  router.push(APP_ROUTES.professionalDashboard);
+                }}
                 className="flex w-full items-center justify-center gap-2 rounded-full py-4 text-[14px] font-bold text-white shadow-lg shadow-pink-500/20 transition-transform active:scale-[0.99]"
                 style={{ backgroundColor: APP_CONFIG.colors.primary }}
               >
@@ -227,7 +310,10 @@ export const ProfessionalAccessScreen = ({ defaultTab = 'login' }: ProfessionalA
               </button>
               <button
                 type="button"
-                onClick={() => router.push(APP_ROUTES.professionalProfile)}
+                onClick={() => {
+                  continueAsProfessional();
+                  router.push(APP_ROUTES.professionalProfile);
+                }}
                 className="flex w-full items-center justify-center gap-2 rounded-full bg-gray-100 py-4 text-[14px] font-bold text-gray-700 transition-colors hover:bg-gray-200"
               >
                 <UserRound className="h-4 w-4" />
@@ -235,7 +321,10 @@ export const ProfessionalAccessScreen = ({ defaultTab = 'login' }: ProfessionalA
               </button>
               <button
                 type="button"
-                onClick={() => setShowAccountSwitcher(true)}
+                onClick={async () => {
+                  await logout();
+                  setShowAccountSwitcher(true);
+                }}
                 className="text-left text-[13px] font-semibold text-gray-500 underline-offset-4 hover:text-gray-700 hover:underline"
               >
                 {t('actions.useAnotherAccount')}
@@ -256,10 +345,14 @@ export const ProfessionalAccessScreen = ({ defaultTab = 'login' }: ProfessionalA
               </div>
 
               <div className="mt-4 grid gap-3">
-                {demoProfessionals.map((professional) => {
+                {highlightedProfessionals.map((professional) => {
                   const isSelected = selectedProfessionalId === professional.id;
                   const professionalCardTitle = getLocalizedProfessionalTitle(
-                    getProfessionalCategoryLabel(professional) || professional.title,
+                    getProfessionalCategoryLabel({
+                      categories: serviceCategories,
+                      professional,
+                      services: serviceTemplates,
+                    }) || professional.title,
                     locale,
                   );
 
@@ -398,6 +491,7 @@ export const ProfessionalAccessScreen = ({ defaultTab = 'login' }: ProfessionalA
                         <button
                           type="button"
                           onClick={handleRecovery}
+                          disabled={isSubmitting}
                           className="flex w-full items-center justify-center gap-2 rounded-full bg-gray-100 py-4 text-[14px] font-bold text-gray-700 transition-colors hover:bg-gray-200"
                         >
                           {t('actions.sendResetLink')}
@@ -426,6 +520,7 @@ export const ProfessionalAccessScreen = ({ defaultTab = 'login' }: ProfessionalA
                   <button
                     type="button"
                     onClick={handleLogin}
+                    disabled={isSubmitting}
                     className="mt-2 flex w-full items-center justify-center gap-2 rounded-full py-4 text-[14px] font-bold text-white shadow-lg shadow-pink-500/20 transition-transform active:scale-[0.99]"
                     style={{ backgroundColor: APP_CONFIG.colors.primary }}
                   >
@@ -475,12 +570,23 @@ export const ProfessionalAccessScreen = ({ defaultTab = 'login' }: ProfessionalA
                       className={fieldClass}
                     />
                   </FormField>
+                  <FormField htmlFor={`${inputIdPrefix}-register-password`} label={t('fields.password')}>
+                    <input
+                      id={`${inputIdPrefix}-register-password`}
+                      type="password"
+                      value={registerPassword}
+                      onChange={(event) => setRegisterPassword(event.target.value)}
+                      placeholder={t('placeholders.password')}
+                      className={fieldClass}
+                    />
+                  </FormField>
                   <p className="rounded-[18px] bg-gray-50 px-4 py-3 text-[12px] leading-relaxed text-gray-500">
                     {t('registerHelper', { category: selectedProfessionalTitle })}
                   </p>
                   <button
                     type="button"
                     onClick={handleRegister}
+                    disabled={isSubmitting}
                     className="mt-2 flex w-full items-center justify-center gap-2 rounded-full py-4 text-[14px] font-bold text-white shadow-lg shadow-pink-500/20 transition-transform active:scale-[0.99]"
                     style={{ backgroundColor: APP_CONFIG.colors.primary }}
                   >

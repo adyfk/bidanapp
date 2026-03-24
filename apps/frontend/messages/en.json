@@ -38,7 +38,7 @@
   "CustomerAccess": {
     "navTitle": "Customer Access",
     "eyebrow": "Customer Access",
-    "demoBadge": "Frontend Demo",
+    "accessBadge": "Account Access",
     "alreadyCustomer": "You are already in customer mode. Continue to the page you need.",
     "tabs": {
       "login": "Sign In",
@@ -79,22 +79,26 @@
     },
     "placeholders": {
       "phone": "Example: +62 812 3456 7890",
-      "password": "Enter a demo password",
+      "password": "Enter your password",
       "fullName": "Your name",
       "city": "Example: Depok"
     },
     "errors": {
-      "loginPhoneRequired": "WhatsApp number is required for the login simulation.",
-      "loginPasswordRequired": "Password is required for the login simulation.",
-      "registerNameRequired": "Full name is required for the registration simulation.",
-      "registerPhoneRequired": "WhatsApp number is required for the registration simulation."
+      "loginPhoneRequired": "WhatsApp number is required to continue.",
+      "loginPasswordRequired": "Password is required to continue.",
+      "loginFailed": "Customer access could not be verified yet. Recheck the number and password, then try again.",
+      "registerNameRequired": "Full name is required to create your profile.",
+      "registerPhoneRequired": "WhatsApp number is required to create your profile.",
+      "registerPasswordRequired": "A password is required to create the customer account.",
+      "registerPasswordWeak": "The customer password must be at least 8 characters and include an uppercase letter and a number.",
+      "registerFailed": "The customer account could not be created right now. Please try again shortly."
     },
     "actions": {
       "login": "Sign in and continue",
       "register": "Register and continue",
       "continueVisitor": "Continue as visitor"
     },
-    "registerHelper": "This form is still a frontend-only simulation. After submitting, the app will switch to customer mode without backend auth.",
+    "registerHelper": "After your profile details are completed, the app will continue in customer mode for this session.",
     "visitorEyebrow": "Visitor mode",
     "visitorDescription": "Visitors can still explore services and professionals, but activity, booking, and customer profile are gated to this page.",
     "professional": {
@@ -142,6 +146,23 @@
       "openProfile": "Open profile",
       "leaveReview": "Leave review"
     },
+    "labels": {
+      "system": "System"
+    },
+    "items": {
+      "requestSubmittedTitle": "Your request has been submitted",
+      "requestSubmittedBody": "{professional} has received your request for {service} and the next update will appear in your activity feed.",
+      "paymentPendingTitle": "Payment is still pending",
+      "paymentPendingBody": "Complete the payment of {price} for {service} so the slot at {time} stays reserved.",
+      "scheduleConfirmedTitle": "Your appointment has been confirmed",
+      "scheduleConfirmedBody": "{professional} has confirmed {service}. Recheck the schedule details for {time} before the session starts.",
+      "sessionInProgressTitle": "There is a live update from your professional",
+      "sessionInProgressBody": "{professional} is currently handling {service}. Open the conversation to reply or confirm the latest details.",
+      "reviewReminderTitle": "Time to leave a review",
+      "reviewReminderBody": "{service} with {professional} has been completed. Leave a short review so your care history stays complete.",
+      "profileReminderTitle": "Complete your customer profile",
+      "profileReminderBody": "Add location context, favorite professionals, and family notes so future bookings feel more organized."
+    },
     "empty": {
       "title": "No notifications match this filter",
       "description": "Try switching back to all updates to review the latest schedule, payment, or professional message.",
@@ -151,10 +172,10 @@
   "ProfessionalAccess": {
     "navTitle": "Professional Access",
     "eyebrow": "Professional Access",
-    "demoBadge": "Frontend Demo",
+    "accessBadge": "Professional Portal",
     "title": "Enter the professional portal",
     "alreadyProfessional": "You are already in professional mode. Open the dashboard to continue.",
-    "loginHelper": "Use the demo WhatsApp number and password. If you forget the password, send a reset link to the same number.",
+    "loginHelper": "Use the WhatsApp number linked to your professional account. If you forget your password, request a reset link to the same number.",
     "connectedProfileLabel": "Connected public profile",
     "language": {
       "title": "Language",
@@ -164,8 +185,8 @@
       "login": "Sign In",
       "register": "Register"
     },
-    "profileSelectorLabel": "Choose a professional demo profile",
-    "profileSelectorHint": "This demo profile links the auth flow, dashboard, and public professional profile together.",
+    "profileSelectorLabel": "Choose your professional profile",
+    "profileSelectorHint": "This profile links portal access, the dashboard, and the connected public professional page.",
     "fields": {
       "phone": "WhatsApp number",
       "password": "Password",
@@ -175,17 +196,21 @@
     },
     "placeholders": {
       "phone": "Example: +62 812 3000 0000",
-      "password": "Enter a demo password",
+      "password": "Enter your password",
       "fullName": "Professional name",
       "city": "Example: South Tangerang",
       "credential": "Example: STR-001-2026"
     },
     "errors": {
-      "loginPhoneRequired": "WhatsApp number is required for the professional login simulation.",
-      "loginPasswordRequired": "Password is required for the professional login simulation.",
-      "registerNameRequired": "Full name is required for the professional registration simulation.",
-      "registerPhoneRequired": "WhatsApp number is required for the professional registration simulation.",
-      "registerCredentialRequired": "STR / license number is required for the professional registration simulation."
+      "loginPhoneRequired": "WhatsApp number is required to continue.",
+      "loginPasswordRequired": "Password is required to continue.",
+      "loginFailed": "Professional access could not be verified yet. Recheck the number, password, and selected profile, then try again.",
+      "registerNameRequired": "Full name is required to create your professional profile.",
+      "registerPhoneRequired": "WhatsApp number is required to create your professional profile.",
+      "registerCredentialRequired": "STR / license number is required to create your professional profile.",
+      "registerPasswordRequired": "A password is required to create the professional account.",
+      "registerPasswordWeak": "The professional password must be at least 8 characters and include an uppercase letter and a number.",
+      "registerFailed": "The professional account could not be created right now. Please try again shortly."
     },
     "actions": {
       "openDashboard": "Open dashboard",
@@ -200,9 +225,9 @@
     },
     "forgotPassword": {
       "title": "Reset professional password",
-      "description": "This is a frontend simulation. Enter the professional WhatsApp number to receive a password reset link and continue the login flow.",
+      "description": "Enter the professional WhatsApp number linked to the account to request a password reset link.",
       "phoneLabel": "WhatsApp number for reset",
-      "success": "A demo password reset link was sent to that WhatsApp number.",
+      "success": "A password reset link was sent to that WhatsApp number.",
       "error": "Enter a WhatsApp number before sending the reset link."
     },
     "registerHelper": "After registering, you will go straight to the professional profile to start managing the portal. The connected public profile focus is: {category}.",
@@ -343,8 +368,8 @@
           "description": "The professional profile is already visible in the public catalog."
         }
       },
-      "demoRevisionSuccess": "Demo review moved the profile to revision requested.",
-      "demoVerifySuccess": "Demo review moved the profile to verified.",
+      "reviewRevisionSuccess": "Review moved the profile to revision requested.",
+      "reviewVerifySuccess": "Review moved the profile to verified.",
       "publishSuccess": "Profile was published to the catalog.",
       "submitSuccess": "Profile was submitted for admin review.",
       "validationNotice": "Complete all blocking onboarding items before submitting to admin."
@@ -585,9 +610,9 @@
       "galleryDeleteButton": "Delete asset",
       "featuredAsset": "Featured asset",
       "addSuccess": "A new portfolio draft was added.",
-      "deleteSuccess": "Portfolio was removed from the simulation.",
+      "deleteSuccess": "Portfolio was removed.",
       "galleryAddSuccess": "A new gallery asset was added.",
-      "galleryDeleteSuccess": "Gallery asset was removed from the simulation.",
+      "galleryDeleteSuccess": "Gallery asset was removed.",
       "gallerySaveSuccess": "Gallery asset was updated.",
       "saveSuccess": "Portfolio was updated."
     },
@@ -727,18 +752,19 @@
       "errors": {
         "displayNameRequired": "Professional name is required.",
         "phoneRequired": "WhatsApp number is required.",
-        "credentialRequired": "License number is required."
+        "credentialRequired": "License number is required.",
+        "saveFailed": "The profile update could not be saved to the backend. Please try again."
       }
     },
     "security": {
       "title": "Account security",
-      "description": "Manage the professional demo password and keep a reset path ready whenever the password is forgotten.",
+      "description": "Manage the professional password and keep a reset path ready whenever the password is forgotten.",
       "saveButton": "Save new password",
-      "success": "The demo professional password was updated.",
+      "success": "The professional password was updated.",
       "resetTitle": "Forgot password?",
       "resetDescription": "Send a reset link to the professional WhatsApp number so access can be restored without changing profile data.",
       "resetButton": "Send password reset",
-      "resetSuccess": "The demo password reset link was sent.",
+      "resetSuccess": "The password reset link was sent.",
       "fields": {
         "currentPassword": "Current password",
         "newPassword": "New password",
@@ -757,9 +783,12 @@
       },
       "errors": {
         "currentRequired": "Enter the current password first.",
+        "currentPasswordInvalid": "The current password does not match this professional account.",
         "newPasswordWeak": "The new password does not meet the minimum security rules.",
         "confirmMismatch": "The password confirmation does not match the new password.",
-        "resetPhoneRequired": "Enter the WhatsApp number for the reset flow first."
+        "saveFailed": "The password update could not be saved. Please try again.",
+        "resetPhoneRequired": "Enter the WhatsApp number for the reset flow first.",
+        "resetFailed": "The password reset request could not be sent. Please try again."
       }
     },
     "support": {
@@ -1049,8 +1078,8 @@
     "locationUnavailable": "Location is currently unavailable from this device.",
     "locationTimeout": "Location detection timed out.",
     "locationFetchFailed": "Failed to detect the current location.",
-    "locationResolveFailed": "Failed to map coordinates to mock location details.",
-    "locationDummyHint": "Location detail is currently mocked in the frontend. It can be replaced by a reverse geocoding API later without changing the UI.",
+    "locationResolveFailed": "Failed to map coordinates to derived location details.",
+    "locationModelHint": "Location detail is currently derived from the backend area model and stays aligned with the active service area.",
     "categorySection": "Category",
     "availabilitySection": "Availability",
     "genderPreference": "Gender Preference",
@@ -1125,24 +1154,17 @@
     },
     "accountSheet": {
       "title": "Account Details",
-      "description": "Complete your identity, care focus, and family contact so follow-up stays aligned.",
+      "description": "Keep your identity and home city up to date so bookings and follow-up stay aligned.",
       "identityTitle": "Primary info",
       "nameLabel": "Full name",
       "phoneLabel": "WhatsApp number",
-      "focusLabel": "Care focus",
-      "focusPlaceholder": "Example: home care, family education, routine follow-up",
-      "supportTitle": "Family support contact",
-      "supportDescription": "Add the one contact who is most relevant when care coordination is needed.",
-      "supportNameLabel": "Support contact name",
-      "supportRelationLabel": "Relationship",
-      "supportPhoneLabel": "Support contact number",
-      "supportPlaceholder": "Partner / parent / caregiver",
+      "cityLabel": "Home city",
       "save": "Save details",
       "success": "Profile details updated successfully.",
       "errors": {
         "nameRequired": "Full name is required.",
         "phoneRequired": "WhatsApp number is required.",
-        "supportContactIncomplete": "Complete the family support name, relationship, and phone number."
+        "saveFailed": "The profile update could not be saved to the backend. Please try again."
       }
     },
     "securitySheet": {
@@ -1162,7 +1184,8 @@
       "errors": {
         "currentRequired": "Enter your current password first.",
         "newPasswordWeak": "The new password does not meet the security rules.",
-        "confirmMismatch": "The password confirmation does not match."
+        "confirmMismatch": "The password confirmation does not match.",
+        "saveFailed": "The password update could not be saved. Please try again."
       }
     },
     "support": {
@@ -1346,8 +1369,8 @@
     },
     "alerts": {
       "chatAutoReply": "Okay, I received your message.",
-      "paymentSuccess": "Payment simulation successful",
-      "chatSent": "Message sent in demo mode",
+      "paymentSuccess": "Payment completed successfully",
+      "chatSent": "Message sent",
       "chatUnavailable": "Chat is only available for active activities.",
       "appointmentCancelled": {
         "none": "Appointment cancelled.",
@@ -1478,36 +1501,8 @@
       "reviewLabel": "Tell us about your experience",
       "reviewPlaceholder": "The service was very friendly and professional...",
       "submitLabel": "Submit Review",
-      "uploadAlert": "Photo upload simulation",
+      "uploadAlert": "Photo upload is not available yet",
       "successAlert": "Review submitted successfully. Thank you for your feedback."
     }
-  },
-  "Integration": {
-    "eyebrow": "Backend Integration",
-    "title": "Backend Contract + Realtime Example",
-    "description": "This page demonstrates REST access through the shared SDK generated from the backend OpenAPI document, plus realtime chat over WebSocket.",
-    "restSection": "REST Contract",
-    "health": "Health",
-    "frontendVersion": "Frontend Version",
-    "professionals": "Professionals",
-    "threads": "Chat Threads",
-    "openapiLink": "OpenAPI from backend",
-    "refresh": "Refresh",
-    "restError": "Failed to load backend data. Make sure the backend is running on localhost:8080.",
-    "socketSection": "Realtime Chat",
-    "socketUrl": "WebSocket URL",
-    "emptyMessages": "No live messages yet. Send one message to verify the websocket flow.",
-    "messagePlaceholder": "Send a live message to the backend demo thread...",
-    "socketError": "WebSocket connection failed. Verify the backend websocket endpoint and allowed origin.",
-    "socketState": {
-      "idle": "Idle",
-      "connecting": "Connecting",
-      "connected": "Connected",
-      "error": "Error"
-    },
-    "notesSection": "Architecture Notes",
-    "noteContract": "The OpenAPI document is exported from backend route registration, not hand-maintained in frontend.",
-    "noteSdk": "Frontend integration uses the shared SDK package so fetch usage stays typed at development time.",
-    "noteWebsocket": "Realtime chat is intentionally separated from OpenAPI because websocket transport needs its own event contract."
   }
 }

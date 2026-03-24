@@ -11,8 +11,8 @@ import {
 } from '@/components/ui/tokens';
 import type { ServiceProviderSummary } from '@/features/service-detail/hooks/useServiceDetail';
 import { useRouter } from '@/i18n/routing';
+import { getEnabledServiceModes } from '@/lib/catalog-selectors';
 import { APP_CONFIG } from '@/lib/config';
-import { getEnabledServiceModes } from '@/lib/mock-db/catalog';
 import { professionalRoute } from '@/lib/routes';
 import { useUiText } from '@/lib/ui-text';
 

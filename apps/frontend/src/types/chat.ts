@@ -1,7 +1,7 @@
 export type ChatSender = 'user' | 'professional';
 
 export interface ChatMessage {
-  id: number;
+  id: number | string;
   text: string;
   sender: ChatSender;
   time: string;

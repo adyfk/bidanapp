@@ -76,6 +76,7 @@ export interface SupportDeskSnapshot {
 export interface AdminSessionState {
   adminId: string;
   email: string;
+  expiresAt?: string;
   focusArea: AdminFocusArea;
   isAuthenticated: boolean;
   lastLoginAt?: string;

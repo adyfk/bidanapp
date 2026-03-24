@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/url"
@@ -13,10 +14,18 @@ import (
 )
 
 const (
-	defaultAppName        = "bidanapp-backend"
-	defaultAppVersion     = "dev"
-	defaultEnvironment    = "development"
-	defaultFrontendOrigin = "http://localhost:3000"
+	defaultAppName             = "bidanapp-backend"
+	defaultAppVersion          = "dev"
+	defaultEnvironment         = "development"
+	defaultFrontendOrigin      = "http://localhost:3000"
+	defaultAuthCookiePath      = "/api/v1"
+	defaultAuthCookieSameSite  = "lax"
+	defaultAuthRateLimitWindow = 5 * time.Minute
+	defaultAuthRateLimitMax    = 10
+	defaultAdminAuthTTL        = 24 * time.Hour
+	defaultCustomerAuthTTL     = 24 * time.Hour
+	defaultProfessionalAuthTTL = 24 * time.Hour
+	defaultAdminPassword       = "$2a$12$VUpiMPsu6djn6JDj.a0a8OACtyvGtGninz4/ZwTsPGGQOK0CL./1C"
 )
 
 func Load() (Config, error) {
@@ -34,9 +43,12 @@ func loadFromAppRoot(appRoot string) (Config, error) {
 	}
 
 	environment := envOrDefault("APP_ENV", defaultEnvironment)
-	mockDBDataDir, err := resolveDir(appRoot, envOrDefault("MOCK_DB_DIR", filepath.Join(appRoot, "../frontend/src/data/mock-db")))
+	seedDataDir, err := resolveDir(
+		appRoot,
+		envOrDefault("SEED_DATA_DIR", filepath.Join(appRoot, "seeddata")),
+	)
 	if err != nil {
-		return Config{}, fmt.Errorf("resolve mock db dir: %w", err)
+		return Config{}, fmt.Errorf("resolve seed data dir: %w", err)
 	}
 
 	httpPort, err := envIntOrDefault("HTTP_PORT", 8080)
@@ -75,6 +87,38 @@ func loadFromAppRoot(appRoot string) (Config, error) {
 	}
 
 	allowedOrigins := envCSVOrDefault("CORS_ALLOWED_ORIGINS", []string{envOrDefault("FRONTEND_ORIGIN", defaultFrontendOrigin)})
+	authCookieDomain := envOrDefault("AUTH_COOKIE_DOMAIN", "")
+	authCookiePath := envOrDefault("AUTH_COOKIE_PATH", defaultAuthCookiePath)
+	authCookieSameSite := strings.ToLower(envOrDefault("AUTH_COOKIE_SAME_SITE", defaultAuthCookieSameSite))
+	authCookieSecure, err := envBoolOrDefault("AUTH_COOKIE_SECURE", defaultAuthCookieSecure(environment))
+	if err != nil {
+		return Config{}, err
+	}
+	authRateLimitWindow, err := envDurationOrDefault("AUTH_RATE_LIMIT_WINDOW", defaultAuthRateLimitWindow)
+	if err != nil {
+		return Config{}, err
+	}
+	authRateLimitMaxAttempts, err := envIntOrDefault("AUTH_RATE_LIMIT_MAX_ATTEMPTS", defaultAuthRateLimitMax)
+	if err != nil {
+		return Config{}, err
+	}
+	adminSessionTTL, err := envDurationOrDefault("ADMIN_AUTH_SESSION_TTL", defaultAdminAuthTTL)
+	if err != nil {
+		return Config{}, err
+	}
+	customerSessionTTL, err := envDurationOrDefault("CUSTOMER_AUTH_SESSION_TTL", defaultCustomerAuthTTL)
+	if err != nil {
+		return Config{}, err
+	}
+	professionalSessionTTL, err := envDurationOrDefault("PROFESSIONAL_AUTH_SESSION_TTL", defaultProfessionalAuthTTL)
+	if err != nil {
+		return Config{}, err
+	}
+
+	adminCredentials, err := loadAdminCredentials(environment)
+	if err != nil {
+		return Config{}, err
+	}
 
 	cfg := Config{
 		App: AppConfig{
@@ -95,11 +139,46 @@ func loadFromAppRoot(appRoot string) (Config, error) {
 		CORS: CORSConfig{
 			AllowedOrigins: allowedOrigins,
 		},
-		MockDB: MockDBConfig{
-			DataDir: mockDBDataDir,
+		SeedData: SeedDataConfig{
+			DataDir: seedDataDir,
 		},
 		Database: DatabaseConfig{
 			URL: envOrDefault("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/bidanapp?sslmode=disable"),
+		},
+		AuthRateLimit: AuthRateLimitConfig{
+			MaxAttempts: authRateLimitMaxAttempts,
+			Window:      authRateLimitWindow,
+		},
+		AdminAuth: AdminAuthConfig{
+			Credentials: adminCredentials,
+			Cookie: SessionCookieConfig{
+				Domain:   authCookieDomain,
+				Name:     envOrDefault("ADMIN_AUTH_COOKIE_NAME", "bidanapp_admin_session"),
+				Path:     authCookiePath,
+				SameSite: authCookieSameSite,
+				Secure:   authCookieSecure,
+			},
+			SessionTTL: adminSessionTTL,
+		},
+		CustomerAuth: CustomerAuthConfig{
+			Cookie: SessionCookieConfig{
+				Domain:   authCookieDomain,
+				Name:     envOrDefault("CUSTOMER_AUTH_COOKIE_NAME", "bidanapp_customer_session"),
+				Path:     authCookiePath,
+				SameSite: authCookieSameSite,
+				Secure:   authCookieSecure,
+			},
+			SessionTTL: customerSessionTTL,
+		},
+		ProfessionalAuth: ProfessionalAuthConfig{
+			Cookie: SessionCookieConfig{
+				Domain:   authCookieDomain,
+				Name:     envOrDefault("PROFESSIONAL_AUTH_COOKIE_NAME", "bidanapp_professional_session"),
+				Path:     authCookiePath,
+				SameSite: authCookieSameSite,
+				Secure:   authCookieSecure,
+			},
+			SessionTTL: professionalSessionTTL,
 		},
 		Redis: RedisConfig{
 			URL: envOrDefault("REDIS_URL", "redis://localhost:6379"),
@@ -169,6 +248,11 @@ func (c *Config) validate() error {
 	}
 
 	for index, origin := range c.CORS.AllowedOrigins {
+		if origin == "*" {
+			issues = append(issues, "CORS_ALLOWED_ORIGINS must not contain * when cookie-authenticated sessions are enabled")
+			continue
+		}
+
 		normalized, err := normalizeOrigin(origin)
 		if err != nil {
 			issues = append(issues, fmt.Sprintf("CORS_ALLOWED_ORIGINS[%d] %v", index, err))
@@ -176,16 +260,78 @@ func (c *Config) validate() error {
 		}
 
 		c.CORS.AllowedOrigins[index] = normalized
+		if isProductionLike(c.App.Environment) && !strings.HasPrefix(normalized, "https://") {
+			issues = append(issues, fmt.Sprintf("CORS_ALLOWED_ORIGINS[%d] must use https in %s (got %q)", index, c.App.Environment, normalized))
+		}
 	}
 
-	if info, err := os.Stat(c.MockDB.DataDir); err != nil {
-		issues = append(issues, fmt.Sprintf("MOCK_DB_DIR must point to an existing directory (got %q)", c.MockDB.DataDir))
+	if info, err := os.Stat(c.SeedData.DataDir); err != nil {
+		issues = append(issues, fmt.Sprintf("SEED_DATA_DIR must point to an existing directory (got %q)", c.SeedData.DataDir))
 	} else if !info.IsDir() {
-		issues = append(issues, fmt.Sprintf("MOCK_DB_DIR must be a directory (got %q)", c.MockDB.DataDir))
+		issues = append(issues, fmt.Sprintf("SEED_DATA_DIR must be a directory (got %q)", c.SeedData.DataDir))
 	}
 
 	if err := validateURL("DATABASE_URL", c.Database.URL); err != nil {
 		issues = append(issues, err.Error())
+	}
+
+	if c.AdminAuth.SessionTTL <= 0 {
+		issues = append(issues, "ADMIN_AUTH_SESSION_TTL must be greater than 0")
+	}
+	if c.CustomerAuth.SessionTTL <= 0 {
+		issues = append(issues, "CUSTOMER_AUTH_SESSION_TTL must be greater than 0")
+	}
+	if c.ProfessionalAuth.SessionTTL <= 0 {
+		issues = append(issues, "PROFESSIONAL_AUTH_SESSION_TTL must be greater than 0")
+	}
+	if c.AuthRateLimit.Window <= 0 {
+		issues = append(issues, "AUTH_RATE_LIMIT_WINDOW must be greater than 0")
+	}
+	if c.AuthRateLimit.MaxAttempts <= 0 {
+		issues = append(issues, "AUTH_RATE_LIMIT_MAX_ATTEMPTS must be greater than 0")
+	}
+	issues = append(issues, validateSessionCookieConfig("ADMIN_AUTH", c.AdminAuth.Cookie, c.App.Environment)...)
+	issues = append(issues, validateSessionCookieConfig("CUSTOMER_AUTH", c.CustomerAuth.Cookie, c.App.Environment)...)
+	issues = append(issues, validateSessionCookieConfig("PROFESSIONAL_AUTH", c.ProfessionalAuth.Cookie, c.App.Environment)...)
+
+	if len(c.AdminAuth.Credentials) == 0 {
+		issues = append(issues, "ADMIN_CONSOLE_CREDENTIALS_JSON must contain at least one credential")
+	}
+
+	seenAdminIDs := map[string]struct{}{}
+	seenEmails := map[string]struct{}{}
+	for index, credential := range c.AdminAuth.Credentials {
+		credential.AdminID = strings.TrimSpace(credential.AdminID)
+		credential.Email = strings.ToLower(strings.TrimSpace(credential.Email))
+		credential.PasswordHash = strings.TrimSpace(credential.PasswordHash)
+		credential.FocusArea = strings.TrimSpace(credential.FocusArea)
+		c.AdminAuth.Credentials[index] = credential
+
+		if credential.AdminID == "" {
+			issues = append(issues, fmt.Sprintf("ADMIN_CONSOLE_CREDENTIALS_JSON[%d].adminId must not be empty", index))
+		} else if _, exists := seenAdminIDs[credential.AdminID]; exists {
+			issues = append(issues, fmt.Sprintf("ADMIN_CONSOLE_CREDENTIALS_JSON[%d].adminId must be unique (got %q)", index, credential.AdminID))
+		} else {
+			seenAdminIDs[credential.AdminID] = struct{}{}
+		}
+
+		if credential.Email == "" {
+			issues = append(issues, fmt.Sprintf("ADMIN_CONSOLE_CREDENTIALS_JSON[%d].email must not be empty", index))
+		} else if _, exists := seenEmails[credential.Email]; exists {
+			issues = append(issues, fmt.Sprintf("ADMIN_CONSOLE_CREDENTIALS_JSON[%d].email must be unique (got %q)", index, credential.Email))
+		} else {
+			seenEmails[credential.Email] = struct{}{}
+		}
+
+		if credential.PasswordHash == "" {
+			issues = append(issues, fmt.Sprintf("ADMIN_CONSOLE_CREDENTIALS_JSON[%d].passwordHash must not be empty", index))
+		} else if (c.App.Environment == "production" || c.App.Environment == "staging") && credential.PasswordHash == defaultAdminPassword {
+			issues = append(issues, fmt.Sprintf("ADMIN_CONSOLE_CREDENTIALS_JSON[%d].passwordHash must not use the development default in %s", index, c.App.Environment))
+		}
+
+		if !oneOf(credential.FocusArea, "catalog", "ops", "reviews", "support") {
+			issues = append(issues, fmt.Sprintf("ADMIN_CONSOLE_CREDENTIALS_JSON[%d].focusArea must be one of catalog, ops, reviews, support (got %q)", index, credential.FocusArea))
+		}
 	}
 
 	if err := validateURL("REDIS_URL", c.Redis.URL); err != nil {
@@ -299,6 +445,20 @@ func envDurationOrDefault(key string, fallback time.Duration) (time.Duration, er
 	return parsed, nil
 }
 
+func envBoolOrDefault(key string, fallback bool) (bool, error) {
+	value := strings.TrimSpace(os.Getenv(key))
+	if value == "" {
+		return fallback, nil
+	}
+
+	parsed, err := strconv.ParseBool(value)
+	if err != nil {
+		return false, fmt.Errorf("%s must be a valid boolean: %w", key, err)
+	}
+
+	return parsed, nil
+}
+
 func envCSVOrDefault(key string, fallback []string) []string {
 	value := strings.TrimSpace(os.Getenv(key))
 	if value == "" {
@@ -321,6 +481,83 @@ func envCSVOrDefault(key string, fallback []string) []string {
 	}
 
 	return items
+}
+
+func defaultAuthCookieSecure(environment string) bool {
+	return environment == "production" || environment == "staging"
+}
+
+func validateSessionCookieConfig(prefix string, cfg SessionCookieConfig, environment string) []string {
+	var issues []string
+
+	if strings.TrimSpace(cfg.Name) == "" {
+		issues = append(issues, fmt.Sprintf("%s cookie name must not be empty", prefix))
+	}
+
+	if strings.TrimSpace(cfg.Path) == "" || !strings.HasPrefix(cfg.Path, "/") {
+		issues = append(issues, fmt.Sprintf("%s cookie path must start with / (got %q)", prefix, cfg.Path))
+	}
+
+	if !oneOf(strings.ToLower(cfg.SameSite), "lax", "strict", "none") {
+		issues = append(issues, fmt.Sprintf("%s cookie same-site must be one of lax, strict, none (got %q)", prefix, cfg.SameSite))
+	}
+
+	if strings.EqualFold(cfg.SameSite, "none") && !cfg.Secure {
+		issues = append(issues, fmt.Sprintf("%s cookie secure must be true when same-site is none", prefix))
+	}
+
+	if isProductionLike(environment) && !cfg.Secure {
+		issues = append(issues, fmt.Sprintf("%s cookie secure must be true in %s", prefix, environment))
+	}
+
+	return issues
+}
+
+func loadAdminCredentials(environment string) ([]AdminCredentialConfig, error) {
+	rawValue := strings.TrimSpace(os.Getenv("ADMIN_CONSOLE_CREDENTIALS_JSON"))
+	if rawValue == "" {
+		if environment != "development" && environment != "test" {
+			return nil, nil
+		}
+
+		return defaultAdminCredentials(), nil
+	}
+
+	var credentials []AdminCredentialConfig
+	if err := json.Unmarshal([]byte(rawValue), &credentials); err != nil {
+		return nil, fmt.Errorf("ADMIN_CONSOLE_CREDENTIALS_JSON must be valid JSON: %w", err)
+	}
+
+	return credentials, nil
+}
+
+func defaultAdminCredentials() []AdminCredentialConfig {
+	return []AdminCredentialConfig{
+		{
+			AdminID:      "adm-01",
+			Email:        "naya@ops.bidanapp.id",
+			PasswordHash: defaultAdminPassword,
+			FocusArea:    "support",
+		},
+		{
+			AdminID:      "adm-02",
+			Email:        "rani@ops.bidanapp.id",
+			PasswordHash: defaultAdminPassword,
+			FocusArea:    "reviews",
+		},
+		{
+			AdminID:      "adm-03",
+			Email:        "dimas@ops.bidanapp.id",
+			PasswordHash: defaultAdminPassword,
+			FocusArea:    "ops",
+		},
+		{
+			AdminID:      "adm-04",
+			Email:        "vina@ops.bidanapp.id",
+			PasswordHash: defaultAdminPassword,
+			FocusArea:    "catalog",
+		},
+	}
 }
 
 func defaultLogLevel(environment string) string {
@@ -357,4 +594,8 @@ func oneOf(value string, expected ...string) bool {
 	}
 
 	return false
+}
+
+func isProductionLike(environment string) bool {
+	return environment == "production" || environment == "staging"
 }

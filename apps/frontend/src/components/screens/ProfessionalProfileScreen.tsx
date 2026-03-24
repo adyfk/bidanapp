@@ -13,6 +13,7 @@ import type {
   ProfessionalProfileSaveState,
   ProfessionalProfileSheetKey,
   ProfessionalSecurityErrorKey,
+  ProfessionalSecurityResetErrorKey,
 } from '@/features/profile/components/ProfessionalProfileSettingsSheet';
 import { ProfessionalProfileSettingsSheet } from '@/features/profile/components/ProfessionalProfileSettingsSheet';
 import {
@@ -26,8 +27,8 @@ import {
 import { ProfileSupportEntryCard, ProfileSupportSheet } from '@/features/profile/components/ProfileSupportCenter';
 import { useRouter } from '@/i18n/routing';
 import { APP_ROUTES, professionalDashboardRoute, professionalRoute } from '@/lib/routes';
+import { useProfessionalAuthSession } from '@/lib/use-professional-auth-session';
 import { useProfessionalPortal } from '@/lib/use-professional-portal';
-import { useViewerSession } from '@/lib/use-viewer-session';
 
 const buildProfileDraft = ({
   city,
@@ -58,7 +59,15 @@ const sanitizePhone = (value: string) => value.replace(/[^\d+\s()-]/g, '');
 export const ProfessionalProfileScreen = () => {
   const router = useRouter();
   const t = useTranslations('ProfessionalProfile');
-  const { continueAsVisitor, isProfessional } = useViewerSession();
+  const {
+    hasHydrated,
+    isAuthenticated,
+    logout,
+    requestPasswordRecovery,
+    session: professionalSession,
+    updateAccount,
+    updatePassword,
+  } = useProfessionalAuthSession();
   const { activeProfessional, portalState, profileCompletionScore, saveBusinessSettings } = useProfessionalPortal();
   const [hasMounted, setHasMounted] = useState(false);
   const [activeSheet, setActiveSheet] = useState<ProfessionalProfileSheetKey>(null);
@@ -81,6 +90,7 @@ export const ProfessionalProfileScreen = () => {
   const [resetSaveState, setResetSaveState] = useState<ProfessionalProfileSaveState>('idle');
   const [profileErrorKey, setProfileErrorKey] = useState<ProfessionalProfileErrorKey>(null);
   const [securityErrorKey, setSecurityErrorKey] = useState<ProfessionalSecurityErrorKey>(null);
+  const [resetErrorKey, setResetErrorKey] = useState<ProfessionalSecurityResetErrorKey>(null);
 
   useEffect(() => {
     setHasMounted(true);
@@ -99,9 +109,10 @@ export const ProfessionalProfileScreen = () => {
     );
     setPasswordDraft((currentDraft) => ({
       ...currentDraft,
-      resetPhone: currentDraft.resetPhone || portalState.phone,
+      resetPhone: currentDraft.resetPhone || professionalSession.phone || portalState.phone,
     }));
   }, [
+    professionalSession.phone,
     portalState.city,
     portalState.credentialNumber,
     portalState.displayName,
@@ -110,11 +121,11 @@ export const ProfessionalProfileScreen = () => {
     portalState.responseTimeGoal,
   ]);
 
-  if (!hasMounted) {
+  if (!hasMounted || !hasHydrated) {
     return <ProfessionalPageSkeleton />;
   }
 
-  if (!isProfessional || !activeProfessional) {
+  if (!isAuthenticated || !activeProfessional) {
     return <ProfessionalAccessScreen defaultTab="login" />;
   }
 
@@ -152,6 +163,7 @@ export const ProfessionalProfileScreen = () => {
   ) => {
     if (field === 'resetPhone') {
       setResetSaveState('idle');
+      setResetErrorKey(null);
     } else {
       setSecuritySaveState('idle');
       setSecurityErrorKey(null);
@@ -163,7 +175,7 @@ export const ProfessionalProfileScreen = () => {
     }));
   };
 
-  const handleSaveProfile = () => {
+  const handleSaveProfile = async () => {
     if (!hasValue(profileDraft.displayName)) {
       setProfileSaveState('error');
       setProfileErrorKey('displayNameRequired');
@@ -182,19 +194,30 @@ export const ProfessionalProfileScreen = () => {
       return;
     }
 
-    saveBusinessSettings({
-      city: profileDraft.city.trim(),
-      credentialNumber: profileDraft.credentialNumber.trim(),
-      displayName: profileDraft.displayName.trim(),
-      phone: profileDraft.phone.trim(),
-      publicBio: profileDraft.publicBio.trim(),
-      responseTimeGoal: profileDraft.responseTimeGoal.trim(),
-    });
-    setProfileSaveState('success');
-    setProfileErrorKey(null);
+    try {
+      saveBusinessSettings({
+        city: profileDraft.city.trim(),
+        credentialNumber: profileDraft.credentialNumber.trim(),
+        displayName: profileDraft.displayName.trim(),
+        phone: profileDraft.phone.trim(),
+        publicBio: profileDraft.publicBio.trim(),
+        responseTimeGoal: profileDraft.responseTimeGoal.trim(),
+      });
+      await updateAccount({
+        city: profileDraft.city.trim(),
+        credentialNumber: profileDraft.credentialNumber.trim(),
+        displayName: profileDraft.displayName.trim(),
+        phone: profileDraft.phone.trim(),
+      });
+      setProfileSaveState('success');
+      setProfileErrorKey(null);
+    } catch {
+      setProfileSaveState('error');
+      setProfileErrorKey('saveFailed');
+    }
   };
 
-  const handleSavePassword = () => {
+  const handleSavePassword = async () => {
     if (!hasValue(passwordDraft.currentPassword)) {
       setSecuritySaveState('error');
       setSecurityErrorKey('currentRequired');
@@ -213,23 +236,43 @@ export const ProfessionalProfileScreen = () => {
       return;
     }
 
-    setSecuritySaveState('success');
-    setSecurityErrorKey(null);
-    setPasswordDraft((currentDraft) => ({
-      ...currentDraft,
-      confirmPassword: '',
-      currentPassword: '',
-      newPassword: '',
-    }));
+    try {
+      await updatePassword({
+        currentPassword: passwordDraft.currentPassword,
+        newPassword: passwordDraft.newPassword,
+      });
+      setSecuritySaveState('success');
+      setSecurityErrorKey(null);
+      setPasswordDraft((currentDraft) => ({
+        ...currentDraft,
+        confirmPassword: '',
+        currentPassword: '',
+        newPassword: '',
+      }));
+    } catch {
+      setSecuritySaveState('error');
+      setSecurityErrorKey('saveFailed');
+    }
   };
 
-  const handleSendReset = () => {
+  const handleSendReset = async () => {
     if (!hasValue(passwordDraft.resetPhone)) {
       setResetSaveState('error');
+      setResetErrorKey('resetPhoneRequired');
       return;
     }
 
-    setResetSaveState('success');
+    try {
+      await requestPasswordRecovery({
+        phone: passwordDraft.resetPhone.trim(),
+        professionalId: professionalSession.professionalId,
+      });
+      setResetSaveState('success');
+      setResetErrorKey(null);
+    } catch {
+      setResetSaveState('error');
+      setResetErrorKey('resetFailed');
+    }
   };
 
   return (
@@ -301,8 +344,8 @@ export const ProfessionalProfileScreen = () => {
           <ProfileLogoutButton
             icon={<LogOut className="h-5 w-5" />}
             label={t('actions.logout')}
-            onClick={() => {
-              continueAsVisitor();
+            onClick={async () => {
+              await logout();
               router.push(APP_ROUTES.home);
             }}
           />
@@ -323,6 +366,7 @@ export const ProfessionalProfileScreen = () => {
         profileDraft={profileDraft}
         profileErrorKey={profileErrorKey}
         profileSaveState={profileSaveState}
+        resetErrorKey={resetErrorKey}
         resetSaveState={resetSaveState}
         securityErrorKey={securityErrorKey}
         securitySaveState={securitySaveState}

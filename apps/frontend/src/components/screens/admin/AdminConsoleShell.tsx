@@ -133,7 +133,7 @@ export const AdminConsoleShell = ({ children }: AdminConsoleShellProps) => {
   const commandInputRef = useRef<HTMLInputElement>(null);
   const [commandQuery, setCommandQuery] = useState('');
   const [isCommandOpen, setIsCommandOpen] = useState(false);
-  const { activeAdmin, adminStaff, logout, session, switchAdminPersona } = useAdminSession();
+  const { activeAdmin, logout, session } = useAdminSession();
   const { appointments, consumers, modifiedTableNames, professionals, services, snapshotSavedAt } =
     useAdminConsoleData();
   const { savedAt: supportSavedAt, tickets } = useSupportDesk();
@@ -175,10 +175,10 @@ export const AdminConsoleShell = ({ children }: AdminConsoleShellProps) => {
     {
       description:
         modifiedTableCount > 0
-          ? 'Ada perubahan lokal yang belum di-reset. Audit table mock sebelum berganti skenario.'
-          : 'Seed masih bersih. Gunakan studio untuk import, export, atau reset dataset mock admin.',
-      href: modifiedTableCount > 0 ? ADMIN_ROUTES.mock : ADMIN_ROUTES.appointments,
-      label: modifiedTableCount > 0 ? 'Mock Changes' : 'Appointment Ops',
+          ? 'Ada perubahan lokal yang belum di-reset. Audit tabel operasional sebelum berganti skenario.'
+          : 'Seed masih bersih. Gunakan studio untuk import, export, atau reset dataset admin.',
+      href: modifiedTableCount > 0 ? ADMIN_ROUTES.studio : ADMIN_ROUTES.appointments,
+      label: modifiedTableCount > 0 ? 'Data Changes' : 'Appointment Ops',
       tone: 'amber' as const,
       value: modifiedTableCount > 0 ? `${modifiedTableCount} tabel` : `${appointments.length} booking`,
     },
@@ -235,7 +235,7 @@ export const AdminConsoleShell = ({ children }: AdminConsoleShellProps) => {
       return `${openTickets} aktif`;
     }
 
-    if (href === ADMIN_ROUTES.mock) {
+    if (href === ADMIN_ROUTES.studio) {
       return modifiedTableCount > 0 ? `${modifiedTableCount} berubah` : 'Seed bersih';
     }
 
@@ -269,7 +269,7 @@ export const AdminConsoleShell = ({ children }: AdminConsoleShellProps) => {
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-300">Persona aktif</p>
-                  <p className="mt-2 text-[16px] font-bold">{activeAdmin?.name || 'Admin demo'}</p>
+                  <p className="mt-2 text-[16px] font-bold">{activeAdmin?.name || 'Admin'}</p>
                   <p className="mt-1 text-sm text-slate-300">{activeAdmin?.title || 'Console operator'}</p>
                 </div>
                 {activeAdmin ? (
@@ -344,16 +344,16 @@ export const AdminConsoleShell = ({ children }: AdminConsoleShellProps) => {
           <div className="mt-auto rounded-[28px] border border-white/10 bg-white/7 p-4">
             <div className="flex items-center gap-2 text-sm text-slate-300">
               <ShieldCheck className="h-4 w-4" />
-              Demo auth client-side
+              Backend-authenticated admin access
             </div>
             <p className="mt-3 text-[13px] leading-6 text-slate-300">
-              Console ini disiapkan untuk operasional mock, review flow, dan kontrol QA lokal sebelum backend admin
-              terintegrasi.
+              Semua mutasi admin dibatasi oleh session backend aktif. Logout akan mencabut akses UI dan cache
+              operasional lokal untuk browser ini.
             </p>
 
             <div className="mt-4 grid gap-3">
               <SidebarStat label="Support sync" value={formatDateLabel(supportSavedAt)} />
-              <SidebarStat label="Mock snapshot" value={formatDateLabel(snapshotSavedAt)} />
+              <SidebarStat label="Data snapshot" value={formatDateLabel(snapshotSavedAt)} />
               <SidebarStat
                 label="Resume terakhir"
                 value={lastVisitedNavItem ? lastVisitedNavItem.label : 'Mulai dari overview'}
@@ -406,7 +406,7 @@ export const AdminConsoleShell = ({ children }: AdminConsoleShellProps) => {
                           onChange={(event) => setCommandQuery(event.target.value)}
                           onFocus={() => setIsCommandOpen(true)}
                           className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-20 text-sm font-medium text-slate-700 outline-none transition focus:border-slate-400 focus:bg-white"
-                          placeholder="Cari module, support, approval, mock..."
+                          placeholder="Cari module, support, approval, data..."
                         />
                         <span className="pointer-events-none absolute right-3 top-1/2 inline-flex -translate-y-1/2 items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-500">
                           <Command className="h-3 w-3" />K
@@ -444,22 +444,17 @@ export const AdminConsoleShell = ({ children }: AdminConsoleShellProps) => {
                     ) : null}
                   </form>
 
-                  <label className="flex min-w-[220px] flex-col gap-2">
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-                      Switch persona
-                    </span>
-                    <select
-                      value={session.adminId}
-                      onChange={(event) => switchAdminPersona(event.target.value)}
-                      className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-slate-400 focus:bg-white"
-                    >
-                      {adminStaff.map((admin) => (
-                        <option key={admin.id} value={admin.id}>
-                          {admin.name} · {admin.focusArea}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
+                  <div className="min-w-[220px] rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                      Authenticated session
+                    </p>
+                    <p className="mt-2 text-sm font-semibold text-slate-800">
+                      {activeAdmin?.name || session.email || 'Admin session'}
+                    </p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      {session.expiresAt ? `Berlaku sampai ${formatDateLabel(session.expiresAt)}` : 'Session aktif'}
+                    </p>
+                  </div>
 
                   <button
                     type="button"
@@ -489,7 +484,7 @@ export const AdminConsoleShell = ({ children }: AdminConsoleShellProps) => {
                 <div className="rounded-[28px] border border-slate-200 bg-slate-50/90 p-4">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Session pulse</p>
                   <div className="mt-3 flex flex-wrap gap-2">
-                    <StatusChip label="Persona" value={activeAdmin?.name || 'Admin demo'} />
+                    <StatusChip label="Persona" value={activeAdmin?.name || 'Admin'} />
                     <StatusChip
                       label="Presence"
                       tone={activeAdmin?.presence === 'online' ? 'emerald' : 'slate'}
@@ -497,7 +492,7 @@ export const AdminConsoleShell = ({ children }: AdminConsoleShellProps) => {
                     />
                     <StatusChip label="Support" value={`${openTickets} aktif`} />
                     <StatusChip
-                      label="Mock"
+                      label="Data"
                       value={modifiedTableCount > 0 ? `${modifiedTableCount} berubah` : 'Bersih'}
                     />
                   </div>
