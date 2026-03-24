@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
-import { readFile } from 'node:fs/promises';
+import { readFile, rm } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
 import { after, before, test } from 'node:test';
@@ -15,13 +15,17 @@ const frontendPort = 3201;
 const backendPort = 3202;
 const baseUrl = `http://127.0.0.1:${frontendPort}`;
 const backendApiBaseUrl = `http://127.0.0.1:${backendPort}/api/v1`;
+const nextDevLockPath = resolve(frontendDir, '.next', 'dev', 'lock');
 
 const professionalsJsonPath = resolve(backendDir, 'seeddata/professionals.json');
 const servicesJsonPath = resolve(backendDir, 'seeddata/services.json');
+const appointmentsJsonPath = resolve(backendDir, 'seeddata/appointments.json');
 const professionals = JSON.parse(await readFile(professionalsJsonPath, 'utf8'));
 const services = JSON.parse(await readFile(servicesJsonPath, 'utf8'));
+const appointments = JSON.parse(await readFile(appointmentsJsonPath, 'utf8'));
 const professionalSlug = professionals[0]?.slug;
 const serviceSlug = services[0]?.slug;
+const appointmentId = appointments[0]?.id;
 
 let nextProcess;
 let backendProcess;
@@ -32,6 +36,10 @@ const appendOutput = (chunk) => {
 };
 
 const wait = (timeMs) => new Promise((resolveWait) => setTimeout(resolveWait, timeMs));
+const clearStaleNextDevLock = async () => {
+  await rm(nextDevLockPath, { force: true });
+};
+
 const cleanupProcess = (childProcess) => {
   childProcess?.stdout?.removeAllListeners();
   childProcess?.stderr?.removeAllListeners();
@@ -106,37 +114,49 @@ const waitForServer = async () => {
 
 before(
   async () => {
-    backendProcess = spawn('go', ['run', './cmd/dev-api'], {
-      cwd: backendDir,
-      env: {
-        ...process.env,
-        APP_ENV: 'test',
-        CORS_ALLOWED_ORIGINS: baseUrl,
-        HTTP_HOST: '127.0.0.1',
-        HTTP_PORT: String(backendPort),
-      },
-      stdio: ['ignore', 'pipe', 'pipe'],
-    });
+    try {
+      await clearStaleNextDevLock();
 
-    backendProcess.stdout.on('data', appendOutput);
-    backendProcess.stderr.on('data', appendOutput);
+      backendProcess = spawn('go', ['run', './cmd/dev-api'], {
+        cwd: backendDir,
+        env: {
+          ...process.env,
+          APP_ENV: 'test',
+          CORS_ALLOWED_ORIGINS: baseUrl,
+          HTTP_HOST: '127.0.0.1',
+          HTTP_PORT: String(backendPort),
+        },
+        stdio: ['ignore', 'pipe', 'pipe'],
+      });
 
-    await waitForBackend();
+      backendProcess.stdout.on('data', appendOutput);
+      backendProcess.stderr.on('data', appendOutput);
 
-    nextProcess = spawn(process.execPath, [nextBin, 'dev', '--hostname', '127.0.0.1', '--port', String(frontendPort)], {
-      cwd: frontendDir,
-      env: {
-        ...process.env,
-        CI: '1',
-        NEXT_PUBLIC_API_BASE_URL: backendApiBaseUrl,
-      },
-      stdio: ['ignore', 'pipe', 'pipe'],
-    });
+      await waitForBackend();
 
-    nextProcess.stdout.on('data', appendOutput);
-    nextProcess.stderr.on('data', appendOutput);
+      nextProcess = spawn(
+        process.execPath,
+        [nextBin, 'dev', '--hostname', '127.0.0.1', '--port', String(frontendPort)],
+        {
+          cwd: frontendDir,
+          env: {
+            ...process.env,
+            CI: '1',
+            NEXT_PUBLIC_API_BASE_URL: backendApiBaseUrl,
+          },
+          stdio: ['ignore', 'pipe', 'pipe'],
+        },
+      );
 
-    await waitForServer();
+      nextProcess.stdout.on('data', appendOutput);
+      nextProcess.stderr.on('data', appendOutput);
+
+      await waitForServer();
+    } catch (error) {
+      await stopProcess(nextProcess);
+      await stopProcess(backendProcess);
+      throw error;
+    }
   },
   { timeout: 180000 },
 );
@@ -172,12 +192,23 @@ test(
       '/home',
       '/services',
       '/explore',
+      '/auth/customer',
       '/appointments',
+      `/appointments/${appointmentId}`,
+      `/activity/${appointmentId}`,
+      '/notifications',
       '/profile',
       '/for-professionals',
       '/for-professionals/setup',
       '/for-professionals/profile',
+      '/for-professionals/dashboard',
       '/for-professionals/dashboard/overview',
+      '/for-professionals/dashboard/requests',
+      '/for-professionals/dashboard/services',
+      '/for-professionals/dashboard/availability',
+      '/for-professionals/dashboard/coverage',
+      '/for-professionals/dashboard/portfolio',
+      '/for-professionals/dashboard/notifications',
       '/for-professionals/dashboard/trust',
       `/p/${professionalSlug}`,
       `/s/${serviceSlug}`,

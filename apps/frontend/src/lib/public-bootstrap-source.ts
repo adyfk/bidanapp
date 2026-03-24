@@ -1,5 +1,6 @@
 import { createBidanappApiClient, fetchPublicBootstrap } from '@bidanapp/sdk';
 import { getBackendApiBaseUrl } from '@/lib/backend';
+import { normalizeProfessional } from '@/lib/catalog-normalizers';
 import type { ConsumerProfile, UserContext } from '@/types/app-state';
 import type { AppointmentStatus } from '@/types/appointments';
 import type { Area, Category, GlobalService, Professional } from '@/types/catalog';
@@ -87,39 +88,6 @@ const withTimeout = <T>(promise: Promise<T>, timeoutMs: number) =>
     );
   });
 
-const normalizeProfessional = (value: unknown): Professional => {
-  const candidate = value as Partial<Professional>;
-
-  return {
-    ...(candidate as Professional),
-    activityStories: Array.isArray(candidate.activityStories) ? candidate.activityStories : [],
-    availability: candidate.availability || { isAvailable: false },
-    coverage: {
-      areaIds: Array.isArray(candidate.coverage?.areaIds) ? candidate.coverage.areaIds : [],
-      center: candidate.coverage?.center || {
-        latitude: 0,
-        longitude: 0,
-      },
-      homeVisitRadiusKm:
-        typeof candidate.coverage?.homeVisitRadiusKm === 'number' ? candidate.coverage.homeVisitRadiusKm : 0,
-    },
-    credentials: Array.isArray(candidate.credentials) ? candidate.credentials : [],
-    feedbackBreakdown: Array.isArray(candidate.feedbackBreakdown) ? candidate.feedbackBreakdown : [],
-    feedbackMetrics: Array.isArray(candidate.feedbackMetrics) ? candidate.feedbackMetrics : [],
-    feedbackSummary: candidate.feedbackSummary || {
-      recommendationRate: '',
-      repeatClientRate: '',
-    },
-    gallery: Array.isArray(candidate.gallery) ? candidate.gallery : [],
-    languages: Array.isArray(candidate.languages) ? candidate.languages : [],
-    portfolioEntries: Array.isArray(candidate.portfolioEntries) ? candidate.portfolioEntries : [],
-    recentActivities: Array.isArray(candidate.recentActivities) ? candidate.recentActivities : [],
-    services: Array.isArray(candidate.services) ? candidate.services : [],
-    specialties: Array.isArray(candidate.specialties) ? candidate.specialties : [],
-    testimonials: Array.isArray(candidate.testimonials) ? candidate.testimonials : [],
-  };
-};
-
 export const buildFallbackPublicBootstrapData = (): PublicBootstrapData => ({
   activeHomeFeed: {
     currentUser: EMPTY_CONSUMER,
@@ -156,7 +124,7 @@ export const fetchPublicBootstrapData = async (): Promise<PublicBootstrapData> =
               status: payload.activeHomeFeed.featuredAppointment.appointment.status as AppointmentStatus,
             },
             dateLabel: payload.activeHomeFeed.featuredAppointment.dateLabel,
-            professional: payload.activeHomeFeed.featuredAppointment.professional as unknown as Professional,
+            professional: normalizeProfessional(payload.activeHomeFeed.featuredAppointment.professional),
             timeLabel: payload.activeHomeFeed.featuredAppointment.timeLabel,
           }
         : undefined,

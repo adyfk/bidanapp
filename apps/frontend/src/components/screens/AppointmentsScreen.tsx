@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { CustomerAccessScreen } from '@/components/screens/CustomerAccessScreen';
 import { InlineFeedbackNotice } from '@/components/ui/InlineFeedbackNotice';
 import { AppointmentCancelSheet } from '@/features/appointments/components/AppointmentCancelSheet';
@@ -23,7 +23,7 @@ import { APP_CONFIG } from '@/lib/config';
 import { APP_ROUTES, professionalDashboardRoute, professionalRoute } from '@/lib/routes';
 import { useViewerSession } from '@/lib/use-viewer-session';
 
-export const AppointmentsScreen = () => {
+const AppointmentsScreenContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab');
@@ -173,3 +173,15 @@ export const AppointmentsScreen = () => {
     </div>
   );
 };
+
+export const AppointmentsScreen = () => (
+  <Suspense
+    fallback={
+      <div className="flex min-h-screen h-full items-center justify-center bg-gray-50">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-pink-500" />
+      </div>
+    }
+  >
+    <AppointmentsScreenContent />
+  </Suspense>
+);

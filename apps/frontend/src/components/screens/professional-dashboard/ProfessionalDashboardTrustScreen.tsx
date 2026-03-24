@@ -30,7 +30,6 @@ export const ProfessionalDashboardTrustScreen = () => {
     publishProfessionalProfile,
     portalState,
     publicPortfolioEntries,
-    simulateProfessionalAdminReview,
     submitProfessionalProfileForReview,
     t,
     upsertActivityStory,
@@ -68,15 +67,6 @@ export const ProfessionalDashboardTrustScreen = () => {
         }
 
         setNotice(t('onboarding.publishSuccess'));
-      }}
-      onSimulateReview={(status) => {
-        if (!simulateProfessionalAdminReview(status)) {
-          return;
-        }
-
-        setNotice(
-          status === 'changes_requested' ? t('onboarding.reviewRevisionSuccess') : t('onboarding.reviewVerifySuccess'),
-        );
       }}
       onSubmitForReview={() => {
         if (!submitProfessionalProfileForReview()) {

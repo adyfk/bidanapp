@@ -33,7 +33,6 @@ export const ProfessionalDashboardServicesScreen = () => {
     portalState,
     saveServiceConfiguration,
     serviceTemplates,
-    simulateProfessionalAdminReview,
     submitProfessionalProfileForReview,
     t,
   } = useProfessionalDashboardPageData();
@@ -177,15 +176,6 @@ export const ProfessionalDashboardServicesScreen = () => {
         }
 
         setNotice(t('onboarding.publishSuccess'));
-      }}
-      onSimulateReview={(status) => {
-        if (!simulateProfessionalAdminReview(status)) {
-          return;
-        }
-
-        setNotice(
-          status === 'changes_requested' ? t('onboarding.reviewRevisionSuccess') : t('onboarding.reviewVerifySuccess'),
-        );
       }}
       onSubmitForReview={() => {
         if (!submitProfessionalProfileForReview()) {

@@ -1,0 +1,36 @@
+{
+  "servers": {
+    "playwright-bidanapp": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@latest",
+        "--browser",
+        "chrome",
+        "--caps",
+        "vision,devtools,pdf",
+        "--isolated",
+        "--save-session",
+        "--save-trace",
+        "--output-dir",
+        "./.artifacts/mcp/playwright",
+        "--viewport-size",
+        "1440x960",
+        "--timeout-action",
+        "10000",
+        "--timeout-navigation",
+        "120000",
+        "--test-id-attribute",
+        "data-testid"
+      ],
+      "gallery": true
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "gallery": true
+    }
+  }
+}

@@ -33,7 +33,6 @@ interface ProfessionalDashboardShellProps {
   onboardingState?: ProfessionalOnboardingState | null;
   onDismissNotice?: () => void;
   onPublishProfile?: () => void;
-  onSimulateReview?: (status: 'changes_requested' | 'verified') => void;
   onSubmitForReview?: () => void;
   reviewState?: ProfessionalLifecycleReviewState | null;
   responseTimeGoal: string;
@@ -52,7 +51,6 @@ export const ProfessionalDashboardShell = ({
   onboardingState,
   onDismissNotice,
   onPublishProfile,
-  onSimulateReview,
   onSubmitForReview,
   reviewState,
   responseTimeGoal,
@@ -108,13 +106,11 @@ export const ProfessionalDashboardShell = ({
         reviewState &&
         onboardingState.pageState !== 'live' &&
         onPublishProfile &&
-        onSimulateReview &&
         onSubmitForReview ? (
           <ProfessionalDashboardOnboardingCard
             onboardingState={onboardingState}
             reviewState={reviewState}
             onPublish={onPublishProfile}
-            onSimulateReview={onSimulateReview}
             onSubmit={onSubmitForReview}
           />
         ) : null}

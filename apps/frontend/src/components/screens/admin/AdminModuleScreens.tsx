@@ -1789,7 +1789,7 @@ export const AdminProfessionalsScreen = () => {
     publishProfessionalProfile,
     publishProfessionalProfiles,
     reviewStatesByProfessionalId,
-    simulateProfessionalAdminReview,
+    reviewProfessionalProfile,
     submitProfessionalProfileForReview,
     switchProfessionalProfile,
   } = useProfessionalPortal();
@@ -2566,7 +2566,7 @@ export const AdminProfessionalsScreen = () => {
                     disabled={!isSynced}
                     onClick={() =>
                       setMessage(
-                        simulateProfessionalAdminReview('changes_requested')
+                        reviewProfessionalProfile('changes_requested')
                           ? 'Admin mengembalikan profil ke profesional untuk revisi.'
                           : 'Status saat ini belum bisa diubah ke changes requested.',
                       )
@@ -2580,7 +2580,7 @@ export const AdminProfessionalsScreen = () => {
                     disabled={!isSynced}
                     onClick={() =>
                       setMessage(
-                        simulateProfessionalAdminReview('verified')
+                        reviewProfessionalProfile('verified')
                           ? 'Profil berhasil ditandai verified dan masuk antrean publish.'
                           : 'Status saat ini belum bisa diverifikasi.',
                       )

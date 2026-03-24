@@ -185,8 +185,8 @@
       "login": "Masuk",
       "register": "Daftar"
     },
-    "profileSelectorLabel": "Pilih profil profesional Anda",
-    "profileSelectorHint": "Profil ini menghubungkan akses portal, dashboard, dan halaman publik profesional yang terkait.",
+    "profileSelectorLabel": "Pilih akun profesional yang ingin dikelola",
+    "profileSelectorHint": "Akun ini menghubungkan akses portal, dashboard, dan halaman publik profesional yang terkait.",
     "fields": {
       "phone": "Nomor WhatsApp",
       "password": "Password",
@@ -328,8 +328,6 @@
         "completeNextStep": "Lengkapi langkah berikutnya",
         "submit": "Ajukan ke admin",
         "resubmit": "Ajukan ulang ke admin",
-        "simulateRevision": "Simulasikan revisi",
-        "simulateVerify": "Simulasikan verifikasi",
         "publish": "Publish profil"
       },
       "sections": {
@@ -368,8 +366,6 @@
           "description": "Profil profesional sudah tampil di katalog publik."
         }
       },
-      "reviewRevisionSuccess": "Review memindahkan profil ke status revisi.",
-      "reviewVerifySuccess": "Review memindahkan profil ke status terverifikasi.",
       "publishSuccess": "Profil berhasil dipublish ke katalog.",
       "submitSuccess": "Profil berhasil diajukan ke admin untuk direview.",
       "validationNotice": "Lengkapi semua item onboarding yang memblokir sebelum mengajukan ke admin."

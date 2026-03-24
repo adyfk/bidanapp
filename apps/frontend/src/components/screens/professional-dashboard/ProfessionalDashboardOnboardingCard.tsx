@@ -13,7 +13,6 @@ interface ProfessionalDashboardOnboardingCardProps {
   reviewState: ProfessionalLifecycleReviewState;
   onPublish: () => void;
   onSubmit: () => void;
-  onSimulateReview: (status: 'changes_requested' | 'verified') => void;
 }
 
 const statusIconMap = {
@@ -31,7 +30,6 @@ export const ProfessionalDashboardOnboardingCard = ({
   reviewState,
   onPublish,
   onSubmit,
-  onSimulateReview,
 }: ProfessionalDashboardOnboardingCardProps) => {
   const router = useRouter();
   const t = useTranslations('ProfessionalPortal');
@@ -127,25 +125,6 @@ export const ProfessionalDashboardOnboardingCard = ({
         >
           {primaryLabel}
         </button>
-
-        {onboardingState.pageState === 'awaiting_admin_review' ? (
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={() => onSimulateReview('changes_requested')}
-              className="rounded-full border border-amber-200 bg-amber-50 px-4 py-3 text-[13px] font-bold text-amber-800 transition-colors hover:bg-amber-100"
-            >
-              {t('onboarding.actions.simulateRevision')}
-            </button>
-            <button
-              type="button"
-              onClick={() => onSimulateReview('verified')}
-              className="rounded-full border border-emerald-200 bg-emerald-50 px-4 py-3 text-[13px] font-bold text-emerald-800 transition-colors hover:bg-emerald-100"
-            >
-              {t('onboarding.actions.simulateVerify')}
-            </button>
-          </div>
-        ) : null}
       </div>
     </section>
   );

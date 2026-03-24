@@ -460,17 +460,18 @@ func (s *seeder) seedAdminAccessTokens(ctx context.Context) error {
 
 	firstCredential := s.cfg.AdminAuth.Credentials[0]
 	rawToken := "seed-admin-session-" + firstCredential.AdminID
-	expiresAt := seededReferenceTime.Add(s.cfg.AdminAuth.SessionTTL).Format(time.RFC3339)
+	now := time.Now().UTC()
+	expiresAt := now.Add(s.cfg.AdminAuth.SessionTTL).Format(time.RFC3339)
 	if _, err := s.documentStore.Upsert(ctx, documentstore.Record{
 		Namespace: adminSessionNamespace,
 		Key:       hashToken(rawToken),
-		SavedAt:   seededReferenceTime.UTC(),
+		SavedAt:   now,
 		Snapshot: map[string]any{
 			"adminId":          firstCredential.AdminID,
 			"email":            strings.ToLower(strings.TrimSpace(firstCredential.Email)),
 			"expiresAt":        expiresAt,
 			"focusArea":        firstCredential.FocusArea,
-			"lastLoginAt":      seededReferenceTime.Format(time.RFC3339),
+			"lastLoginAt":      now.Format(time.RFC3339),
 			"lastVisitedRoute": defaultSeededAdminRoute,
 		},
 	}); err != nil {
@@ -492,15 +493,16 @@ func (s *seeder) seedCustomerAccessToken(ctx context.Context) error {
 
 	consumer := s.dataset.Consumers[0]
 	rawToken := "seed-customer-session-" + consumer.ID
-	expiresAt := seededReferenceTime.Add(s.cfg.CustomerAuth.SessionTTL).Format(time.RFC3339)
+	now := time.Now().UTC()
+	expiresAt := now.Add(s.cfg.CustomerAuth.SessionTTL).Format(time.RFC3339)
 	if _, err := s.documentStore.Upsert(ctx, documentstore.Record{
 		Namespace: customerSessionNamespace,
 		Key:       hashToken(rawToken),
-		SavedAt:   seededReferenceTime.UTC(),
+		SavedAt:   now,
 		Snapshot: map[string]any{
 			"consumerId":  consumer.ID,
 			"expiresAt":   expiresAt,
-			"lastLoginAt": seededReferenceTime.Format(time.RFC3339),
+			"lastLoginAt": now.Format(time.RFC3339),
 		},
 	}); err != nil {
 		return fmt.Errorf("seed customer bearer token: %w", err)
@@ -521,14 +523,15 @@ func (s *seeder) seedProfessionalAccessToken(ctx context.Context) error {
 
 	professional := s.dataset.Professionals[0]
 	rawToken := "seed-professional-session-" + professional.ID
-	expiresAt := seededReferenceTime.Add(s.cfg.ProfessionalAuth.SessionTTL).Format(time.RFC3339)
+	now := time.Now().UTC()
+	expiresAt := now.Add(s.cfg.ProfessionalAuth.SessionTTL).Format(time.RFC3339)
 	if _, err := s.documentStore.Upsert(ctx, documentstore.Record{
 		Namespace: professionalSessionNamespace,
 		Key:       hashToken(rawToken),
-		SavedAt:   seededReferenceTime.UTC(),
+		SavedAt:   now,
 		Snapshot: map[string]any{
 			"expiresAt":      expiresAt,
-			"lastLoginAt":    seededReferenceTime.Format(time.RFC3339),
+			"lastLoginAt":    now.Format(time.RFC3339),
 			"professionalId": professional.ID,
 		},
 	}); err != nil {
@@ -732,7 +735,7 @@ func (s *seeder) buildVerificationScenarios() {
 			Email:     admin.Email,
 			FocusArea: admin.FocusArea,
 			SuggestedChecks: []string{
-				"Open /admin/studio and verify seeded admin console tables hydrate without browser-owned mock data.",
+				"Open /admin/studio and verify seeded admin console tables hydrate without browser-owned fallback data.",
 				"Open /admin/support and verify urgent, high, and normal support tickets render with seeded command-center context.",
 				"Use admin mutations on staff or service tables and verify granular table sync persists to backend state.",
 			},

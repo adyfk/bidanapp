@@ -73,6 +73,8 @@ Useful single-app entrypoints:
 ```bash
 npm run dev:frontend
 npm run dev:backend
+npm run mcp:playwright:install
+npm run mcp:qa
 ```
 
 ## Development Model
@@ -107,6 +109,7 @@ Read [docs/README.md](docs/README.md) first for the full handbook. The most usef
 - [docs/development-workflow.md](docs/development-workflow.md)
 - [docs/operations.md](docs/operations.md)
 - [docs/environment.md](docs/environment.md)
+- [docs/mcp-workspace.md](docs/mcp-workspace.md)
 - [docs/system-flow-diagrams.md](docs/system-flow-diagrams.md)
 - [docs/user-facing-flow-diagrams.md](docs/user-facing-flow-diagrams.md)
 - [docs/user-flows/README.md](docs/user-flows/README.md)

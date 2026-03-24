@@ -13,6 +13,14 @@ type PublicEnv = {
   isProduction: boolean;
 };
 
+type PublicEnvKey =
+  | 'NEXT_PUBLIC_ADMIN_CONSOLE_ENABLED'
+  | 'NEXT_PUBLIC_API_BASE_URL'
+  | 'NEXT_PUBLIC_APP_STATE_DATA_SOURCE'
+  | 'NEXT_PUBLIC_APP_VERSION'
+  | 'NEXT_PUBLIC_PROFESSIONAL_PORTAL_DATA_SOURCE'
+  | 'NEXT_PUBLIC_SITE_URL';
+
 export const PUBLIC_ENV: PublicEnv = loadPublicEnv();
 
 function loadPublicEnv(): PublicEnv {
@@ -32,7 +40,7 @@ function loadPublicEnv(): PublicEnv {
 }
 
 function readText(name: string, fallback: string): string {
-  const rawValue = (process.env[name] ?? fallback).trim();
+  const rawValue = (readPublicEnvValue(name as PublicEnvKey, fallback) ?? fallback).trim();
   if (rawValue.length === 0) {
     throw new Error(`${name} must not be empty.`);
   }
@@ -41,7 +49,7 @@ function readText(name: string, fallback: string): string {
 }
 
 function readUrl(name: string, fallback: string): string {
-  const rawValue = process.env[name] ?? fallback;
+  const rawValue = readPublicEnvValue(name as PublicEnvKey, fallback) ?? fallback;
 
   try {
     const parsed = new URL(rawValue);
@@ -52,7 +60,7 @@ function readUrl(name: string, fallback: string): string {
 }
 
 function readEnum<const T extends string>(name: string, allowedValues: readonly T[], fallback: T): T {
-  const rawValue = (process.env[name] ?? fallback).trim() as T;
+  const rawValue = (readPublicEnvValue(name as PublicEnvKey, fallback) ?? fallback).trim() as T;
 
   if (!allowedValues.includes(rawValue)) {
     throw new Error(`${name} must be one of: ${allowedValues.join(', ')}. Received: ${rawValue}`);
@@ -62,7 +70,7 @@ function readEnum<const T extends string>(name: string, allowedValues: readonly 
 }
 
 function readBool(name: string, fallback: boolean): boolean {
-  const rawValue = process.env[name];
+  const rawValue = readPublicEnvValue(name as PublicEnvKey);
   if (typeof rawValue === 'undefined') {
     return fallback;
   }
@@ -82,4 +90,23 @@ function readBool(name: string, fallback: boolean): boolean {
 function normalizeUrl(value: URL): string {
   const path = value.pathname === '/' ? '' : value.pathname.replace(/\/$/, '');
   return `${value.origin}${path}${value.search}${value.hash}`;
+}
+
+function readPublicEnvValue(name: PublicEnvKey, fallback?: string): string | undefined {
+  switch (name) {
+    case 'NEXT_PUBLIC_APP_VERSION':
+      return process.env.NEXT_PUBLIC_APP_VERSION ?? fallback;
+    case 'NEXT_PUBLIC_SITE_URL':
+      return process.env.NEXT_PUBLIC_SITE_URL ?? fallback;
+    case 'NEXT_PUBLIC_API_BASE_URL':
+      return process.env.NEXT_PUBLIC_API_BASE_URL ?? fallback;
+    case 'NEXT_PUBLIC_PROFESSIONAL_PORTAL_DATA_SOURCE':
+      return process.env.NEXT_PUBLIC_PROFESSIONAL_PORTAL_DATA_SOURCE ?? fallback;
+    case 'NEXT_PUBLIC_APP_STATE_DATA_SOURCE':
+      return process.env.NEXT_PUBLIC_APP_STATE_DATA_SOURCE ?? fallback;
+    case 'NEXT_PUBLIC_ADMIN_CONSOLE_ENABLED':
+      return process.env.NEXT_PUBLIC_ADMIN_CONSOLE_ENABLED ?? fallback;
+    default:
+      return fallback;
+  }
 }

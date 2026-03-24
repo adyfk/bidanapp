@@ -39,6 +39,7 @@ import { validateProfessionalRequestStatusUpdate } from '@/features/professional
 import { ACTIVE_RUNTIME_CLOCK_ISO } from '@/lib/app-runtime';
 import { appointmentPriceLabelToNumber, createHydratedAppointment } from '@/lib/appointment-utils';
 import { normalizeAvailabilityRulesByMode } from '@/lib/availability-rules';
+import { getProfessionalCoverageAreaIds, normalizeProfessional } from '@/lib/catalog-normalizers';
 import { getAreaById, getProfessionalCategoryLabel, getServiceById } from '@/lib/catalog-selectors';
 import { getProfessionalAvailabilityScheduleDays } from '@/lib/professional-availability';
 import { useAppShell } from '@/lib/use-app-shell';
@@ -266,7 +267,7 @@ const professionalPortalCopyByLocale = {
         quotedPrimaryInternal:
           'Uploaded the quote breakdown, payment steps, and follow-up checklist to the request thread for audit.',
         quotedSecondaryCustomer:
-          'Sent the initial quote, session scope, and expected turnaround for the developmental notes before scheduling.',
+          'Sent the initial quote, session scope, and expected turnaround for the progress notes before scheduling.',
         quotedSecondaryInternal:
           'Prepared the quote and attached the session outline requested by the caregiver coordinator.',
         scheduledPrimaryQuotedCustomer:
@@ -411,8 +412,9 @@ const buildPortalCatalogData = ({
   services: GlobalService[];
 }): PortalCatalogData => {
   const serviceDefaultsByServiceId = new Map<string, ProfessionalService>();
+  const normalizedProfessionals = professionals.map((professional) => normalizeProfessional(professional));
 
-  for (const professional of professionals) {
+  for (const professional of normalizedProfessionals) {
     for (const service of professional.services) {
       if (!serviceDefaultsByServiceId.has(service.serviceId)) {
         serviceDefaultsByServiceId.set(service.serviceId, service);
@@ -423,8 +425,8 @@ const buildPortalCatalogData = ({
   return {
     areas,
     categories,
-    defaultProfessional: professionals[0] || null,
-    professionals,
+    defaultProfessional: normalizedProfessionals[0] || null,
+    professionals: normalizedProfessionals,
     services,
     serviceDefaultsByServiceId,
   };
@@ -833,9 +835,8 @@ const buildDefaultPortalState = (
   professionalId = catalogData.defaultProfessional?.id || '',
 ): ProfessionalPortalState => {
   const professional = catalogData.getProfessionalById(professionalId) || catalogData.defaultProfessional;
-  const primaryArea = professional?.coverage.areaIds[0]
-    ? getAreaById(catalogData.areas, professional.coverage.areaIds[0])
-    : undefined;
+  const coverageAreaIds = getProfessionalCoverageAreaIds(professional);
+  const primaryArea = coverageAreaIds[0] ? getAreaById(catalogData.areas, coverageAreaIds[0]) : undefined;
 
   return {
     acceptingNewClients: professional?.availability.isAvailable ?? true,
@@ -847,7 +848,7 @@ const buildDefaultPortalState = (
     ),
     autoApproveInstantBookings: (professional?.services || []).some((service) => service.bookingFlow === 'instant'),
     city: primaryArea?.city || professional?.location || '',
-    coverageAreaIds: professional?.coverage.areaIds.slice(0, 3) || [],
+    coverageAreaIds: coverageAreaIds.slice(0, 3),
     credentials: buildDefaultCredentials(professional),
     coverageCenter: professional?.coverage.center || {
       latitude: -6.208763,
@@ -1538,6 +1539,7 @@ const mergeProfessionalWithPortalState = (
   if (professional.id !== portalState.activeProfessionalId) {
     return professional;
   }
+  const professionalCoverageAreaIds = getProfessionalCoverageAreaIds(professional);
 
   const activeServiceConfigurations = portalState.serviceConfigurations
     .filter((service) => service.isActive)
@@ -1618,10 +1620,7 @@ const mergeProfessionalWithPortalState = (
     practiceLocation: {
       address: portalState.practiceAddress || professional.practiceLocation?.address || professional.about,
       areaId:
-        portalState.coverageAreaIds[0] ||
-        professional.practiceLocation?.areaId ||
-        professional.coverage.areaIds[0] ||
-        '',
+        portalState.coverageAreaIds[0] || professional.practiceLocation?.areaId || professionalCoverageAreaIds[0] || '',
       coordinates: portalState.coverageCenter,
       label: portalState.practiceLabel || professional.practiceLocation?.label || professional.location,
     },
@@ -2081,7 +2080,7 @@ export const useProfessionalPortal = () => {
     return true;
   };
 
-  const simulateProfessionalAdminReview = (status: 'changes_requested' | 'verified') => {
+  const reviewProfessionalProfile = (status: 'changes_requested' | 'verified') => {
     const activeReviewState =
       reviewStatesByProfessionalId[portalState.activeProfessionalId] || createDraftReviewState();
 
@@ -2845,7 +2844,7 @@ export const useProfessionalPortal = () => {
     serviceCategories: catalogData.categories,
     serviceTemplates: catalogData.services,
     applyProfessionalAdminReviewBatch,
-    simulateProfessionalAdminReview,
+    reviewProfessionalProfile,
     submitProfessionalProfileForReview,
     updateRequestStatus,
     activateTemplateService,

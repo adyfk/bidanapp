@@ -41,6 +41,8 @@ If you are new to the repository, read these documents in order:
   Detailed environment variable reference for frontend, backend, and deploy templates.
 - [Production Rollout](./production-rollout.md)
   Pre-deploy checklist, env validation, migrations, Docker rollout, post-deploy smoke, and rollback flow.
+- [MCP Workspace Setup](./mcp-workspace.md)
+  Workspace MCP servers, VS Code tasks, and the recommended browser-driven QA workflow for this project.
 - [System Flow Diagrams](./system-flow-diagrams.md)
   Detailed maintenance-oriented diagrams for runtime ownership, request flow, auth, portal state, chat, QA seed, and deploy paths.
 - [User-Facing Flow Diagrams](./user-facing-flow-diagrams.md)

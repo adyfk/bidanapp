@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { ProfessionalAccessScreen } from '@/components/screens/ProfessionalAccessScreen';
 import { ProfessionalPageSkeleton } from '@/components/screens/ProfessionalPageSkeleton';
 import {
@@ -19,7 +19,7 @@ import type { RequestCloseDraft, RequestFilter, RequestStatusDraft } from './typ
 import { useDashboardDialogLifecycle } from './useDashboardDialogLifecycle';
 import { useProfessionalDashboardPageData } from './useProfessionalDashboardPageData';
 
-export const ProfessionalDashboardRequestsScreen = () => {
+const ProfessionalDashboardRequestsScreenContent = () => {
   const searchParams = useSearchParams();
   const requestedFilterParam = searchParams.get('status');
   const requestedRequestId = searchParams.get('request');
@@ -44,7 +44,6 @@ export const ProfessionalDashboardRequestsScreen = () => {
     publishProfessionalProfile,
     portalState,
     requestStatusCounts,
-    simulateProfessionalAdminReview,
     submitProfessionalProfileForReview,
     t,
     closeProfessionalRequest,
@@ -186,15 +185,6 @@ export const ProfessionalDashboardRequestsScreen = () => {
 
         setNotice(t('onboarding.publishSuccess'));
       }}
-      onSimulateReview={(status) => {
-        if (!simulateProfessionalAdminReview(status)) {
-          return;
-        }
-
-        setNotice(
-          status === 'changes_requested' ? t('onboarding.reviewRevisionSuccess') : t('onboarding.reviewVerifySuccess'),
-        );
-      }}
       onSubmitForReview={() => {
         if (!submitProfessionalProfileForReview()) {
           setNotice(t('onboarding.validationNotice'));
@@ -331,3 +321,9 @@ export const ProfessionalDashboardRequestsScreen = () => {
     </ProfessionalDashboardShell>
   );
 };
+
+export const ProfessionalDashboardRequestsScreen = () => (
+  <Suspense fallback={<ProfessionalPageSkeleton />}>
+    <ProfessionalDashboardRequestsScreenContent />
+  </Suspense>
+);

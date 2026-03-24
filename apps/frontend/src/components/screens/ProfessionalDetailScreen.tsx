@@ -2,6 +2,7 @@
 
 import { BadgeCheck, Clock3, Languages } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { Suspense } from 'react';
 import { CustomerRequestStatusCard } from '@/features/professional-detail/components/CustomerRequestStatusCard';
 import { ProfessionalBookingBar } from '@/features/professional-detail/components/ProfessionalBookingBar';
 import { ProfessionalHeroSection } from '@/features/professional-detail/components/ProfessionalHeroSection';
@@ -17,7 +18,7 @@ import { useProfessionalUserPreferences } from '@/lib/use-professional-user-pref
 import { useViewerSession } from '@/lib/use-viewer-session';
 import type { Area, Category, GlobalService, Professional } from '@/types/catalog';
 
-export const ProfessionalDetailScreen = ({
+const ProfessionalDetailScreenContent = ({
   areas,
   categories,
   initialProfessional,
@@ -182,3 +183,24 @@ export const ProfessionalDetailScreen = ({
     </div>
   );
 };
+
+export const ProfessionalDetailScreen = (props: {
+  areas: Area[];
+  categories: Category[];
+  initialProfessional?: Professional | null;
+  professionalSlug?: string;
+  services: GlobalService[];
+}) => (
+  <Suspense
+    fallback={
+      <div className="flex h-full min-h-screen flex-col gap-5 bg-gray-50 px-6 py-8">
+        <div className="h-60 animate-pulse rounded-[36px] bg-white shadow-sm" />
+        <div className="h-32 animate-pulse rounded-[28px] bg-white shadow-sm" />
+        <div className="h-48 animate-pulse rounded-[28px] bg-white shadow-sm" />
+        <div className="h-72 animate-pulse rounded-[28px] bg-white shadow-sm" />
+      </div>
+    }
+  >
+    <ProfessionalDetailScreenContent {...props} />
+  </Suspense>
+);

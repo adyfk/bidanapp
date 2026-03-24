@@ -27,7 +27,6 @@ export const ProfessionalDashboardAvailabilityScreen = () => {
     portalState,
     publishProfessionalProfile,
     saveAvailabilityRulesByMode,
-    simulateProfessionalAdminReview,
     submitProfessionalProfileForReview,
     t,
   } = useProfessionalDashboardPageData();
@@ -78,15 +77,6 @@ export const ProfessionalDashboardAvailabilityScreen = () => {
         }
 
         setNotice(t('onboarding.publishSuccess'));
-      }}
-      onSimulateReview={(status) => {
-        if (!simulateProfessionalAdminReview(status)) {
-          return;
-        }
-
-        setNotice(
-          status === 'changes_requested' ? t('onboarding.reviewRevisionSuccess') : t('onboarding.reviewVerifySuccess'),
-        );
       }}
       onSubmitForReview={() => {
         if (!submitProfessionalProfileForReview()) {

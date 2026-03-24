@@ -188,8 +188,8 @@ declare const messages: {
       "login": "Sign In",
       "register": "Register"
     },
-    "profileSelectorLabel": "Choose your professional profile",
-    "profileSelectorHint": "This profile links portal access, the dashboard, and the connected public professional page.",
+    "profileSelectorLabel": "Select the professional account you want to manage",
+    "profileSelectorHint": "This account links portal access, the dashboard, and the connected public professional page.",
     "fields": {
       "phone": "WhatsApp number",
       "password": "Password",
@@ -331,8 +331,6 @@ declare const messages: {
         "completeNextStep": "Complete next step",
         "submit": "Submit to admin",
         "resubmit": "Resubmit to admin",
-        "simulateRevision": "Simulate revision",
-        "simulateVerify": "Simulate verify",
         "publish": "Publish profile"
       },
       "sections": {
@@ -371,8 +369,6 @@ declare const messages: {
           "description": "The professional profile is already visible in the public catalog."
         }
       },
-      "reviewRevisionSuccess": "Review moved the profile to revision requested.",
-      "reviewVerifySuccess": "Review moved the profile to verified.",
       "publishSuccess": "Profile was published to the catalog.",
       "submitSuccess": "Profile was submitted for admin review.",
       "validationNotice": "Complete all blocking onboarding items before submitting to admin."

@@ -34,7 +34,6 @@ export const ProfessionalDashboardPortfolioScreen = () => {
     publicPortfolioEntries,
     saveGalleryItem,
     savePortfolioEntry,
-    simulateProfessionalAdminReview,
     submitProfessionalProfileForReview,
     t,
   } = useProfessionalDashboardPageData();
@@ -208,15 +207,6 @@ export const ProfessionalDashboardPortfolioScreen = () => {
         }
 
         setNotice(t('onboarding.publishSuccess'));
-      }}
-      onSimulateReview={(status) => {
-        if (!simulateProfessionalAdminReview(status)) {
-          return;
-        }
-
-        setNotice(
-          status === 'changes_requested' ? t('onboarding.reviewRevisionSuccess') : t('onboarding.reviewVerifySuccess'),
-        );
       }}
       onSubmitForReview={() => {
         if (!submitProfessionalProfileForReview()) {

@@ -11,8 +11,17 @@ import (
 	"syscall"
 
 	"bidanapp/apps/backend/internal/config"
+	"bidanapp/apps/backend/internal/devseed"
 	apphttp "bidanapp/apps/backend/internal/http"
+	"bidanapp/apps/backend/internal/modules/adminauth"
+	"bidanapp/apps/backend/internal/modules/chat"
+	"bidanapp/apps/backend/internal/modules/customerauth"
+	"bidanapp/apps/backend/internal/modules/professionalauth"
+	"bidanapp/apps/backend/internal/modules/readmodel"
+	"bidanapp/apps/backend/internal/platform/contentstore"
+	"bidanapp/apps/backend/internal/platform/documentstore"
 	applog "bidanapp/apps/backend/internal/platform/log"
+	"bidanapp/apps/backend/internal/platform/portalstore"
 	"bidanapp/apps/backend/internal/server"
 )
 
@@ -24,7 +33,23 @@ func main() {
 	}
 
 	logger := applog.New(cfg.Observability.LogLevel, cfg.Observability.LogFormat)
-	router := apphttp.NewRouter(cfg, logger)
+	deps := apphttp.Dependencies{
+		ChatStore:     chat.NewMemoryStore(),
+		PortalStore:   portalstore.NewMemoryStore(),
+		ContentStore:  contentstore.NewMemoryStore(),
+		DocumentStore: documentstore.NewMemoryStore(),
+	}
+	readModelService := readmodel.NewServiceWithStore(cfg.SeedData.DataDir, deps.ContentStore, deps.PortalStore)
+	if err := devseed.SeedAuthRuntime(context.Background(), cfg, devseed.RuntimeServices{
+		AdminAuth:        adminauth.NewService(cfg.AdminAuth, deps.DocumentStore),
+		CustomerAuth:     customerauth.NewService(cfg.CustomerAuth, deps.DocumentStore),
+		ProfessionalAuth: professionalauth.NewService(cfg.ProfessionalAuth, readModelService, deps.DocumentStore),
+	}); err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "seed backend dev auth runtime: %v\n", err)
+		os.Exit(1)
+	}
+
+	router := apphttp.NewRouter(cfg, logger, deps)
 	httpServer := server.New(cfg, router)
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)

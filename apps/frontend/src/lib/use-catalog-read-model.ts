@@ -3,6 +3,7 @@
 import { createBidanappApiClient, fetchCatalogReadModel } from '@bidanapp/sdk';
 import { useEffect, useState } from 'react';
 import { getBackendApiBaseUrl } from '@/lib/backend';
+import { normalizeProfessional } from '@/lib/catalog-normalizers';
 import type { Area, Category, GlobalService, Professional } from '@/types/catalog';
 
 interface CatalogReadModelSnapshot {
@@ -57,7 +58,7 @@ const normalizeCatalogReadModelSnapshot = (value: unknown): CatalogReadModelSnap
       ? (candidate.categories as Category[])
       : fallbackSnapshot.categories,
     professionals: Array.isArray(candidate.professionals)
-      ? (candidate.professionals as Professional[])
+      ? candidate.professionals.map((professional) => normalizeProfessional(professional))
       : fallbackSnapshot.professionals,
     savedAt:
       typeof candidate.savedAt === 'string' && candidate.savedAt.length > 0

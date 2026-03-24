@@ -12,6 +12,10 @@
 
 # testing
 /coverage
+/playwright-report
+/test-results
+apps/frontend/playwright-report
+apps/frontend/test-results
 
 # next.js
 /.next/
@@ -31,7 +35,9 @@ apps/backend/api
 # misc
 .DS_Store
 .idea
-.vscode
+.vscode/*
+!.vscode/mcp.json
+!.vscode/tasks.json
 *.pem
 *.log
 

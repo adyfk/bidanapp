@@ -1,0 +1,83 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "BidanApp: seed backend",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "seed:backend"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "BidanApp: start backend",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "dev:backend"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "BidanApp: start frontend",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "dev:frontend"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "BidanApp: start app stack",
+      "dependsOn": ["BidanApp: start backend", "BidanApp: start frontend"],
+      "dependsOrder": "parallel",
+      "problemMatcher": []
+    },
+    {
+      "label": "BidanApp: install Playwright browser",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "mcp:playwright:install"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "BidanApp: run seeded smoke",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "smoke:seeded"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "BidanApp: run browser E2E",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "test:e2e:frontend"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "BidanApp: run MCP QA sweep",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "mcp:qa"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

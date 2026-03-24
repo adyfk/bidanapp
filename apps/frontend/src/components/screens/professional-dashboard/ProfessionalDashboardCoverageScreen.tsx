@@ -29,7 +29,6 @@ export const ProfessionalDashboardCoverageScreen = () => {
     publishProfessionalProfile,
     portalState,
     saveBusinessSettings,
-    simulateProfessionalAdminReview,
     submitProfessionalProfileForReview,
     t,
   } = useProfessionalDashboardPageData();
@@ -110,15 +109,6 @@ export const ProfessionalDashboardCoverageScreen = () => {
         }
 
         setNotice(t('onboarding.publishSuccess'));
-      }}
-      onSimulateReview={(status) => {
-        if (!simulateProfessionalAdminReview(status)) {
-          return;
-        }
-
-        setNotice(
-          status === 'changes_requested' ? t('onboarding.reviewRevisionSuccess') : t('onboarding.reviewVerifySuccess'),
-        );
       }}
       onSubmitForReview={() => {
         if (!submitProfessionalProfileForReview()) {
