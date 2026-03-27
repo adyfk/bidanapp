@@ -61,15 +61,6 @@ type seedDataProfessionalPracticeLocationRow struct {
 	Longitude      float64 `json:"longitude"`
 }
 
-type seedDataProfessionalPortfolioStatRow struct {
-	Index          int    `json:"index"`
-	ID             string `json:"id"`
-	ProfessionalID string `json:"professionalId"`
-	Label          string `json:"label"`
-	Value          string `json:"value"`
-	Detail         string `json:"detail"`
-}
-
 type seedDataProfessionalCredentialRow struct {
 	Index          int    `json:"index"`
 	ID             string `json:"id"`
@@ -149,16 +140,6 @@ type seedDataProfessionalFeedbackBreakdownRow struct {
 	Label          string  `json:"label"`
 	Total          string  `json:"total"`
 	Percentage     float64 `json:"percentage"`
-}
-
-type seedDataProfessionalRecentActivityRow struct {
-	Index          int    `json:"index"`
-	ID             string `json:"id"`
-	ProfessionalID string `json:"professionalId"`
-	DateLabel      string `json:"dateLabel"`
-	Title          string `json:"title"`
-	Channel        string `json:"channel"`
-	Summary        string `json:"summary"`
 }
 
 type seedDataProfessionalServiceOfferingRow struct {

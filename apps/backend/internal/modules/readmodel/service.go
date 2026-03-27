@@ -224,11 +224,6 @@ func (s Service) Professionals(ctx context.Context) ([]Professional, error) {
 		return nil, err
 	}
 
-	portfolioStatRows, err := readOptionalJSON[[]seedDataProfessionalPortfolioStatRow](ctx, s.repository, "professional_portfolio_stats.json", []seedDataProfessionalPortfolioStatRow{})
-	if err != nil {
-		return nil, err
-	}
-
 	credentialRows, err := readOptionalJSON[[]seedDataProfessionalCredentialRow](ctx, s.repository, "professional_credentials.json", []seedDataProfessionalCredentialRow{})
 	if err != nil {
 		return nil, err
@@ -309,7 +304,6 @@ func (s Service) Professionals(ctx context.Context) ([]Professional, error) {
 	practiceLocationsByProfessionalID := groupPracticeLocationsByProfessionalID(practiceLocationRows)
 	coveragePoliciesByProfessionalID := mapCoveragePolicyByProfessionalID(coveragePolicyRows)
 	coverageAreaIDsByProfessionalID := groupCoverageAreaIDsByProfessionalID(coverageAreaRows)
-	portfolioStatsByProfessionalID := groupPortfolioStatsByProfessionalID(portfolioStatRows)
 	credentialsByProfessionalID := groupCredentialsByProfessionalID(credentialRows)
 	activityStoriesByProfessionalID := groupStoriesByProfessionalID(activityStoryRows)
 	portfolioEntriesByProfessionalID := groupPortfolioEntriesByProfessionalID(portfolioEntryRows)
@@ -370,7 +364,6 @@ func (s Service) Professionals(ctx context.Context) ([]Professional, error) {
 			PracticeLocation:           toPracticeLocation(practiceLocationsByProfessionalID[row.ID]),
 			Coverage:                   toProfessionalCoverage(coveragePoliciesByProfessionalID[row.ID], coverageAreaIDsByProfessionalID[row.ID]),
 			About:                      row.About,
-			PortfolioStats:             portfolioStatsByProfessionalID[row.ID],
 			Credentials:                credentialsByProfessionalID[row.ID],
 			ActivityStories:            activityStoriesByProfessionalID[row.ID],
 			PortfolioEntries:           portfolioEntriesByProfessionalID[row.ID],
@@ -541,19 +534,6 @@ func groupCoverageAreaIDsByProfessionalID(rows []seedDataProfessionalCoverageAre
 	return grouped
 }
 
-func groupPortfolioStatsByProfessionalID(rows []seedDataProfessionalPortfolioStatRow) map[string][]ProfessionalPortfolioStat {
-	grouped := make(map[string][]ProfessionalPortfolioStat)
-	for _, row := range rows {
-		grouped[row.ProfessionalID] = append(grouped[row.ProfessionalID], ProfessionalPortfolioStat{
-			Index:  row.Index,
-			Label:  row.Label,
-			Value:  row.Value,
-			Detail: row.Detail,
-		})
-	}
-	return grouped
-}
-
 func groupCredentialsByProfessionalID(rows []seedDataProfessionalCredentialRow) map[string][]ProfessionalCredential {
 	grouped := make(map[string][]ProfessionalCredential)
 	for _, row := range rows {
@@ -663,20 +643,6 @@ func groupFeedbackBreakdownsByProfessionalID(rows []seedDataProfessionalFeedback
 			Label:      row.Label,
 			Total:      row.Total,
 			Percentage: row.Percentage,
-		})
-	}
-	return grouped
-}
-
-func groupRecentActivitiesByProfessionalID(rows []seedDataProfessionalRecentActivityRow) map[string][]ProfessionalRecentActivity {
-	grouped := make(map[string][]ProfessionalRecentActivity)
-	for _, row := range rows {
-		grouped[row.ProfessionalID] = append(grouped[row.ProfessionalID], ProfessionalRecentActivity{
-			Index:     row.Index,
-			DateLabel: row.DateLabel,
-			Title:     row.Title,
-			Channel:   row.Channel,
-			Summary:   row.Summary,
 		})
 	}
 	return grouped

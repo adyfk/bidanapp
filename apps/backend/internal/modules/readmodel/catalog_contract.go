@@ -56,13 +56,6 @@ type ProfessionalService struct {
 	BookingFlow  string      `json:"bookingFlow"`
 }
 
-type ProfessionalPortfolioStat struct {
-	Index  int    `json:"index"`
-	Label  string `json:"label"`
-	Value  string `json:"value"`
-	Detail string `json:"detail"`
-}
-
 type ProfessionalCredential struct {
 	Index  int    `json:"index"`
 	Title  string `json:"title"`
@@ -218,7 +211,6 @@ type Professional struct {
 	PracticeLocation           *ProfessionalPracticeLocation             `json:"practiceLocation,omitempty"`
 	Coverage                   ProfessionalCoverage                      `json:"coverage"`
 	About                      string                                    `json:"about"`
-	PortfolioStats             []ProfessionalPortfolioStat               `json:"portfolioStats"`
 	Credentials                []ProfessionalCredential                  `json:"credentials"`
 	ActivityStories            []ProfessionalStory                       `json:"activityStories"`
 	PortfolioEntries           []ProfessionalPortfolioEntry              `json:"portfolioEntries"`
