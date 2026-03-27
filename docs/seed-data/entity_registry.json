@@ -66,7 +66,7 @@
     "group": "catalog",
     "entityKind": "master",
     "description": "Kategori layanan.",
-    "keyRelations": []
+    "keyRelations": ["parentId -> service_categories.id"]
   },
   {
     "index": 9,
@@ -142,6 +142,22 @@
   },
   {
     "index": 18,
+    "tableName": "professional_availability_policies.json",
+    "group": "catalog",
+    "entityKind": "availability_policy",
+    "description": "Policy availability global per profesional dan mode, termasuk minimum notice booking.",
+    "keyRelations": ["professionalId -> professionals.id", "mode -> reference_service_delivery_modes.code"]
+  },
+  {
+    "index": 19,
+    "tableName": "professional_cancellation_policies.json",
+    "group": "catalog",
+    "entityKind": "cancellation_policy",
+    "description": "Policy pembatalan customer dan profesional per mode layanan.",
+    "keyRelations": ["professionalId -> professionals.id", "mode -> reference_service_delivery_modes.code"]
+  },
+  {
+    "index": 20,
     "tableName": "professional_availability_date_overrides.json",
     "group": "catalog",
     "entityKind": "availability_override",
@@ -149,15 +165,7 @@
     "keyRelations": ["professionalId -> professionals.id", "mode -> reference_service_delivery_modes.code"]
   },
   {
-    "index": 19,
-    "tableName": "professional_portfolio_stats.json",
-    "group": "trust",
-    "entityKind": "child_collection",
-    "description": "Statistik ringkas profesional.",
-    "keyRelations": ["professionalId -> professionals.id"]
-  },
-  {
-    "index": 20,
+    "index": 21,
     "tableName": "professional_credentials.json",
     "group": "trust",
     "entityKind": "child_collection",
@@ -165,7 +173,7 @@
     "keyRelations": ["professionalId -> professionals.id"]
   },
   {
-    "index": 21,
+    "index": 22,
     "tableName": "professional_activity_stories.json",
     "group": "trust",
     "entityKind": "child_collection",
@@ -173,7 +181,7 @@
     "keyRelations": ["professionalId -> professionals.id"]
   },
   {
-    "index": 22,
+    "index": 23,
     "tableName": "professional_portfolio_entries.json",
     "group": "trust",
     "entityKind": "child_collection",
@@ -181,7 +189,7 @@
     "keyRelations": ["professionalId -> professionals.id", "serviceId -> services.id"]
   },
   {
-    "index": 23,
+    "index": 24,
     "tableName": "professional_gallery_items.json",
     "group": "trust",
     "entityKind": "child_collection",
@@ -189,7 +197,7 @@
     "keyRelations": ["professionalId -> professionals.id"]
   },
   {
-    "index": 24,
+    "index": 25,
     "tableName": "professional_testimonials.json",
     "group": "trust",
     "entityKind": "child_collection",
@@ -197,7 +205,7 @@
     "keyRelations": ["professionalId -> professionals.id", "serviceId -> services.id"]
   },
   {
-    "index": 25,
+    "index": 26,
     "tableName": "professional_feedback_summaries.json",
     "group": "trust",
     "entityKind": "aggregate",
@@ -205,7 +213,7 @@
     "keyRelations": ["professionalId -> professionals.id"]
   },
   {
-    "index": 26,
+    "index": 27,
     "tableName": "professional_feedback_metrics.json",
     "group": "trust",
     "entityKind": "aggregate_detail",
@@ -213,19 +221,11 @@
     "keyRelations": ["professionalId -> professionals.id"]
   },
   {
-    "index": 27,
+    "index": 28,
     "tableName": "professional_feedback_breakdowns.json",
     "group": "trust",
     "entityKind": "aggregate_detail",
     "description": "Breakdown distribusi feedback profesional.",
-    "keyRelations": ["professionalId -> professionals.id"]
-  },
-  {
-    "index": 28,
-    "tableName": "professional_recent_activities.json",
-    "group": "trust",
-    "entityKind": "child_collection",
-    "description": "Aktivitas operasional terbaru profesional.",
     "keyRelations": ["professionalId -> professionals.id"]
   },
   {
@@ -310,18 +310,22 @@
   },
   {
     "index": 39,
-    "tableName": "table_manifest.json",
+    "tableName": "admin_staff.json",
     "group": "ops",
-    "entityKind": "audit_manifest",
-    "description": "Audit jumlah row per tabel hasil generator.",
+    "entityKind": "master",
+    "description": "Direktori admin untuk support desk dan admin console.",
     "keyRelations": []
   },
   {
     "index": 40,
-    "tableName": "professional_availability_policies.json",
-    "group": "catalog",
-    "entityKind": "availability_policy",
-    "description": "Policy availability global per profesional dan mode, termasuk minimum notice booking.",
-    "keyRelations": ["professionalId -> professionals.id", "mode -> reference_service_delivery_modes.code"]
+    "tableName": "support_tickets.json",
+    "group": "ops",
+    "entityKind": "ticket",
+    "description": "Ticket bantuan customer dan profesional yang masuk ke support desk.",
+    "keyRelations": [
+      "assignedAdminId -> admin_staff.id",
+      "relatedAppointmentId -> appointments.id",
+      "relatedProfessionalId -> professionals.id"
+    ]
   }
 ]

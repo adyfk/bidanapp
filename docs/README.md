@@ -53,6 +53,8 @@ If you are new to the repository, read these documents in order:
   Concise explanation of backend-generated OpenAPI and generated TypeScript types.
 - [QA Seed Matrix](./qa-seed-matrix.md)
   How to reset the full runtime seed, which states and actors it creates, and how to use the report for product verification.
+- [Manual QA Playbook](./manual-qa-playbook.md)
+  Single-file setup, demo-account, route, and checklist guide for repeatable manual QA on the seeded runtime.
 - [Seed Data Contract](./seed-data-contract.md)
   Shape and ownership of the backend-owned normalized JSON seed dataset used by remaining read-model/bootstrap surfaces.
 - [Seed Data Blueprint](./seed-data/README.md)

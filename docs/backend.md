@@ -25,20 +25,31 @@ apps/backend
 │   └── schema.sql               # desired schema state
 ├── seeddata                     # backend-owned normalized seed dataset used for bootstrap import and tests
 ├── internal
-│   ├── api/contract             # shared API contract helpers and types
 │   ├── config                   # env loading and validation
+│   ├── devseed                  # lightweight dev runtime helpers
 │   ├── http
 │   │   ├── middleware           # middleware chain
 │   │   └── router.go            # route composition
 │   ├── modules
+│   │   ├── adminauth
+│   │   ├── appointments
 │   │   ├── chat
+│   │   ├── clientstate
+│   │   ├── customerauth
 │   │   ├── health
+│   │   ├── professionalauth
 │   │   ├── professionalportal
 │   │   └── readmodel
 │   ├── platform
+│   │   ├── contentstore         # public content document storage
+│   │   ├── database             # PostgreSQL connection setup
+│   │   ├── documentstore        # generic document persistence
 │   │   ├── log                  # logger setup
 │   │   ├── openapi              # Huma/OpenAPI builder
+│   │   ├── portalstore          # professional portal persistence
+│   │   ├── ratelimit            # Redis or in-memory auth rate limit
 │   │   └── web                  # JSON and API error helpers
+│   ├── seeding                  # seeded QA/runtime import helpers
 │   └── server                   # HTTP server lifecycle
 └── scripts/atlas.sh             # Atlas convenience wrapper
 ```

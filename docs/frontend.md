@@ -38,25 +38,32 @@ apps/frontend/src
 
 ## 3. Route Structure
 
-The frontend uses localized routes under `src/app/[locale]`.
+The frontend uses localized public routes under `apps/frontend/src/app/(public)/[locale]` and a separate admin tree under `apps/frontend/src/app/(admin)/admin`.
 
-Current route files include:
+Current public route files include:
 
-- `src/app/[locale]/page.tsx`
-- `src/app/[locale]/home/page.tsx`
-- `src/app/[locale]/explore/page.tsx`
-- `src/app/[locale]/services/page.tsx`
-- `src/app/[locale]/appointments/page.tsx`
-- `src/app/[locale]/appointments/[id]/page.tsx`
-- `src/app/[locale]/activity/[id]/page.tsx`
-- `src/app/[locale]/p/[slug]/page.tsx`
-- `src/app/[locale]/s/[slug]/page.tsx`
-- `src/app/[locale]/profile/page.tsx`
+- `apps/frontend/src/app/(public)/[locale]/page.tsx`
+- `apps/frontend/src/app/(public)/[locale]/home/page.tsx`
+- `apps/frontend/src/app/(public)/[locale]/explore/page.tsx`
+- `apps/frontend/src/app/(public)/[locale]/services/page.tsx`
+- `apps/frontend/src/app/(public)/[locale]/appointments/page.tsx`
+- `apps/frontend/src/app/(public)/[locale]/appointments/[id]/page.tsx`
+- `apps/frontend/src/app/(public)/[locale]/activity/[id]/page.tsx`
+- `apps/frontend/src/app/(public)/[locale]/p/[slug]/page.tsx`
+- `apps/frontend/src/app/(public)/[locale]/s/[slug]/page.tsx`
+- `apps/frontend/src/app/(public)/[locale]/profile/page.tsx`
+- `apps/frontend/src/app/(public)/[locale]/for-professionals/page.tsx`
+- `apps/frontend/src/app/(public)/[locale]/for-professionals/dashboard/*`
+
+Current admin route files include:
+
+- `apps/frontend/src/app/(admin)/admin/login/page.tsx`
+- `apps/frontend/src/app/(admin)/admin/(console)/*`
 
 Global metadata routes also exist:
 
-- `src/app/robots.ts`
-- `src/app/sitemap.ts`
+- `apps/frontend/src/app/robots.ts`
+- `apps/frontend/src/app/sitemap.ts`
 
 ## 4. Locale And Navigation Rules
 
@@ -158,7 +165,7 @@ This split is important:
 Current styling conventions:
 
 - shared visual values come from `APP_CONFIG.colors`
-- route-level layout is applied in `src/app/[locale]/layout.tsx`
+- route-level layout is applied in `apps/frontend/src/app/(public)/[locale]/layout.tsx`
 - the app shell uses a mobile-app inspired layout with bottom navigation
 - design primitives should be kept reusable, not page-coupled
 
@@ -191,7 +198,7 @@ The smoke test runs a real Next.js dev server, so it is slower than a pure unit 
 Recommended checklist:
 
 1. Decide which backend contract or read-model surface owns the feature data.
-2. Add or update route files under `src/app/[locale]` as needed.
+2. Add or update route files under `apps/frontend/src/app/(public)/[locale]` or `apps/frontend/src/app/(admin)/admin` as needed.
 3. Create or update a screen container in `components/screens`.
 4. Split complex sections into `features/<feature>/components`.
 5. Put state or action logic into `features/<feature>/hooks`.

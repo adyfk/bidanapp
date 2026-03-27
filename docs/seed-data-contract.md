@@ -25,10 +25,11 @@ Primary backend read-model reader:
 ## Current Table Groups
 
 - runtime pointer tables: `app_runtime_selections.json`, `app_section_configs.json`
-- catalog tables: `service_categories.json`, `services.json`, `professionals.json`, plus professional relation tables
+- catalog tables: `service_categories.json`, `services.json`, `professionals.json`, plus coverage, availability, and cancellation-policy relation tables
 - transaction tables: `appointments.json`
 - messaging tables: `chat_threads.json`, `chat_messages.json`
 - runtime composition tables: `consumers.json`, `user_contexts.json`, `home_feed_*`, `media_presets.json`
+- operational tables: `admin_staff.json`, `support_tickets.json`
 - reference tables: `reference_*`
 
 ## Important Rules

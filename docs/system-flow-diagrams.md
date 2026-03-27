@@ -182,9 +182,9 @@ Primary frontend files:
 
 - `apps/frontend/src/lib/public-bootstrap.ts`
 - `apps/frontend/src/lib/use-catalog-read-model.ts`
-- `apps/frontend/src/app/[locale]/home/page.tsx`
-- `apps/frontend/src/app/[locale]/explore/page.tsx`
-- `apps/frontend/src/app/[locale]/services/page.tsx`
+- `apps/frontend/src/app/(public)/[locale]/home/page.tsx`
+- `apps/frontend/src/app/(public)/[locale]/explore/page.tsx`
+- `apps/frontend/src/app/(public)/[locale]/services/page.tsx`
 
 ```mermaid
 sequenceDiagram

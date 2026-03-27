@@ -57,13 +57,13 @@ Folder ini adalah blueprint seed data backend untuk read-model dan bootstrap yan
   Jam kerja mingguan global per profesional dan mode offline. Ini menjadi source of truth tunggal untuk availability customer-facing.
 - `professional_availability_policies.json`
   Policy availability global per profesional dan mode offline, misalnya `minimumNoticeHours` untuk menutup booking yang terlalu mepet tanpa menduplikasi aturan per hari.
+- `professional_cancellation_policies.json`
+  Policy pembatalan per profesional dan mode yang dipakai untuk snapshot outcome refund atau void saat order dibuat.
 - `professional_availability_date_overrides.json`
   Tanggal khusus untuk libur atau jam custom sementara. Ini adalah kandidat tabel `availability_overrides`.
 
 ### Trust, portfolio, dan social proof profesional
 
-- `professional_portfolio_stats.json`
-  Angka ringkas untuk membangun trust card profesional.
 - `professional_credentials.json`
   Sertifikasi, lisensi, dan dokumen legal profesional.
 - `professional_activity_stories.json`
@@ -80,8 +80,6 @@ Folder ini adalah blueprint seed data backend untuk read-model dan bootstrap yan
   KPI feedback tambahan yang dipakai di UI detail profesional.
 - `professional_feedback_breakdowns.json`
   Breakdown rating atau feedback ke dalam bucket persentase.
-- `professional_recent_activities.json`
-  Aktivitas terbaru profesional untuk membentuk persepsi freshness dan aktivitas operasional.
 
 ### Consumer context dan komposisi UI
 
@@ -112,6 +110,13 @@ Folder ini adalah blueprint seed data backend untuk read-model dan bootstrap yan
 - `chat_messages.json`
   Pesan individual dalam thread. Ini kandidat tabel event/append-only untuk messaging.
 
+### Operasional admin dan support
+
+- `admin_staff.json`
+  Direktori admin yang dipakai admin console dan support desk.
+- `support_tickets.json`
+  Ticket bantuan customer dan profesional yang dipakai untuk triage admin.
+
 ### Manifest
 
 - `table_manifest.json`
@@ -123,6 +128,7 @@ Folder ini adalah blueprint seed data backend untuk read-model dan bootstrap yan
 - `professionals` 1:N `professional_service_offerings`
 - `professionals` 1:N `professional_availability_weekly_hours`
 - `professionals` 1:N `professional_availability_policies`
+- `professionals` 1:N `professional_cancellation_policies`
 - `professionals` 1:N `professional_availability_date_overrides`
 - `professionals` 1:N hampir semua tabel trust dan portofolio
 - `areas` 1:N `user_contexts`
@@ -130,6 +136,7 @@ Folder ini adalah blueprint seed data backend untuk read-model dan bootstrap yan
 - `consumers` 1:N `appointments`
 - `appointments` 1:N `chat_threads` untuk thread bertipe appointment
 - `chat_threads` 1:N `chat_messages`
+- `admin_staff` 1:N `support_tickets` melalui `assignedAdminId`
 
 ## Flow Domain
 
