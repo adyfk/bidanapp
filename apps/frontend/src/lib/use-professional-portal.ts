@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useEffectEvent, useState } from 'react';
 import {
   createDefaultCancellationPolicySnapshot,
   getAppointmentClosePreview,
@@ -68,7 +68,9 @@ import type {
   ServiceModeFlags,
 } from '@/types/catalog';
 import {
+  hydrateProfessionalPortalAdminReviewStatesFromApi,
   syncAppointmentRecordResource,
+  syncProfessionalPortalAdminReviewStateResource,
   syncProfessionalPortalCoverageResource,
   syncProfessionalPortalGalleryResource,
   syncProfessionalPortalPortfolioResource,
@@ -77,6 +79,7 @@ import {
   syncProfessionalPortalServicesResource,
   syncProfessionalPortalTrustResource,
 } from './professional-portal-api';
+import { useProfessionalAuthSession } from './use-professional-auth-session';
 import { useViewerSession } from './use-viewer-session';
 
 export type {
@@ -1387,6 +1390,7 @@ const sanitizePortalState = (
 const readProfessionalPortalData = (
   catalogData: PortalCatalogLookupData,
   currentConsumerName: string,
+  storedSnapshotOverride?: Partial<ProfessionalPortalSnapshot> | null,
 ): {
   portalState: ProfessionalPortalState;
   appointmentRecordsByProfessionalId: Record<string, ProfessionalManagedAppointmentRecord[]>;
@@ -1405,7 +1409,8 @@ const readProfessionalPortalData = (
   }
 
   try {
-    const storedSnapshot = professionalPortalRepository.read() as Partial<ProfessionalPortalSnapshot> | null;
+    const storedSnapshot =
+      storedSnapshotOverride ?? (professionalPortalRepository.read() as Partial<ProfessionalPortalSnapshot> | null);
 
     if (!storedSnapshot) {
       return {
@@ -1631,6 +1636,11 @@ const mergeProfessionalWithPortalState = (
 
 export const useProfessionalPortal = () => {
   const { currentConsumer, currentUserContext } = useAppShell();
+  const {
+    hasHydrated: hasHydratedProfessionalAuth,
+    isAuthenticated: isProfessionalAuthenticated,
+    session: professionalAuthSession,
+  } = useProfessionalAuthSession();
   const { continueAsProfessional } = useViewerSession();
   const catalogSnapshot = useCatalogReadModel();
   const catalogData = buildPortalCatalogData(catalogSnapshot);
@@ -1643,7 +1653,8 @@ export const useProfessionalPortal = () => {
   };
   const buildCatalogDefaultPortalState = (professionalId = catalogData.defaultProfessional?.id || '') =>
     buildDefaultPortalState(catalogLookupData, currentConsumer.name, professionalId);
-  const readPortalData = () => readProfessionalPortalData(catalogLookupData, currentConsumer.name);
+  const readPortalData = (storedSnapshotOverride?: Partial<ProfessionalPortalSnapshot> | null) =>
+    readProfessionalPortalData(catalogLookupData, currentConsumer.name, storedSnapshotOverride);
   const [portalState, setPortalState] = useState<ProfessionalPortalState>(() => readPortalData().portalState);
   const [appointmentRecordsByProfessionalId, setAppointmentRecordsByProfessionalId] = useState<
     Record<string, ProfessionalManagedAppointmentRecord[]>
@@ -1688,6 +1699,45 @@ export const useProfessionalPortal = () => {
 
     void professionalPortalRepository.hydrate(portalState.activeProfessionalId);
   }, [portalState.activeProfessionalId]);
+
+  const syncPortalStateFromRepository = useEffectEvent(
+    (storedSnapshotOverride?: Partial<ProfessionalPortalSnapshot> | null) => {
+      const nextData = readPortalData(storedSnapshotOverride);
+      setPortalState(nextData.portalState);
+      setAppointmentRecordsByProfessionalId(nextData.appointmentRecordsByProfessionalId);
+      setReviewStatesByProfessionalId(nextData.reviewStatesByProfessionalId);
+    },
+  );
+
+  const syncAdminReviewStatesFromApi = useEffectEvent(async () => {
+    if (typeof window === 'undefined' || !window.location.pathname.startsWith('/admin')) {
+      return;
+    }
+
+    const adminReviewStates = await hydrateProfessionalPortalAdminReviewStatesFromApi();
+    const nextReviewStates = sanitizeReviewStatesByProfessionalId(adminReviewStates?.reviewStatesByProfessionalId);
+
+    if (Object.keys(nextReviewStates).length === 0) {
+      return;
+    }
+
+    const mergedReviewStates = {
+      ...buildDefaultReviewStates(catalogData.professionals),
+      ...reviewStatesByProfessionalId,
+      ...nextReviewStates,
+      [portalState.activeProfessionalId]:
+        nextReviewStates[portalState.activeProfessionalId] ||
+        reviewStatesByProfessionalId[portalState.activeProfessionalId] ||
+        createPublishedReviewState(),
+    };
+
+    setReviewStatesByProfessionalId(mergedReviewStates);
+    persistProfessionalPortalState(portalState, appointmentRecordsByProfessionalId, mergedReviewStates);
+  });
+
+  useEffect(() => {
+    void syncAdminReviewStatesFromApi();
+  }, []);
 
   const updatePortalState = (
     nextState: ProfessionalPortalState,
@@ -1743,8 +1793,35 @@ export const useProfessionalPortal = () => {
     return updatePortalState(updater(portalState));
   };
 
+  const selectProfessionalProfile = (professionalId: string) => {
+    const professional = getCatalogProfessionalById(professionalId) || catalogData.defaultProfessional;
+    const appointmentRecords =
+      appointmentRecordsByProfessionalId[professionalId] || buildDefaultAppointmentRecords(professional);
+    const requestBoard = buildRequestBoardFromAppointmentRecords(appointmentRecords, currentConsumer.name);
+
+    return updatePortalState(
+      {
+        ...buildCatalogDefaultPortalState(professionalId),
+        requestBoard,
+      },
+      undefined,
+      {
+        ...reviewStatesByProfessionalId,
+        [professionalId]: reviewStatesByProfessionalId[professionalId] || createPublishedReviewState(),
+      },
+    );
+  };
+
   const startProfessionalLogin = async ({ professionalId }: ProfessionalAccessDraft) => {
-    await professionalPortalRepository.hydrate(professionalId);
+    const hydratedSnapshot = await professionalPortalRepository.hydrate(professionalId);
+
+    if (hydratedSnapshot?.state?.activeProfessionalId === professionalId) {
+      syncPortalStateFromRepository(hydratedSnapshot);
+      continueAsProfessional();
+      return;
+    }
+
+    selectProfessionalProfile(professionalId);
     continueAsProfessional();
   };
 
@@ -1791,23 +1868,47 @@ export const useProfessionalPortal = () => {
   };
 
   const switchProfessionalProfile = (professionalId: string) => {
-    const professional = getCatalogProfessionalById(professionalId) || catalogData.defaultProfessional;
-    const appointmentRecords =
-      appointmentRecordsByProfessionalId[professionalId] || buildDefaultAppointmentRecords(professional);
-    const requestBoard = buildRequestBoardFromAppointmentRecords(appointmentRecords, currentConsumer.name);
-
-    updatePortalState(
-      {
-        ...buildCatalogDefaultPortalState(professionalId),
-        requestBoard,
-      },
-      undefined,
-      {
-        ...reviewStatesByProfessionalId,
-        [professionalId]: reviewStatesByProfessionalId[professionalId] || createPublishedReviewState(),
-      },
-    );
+    selectProfessionalProfile(professionalId);
   };
+
+  const syncAuthenticatedProfessionalProfile = useEffectEvent(async (authenticatedProfessionalID: string) => {
+    const hydratedSnapshot = await professionalPortalRepository.hydrate(authenticatedProfessionalID);
+
+    if (hydratedSnapshot?.state?.activeProfessionalId === authenticatedProfessionalID) {
+      syncPortalStateFromRepository(hydratedSnapshot);
+      return;
+    }
+
+    if (portalState.activeProfessionalId !== authenticatedProfessionalID) {
+      const professional = getCatalogProfessionalById(authenticatedProfessionalID) || catalogData.defaultProfessional;
+      const appointmentRecords =
+        appointmentRecordsByProfessionalId[authenticatedProfessionalID] || buildDefaultAppointmentRecords(professional);
+      const requestBoard = buildRequestBoardFromAppointmentRecords(appointmentRecords, currentConsumer.name);
+
+      updatePortalState(
+        {
+          ...buildCatalogDefaultPortalState(authenticatedProfessionalID),
+          requestBoard,
+        },
+        undefined,
+        {
+          ...reviewStatesByProfessionalId,
+          [authenticatedProfessionalID]:
+            reviewStatesByProfessionalId[authenticatedProfessionalID] || createPublishedReviewState(),
+        },
+      );
+    }
+  });
+
+  useEffect(() => {
+    const authenticatedProfessionalID = professionalAuthSession.professionalId.trim();
+
+    if (!hasHydratedProfessionalAuth || !isProfessionalAuthenticated || !authenticatedProfessionalID) {
+      return;
+    }
+
+    syncAuthenticatedProfessionalProfile(authenticatedProfessionalID);
+  }, [hasHydratedProfessionalAuth, isProfessionalAuthenticated, professionalAuthSession.professionalId]);
 
   const saveServiceConfiguration = (serviceId: string, updates: Partial<ProfessionalManagedService>) => {
     const nextPortalData = updatePortalStateWith((currentState) => ({
@@ -2076,6 +2177,13 @@ export const useProfessionalPortal = () => {
         submittedAt,
       },
     );
+    syncProfessionalPortalAdminReviewStateResource(
+      portalState.activeProfessionalId,
+      nextPortalData.reviewStatesByProfessionalId[portalState.activeProfessionalId] || {
+        status: 'submitted',
+        submittedAt,
+      },
+    );
 
     return true;
   };
@@ -2115,6 +2223,10 @@ export const useProfessionalPortal = () => {
       nextPortalData.portalState,
       nextPortalData.reviewStatesByProfessionalId[portalState.activeProfessionalId] || createDraftReviewState(),
     );
+    syncProfessionalPortalAdminReviewStateResource(
+      portalState.activeProfessionalId,
+      nextPortalData.reviewStatesByProfessionalId[portalState.activeProfessionalId] || createDraftReviewState(),
+    );
 
     return true;
   };
@@ -2123,6 +2235,7 @@ export const useProfessionalPortal = () => {
     const uniqueProfessionalIds = Array.from(new Set(professionalIds.filter(Boolean)));
     const reviewedAt = new Date().toISOString();
     let appliedCount = 0;
+    const appliedProfessionalIds: string[] = [];
     const nextReviewStates = { ...reviewStatesByProfessionalId };
 
     for (const professionalId of uniqueProfessionalIds) {
@@ -2150,6 +2263,7 @@ export const useProfessionalPortal = () => {
               submittedAt: currentReviewState.submittedAt,
             };
       appliedCount += 1;
+      appliedProfessionalIds.push(professionalId);
     }
 
     if (appliedCount === 0) {
@@ -2157,6 +2271,17 @@ export const useProfessionalPortal = () => {
     }
 
     updatePortalState(portalState, undefined, nextReviewStates);
+
+    for (const professionalId of appliedProfessionalIds) {
+      const nextReviewState = nextReviewStates[professionalId];
+
+      if (!nextReviewState) {
+        continue;
+      }
+
+      syncProfessionalPortalAdminReviewStateResource(professionalId, nextReviewState);
+    }
+
     return appliedCount;
   };
 
@@ -2188,6 +2313,13 @@ export const useProfessionalPortal = () => {
       nextPortalData.portalState,
       nextPortalData.reviewStatesByProfessionalId[portalState.activeProfessionalId] || createPublishedReviewState(),
     );
+    syncProfessionalPortalAdminReviewStateResource(
+      portalState.activeProfessionalId,
+      nextPortalData.reviewStatesByProfessionalId[portalState.activeProfessionalId] || createPublishedReviewState(),
+      {
+        acceptingNewClients: true,
+      },
+    );
     syncProfessionalPortalCoverageResource(nextPortalData.portalState);
 
     return true;
@@ -2196,6 +2328,7 @@ export const useProfessionalPortal = () => {
   const publishProfessionalProfiles = (professionalIds: string[]) => {
     const uniqueProfessionalIds = Array.from(new Set(professionalIds.filter(Boolean)));
     let appliedCount = 0;
+    const appliedProfessionalIds: string[] = [];
     const nextReviewStates = { ...reviewStatesByProfessionalId };
 
     for (const professionalId of uniqueProfessionalIds) {
@@ -2211,6 +2344,7 @@ export const useProfessionalPortal = () => {
         status: 'published',
       };
       appliedCount += 1;
+      appliedProfessionalIds.push(professionalId);
     }
 
     if (appliedCount === 0) {
@@ -2227,6 +2361,18 @@ export const useProfessionalPortal = () => {
       undefined,
       nextReviewStates,
     );
+
+    for (const professionalId of appliedProfessionalIds) {
+      const nextReviewState = nextReviewStates[professionalId];
+
+      if (!nextReviewState || nextReviewState.status !== 'published') {
+        continue;
+      }
+
+      syncProfessionalPortalAdminReviewStateResource(professionalId, nextReviewState, {
+        acceptingNewClients: true,
+      });
+    }
 
     return appliedCount;
   };

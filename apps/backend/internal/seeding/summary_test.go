@@ -25,6 +25,7 @@ func TestSummaryWriteReportIncludesScenarioMatrices(t *testing.T) {
 		},
 		ChatMessageCount:     3,
 		ChatThreadCount:      2,
+		CoveredCities:        []string{"Bandung", "Jakarta Selatan", "Surabaya"},
 		ContentDocumentCount: 10,
 		CustomerAccounts: []AccountLogin{
 			{ID: "guest-primary", Phone: "+628123", Password: "Customer2026A"},
@@ -45,8 +46,11 @@ func TestSummaryWriteReportIncludesScenarioMatrices(t *testing.T) {
 		ProfessionalScenarios: []ProfessionalScenario{
 			{ProfessionalID: "prof-01", DisplayName: "Nadia", ReviewStatus: "published", CoverageReady: true, ServicesReady: true, HasFeaturedService: true, AppointmentStatuses: []string{"confirmed"}},
 		},
-		Scenario:           "comprehensive",
-		SupportTicketCount: 4,
+		Scenario:                  "comprehensive",
+		SupportedAppointmentModes: []string{"home_visit", "online", "onsite"},
+		SupportedBookingFlows:     []string{"instant", "request"},
+		SupportedServiceModes:     []string{"home_visit", "online", "onsite"},
+		SupportTicketCount:        4,
 	}
 
 	var buffer bytes.Buffer
@@ -58,6 +62,10 @@ func TestSummaryWriteReportIncludesScenarioMatrices(t *testing.T) {
 	for _, needle := range []string{
 		"BidanApp comprehensive seed completed",
 		"appointment_statuses: confirmed=1, requested=2",
+		"covered_cities: Bandung, Jakarta Selatan, Surabaya",
+		"service_modes: home_visit, online, onsite",
+		"booking_flows: instant, request",
+		"appointment_modes: home_visit, online, onsite",
 		"customer scenario matrix",
 		"professional scenario matrix",
 		"admin identities",

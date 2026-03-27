@@ -77,6 +77,35 @@ npm run mcp:playwright:install
 npm run mcp:qa
 ```
 
+## Seeded QA Quickstart
+
+For a repeatable local QA run with a fully restored runtime matrix:
+
+```bash
+npm run infra:up
+npm run atlas:apply --workspace @bidanapp/backend
+npm run seed:backend:json
+npm run smoke:seeded
+npm run mcp:playwright:install
+PLAYWRIGHT_BACKEND_MODE=seeded npm run test:e2e:frontend
+```
+
+The seeded runtime is designed to cover:
+
+- visitor and public browsing flows from onboarding through home, explore, services, and published professional detail
+- major Indonesia metro contexts across Jakarta Selatan, Jakarta Pusat, Tangerang Selatan, Bandung, Surabaya, Bekasi, and Medan
+- 3 customer personas with unread notifications, in-flight appointments, and history-heavy states across Jakarta Selatan, Tangerang Selatan, and Surabaya contexts
+- 6 professional personas spanning Jakarta Selatan, Surabaya, Tangerang Selatan, Bandung, Medan, and Bekasi plus `published`, `submitted`, `changes_requested`, `verified`, `draft`, and `ready_for_review`
+- 4 admin personas across support, reviews, ops, and catalog
+- service coverage across `home_visit`, `online`, and `onsite` with both `instant` and `request` booking flows
+- all seeded appointment lifecycle states: `requested`, `approved_waiting_payment`, `paid`, `confirmed`, `in_service`, `completed`, `cancelled`, `rejected`, and `expired`
+
+Use these docs together when running manual or automated QA:
+
+- [docs/qa-seed-matrix.md](docs/qa-seed-matrix.md) for exact seeded accounts, route suggestions, and manual test checklists
+- [docs/user-flows/README.md](docs/user-flows/README.md) for persona-by-persona product walkthroughs
+- [docs/getting-started.md](docs/getting-started.md) for local setup and infra prerequisites
+
 ## Development Model
 
 - Backend is the API contract source of truth through Huma.

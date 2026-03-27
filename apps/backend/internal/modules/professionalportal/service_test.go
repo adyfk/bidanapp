@@ -358,3 +358,95 @@ func TestProfileCoverageServicesAndRequestsRoundTrip(t *testing.T) {
 		t.Fatal("expected session snapshot to be patched by granular updates")
 	}
 }
+
+func TestUpsertAdminReviewStatePreservesProfileFieldsAndLifecycleState(t *testing.T) {
+	t.Parallel()
+
+	service := NewService(portalstore.NewMemoryStore())
+	ctx := context.Background()
+
+	_, err := service.UpsertProfile(ctx, ProfessionalPortalProfileData{
+		AcceptingNewClients:        false,
+		AutoApproveInstantBookings: false,
+		City:                       "Jakarta Selatan",
+		CredentialNumber:           "STR-456",
+		DisplayName:                "Bidan Nila",
+		Phone:                      "+62 811 0000 1111",
+		ProfessionalID:             "prof-admin-review",
+		PublicBio:                  "Pendamping nifas area Jabodetabek.",
+		ResponseTimeGoal:           "< 15 menit",
+		ReviewState: ProfessionalPortalReviewState{
+			Status:      "submitted",
+			SubmittedAt: "2026-03-24T08:00:00Z",
+		},
+		YearsExperience: "11 years",
+	})
+	if err != nil {
+		t.Fatalf("seed profile: %v", err)
+	}
+
+	verifiedProfile, err := service.UpsertAdminReviewState(ctx, ProfessionalPortalAdminReviewStateData{
+		ProfessionalID: "prof-admin-review",
+		ReviewState: ProfessionalPortalReviewState{
+			ReviewedAt:   "2026-03-24T09:00:00Z",
+			ReviewerName: "Admin BidanCare",
+			Status:       "verified",
+			SubmittedAt:  "2026-03-24T08:00:00Z",
+		},
+	})
+	if err != nil {
+		t.Fatalf("verify review state: %v", err)
+	}
+
+	if verifiedProfile.DisplayName != "Bidan Nila" {
+		t.Fatalf("expected profile fields to be preserved, got display name %q", verifiedProfile.DisplayName)
+	}
+	if verifiedProfile.ReviewState.Status != "verified" {
+		t.Fatalf("expected verified review state, got %#v", verifiedProfile.ReviewState)
+	}
+	if verifiedProfile.AcceptingNewClients {
+		t.Fatal("expected acceptingNewClients to remain false before publish")
+	}
+
+	acceptingNewClients := true
+	publishedProfile, err := service.UpsertAdminReviewState(ctx, ProfessionalPortalAdminReviewStateData{
+		AcceptingNewClients: &acceptingNewClients,
+		ProfessionalID:      "prof-admin-review",
+		ReviewState: ProfessionalPortalReviewState{
+			PublishedAt:  "2026-03-24T10:00:00Z",
+			ReviewedAt:   "2026-03-24T09:00:00Z",
+			ReviewerName: "Admin BidanCare",
+			Status:       "published",
+			SubmittedAt:  "2026-03-24T08:00:00Z",
+		},
+	})
+	if err != nil {
+		t.Fatalf("publish review state: %v", err)
+	}
+
+	if !publishedProfile.AcceptingNewClients {
+		t.Fatal("expected publish flow to set acceptingNewClients")
+	}
+	if publishedProfile.ReviewState.Status != "published" {
+		t.Fatalf("expected published review state, got %#v", publishedProfile.ReviewState)
+	}
+
+	loadedProfile, err := service.Profile(ctx, "prof-admin-review")
+	if err != nil {
+		t.Fatalf("load updated profile: %v", err)
+	}
+	if loadedProfile.DisplayName != "Bidan Nila" || loadedProfile.City != "Jakarta Selatan" {
+		t.Fatalf("expected profile fields to survive admin review updates, got %#v", loadedProfile)
+	}
+	if loadedProfile.ReviewState.Status != "published" || loadedProfile.ReviewState.PublishedAt == "" {
+		t.Fatalf("expected persisted published lifecycle state, got %#v", loadedProfile.ReviewState)
+	}
+
+	adminReviewStates, err := service.AdminReviewStates(ctx)
+	if err != nil {
+		t.Fatalf("load admin review states: %v", err)
+	}
+	if adminReviewStates.ReviewStatesByProfessionalID["prof-admin-review"].Status != "published" {
+		t.Fatalf("expected admin review state map to expose published status, got %#v", adminReviewStates)
+	}
+}

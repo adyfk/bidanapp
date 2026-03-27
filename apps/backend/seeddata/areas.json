@@ -1,26 +1,6 @@
 [
   {
     "index": 1,
-    "id": "depok-sukmajaya",
-    "city": "Depok",
-    "district": "Sukmajaya",
-    "province": "Jawa Barat",
-    "label": "Depok, Sukmajaya",
-    "latitude": -6.3975,
-    "longitude": 106.8239
-  },
-  {
-    "index": 2,
-    "id": "depok-pancoran-mas",
-    "city": "Depok",
-    "district": "Pancoran Mas",
-    "province": "Jawa Barat",
-    "label": "Depok, Pancoran Mas",
-    "latitude": -6.4021,
-    "longitude": 106.8126
-  },
-  {
-    "index": 3,
     "id": "jakarta-selatan-cilandak",
     "city": "Jakarta Selatan",
     "district": "Cilandak",
@@ -30,43 +10,83 @@
     "longitude": 106.7956
   },
   {
-    "index": 4,
-    "id": "jakarta-selatan-kebayoran-baru",
-    "city": "Jakarta Selatan",
-    "district": "Kebayoran Baru",
+    "index": 2,
+    "id": "jakarta-pusat-menteng",
+    "city": "Jakarta Pusat",
+    "district": "Menteng",
     "province": "DKI Jakarta",
-    "label": "Jakarta Selatan, Kebayoran Baru",
-    "latitude": -6.2447,
-    "longitude": 106.7985
+    "label": "Jakarta Pusat, Menteng",
+    "latitude": -6.1963,
+    "longitude": 106.8327
+  },
+  {
+    "index": 3,
+    "id": "tangerang-selatan-serpong",
+    "city": "Tangerang Selatan",
+    "district": "Serpong",
+    "province": "Banten",
+    "label": "Tangerang Selatan, Serpong",
+    "latitude": -6.3089,
+    "longitude": 106.6656
+  },
+  {
+    "index": 4,
+    "id": "tangerang-selatan-pamulang",
+    "city": "Tangerang Selatan",
+    "district": "Pamulang",
+    "province": "Banten",
+    "label": "Tangerang Selatan, Pamulang",
+    "latitude": -6.3428,
+    "longitude": 106.7383
   },
   {
     "index": 5,
-    "id": "bandung-soreang",
+    "id": "bandung-coblong",
     "city": "Bandung",
-    "district": "Soreang",
+    "district": "Coblong",
     "province": "Jawa Barat",
-    "label": "Bandung, Soreang",
-    "latitude": -7.0346,
-    "longitude": 107.5185
+    "label": "Bandung, Coblong",
+    "latitude": -6.8873,
+    "longitude": 107.6191
   },
   {
     "index": 6,
-    "id": "jakarta-barat-kembangan",
-    "city": "Jakarta Barat",
-    "district": "Kembangan",
-    "province": "DKI Jakarta",
-    "label": "Jakarta Barat, Kembangan",
-    "latitude": -6.1918,
-    "longitude": 106.7382
+    "id": "surabaya-tegalsari",
+    "city": "Surabaya",
+    "district": "Tegalsari",
+    "province": "Jawa Timur",
+    "label": "Surabaya, Tegalsari",
+    "latitude": -7.2721,
+    "longitude": 112.7429
   },
   {
     "index": 7,
-    "id": "depok-cimanggis",
-    "city": "Depok",
-    "district": "Cimanggis",
+    "id": "surabaya-sukolilo",
+    "city": "Surabaya",
+    "district": "Sukolilo",
+    "province": "Jawa Timur",
+    "label": "Surabaya, Sukolilo",
+    "latitude": -7.2915,
+    "longitude": 112.8017
+  },
+  {
+    "index": 8,
+    "id": "bekasi-bekasi-selatan",
+    "city": "Bekasi",
+    "district": "Bekasi Selatan",
     "province": "Jawa Barat",
-    "label": "Depok, Cimanggis",
-    "latitude": -6.3663,
-    "longitude": 106.877
+    "label": "Bekasi, Bekasi Selatan",
+    "latitude": -6.2504,
+    "longitude": 106.9905
+  },
+  {
+    "index": 9,
+    "id": "medan-petisah",
+    "city": "Medan",
+    "district": "Petisah",
+    "province": "Sumatera Utara",
+    "label": "Medan, Petisah",
+    "latitude": 3.5852,
+    "longitude": 98.6653
   }
 ]

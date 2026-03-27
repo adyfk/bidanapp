@@ -1,14 +1,6 @@
 [
   {
     "index": 1,
-    "id": "depok-sukmajaya",
-    "selectedAreaId": "depok-sukmajaya",
-    "userLatitude": -6.3962,
-    "userLongitude": 106.8239,
-    "onlineStatusLabel": "Tersedia"
-  },
-  {
-    "index": 2,
     "id": "jakarta-selatan-cilandak",
     "selectedAreaId": "jakarta-selatan-cilandak",
     "userLatitude": -6.2878,
@@ -16,11 +8,19 @@
     "onlineStatusLabel": "Sedang aktif"
   },
   {
+    "index": 2,
+    "id": "tangerang-selatan-serpong",
+    "selectedAreaId": "tangerang-selatan-serpong",
+    "userLatitude": -6.3068,
+    "userLongitude": 106.6652,
+    "onlineStatusLabel": "Tersedia"
+  },
+  {
     "index": 3,
-    "id": "bandung-soreang",
-    "selectedAreaId": "bandung-soreang",
-    "userLatitude": -7.0325,
-    "userLongitude": 107.5172,
+    "id": "surabaya-tegalsari",
+    "selectedAreaId": "surabaya-tegalsari",
+    "userLatitude": -7.2747,
+    "userLongitude": 112.7396,
     "onlineStatusLabel": "Online"
   }
 ]

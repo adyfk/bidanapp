@@ -11,40 +11,40 @@
     "id": "professional-coverage-1",
     "index": 1,
     "professionalId": "1",
-    "homeVisitRadiusKm": 8,
-    "centerLatitude": -6.4012,
-    "centerLongitude": 106.8158
+    "homeVisitRadiusKm": 12,
+    "centerLatitude": -7.2721,
+    "centerLongitude": 112.7429
   },
   {
     "id": "professional-coverage-4",
     "index": 1,
     "professionalId": "4",
-    "homeVisitRadiusKm": 10,
-    "centerLatitude": -6.2815,
-    "centerLongitude": 106.802
+    "homeVisitRadiusKm": 12,
+    "centerLatitude": -6.3089,
+    "centerLongitude": 106.6656
   },
   {
     "id": "professional-coverage-3",
     "index": 1,
     "professionalId": "3",
-    "homeVisitRadiusKm": 18,
-    "centerLatitude": -7.031,
-    "centerLongitude": 107.519
+    "homeVisitRadiusKm": 14,
+    "centerLatitude": -6.8873,
+    "centerLongitude": 107.6191
   },
   {
     "id": "professional-coverage-2",
     "index": 1,
     "professionalId": "2",
-    "homeVisitRadiusKm": 6,
-    "centerLatitude": -6.394,
-    "centerLongitude": 106.824
+    "homeVisitRadiusKm": 8,
+    "centerLatitude": 3.5852,
+    "centerLongitude": 98.6653
   },
   {
     "id": "professional-coverage-5",
     "index": 1,
     "professionalId": "5",
-    "homeVisitRadiusKm": 12,
-    "centerLatitude": -6.1935,
-    "centerLongitude": 106.739
+    "homeVisitRadiusKm": 10,
+    "centerLatitude": -6.2504,
+    "centerLongitude": 106.9905
   }
 ]

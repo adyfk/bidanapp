@@ -136,6 +136,61 @@ func (s *Service) UpsertProfile(ctx context.Context, input ProfessionalPortalPro
 	return profileFromRecord(professionalID, record), nil
 }
 
+func (s *Service) UpsertAdminReviewState(
+	ctx context.Context,
+	input ProfessionalPortalAdminReviewStateData,
+) (ProfessionalPortalProfileData, error) {
+	if err := ctx.Err(); err != nil {
+		return ProfessionalPortalProfileData{}, err
+	}
+
+	professionalID := strings.TrimSpace(input.ProfessionalID)
+	if professionalID == "" {
+		return ProfessionalPortalProfileData{}, ErrInvalidProfessionalID
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	store, err := s.readStore(ctx)
+	if err != nil {
+		return ProfessionalPortalProfileData{}, err
+	}
+
+	record := store.Sessions[professionalID]
+	record = applyRecordMutation(record, professionalID, func(snapshot map[string]any) {
+		applyAdminReviewStateToSnapshot(snapshot, input)
+	})
+	if _, err := s.writeStore(ctx, record, professionalID); err != nil {
+		return ProfessionalPortalProfileData{}, err
+	}
+
+	return profileFromRecord(professionalID, record), nil
+}
+
+func (s *Service) AdminReviewStates(ctx context.Context) (ProfessionalPortalAdminReviewStatesData, error) {
+	if err := ctx.Err(); err != nil {
+		return ProfessionalPortalAdminReviewStatesData{}, err
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	store, err := s.readStore(ctx)
+	if err != nil {
+		return ProfessionalPortalAdminReviewStatesData{}, err
+	}
+
+	reviewStatesByProfessionalID := make(map[string]ProfessionalPortalReviewState, len(store.Sessions))
+	for professionalID, record := range store.Sessions {
+		reviewStatesByProfessionalID[professionalID] = profileFromRecord(professionalID, record).ReviewState
+	}
+
+	return ProfessionalPortalAdminReviewStatesData{
+		ReviewStatesByProfessionalID: reviewStatesByProfessionalID,
+	}, nil
+}
+
 func (s *Service) Coverage(ctx context.Context, professionalID string) (ProfessionalPortalCoverageData, error) {
 	if err := ctx.Err(); err != nil {
 		return ProfessionalPortalCoverageData{}, err
@@ -748,6 +803,17 @@ func applyProfileToSnapshot(snapshot map[string]any, input ProfessionalPortalPro
 	state["publicBio"] = input.PublicBio
 	state["responseTimeGoal"] = input.ResponseTimeGoal
 	state["yearsExperience"] = input.YearsExperience
+
+	reviewStatesByProfessionalID := ensureMap(snapshot, "reviewStatesByProfessionalId")
+	reviewStatesByProfessionalID[input.ProfessionalID] = input.ReviewState
+}
+
+func applyAdminReviewStateToSnapshot(snapshot map[string]any, input ProfessionalPortalAdminReviewStateData) {
+	state := ensureMap(snapshot, "state")
+	state["activeProfessionalId"] = input.ProfessionalID
+	if input.AcceptingNewClients != nil {
+		state["acceptingNewClients"] = *input.AcceptingNewClients
+	}
 
 	reviewStatesByProfessionalID := ensureMap(snapshot, "reviewStatesByProfessionalId")
 	reviewStatesByProfessionalID[input.ProfessionalID] = input.ReviewState

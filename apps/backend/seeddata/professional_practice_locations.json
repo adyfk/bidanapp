@@ -3,8 +3,8 @@
     "id": "professional-practice-6",
     "index": 1,
     "professionalId": "6",
-    "label": "BidanCare Video Room",
-    "address": "Studio konsultasi virtual, link sesi dikirim otomatis.",
+    "label": "Jakarta Selatan Video Care",
+    "address": "Studio konsultasi virtual Cilandak, link sesi dikirim otomatis sebelum jadwal.",
     "areaId": "jakarta-selatan-cilandak",
     "latitude": -6.2892,
     "longitude": 106.7956
@@ -13,50 +13,50 @@
     "id": "professional-practice-1",
     "index": 1,
     "professionalId": "1",
-    "label": "BidanCare Center",
-    "address": "BidanCare Center, lantai 2 ruang perawatan bayi.",
-    "areaId": "depok-pancoran-mas",
-    "latitude": -6.4012,
-    "longitude": 106.8158
+    "label": "Surabaya Newborn Care Center",
+    "address": "Jl. Dr. Soetomo No. 12, ruang perawatan bayi dan laktasi lantai 2.",
+    "areaId": "surabaya-tegalsari",
+    "latitude": -7.2721,
+    "longitude": 112.7429
   },
   {
     "id": "professional-practice-4",
     "index": 1,
     "professionalId": "4",
-    "label": "BidanCare South District",
-    "address": "Jl. Wijaya Timur No. 18, ruang keluarga postpartum.",
-    "areaId": "jakarta-selatan-cilandak",
-    "latitude": -6.2815,
-    "longitude": 106.802
+    "label": "Serpong Postpartum Care",
+    "address": "Jl. Gading Serpong Boulevard No. 8, ruang edukasi nifas keluarga.",
+    "areaId": "tangerang-selatan-serpong",
+    "latitude": -6.3089,
+    "longitude": 106.6656
   },
   {
     "id": "professional-practice-3",
     "index": 1,
     "professionalId": "3",
-    "label": "BidanCare Rehab Mobile",
-    "address": "Base operasional rehabilitasi Soreang untuk kunjungan terapi rumah.",
-    "areaId": "bandung-soreang",
-    "latitude": -7.031,
-    "longitude": 107.519
+    "label": "Bandung Rehab Homecare",
+    "address": "Jl. Ir. H. Juanda No. 92, base operasional terapi rumah area Coblong.",
+    "areaId": "bandung-coblong",
+    "latitude": -6.8873,
+    "longitude": 107.6191
   },
   {
     "id": "professional-practice-2",
     "index": 1,
     "professionalId": "2",
-    "label": "BidanCare Home Service",
-    "address": "Base home care Sukmajaya untuk home visit area terbatas.",
-    "areaId": "depok-sukmajaya",
-    "latitude": -6.394,
-    "longitude": 106.824
+    "label": "Medan Sunnah Wellness Homecare",
+    "address": "Jl. Iskandar Muda No. 45, titik homecare terapi kebugaran dan bekam.",
+    "areaId": "medan-petisah",
+    "latitude": 3.5852,
+    "longitude": 98.6653
   },
   {
     "id": "professional-practice-5",
     "index": 1,
     "professionalId": "5",
-    "label": "West Point Wellness",
-    "address": "Studio terapi West Point untuk sesi sore dan malam.",
-    "areaId": "jakarta-barat-kembangan",
-    "latitude": -6.1935,
-    "longitude": 106.739
+    "label": "Bekasi Recovery Point",
+    "address": "Jl. Ahmad Yani No. 188, studio relaksasi sore dan malam untuk pekerja urban.",
+    "areaId": "bekasi-bekasi-selatan",
+    "latitude": -6.2504,
+    "longitude": 106.9905
   }
 ]

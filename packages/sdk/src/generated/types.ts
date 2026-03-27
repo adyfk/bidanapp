@@ -60,6 +60,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/professionals/review-state": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Persist a professional review state from the admin console */
+        put: operations["upsert-admin-professional-portal-review-state"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/professionals/review-states": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get the professional review-state map for the admin console */
+        get: operations["get-admin-professional-portal-review-states"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/session": {
         parameters: {
             query?: never;
@@ -741,6 +775,15 @@ export interface components {
             /** Format: int64 */
             schemaVersion: number;
         };
+        AdminReviewStatesResponseBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/AdminReviewStatesResponseBody.json
+             */
+            readonly $schema?: string;
+            data: components["schemas"]["ProfessionalPortalAdminReviewStatesData"];
+        };
         AdminSessionData: {
             /**
              * Format: uri
@@ -1408,6 +1451,22 @@ export interface components {
             location: string;
             note: string;
             title: string;
+        };
+        ProfessionalPortalAdminReviewStateData: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/ProfessionalPortalAdminReviewStateData.json
+             */
+            readonly $schema?: string;
+            acceptingNewClients?: boolean;
+            professionalId: string;
+            reviewState: components["schemas"]["ProfessionalPortalReviewState"];
+        };
+        ProfessionalPortalAdminReviewStatesData: {
+            reviewStatesByProfessionalId: {
+                [key: string]: components["schemas"]["ProfessionalPortalReviewState"];
+            };
         };
         ProfessionalPortalAppointmentCancellationResolution: {
             cancellationReason: string;
@@ -2301,6 +2360,104 @@ export interface operations {
             };
             /** @description Unprocessable Entity */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "upsert-admin-professional-portal-review-state": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProfessionalPortalAdminReviewStateData"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileResponseBody"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "get-admin-professional-portal-review-states": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminReviewStatesResponseBody"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };

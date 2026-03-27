@@ -6,7 +6,7 @@
     "name": "Clara Wijaya",
     "title": "Konsultan Ibu dan Anak",
     "gender": "female",
-    "location": "BidanCare Video Room",
+    "location": "Jakarta Selatan Video Care",
     "rating": 4.95,
     "reviews": "210+",
     "experience": "9+",
@@ -22,9 +22,9 @@
     "id": "1",
     "slug": "omeya-sen",
     "name": "Omeya Sen",
-    "title": "Professional Newborn Care",
+    "title": "Neonatal Homecare Specialist",
     "gender": "female",
-    "location": "BidanCare Center",
+    "location": "Surabaya Newborn Care Center",
     "rating": 5,
     "reviews": "120+",
     "experience": "8+",
@@ -33,16 +33,16 @@
     "coverImage": "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=1200&auto=format&fit=crop",
     "isAvailable": true,
     "responseTime": "< 15 menit",
-    "about": "Profesional berpengalaman yang berdedikasi tinggi untuk memberikan pelayanan terbaik bagi Anda dan buah hati."
+    "about": "Spesialis homecare bayi baru lahir untuk keluarga urban Surabaya dengan fokus stimulasi awal, laktasi, dan edukasi perawatan newborn."
   },
   {
     "index": 3,
     "id": "4",
     "slug": "rani-hartati",
     "name": "Rani Hartati",
-    "title": "Professional Postpartum Recovery",
+    "title": "Postpartum Recovery Specialist",
     "gender": "female",
-    "location": "BidanCare South District",
+    "location": "Serpong Postpartum Care",
     "rating": 4.7,
     "reviews": "80+",
     "experience": "10+",
@@ -51,16 +51,16 @@
     "coverImage": "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=1200&auto=format&fit=crop",
     "isAvailable": true,
     "responseTime": "< 30 menit",
-    "about": "Fokus pada masa nifas, pemulihan ibu, dan edukasi keluarga inti pasca persalinan."
+    "about": "Fokus pada pemulihan ibu pasca persalinan, home visit nifas, dan coaching keluarga muda di area Tangerang Selatan."
   },
   {
     "index": 4,
     "id": "3",
-    "slug": "martha-stewart",
+    "slug": "martha-teria",
     "name": "Martha Teria",
     "title": "Fisioterapis Rehabilitasi",
     "gender": "female",
-    "location": "BidanCare Mobile",
+    "location": "Bandung Rehab Homecare",
     "rating": 4.9,
     "reviews": "60+",
     "experience": "12+",
@@ -69,7 +69,7 @@
     "coverImage": "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?q=80&w=1200&auto=format&fit=crop",
     "isAvailable": true,
     "responseTime": "< 20 menit",
-    "about": "Spesialis fisioterapi pemulihan pasca operasi dan stroke dengan pengalaman puluhan tahun."
+    "about": "Spesialis fisioterapi homecare Bandung untuk pemulihan pasca stroke, latihan motorik, dan coaching caregiver."
   },
   {
     "index": 5,
@@ -78,7 +78,7 @@
     "name": "Alex Ben",
     "title": "Terapis Sunnah Wellness",
     "gender": "male",
-    "location": "BidanCare Home",
+    "location": "Medan Sunnah Wellness Homecare",
     "rating": 4.8,
     "reviews": "95+",
     "experience": "6+",
@@ -87,7 +87,7 @@
     "coverImage": "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?q=80&w=1200&auto=format&fit=crop",
     "isAvailable": true,
     "responseTime": "< 25 menit",
-    "about": "Terapis bersertifikat yang siap membantu kebutuhan kebugaran dan terapi sunnah Anda secara profesional."
+    "about": "Terapis kebugaran bersertifikat untuk homecare dan onsite wellness di Medan dengan standar kebersihan alat yang ketat."
   },
   {
     "index": 6,
@@ -96,7 +96,7 @@
     "name": "Dimas Pratama",
     "title": "Terapis Relaksasi Rumah",
     "gender": "male",
-    "location": "BidanCare West Point",
+    "location": "Bekasi Recovery Point",
     "rating": 4.4,
     "reviews": "40+",
     "experience": "4+",
@@ -105,6 +105,6 @@
     "coverImage": "https://images.unsplash.com/photo-1519823551278-64ac92734fb1?q=80&w=1200&auto=format&fit=crop",
     "isAvailable": false,
     "responseTime": "< 40 menit",
-    "about": "Terapis relaksasi untuk kebutuhan pemulihan ringan, pijat rumah, dan sesi singkat setelah aktivitas tinggi."
+    "about": "Terapis relaksasi mobile untuk pekerja urban Bekasi yang membutuhkan sesi pemulihan cepat setelah aktivitas padat."
   }
 ]

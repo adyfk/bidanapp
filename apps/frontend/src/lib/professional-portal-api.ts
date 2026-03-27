@@ -30,6 +30,7 @@ const syncWarnings = new Set<string>();
 const client = createBidanappApiClient(getBackendApiBaseUrl());
 
 const isApiSyncEnabled = () => PUBLIC_ENV.professionalPortalDataSource === 'api' && typeof window !== 'undefined';
+const isAdminPortalSyncEnabled = () => isApiSyncEnabled() && window.location.pathname.startsWith('/admin');
 
 const withTimeout = <T>(promise: Promise<T>, timeoutMs: number) =>
   new Promise<T>((resolve, reject) => {
@@ -74,6 +75,16 @@ const fireAndForgetProtectedSync = (promiseFactory: () => Promise<unknown>, warn
   fireAndForgetSync(promiseFactory(), warningMessage);
 };
 
+const fireAndForgetAdminSync = (promiseFactory: () => Promise<unknown>, warningMessage: string) => {
+  if (!isAdminPortalSyncEnabled()) {
+    return;
+  }
+
+  fireAndForgetSync(promiseFactory(), warningMessage);
+};
+
+const buildApiUrl = (path: string) => `${getBackendApiBaseUrl()}${path.startsWith('/') ? path : `/${path}`}`;
+
 export const syncProfessionalPortalProfileResource = (
   portalState: ProfessionalPortalState,
   reviewState: ProfessionalLifecycleReviewState,
@@ -95,6 +106,65 @@ export const syncProfessionalPortalProfileResource = (
       }),
     '[ProfessionalPortal] Failed to sync profile resource to the backend.',
   );
+};
+
+export const syncProfessionalPortalAdminReviewStateResource = (
+  professionalId: string,
+  reviewState: ProfessionalLifecycleReviewState,
+  options?: {
+    acceptingNewClients?: boolean;
+  },
+) => {
+  fireAndForgetAdminSync(async () => {
+    const response = await fetch(buildApiUrl('/admin/professionals/review-state'), {
+      body: JSON.stringify({
+        ...(typeof options?.acceptingNewClients === 'boolean'
+          ? { acceptingNewClients: options.acceptingNewClients }
+          : {}),
+        professionalId,
+        reviewState,
+      }),
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      method: 'PUT',
+    });
+
+    if (!response.ok) {
+      throw new Error(`[ProfessionalPortal] Admin review sync failed with status ${response.status}.`);
+    }
+  }, '[ProfessionalPortal] Failed to sync admin review state to the backend.');
+};
+
+export const hydrateProfessionalPortalAdminReviewStatesFromApi = async () => {
+  if (!isAdminPortalSyncEnabled()) {
+    return undefined;
+  }
+
+  try {
+    const response = await withTimeout(
+      fetch(buildApiUrl('/admin/professionals/review-states'), {
+        credentials: 'include',
+        method: 'GET',
+      }),
+      requestTimeoutMs,
+    );
+
+    if (!response.ok) {
+      throw new Error(`[ProfessionalPortal] Admin review-state hydration failed with status ${response.status}.`);
+    }
+
+    const body = await response.json();
+    return body?.data as
+      | {
+          reviewStatesByProfessionalId?: Record<string, ProfessionalLifecycleReviewState>;
+        }
+      | undefined;
+  } catch {
+    warnSyncFailure('[ProfessionalPortal] Failed to hydrate admin review states from the backend.');
+    return undefined;
+  }
 };
 
 export const syncProfessionalPortalCoverageResource = (portalState: ProfessionalPortalState) => {

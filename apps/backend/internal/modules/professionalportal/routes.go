@@ -8,6 +8,7 @@ import (
 
 	"github.com/danielgtaylor/huma/v2"
 
+	"bidanapp/apps/backend/internal/modules/adminauth"
 	"bidanapp/apps/backend/internal/modules/professionalauth"
 	"bidanapp/apps/backend/internal/platform/web"
 )
@@ -62,6 +63,10 @@ type upsertProfileInput struct {
 	Body ProfessionalPortalProfileData
 }
 
+type upsertAdminReviewStateInput struct {
+	Body ProfessionalPortalAdminReviewStateData
+}
+
 type upsertCoverageInput struct {
 	Body ProfessionalPortalCoverageData
 }
@@ -88,6 +93,10 @@ type upsertTrustInput struct {
 
 type profileResponseBody struct {
 	Data ProfessionalPortalProfileData `json:"data"`
+}
+
+type adminReviewStatesResponseBody struct {
+	Data ProfessionalPortalAdminReviewStatesData `json:"data"`
 }
 
 type coverageResponseBody struct {
@@ -118,6 +127,10 @@ type profileResponse struct {
 	Body profileResponseBody
 }
 
+type adminReviewStatesResponse struct {
+	Body adminReviewStatesResponseBody
+}
+
 type coverageResponse struct {
 	Body coverageResponseBody
 }
@@ -146,6 +159,7 @@ func RegisterRoutes(api huma.API, service *Service) {
 	registerGetRoute(api, service)
 	registerUpsertSessionRoute(api, service)
 	registerProfileRoutes(api, service)
+	registerAdminReviewStateRoutes(api, service)
 	registerCoverageRoutes(api, service)
 	registerServicesRoutes(api, service)
 	registerRequestsRoutes(api, service)
@@ -246,6 +260,44 @@ func registerProfileRoutes(api huma.API, service *Service) {
 		input.Body.ProfessionalID = professionalID
 
 		payload, err := service.UpsertProfile(ctx, input.Body)
+		if err != nil {
+			return nil, toAPIError(err)
+		}
+
+		response := &profileResponse{}
+		response.Body.Data = payload
+		return response, nil
+	})
+}
+
+func registerAdminReviewStateRoutes(api huma.API, service *Service) {
+	huma.Register(api, withAdminSecurity(huma.Operation{
+		OperationID: "get-admin-professional-portal-review-states",
+		Method:      http.MethodGet,
+		Path:        "/admin/professionals/review-states",
+		Summary:     "Get the professional review-state map for the admin console",
+		Tags:        []string{"Professional Portal", "Admin"},
+		Errors:      []int{http.StatusUnauthorized, http.StatusInternalServerError},
+	}), func(ctx context.Context, input *struct{}) (*adminReviewStatesResponse, error) {
+		payload, err := service.AdminReviewStates(ctx)
+		if err != nil {
+			return nil, toAPIError(err)
+		}
+
+		response := &adminReviewStatesResponse{}
+		response.Body.Data = payload
+		return response, nil
+	})
+
+	huma.Register(api, withAdminSecurity(huma.Operation{
+		OperationID: "upsert-admin-professional-portal-review-state",
+		Method:      http.MethodPut,
+		Path:        "/admin/professionals/review-state",
+		Summary:     "Persist a professional review state from the admin console",
+		Tags:        []string{"Professional Portal", "Admin"},
+		Errors:      []int{http.StatusBadRequest, http.StatusUnauthorized, http.StatusInternalServerError},
+	}), func(ctx context.Context, input *upsertAdminReviewStateInput) (*profileResponse, error) {
+		payload, err := service.UpsertAdminReviewState(ctx, input.Body)
 		if err != nil {
 			return nil, toAPIError(err)
 		}
@@ -572,6 +624,13 @@ func toAPIError(err error) error {
 func withProfessionalSecurity(operation huma.Operation) huma.Operation {
 	operation.Security = []map[string][]string{
 		{professionalauth.SecuritySchemeName: {}},
+	}
+	return operation
+}
+
+func withAdminSecurity(operation huma.Operation) huma.Operation {
+	operation.Security = []map[string][]string{
+		{adminauth.SecuritySchemeName: {}},
 	}
 	return operation
 }

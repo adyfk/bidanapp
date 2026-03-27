@@ -57,6 +57,22 @@ func (s Summary) WriteReport(writer io.Writer) error {
 		lines = append(lines, "appointment_statuses: "+strings.Join(parts, ", "))
 	}
 
+	if len(s.CoveredCities) > 0 {
+		lines = append(lines, "covered_cities: "+strings.Join(s.CoveredCities, ", "))
+	}
+
+	if len(s.SupportedServiceModes) > 0 {
+		lines = append(lines, "service_modes: "+strings.Join(s.SupportedServiceModes, ", "))
+	}
+
+	if len(s.SupportedBookingFlows) > 0 {
+		lines = append(lines, "booking_flows: "+strings.Join(s.SupportedBookingFlows, ", "))
+	}
+
+	if len(s.SupportedAppointmentModes) > 0 {
+		lines = append(lines, "appointment_modes: "+strings.Join(s.SupportedAppointmentModes, ", "))
+	}
+
 	if len(s.CustomerAccounts) > 0 {
 		lines = append(lines, "")
 		lines = append(lines, "customer logins")

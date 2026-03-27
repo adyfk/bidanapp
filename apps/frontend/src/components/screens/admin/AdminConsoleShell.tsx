@@ -1,6 +1,20 @@
 'use client';
 
-import { ArrowUpRight, Building2, ChevronRight, Command, LogOut, Search, ShieldCheck } from 'lucide-react';
+import {
+  ArrowUpRight,
+  Building2,
+  CalendarRange,
+  ChevronRight,
+  Command,
+  Database,
+  LayoutDashboard,
+  LifeBuoy,
+  LogOut,
+  type LucideIcon,
+  Search,
+  ShieldCheck,
+  UsersRound,
+} from 'lucide-react';
 import type { Route } from 'next';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -14,9 +28,10 @@ interface AdminConsoleShellProps {
   children: ReactNode;
 }
 
-const activeLinkClass = 'border-slate-900 bg-slate-900 text-white shadow-[0_18px_40px_-30px_rgba(15,23,42,0.8)]';
-const idleLinkClass = 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50';
-
+const surfacePanelClass =
+  'rounded-[32px] border border-slate-200/80 bg-white/92 shadow-[0_24px_60px_-40px_rgba(15,23,42,0.28)] backdrop-blur-xl';
+const railPanelClass =
+  'rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.08)_0%,rgba(255,255,255,0.03)_100%)] shadow-[0_24px_70px_-46px_rgba(15,23,42,0.7)] backdrop-blur-xl';
 const focusAreaLabels = {
   catalog: 'Catalog control',
   ops: 'Operational desk',
@@ -32,9 +47,9 @@ const focusAreaDescriptions = {
 } as const;
 
 const presenceToneClassNames = {
-  away: 'border-slate-300 bg-slate-100 text-slate-600',
-  busy: 'border-amber-300 bg-amber-50 text-amber-700',
-  online: 'border-emerald-300 bg-emerald-50 text-emerald-700',
+  away: 'border-slate-300/30 bg-slate-100/10 text-slate-200',
+  busy: 'border-amber-300/35 bg-amber-400/10 text-amber-100',
+  online: 'border-emerald-300/35 bg-emerald-400/10 text-emerald-100',
 } as const;
 
 const quickActionToneClassNames = {
@@ -42,6 +57,51 @@ const quickActionToneClassNames = {
   rose: 'border-rose-200 bg-rose-50/80 text-rose-900',
   sky: 'border-sky-200 bg-sky-50/80 text-sky-900',
 } as const;
+
+const navVisuals: Record<
+  string,
+  {
+    badgeClassName: string;
+    icon: LucideIcon;
+    kicker: string;
+  }
+> = {
+  [ADMIN_ROUTES.overview]: {
+    badgeClassName: 'border-sky-300/30 bg-sky-400/12 text-sky-100',
+    icon: LayoutDashboard,
+    kicker: 'Cross-module view',
+  },
+  [ADMIN_ROUTES.customers]: {
+    badgeClassName: 'border-cyan-300/30 bg-cyan-400/12 text-cyan-100',
+    icon: UsersRound,
+    kicker: 'Customer context',
+  },
+  [ADMIN_ROUTES.professionals]: {
+    badgeClassName: 'border-amber-300/30 bg-amber-400/12 text-amber-100',
+    icon: ShieldCheck,
+    kicker: 'Trust workflow',
+  },
+  [ADMIN_ROUTES.services]: {
+    badgeClassName: 'border-emerald-300/30 bg-emerald-400/12 text-emerald-100',
+    icon: Building2,
+    kicker: 'Catalog map',
+  },
+  [ADMIN_ROUTES.appointments]: {
+    badgeClassName: 'border-indigo-300/30 bg-indigo-400/12 text-indigo-100',
+    icon: CalendarRange,
+    kicker: 'Delivery ops',
+  },
+  [ADMIN_ROUTES.support]: {
+    badgeClassName: 'border-rose-300/30 bg-rose-400/12 text-rose-100',
+    icon: LifeBuoy,
+    kicker: 'Triage desk',
+  },
+  [ADMIN_ROUTES.studio]: {
+    badgeClassName: 'border-slate-300/30 bg-slate-100/10 text-slate-100',
+    icon: Database,
+    kicker: 'Seed controls',
+  },
+};
 
 const formatDateLabel = (value?: string) => {
   if (!value) {
@@ -79,10 +139,14 @@ const formatRelativeDateLabel = (value?: string) => {
   return `${Math.floor(diffHours / 24)} hari lalu`;
 };
 
+const SectionEyebrow = ({ label }: { label: string }) => (
+  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{label}</p>
+);
+
 const SidebarStat = ({ label, value }: { label: string; value: string }) => (
-  <div className="rounded-[22px] border border-white/10 bg-white/6 px-4 py-3">
-    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-300">{label}</p>
-    <p className="mt-2 text-sm font-semibold text-white">{value}</p>
+  <div className="rounded-[22px] border border-white/10 bg-slate-950/20 px-4 py-3">
+    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">{label}</p>
+    <p className="mt-2 text-sm font-semibold leading-5 text-white">{value}</p>
   </div>
 );
 
@@ -126,6 +190,103 @@ const QuickActionCard = ({
     <p className="mt-3 text-sm leading-6 opacity-80">{description}</p>
   </Link>
 );
+
+const AdminRailLink = ({
+  description,
+  href,
+  isActive,
+  label,
+  metricLabel,
+}: {
+  description: string;
+  href: Route;
+  isActive: boolean;
+  label: string;
+  metricLabel: string;
+}) => {
+  const navVisual = navVisuals[href] || navVisuals[ADMIN_ROUTES.overview];
+  const Icon = navVisual.icon;
+
+  return (
+    <Link
+      href={href}
+      className={`group relative block overflow-hidden rounded-[24px] border px-4 py-4 transition-all ${
+        isActive
+          ? 'border-white/20 bg-white/[0.11] shadow-[0_20px_40px_-32px_rgba(15,23,42,0.6)]'
+          : 'border-white/8 bg-white/[0.04] hover:border-white/16 hover:bg-white/[0.08]'
+      }`}
+    >
+      <div
+        className={`absolute inset-y-4 left-0 w-1 rounded-full transition ${
+          isActive ? 'bg-sky-300' : 'bg-transparent group-hover:bg-white/18'
+        }`}
+      />
+      <div className="flex items-start gap-3 pl-2">
+        <div
+          className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl border ${
+            isActive ? 'border-white/14 bg-white/12 text-white' : 'border-white/10 bg-slate-950/20 text-slate-200'
+          }`}
+        >
+          <Icon className="h-4 w-4" />
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">{navVisual.kicker}</p>
+          <div className="mt-2 flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[15px] font-semibold text-white">{label}</p>
+              <p className="mt-1 text-[12px] leading-5 text-slate-300">{description}</p>
+            </div>
+            <div className="flex flex-shrink-0 items-center gap-2">
+              <span
+                className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${
+                  isActive ? navVisual.badgeClassName : 'border-white/10 bg-white/8 text-slate-100'
+                }`}
+              >
+                {metricLabel}
+              </span>
+              <ChevronRight className={`h-4 w-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+};
+
+const AdminCompactNavLink = ({
+  href,
+  isActive,
+  label,
+  metricLabel,
+}: {
+  href: Route;
+  isActive: boolean;
+  label: string;
+  metricLabel: string;
+}) => {
+  const navVisual = navVisuals[href] || navVisuals[ADMIN_ROUTES.overview];
+  const Icon = navVisual.icon;
+
+  return (
+    <Link
+      href={href}
+      className={`rounded-[22px] border px-4 py-3 transition ${
+        isActive ? 'border-white/18 bg-white/[0.12]' : 'border-white/10 bg-white/[0.05] hover:bg-white/[0.09]'
+      }`}
+    >
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-slate-950/20 text-white">
+          <Icon className="h-4 w-4" />
+        </div>
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-white">{label}</p>
+          <p className="mt-1 text-[11px] font-medium text-slate-300">{metricLabel}</p>
+        </div>
+      </div>
+    </Link>
+  );
+};
 
 export const AdminConsoleShell = ({ children }: AdminConsoleShellProps) => {
   const pathname = usePathname();
@@ -251,25 +412,134 @@ export const AdminConsoleShell = ({ children }: AdminConsoleShellProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,#E2E8F0_0%,#F8FAFC_18%,#F8FAFC_100%)] text-slate-900">
-      <div className="mx-auto flex min-h-screen max-w-[1600px] gap-6 px-4 py-4 lg:px-6">
-        <aside className="hidden w-[316px] flex-shrink-0 flex-col rounded-[32px] border border-slate-200 bg-[linear-gradient(180deg,#0F172A_0%,#111827_42%,#172554_100%)] p-5 text-white shadow-[0_30px_70px_-45px_rgba(15,23,42,0.7)] lg:flex">
-          <div className="rounded-[28px] border border-white/10 bg-white/6 p-4">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,#BFDBFE_0%,transparent_24%),radial-gradient(circle_at_top_right,#FDE68A_0%,transparent_18%),linear-gradient(180deg,#E2E8F0_0%,#F8FAFC_18%,#F8FAFC_100%)] text-slate-900">
+      <div className="mx-auto flex min-h-screen max-w-[1600px] gap-5 px-4 py-4 lg:px-6">
+        <aside className="hidden w-[340px] flex-shrink-0 lg:sticky lg:top-4 lg:flex lg:max-h-[calc(100vh-2rem)] lg:flex-col">
+          <div
+            className={`${railPanelClass} bg-[linear-gradient(180deg,#0F172A_0%,#111827_42%,#172554_100%)] p-5 text-white`}
+          >
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-white">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-white">
                 <Building2 className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-300">Admin Console</p>
-                <p className="mt-1 text-lg font-bold">BidanApp Ops</p>
+                <p className="mt-1 text-lg font-bold text-white">BidanApp Ops</p>
               </div>
             </div>
 
-            <div className="mt-4 rounded-[24px] border border-white/10 bg-white/7 px-4 py-3">
-              <div className="flex items-center justify-between gap-3">
+            <div className="mt-5 rounded-[26px] border border-white/10 bg-white/[0.07] p-4">
+              <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-300">Persona aktif</p>
-                  <p className="mt-2 text-[16px] font-bold">{activeAdmin?.name || 'Admin'}</p>
+                  <SectionEyebrow label="Persona aktif" />
+                  <p className="mt-2 text-[18px] font-bold text-white">{activeAdmin?.name || 'Admin'}</p>
+                  <p className="mt-1 text-sm text-slate-300">{activeAdmin?.title || 'Console operator'}</p>
+                </div>
+                {activeAdmin ? (
+                  <span
+                    className={`rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] ${presenceToneClassNames[activeAdmin.presence]}`}
+                  >
+                    {activeAdmin.presence}
+                  </span>
+                ) : null}
+              </div>
+              <p className="mt-4 text-[12px] leading-6 text-slate-300">
+                Shift {activeAdmin?.shiftLabel || 'internal'} · Fokus {focusAreaLabel.toLowerCase()}
+              </p>
+            </div>
+
+            <div className="mt-4 rounded-[26px] border border-white/10 bg-slate-950/20 p-4">
+              <SectionEyebrow label="Current module" />
+              <p className="mt-2 text-lg font-bold text-white">{currentNavItem.label}</p>
+              <p className="mt-2 text-[13px] leading-6 text-slate-300">{currentNavItem.description}</p>
+              <p className="mt-3 text-[12px] leading-5 text-slate-400">{focusAreaDescription}</p>
+            </div>
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <SidebarStat label="Support open" value={`${openTickets} ticket aktif`} />
+              <SidebarStat
+                label="Data pulse"
+                value={modifiedTableCount > 0 ? `${modifiedTableCount} tabel berubah` : 'Seed bersih'}
+              />
+              <SidebarStat label="Resume" value={lastVisitedNavItem ? lastVisitedNavItem.label : 'Overview'} />
+              <SidebarStat label="Last login" value={formatRelativeDateLabel(session.lastLoginAt)} />
+            </div>
+          </div>
+
+          <div
+            className={`${railPanelClass} mt-5 flex min-h-0 flex-1 flex-col overflow-hidden bg-[linear-gradient(180deg,#0F172A_0%,#111827_44%,#0F172A_100%)] text-white`}
+          >
+            <div className="border-b border-white/10 px-4 py-4">
+              <SectionEyebrow label="Console map" />
+              <p className="mt-2 text-sm leading-6 text-slate-300">
+                Setiap modul sekarang dibaca sebagai jalur operasi, bukan kumpulan kartu terpisah.
+              </p>
+            </div>
+
+            <nav className="flex-1 space-y-2 overflow-y-auto px-3 py-3">
+              {ADMIN_NAV_ITEMS.map((item) => (
+                <AdminRailLink
+                  key={item.href}
+                  description={item.description}
+                  href={item.href}
+                  isActive={pathname === item.href}
+                  label={item.label}
+                  metricLabel={getNavMetricLabel(item.href)}
+                />
+              ))}
+            </nav>
+
+            <div className="border-t border-white/10 p-4">
+              <SectionEyebrow label="Focus radar" />
+              <div className="mt-3 flex flex-wrap gap-2">
+                {focusRoutes.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-2 text-xs font-semibold text-slate-200 transition hover:border-white/20 hover:bg-white/[0.1]"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className={`${railPanelClass} mt-5 bg-[linear-gradient(180deg,#0F172A_0%,#111827_100%)] p-4 text-white`}>
+            <div className="flex items-center gap-2 text-sm text-slate-200">
+              <ShieldCheck className="h-4 w-4" />
+              Backend-authenticated admin access
+            </div>
+            <p className="mt-3 text-[13px] leading-6 text-slate-300">
+              Session admin, sync support desk, dan snapshot operasional tetap dibatasi oleh akses backend aktif.
+            </p>
+            <div className="mt-4 grid gap-3">
+              <SidebarStat label="Support sync" value={formatDateLabel(supportSavedAt)} />
+              <SidebarStat label="Data snapshot" value={formatDateLabel(snapshotSavedAt)} />
+            </div>
+          </div>
+        </aside>
+
+        <div className="flex min-w-0 flex-1 flex-col gap-5">
+          <div
+            className={`${railPanelClass} bg-[linear-gradient(180deg,#0F172A_0%,#111827_100%)] p-4 text-white lg:hidden`}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <SectionEyebrow label="Admin Console" />
+                <h1 className="mt-2 text-[24px] font-black tracking-[-0.04em] text-white">{currentNavItem.label}</h1>
+                <p className="mt-2 text-sm leading-6 text-slate-300">{currentNavItem.description}</p>
+              </div>
+              <span className="rounded-full border border-white/10 bg-white/[0.08] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-100">
+                {currentNavItem.shortLabel}
+              </span>
+            </div>
+
+            <div className="mt-4 rounded-[24px] border border-white/10 bg-white/[0.06] p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <SectionEyebrow label="Persona aktif" />
+                  <p className="mt-2 text-base font-bold text-white">{activeAdmin?.name || 'Admin'}</p>
                   <p className="mt-1 text-sm text-slate-300">{activeAdmin?.title || 'Console operator'}</p>
                 </div>
                 {activeAdmin ? (
@@ -284,86 +554,28 @@ export const AdminConsoleShell = ({ children }: AdminConsoleShellProps) => {
                 Shift {activeAdmin?.shiftLabel || 'internal'} · Fokus {focusAreaLabel.toLowerCase()}
               </p>
             </div>
-          </div>
 
-          <div className="mt-5 rounded-[28px] border border-white/10 bg-white/7 p-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-300">Module context</p>
-            <p className="mt-3 text-lg font-bold text-white">{currentNavItem.label}</p>
-            <p className="mt-2 text-[13px] leading-6 text-slate-300">{currentNavItem.description}</p>
-            <p className="mt-3 text-[12px] leading-5 text-slate-400">{focusAreaDescription}</p>
-          </div>
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <SidebarStat label="Support" value={`${openTickets} aktif`} />
+              <SidebarStat label="Data" value={modifiedTableCount > 0 ? `${modifiedTableCount} berubah` : 'Bersih'} />
+              <SidebarStat label="Resume" value={lastVisitedNavItem ? lastVisitedNavItem.label : 'Overview'} />
+              <SidebarStat label="Login" value={formatRelativeDateLabel(session.lastLoginAt)} />
+            </div>
 
-          <nav className="mt-6 space-y-2">
-            {ADMIN_NAV_ITEMS.map((item) => {
-              const isActive = pathname === item.href;
-
-              return (
-                <Link
+            <div className="mt-4 grid gap-2 sm:grid-cols-2">
+              {ADMIN_NAV_ITEMS.map((item) => (
+                <AdminCompactNavLink
                   key={item.href}
                   href={item.href}
-                  className={`block rounded-[24px] border px-4 py-4 transition-all ${isActive ? activeLinkClass : idleLinkClass}`}
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-[15px] font-semibold">{item.label}</p>
-                      <p className={`mt-1 text-[12px] leading-5 ${isActive ? 'text-slate-200' : 'text-slate-500'}`}>
-                        {item.description}
-                      </p>
-                    </div>
-                    <div className="flex flex-col items-end gap-2">
-                      <span
-                        className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
-                          isActive ? 'bg-white/12 text-white' : 'bg-slate-100 text-slate-600'
-                        }`}
-                      >
-                        {getNavMetricLabel(item.href)}
-                      </span>
-                      <ChevronRight className={`h-4 w-4 flex-shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
-          </nav>
-
-          <div className="mt-5 rounded-[28px] border border-white/10 bg-white/7 p-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-300">Radar fokus</p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {focusRoutes.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="rounded-full border border-white/10 bg-white/6 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:border-white/20 hover:bg-white/10"
-                >
-                  {item.label}
-                </Link>
+                  isActive={pathname === item.href}
+                  label={item.label}
+                  metricLabel={getNavMetricLabel(item.href)}
+                />
               ))}
             </div>
           </div>
 
-          <div className="mt-auto rounded-[28px] border border-white/10 bg-white/7 p-4">
-            <div className="flex items-center gap-2 text-sm text-slate-300">
-              <ShieldCheck className="h-4 w-4" />
-              Backend-authenticated admin access
-            </div>
-            <p className="mt-3 text-[13px] leading-6 text-slate-300">
-              Semua mutasi admin dibatasi oleh session backend aktif. Logout akan mencabut akses UI dan cache
-              operasional lokal untuk browser ini.
-            </p>
-
-            <div className="mt-4 grid gap-3">
-              <SidebarStat label="Support sync" value={formatDateLabel(supportSavedAt)} />
-              <SidebarStat label="Data snapshot" value={formatDateLabel(snapshotSavedAt)} />
-              <SidebarStat
-                label="Resume terakhir"
-                value={lastVisitedNavItem ? lastVisitedNavItem.label : 'Mulai dari overview'}
-              />
-            </div>
-          </div>
-        </aside>
-
-        <div className="flex min-w-0 flex-1 flex-col gap-5">
-          <header className="rounded-[32px] border border-slate-200 bg-white/92 px-5 py-4 shadow-[0_24px_60px_-40px_rgba(15,23,42,0.28)] backdrop-blur-xl">
+          <header className={`${surfacePanelClass} px-5 py-4`}>
             <div className="flex flex-col gap-5">
               <div className="flex flex-col gap-5 2xl:flex-row 2xl:items-start 2xl:justify-between">
                 <div className="max-w-3xl">
@@ -482,7 +694,7 @@ export const AdminConsoleShell = ({ children }: AdminConsoleShellProps) => {
                 </div>
 
                 <div className="rounded-[28px] border border-slate-200 bg-slate-50/90 p-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Session pulse</p>
+                  <SectionEyebrow label="Session pulse" />
                   <div className="mt-3 flex flex-wrap gap-2">
                     <StatusChip label="Persona" value={activeAdmin?.name || 'Admin'} />
                     <StatusChip
@@ -507,7 +719,7 @@ export const AdminConsoleShell = ({ children }: AdminConsoleShellProps) => {
                 </div>
               </div>
 
-              <nav className="overflow-x-auto pb-1">
+              <nav className="hidden overflow-x-auto pb-1 lg:block">
                 <div className="flex min-w-max gap-2">
                   {ADMIN_NAV_ITEMS.map((item) => {
                     const isActive = pathname === item.href;

@@ -20,6 +20,22 @@ const normalizePhone = (value = '') => {
 };
 
 const buildSeedProfessionalPhone = (index) => `+628137000${String(index + 1).padStart(4, '0')}`;
+const professionalReviewStatuses = [
+  'published',
+  'submitted',
+  'changes_requested',
+  'verified',
+  'draft',
+  'ready_for_review',
+];
+const reviewStatusTitles = {
+  changes_requested: 'Revisions are required before publishing',
+  draft: 'Profile is still inactive',
+  published: 'Profile is live',
+  ready_for_review: 'Ready to submit for admin review',
+  submitted: 'Waiting for admin review',
+  verified: 'Verified and ready to publish',
+};
 
 const professionalSlug = professionals[0]?.slug;
 const serviceSlug = services[0]?.slug;
@@ -29,6 +45,23 @@ const professionalPhone = buildSeedProfessionalPhone(0);
 const professionalName = professionals[0]?.name ?? '';
 const customerBearerToken = `seed-customer-session-${consumers[0]?.id}`;
 const professionalBearerToken = `seed-professional-session-${professionals[0]?.id}`;
+const seededCustomerSessions = consumers.map((consumer) => ({
+  bearerToken: `seed-customer-session-${consumer.id}`,
+  consumerId: consumer.id,
+}));
+const seededProfessionalSessions = professionals.map((professional, index) => {
+  const reviewStatus = professionalReviewStatuses[index % professionalReviewStatuses.length];
+
+  return {
+    bearerToken: `seed-professional-session-${professional.id}`,
+    displayName: professional.name,
+    phone: buildSeedProfessionalPhone(index),
+    professionalId: professional.id,
+    reviewStatus,
+    reviewTitle: reviewStatusTitles[reviewStatus],
+  };
+});
+const submittedProfessionalSession = seededProfessionalSessions.find((session) => session.reviewStatus === 'submitted');
 const adminBearerToken = 'seed-admin-session-adm-01';
 const backendApiBaseUrl = process.env.PLAYWRIGHT_BACKEND_API_BASE_URL ?? 'http://127.0.0.1:3302/api/v1';
 const seededCustomerPassword = 'Customer2026A';
@@ -121,6 +154,36 @@ const assertHealthyPage = async (page, errors, route) => {
 
   assertNoRuntimeErrors(errors, route);
   await assertNoDevelopmentWording(page, route);
+};
+
+const readProfessionalPortalReviewStatus = async (browser, professionalSession) => {
+  const context = await browser.newContext({
+    extraHTTPHeaders: {
+      Authorization: `Bearer ${professionalSession.bearerToken}`,
+    },
+  });
+
+  try {
+    const response = await context.request.get(`${backendApiBaseUrl}/professionals/portal/session`, {
+      headers: {
+        Authorization: `Bearer ${professionalSession.bearerToken}`,
+      },
+      params: {
+        professional_id: professionalSession.professionalId,
+      },
+    });
+
+    assert.equal(
+      response.ok(),
+      true,
+      `Expected professional portal session to hydrate for ${professionalSession.professionalId}, got ${response.status()} from ${response.url()}.`,
+    );
+
+    const body = await response.json();
+    return body?.data?.snapshot?.reviewStatesByProfessionalId?.[professionalSession.professionalId]?.status;
+  } finally {
+    await context.close();
+  }
 };
 
 const waitForApiOutcome = async (page, pathFragment) => {
@@ -292,6 +355,28 @@ test('customer protected routes render with the seeded customer session bearer t
   await context.close();
 });
 
+test('all seeded customer personas can reuse bearer sessions on core protected routes', async ({ browser }) => {
+  for (const customerSession of seededCustomerSessions) {
+    const context = await browser.newContext({
+      baseURL: 'http://127.0.0.1:3301',
+      extraHTTPHeaders: {
+        Authorization: `Bearer ${customerSession.bearerToken}`,
+      },
+    });
+    const page = await context.newPage();
+    const runtimeErrors = trackRuntimeErrors(page);
+
+    for (const route of ['/en/profile', '/en/appointments', '/en/notifications']) {
+      runtimeErrors.length = 0;
+      await page.goto(route);
+      await assertHealthyPage(page, runtimeErrors, `${route} for ${customerSession.consumerId}`);
+      await expect(page).not.toHaveURL(/\/auth\/customer/);
+    }
+
+    await context.close();
+  }
+});
+
 test('professional dashboard routes render with the seeded professional session bearer token', async ({ browser }) => {
   const context = await browser.newContext({
     baseURL: 'http://127.0.0.1:3301',
@@ -325,6 +410,50 @@ test('professional dashboard routes render with the seeded professional session 
   await context.close();
 });
 
+test('all seeded professional review states render the expected onboarding status', async ({ browser }) => {
+  for (const professionalSession of seededProfessionalSessions) {
+    const context = await browser.newContext({
+      baseURL: 'http://127.0.0.1:3301',
+      extraHTTPHeaders: {
+        Authorization: `Bearer ${professionalSession.bearerToken}`,
+      },
+    });
+    const page = await context.newPage();
+    const runtimeErrors = trackRuntimeErrors(page);
+
+    await page.goto('/en/for-professionals/dashboard');
+
+    await assertHealthyPage(
+      page,
+      runtimeErrors,
+      `/en/for-professionals/dashboard for ${professionalSession.professionalId}`,
+    );
+    await expect(page).not.toHaveURL(/\/en\/for-professionals(\?|$)/);
+
+    const portalSessionResponse = await context.request.get(`${backendApiBaseUrl}/professionals/portal/session`, {
+      headers: {
+        Authorization: `Bearer ${professionalSession.bearerToken}`,
+      },
+      params: {
+        professional_id: professionalSession.professionalId,
+      },
+    });
+    assert.equal(
+      portalSessionResponse.ok(),
+      true,
+      `Expected professional portal session to hydrate for ${professionalSession.professionalId}, got ${portalSessionResponse.status()} from ${portalSessionResponse.url()}.`,
+    );
+    const portalSessionBody = await portalSessionResponse.json();
+    assert.equal(
+      portalSessionBody?.data?.snapshot?.reviewStatesByProfessionalId?.[professionalSession.professionalId]?.status,
+      professionalSession.reviewStatus,
+      `Expected hydrated professional review status for ${professionalSession.professionalId} to be ${professionalSession.reviewStatus}.`,
+    );
+
+    await context.close();
+  }
+});
+
 test('admin console routes render with the seeded admin session bearer token', async ({ browser }) => {
   const context = await browser.newContext({
     baseURL: 'http://127.0.0.1:3301',
@@ -352,6 +481,75 @@ test('admin console routes render with the seeded admin session bearer token', a
     await assertHealthyPage(page, runtimeErrors, route);
     await expect(page).not.toHaveURL(/\/admin\/login/);
   }
+
+  await context.close();
+});
+
+test('admin bulk review and publish actions persist professional lifecycle state after reload', async ({ browser }) => {
+  assert.ok(submittedProfessionalSession, 'Expected seeded dataset to include a submitted professional.');
+
+  const context = await browser.newContext({
+    baseURL: 'http://127.0.0.1:3301',
+    extraHTTPHeaders: {
+      Authorization: `Bearer ${adminBearerToken}`,
+    },
+  });
+  const page = await context.newPage();
+  const runtimeErrors = trackRuntimeErrors(page);
+  const searchInput = page.getByPlaceholder('Cari nama, title, id, atau status approval.');
+  const approvalQueueSection = page.locator('section').filter({ hasText: 'Antrian review FIFO profesional' }).first();
+
+  const queueEntryCheckbox = () =>
+    approvalQueueSection
+      .getByRole('button', { name: new RegExp(submittedProfessionalSession.displayName, 'i') })
+      .first()
+      .locator('xpath=..')
+      .locator('input[type="checkbox"]');
+
+  await page.goto('/admin/professionals');
+  await assertHealthyPage(page, runtimeErrors, '/admin/professionals for bulk review flow');
+
+  await searchInput.fill(submittedProfessionalSession.professionalId);
+  await queueEntryCheckbox().check();
+
+  const verifySyncResponsePromise = page.waitForResponse(
+    (response) =>
+      response.url().includes('/api/v1/admin/professionals/review-state') &&
+      response.request().method() === 'PUT' &&
+      response.ok(),
+  );
+  await page.getByRole('button', { name: 'Bulk verified' }).click();
+  await verifySyncResponsePromise;
+
+  runtimeErrors.length = 0;
+  await page.reload();
+  await assertHealthyPage(page, runtimeErrors, '/admin/professionals after bulk verified reload');
+  assert.equal(
+    await readProfessionalPortalReviewStatus(browser, submittedProfessionalSession),
+    'verified',
+    `Expected ${submittedProfessionalSession.professionalId} to persist as verified after bulk review.`,
+  );
+
+  await searchInput.fill(submittedProfessionalSession.professionalId);
+  await queueEntryCheckbox().check();
+
+  const publishSyncResponsePromise = page.waitForResponse(
+    (response) =>
+      response.url().includes('/api/v1/admin/professionals/review-state') &&
+      response.request().method() === 'PUT' &&
+      response.ok(),
+  );
+  await page.getByRole('button', { name: 'Bulk publish' }).click();
+  await publishSyncResponsePromise;
+
+  runtimeErrors.length = 0;
+  await page.reload();
+  await assertHealthyPage(page, runtimeErrors, '/admin/professionals after bulk publish reload');
+  assert.equal(
+    await readProfessionalPortalReviewStatus(browser, submittedProfessionalSession),
+    'published',
+    `Expected ${submittedProfessionalSession.professionalId} to persist as published after bulk publish.`,
+  );
 
   await context.close();
 });

@@ -109,6 +109,7 @@ type Summary struct {
 	BearerTokens                       []BearerToken          `json:"bearerTokens"`
 	ChatMessageCount                   int                    `json:"chatMessageCount"`
 	ChatThreadCount                    int                    `json:"chatThreadCount"`
+	CoveredCities                      []string               `json:"coveredCities"`
 	ContentDocumentCount               int                    `json:"contentDocumentCount"`
 	CustomerAccounts                   []AccountLogin         `json:"customerAccounts"`
 	CustomerNotificationStateCount     int                    `json:"customerNotificationStateCount"`
@@ -122,6 +123,9 @@ type Summary struct {
 	ProfessionalPassword               string                 `json:"professionalPassword"`
 	ProfessionalScenarios              []ProfessionalScenario `json:"professionalScenarios"`
 	Scenario                           string                 `json:"scenario"`
+	SupportedAppointmentModes          []string               `json:"supportedAppointmentModes"`
+	SupportedBookingFlows              []string               `json:"supportedBookingFlows"`
+	SupportedServiceModes              []string               `json:"supportedServiceModes"`
 	SupportTicketCount                 int                    `json:"supportTicketCount"`
 }
 
@@ -156,18 +160,22 @@ func Run(ctx context.Context, cfg config.Config, db *sql.DB, writer io.Writer, o
 		opts:          appliedOptions,
 		portalStore:   portalstore.NewPostgresStore(db),
 		summary: Summary{
-			AdminAccesses:            []AdminAccess{},
-			AdminScenarios:           []AdminScenario{},
-			AppointmentStatusCounts:  map[string]int{},
-			BearerTokens:             []BearerToken{},
-			CustomerAccounts:         []AccountLogin{},
-			CustomerPassword:         appliedOptions.CustomerPassword,
-			CustomerScenarios:        []CustomerScenario{},
-			PortalReviewStatusCounts: map[string]int{},
-			ProfessionalAccounts:     []AccountLogin{},
-			ProfessionalPassword:     appliedOptions.ProfessionalPassword,
-			ProfessionalScenarios:    []ProfessionalScenario{},
-			Scenario:                 datasetScenarioName(appliedOptions.Scenario),
+			AdminAccesses:             []AdminAccess{},
+			AdminScenarios:            []AdminScenario{},
+			AppointmentStatusCounts:   map[string]int{},
+			BearerTokens:              []BearerToken{},
+			CoveredCities:             []string{},
+			CustomerAccounts:          []AccountLogin{},
+			CustomerPassword:          appliedOptions.CustomerPassword,
+			CustomerScenarios:         []CustomerScenario{},
+			PortalReviewStatusCounts:  map[string]int{},
+			ProfessionalAccounts:      []AccountLogin{},
+			ProfessionalPassword:      appliedOptions.ProfessionalPassword,
+			ProfessionalScenarios:     []ProfessionalScenario{},
+			Scenario:                  datasetScenarioName(appliedOptions.Scenario),
+			SupportedAppointmentModes: []string{},
+			SupportedBookingFlows:     []string{},
+			SupportedServiceModes:     []string{},
 		},
 	}
 	instance.portalService = professionalportal.NewService(instance.portalStore)
@@ -450,39 +458,37 @@ func (s *seeder) seedAdminAccessTokens(ctx context.Context) error {
 		return nil
 	}
 
+	now := time.Now().UTC()
+	expiresAt := now.Add(s.cfg.AdminAuth.SessionTTL).Format(time.RFC3339)
 	for _, credential := range s.cfg.AdminAuth.Credentials {
 		s.summary.AdminAccesses = append(s.summary.AdminAccesses, AdminAccess{
 			AdminID:   credential.AdminID,
 			Email:     credential.Email,
 			FocusArea: credential.FocusArea,
 		})
-	}
+		rawToken := "seed-admin-session-" + credential.AdminID
+		if _, err := s.documentStore.Upsert(ctx, documentstore.Record{
+			Namespace: adminSessionNamespace,
+			Key:       hashToken(rawToken),
+			SavedAt:   now,
+			Snapshot: map[string]any{
+				"adminId":          credential.AdminID,
+				"email":            strings.ToLower(strings.TrimSpace(credential.Email)),
+				"expiresAt":        expiresAt,
+				"focusArea":        credential.FocusArea,
+				"lastLoginAt":      now.Format(time.RFC3339),
+				"lastVisitedRoute": defaultSeededAdminRoute,
+			},
+		}); err != nil {
+			return fmt.Errorf("seed admin bearer token for %s: %w", credential.AdminID, err)
+		}
 
-	firstCredential := s.cfg.AdminAuth.Credentials[0]
-	rawToken := "seed-admin-session-" + firstCredential.AdminID
-	now := time.Now().UTC()
-	expiresAt := now.Add(s.cfg.AdminAuth.SessionTTL).Format(time.RFC3339)
-	if _, err := s.documentStore.Upsert(ctx, documentstore.Record{
-		Namespace: adminSessionNamespace,
-		Key:       hashToken(rawToken),
-		SavedAt:   now,
-		Snapshot: map[string]any{
-			"adminId":          firstCredential.AdminID,
-			"email":            strings.ToLower(strings.TrimSpace(firstCredential.Email)),
-			"expiresAt":        expiresAt,
-			"focusArea":        firstCredential.FocusArea,
-			"lastLoginAt":      now.Format(time.RFC3339),
-			"lastVisitedRoute": defaultSeededAdminRoute,
-		},
-	}); err != nil {
-		return fmt.Errorf("seed admin bearer token: %w", err)
+		s.summary.BearerTokens = append(s.summary.BearerTokens, BearerToken{
+			Description: "Seeded admin API session for " + credential.Email,
+			Role:        "admin",
+			Token:       rawToken,
+		})
 	}
-
-	s.summary.BearerTokens = append(s.summary.BearerTokens, BearerToken{
-		Description: "Seeded admin API session for " + firstCredential.Email,
-		Role:        "admin",
-		Token:       rawToken,
-	})
 	return nil
 }
 
@@ -491,28 +497,29 @@ func (s *seeder) seedCustomerAccessToken(ctx context.Context) error {
 		return nil
 	}
 
-	consumer := s.dataset.Consumers[0]
-	rawToken := "seed-customer-session-" + consumer.ID
 	now := time.Now().UTC()
 	expiresAt := now.Add(s.cfg.CustomerAuth.SessionTTL).Format(time.RFC3339)
-	if _, err := s.documentStore.Upsert(ctx, documentstore.Record{
-		Namespace: customerSessionNamespace,
-		Key:       hashToken(rawToken),
-		SavedAt:   now,
-		Snapshot: map[string]any{
-			"consumerId":  consumer.ID,
-			"expiresAt":   expiresAt,
-			"lastLoginAt": now.Format(time.RFC3339),
-		},
-	}); err != nil {
-		return fmt.Errorf("seed customer bearer token: %w", err)
-	}
+	for _, consumer := range s.dataset.Consumers {
+		rawToken := "seed-customer-session-" + consumer.ID
+		if _, err := s.documentStore.Upsert(ctx, documentstore.Record{
+			Namespace: customerSessionNamespace,
+			Key:       hashToken(rawToken),
+			SavedAt:   now,
+			Snapshot: map[string]any{
+				"consumerId":  consumer.ID,
+				"expiresAt":   expiresAt,
+				"lastLoginAt": now.Format(time.RFC3339),
+			},
+		}); err != nil {
+			return fmt.Errorf("seed customer bearer token for %s: %w", consumer.ID, err)
+		}
 
-	s.summary.BearerTokens = append(s.summary.BearerTokens, BearerToken{
-		Description: "Seeded customer API session for " + consumer.ID,
-		Role:        "customer",
-		Token:       rawToken,
-	})
+		s.summary.BearerTokens = append(s.summary.BearerTokens, BearerToken{
+			Description: "Seeded customer API session for " + consumer.ID,
+			Role:        "customer",
+			Token:       rawToken,
+		})
+	}
 	return nil
 }
 
@@ -521,28 +528,29 @@ func (s *seeder) seedProfessionalAccessToken(ctx context.Context) error {
 		return nil
 	}
 
-	professional := s.dataset.Professionals[0]
-	rawToken := "seed-professional-session-" + professional.ID
 	now := time.Now().UTC()
 	expiresAt := now.Add(s.cfg.ProfessionalAuth.SessionTTL).Format(time.RFC3339)
-	if _, err := s.documentStore.Upsert(ctx, documentstore.Record{
-		Namespace: professionalSessionNamespace,
-		Key:       hashToken(rawToken),
-		SavedAt:   now,
-		Snapshot: map[string]any{
-			"expiresAt":      expiresAt,
-			"lastLoginAt":    now.Format(time.RFC3339),
-			"professionalId": professional.ID,
-		},
-	}); err != nil {
-		return fmt.Errorf("seed professional bearer token: %w", err)
-	}
+	for _, professional := range s.dataset.Professionals {
+		rawToken := "seed-professional-session-" + professional.ID
+		if _, err := s.documentStore.Upsert(ctx, documentstore.Record{
+			Namespace: professionalSessionNamespace,
+			Key:       hashToken(rawToken),
+			SavedAt:   now,
+			Snapshot: map[string]any{
+				"expiresAt":      expiresAt,
+				"lastLoginAt":    now.Format(time.RFC3339),
+				"professionalId": professional.ID,
+			},
+		}); err != nil {
+			return fmt.Errorf("seed professional bearer token for %s: %w", professional.ID, err)
+		}
 
-	s.summary.BearerTokens = append(s.summary.BearerTokens, BearerToken{
-		Description: "Seeded professional API session for " + professional.ID,
-		Role:        "professional",
-		Token:       rawToken,
-	})
+		s.summary.BearerTokens = append(s.summary.BearerTokens, BearerToken{
+			Description: "Seeded professional API session for " + professional.ID,
+			Role:        "professional",
+			Token:       rawToken,
+		})
+	}
 	return nil
 }
 
@@ -590,20 +598,17 @@ func (s *seeder) seedProfessionalPortal(ctx context.Context) error {
 
 		s.summary.PortalSessionCount += 1
 		s.summary.PortalReviewStatusCounts[status] += 1
-	}
 
-	if len(s.dataset.Professionals) > 0 {
-		firstProfessionalID := s.dataset.Professionals[0].ID
-		session, err := s.portalService.Session(ctx, firstProfessionalID)
+		session, err := s.portalService.Session(ctx, professional.ID)
 		if err != nil {
-			return fmt.Errorf("load portal session for default professional %s: %w", firstProfessionalID, err)
+			return fmt.Errorf("load portal session for professional %s: %w", professional.ID, err)
 		}
 		if session.HasSnapshot {
 			if _, err := s.portalService.UpsertSession(ctx, professionalportal.UpsertProfessionalPortalSessionRequest{
-				ProfessionalID: firstProfessionalID,
+				ProfessionalID: professional.ID,
 				Snapshot:       session.Snapshot,
 			}); err != nil {
-				return fmt.Errorf("set default active portal session %s: %w", firstProfessionalID, err)
+				return fmt.Errorf("set default active portal session %s: %w", professional.ID, err)
 			}
 		}
 	}
@@ -690,6 +695,10 @@ func (s *seeder) buildVerificationScenarios() {
 	areasByID := areasByID(s.dataset.Areas)
 	customerStatusesByID := make(map[string]map[string]struct{}, len(s.dataset.Consumers))
 	professionalStatusesByID := make(map[string]map[string]struct{}, len(s.dataset.Professionals))
+	s.summary.CoveredCities = collectReferencedCities(s.dataset.Areas, s.dataset.UserContexts, s.dataset.Professionals, s.appointments)
+	s.summary.SupportedServiceModes = collectSupportedServiceModes(s.dataset.ServiceOfferings)
+	s.summary.SupportedBookingFlows = collectSupportedBookingFlows(s.dataset.ServiceOfferings)
+	s.summary.SupportedAppointmentModes = collectSupportedAppointmentModes(s.appointments)
 
 	for _, appointment := range s.appointments {
 		status := string(appointment.Status)
@@ -924,6 +933,87 @@ func appendUniqueStatus(target map[string]map[string]struct{}, actorID string, s
 	}
 
 	statuses[status] = struct{}{}
+}
+
+func collectReferencedCities(
+	areas []readmodel.Area,
+	userContexts []seedUserContextRow,
+	professionals []readmodel.Professional,
+	appointments []readmodel.AppointmentSeed,
+) []string {
+	areasByID := areasByID(areas)
+	values := map[string]struct{}{}
+
+	for _, contextRow := range userContexts {
+		if area, ok := areasByID[contextRow.SelectedAreaID]; ok && strings.TrimSpace(area.City) != "" {
+			values[area.City] = struct{}{}
+		}
+	}
+
+	for _, professional := range professionals {
+		if city := strings.TrimSpace(primaryProfessionalCity(professional, areasByID)); city != "" {
+			values[city] = struct{}{}
+		}
+	}
+
+	for _, appointment := range appointments {
+		if area, ok := areasByID[appointment.AreaID]; ok && strings.TrimSpace(area.City) != "" {
+			values[area.City] = struct{}{}
+		}
+	}
+
+	return sortedKeys(values)
+}
+
+func collectSupportedServiceModes(offerings []seedServiceOfferingRow) []string {
+	values := map[string]struct{}{}
+	for _, offering := range offerings {
+		if offering.SupportsHomeVisit {
+			values["home_visit"] = struct{}{}
+		}
+		if offering.SupportsOnline {
+			values["online"] = struct{}{}
+		}
+		if offering.SupportsOnsite {
+			values["onsite"] = struct{}{}
+		}
+	}
+	return sortedKeys(values)
+}
+
+func collectSupportedBookingFlows(offerings []seedServiceOfferingRow) []string {
+	values := map[string]struct{}{}
+	for _, offering := range offerings {
+		flow := strings.TrimSpace(offering.BookingFlow)
+		if flow != "" {
+			values[flow] = struct{}{}
+		}
+	}
+	return sortedKeys(values)
+}
+
+func collectSupportedAppointmentModes(appointments []readmodel.AppointmentSeed) []string {
+	values := map[string]struct{}{}
+	for _, appointment := range appointments {
+		mode := strings.TrimSpace(appointment.RequestedMode)
+		if mode != "" {
+			values[mode] = struct{}{}
+		}
+	}
+	return sortedKeys(values)
+}
+
+func sortedKeys(values map[string]struct{}) []string {
+	if len(values) == 0 {
+		return []string{}
+	}
+
+	keys := make([]string, 0, len(values))
+	for value := range values {
+		keys = append(keys, value)
+	}
+	sort.Strings(keys)
+	return keys
 }
 
 func sortedStatusKeys(values map[string]struct{}) []string {

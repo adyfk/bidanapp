@@ -7,17 +7,22 @@ Use it when you want to understand the application the same way a real operator,
 ## Reading Order
 
 1. [User-Facing Flow Diagrams](../user-facing-flow-diagrams.md)
-2. [Customer Journeys](./customer.md)
-3. [Professional Journeys](./professional.md)
-4. [Admin Journeys](./admin.md)
+2. [QA Seed Matrix](../qa-seed-matrix.md)
+3. [Customer Journeys](./customer.md)
+4. [Professional Journeys](./professional.md)
+5. [Admin Journeys](./admin.md)
 
 ## Pack Structure
 
 ```mermaid
 flowchart TD
   index["User-Facing Flow Diagrams"] --> customer["Customer Journeys"]
+  index --> qa["QA Seed Matrix"]
   index --> professional["Professional Journeys"]
   index --> admin["Admin Journeys"]
+  qa --> customer
+  qa --> professional
+  qa --> admin
   customer --> shared["Shared backend domains"]
   professional --> shared
   admin --> shared
@@ -29,6 +34,7 @@ flowchart TD
 | File | Best for |
 | --- | --- |
 | [User-Facing Flow Diagrams](../user-facing-flow-diagrams.md) | quick orientation across all personas |
+| [QA Seed Matrix](../qa-seed-matrix.md) | seeded accounts, manual QA checklist, and automated verification commands |
 | [Customer Journeys](./customer.md) | discovery, booking, appointments, notifications, profile, support |
 | [Professional Journeys](./professional.md) | access, onboarding, dashboard operations, publication behavior |
 | [Admin Journeys](./admin.md) | admin login, console modules, support desk, studio, ops impact |

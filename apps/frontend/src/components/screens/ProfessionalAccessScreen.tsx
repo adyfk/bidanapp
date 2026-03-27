@@ -39,8 +39,8 @@ const getLocalizedProfessionalTitle = (title: string, locale: string) => {
   }
 
   const replacements: Array<[string, string]> = [
-    ['Professional Newborn Care', 'Perawatan Bayi Baru Lahir'],
-    ['Professional Postpartum Recovery', 'Pemulihan Pascapersalinan'],
+    ['Neonatal Homecare Specialist', 'Spesialis Homecare Bayi Baru Lahir'],
+    ['Postpartum Recovery Specialist', 'Spesialis Pemulihan Pascapersalinan'],
     ['Newborn', 'Bayi Baru Lahir'],
     ['Postpartum', 'Pascapersalinan'],
   ];

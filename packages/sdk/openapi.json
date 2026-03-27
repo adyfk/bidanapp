@@ -303,6 +303,27 @@
         ],
         "type": "object"
       },
+      "AdminReviewStatesResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/AdminReviewStatesResponseBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProfessionalPortalAdminReviewStatesData"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
       "AdminSessionData": {
         "additionalProperties": false,
         "properties": {
@@ -2604,6 +2625,49 @@
         ],
         "type": "object"
       },
+      "ProfessionalPortalAdminReviewStateData": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ProfessionalPortalAdminReviewStateData.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "acceptingNewClients": {
+            "type": "boolean"
+          },
+          "professionalId": {
+            "type": "string"
+          },
+          "reviewState": {
+            "$ref": "#/components/schemas/ProfessionalPortalReviewState"
+          }
+        },
+        "required": [
+          "professionalId",
+          "reviewState"
+        ],
+        "type": "object"
+      },
+      "ProfessionalPortalAdminReviewStatesData": {
+        "additionalProperties": false,
+        "properties": {
+          "reviewStatesByProfessionalId": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ProfessionalPortalReviewState"
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "reviewStatesByProfessionalId"
+        ],
+        "type": "object"
+      },
       "ProfessionalPortalAppointmentCancellationResolution": {
         "additionalProperties": false,
         "properties": {
@@ -4726,6 +4790,130 @@
         ],
         "summary": "Persist admin console table snapshot",
         "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/professionals/review-state": {
+      "put": {
+        "operationId": "upsert-admin-professional-portal-review-state",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfessionalPortalAdminReviewStateData"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "AdminSessionAuth": []
+          }
+        ],
+        "summary": "Persist a professional review state from the admin console",
+        "tags": [
+          "Professional Portal",
+          "Admin"
+        ]
+      }
+    },
+    "/admin/professionals/review-states": {
+      "get": {
+        "operationId": "get-admin-professional-portal-review-states",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminReviewStatesResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "AdminSessionAuth": []
+          }
+        ],
+        "summary": "Get the professional review-state map for the admin console",
+        "tags": [
+          "Professional Portal",
           "Admin"
         ]
       }
