@@ -1208,7 +1208,6 @@ export interface components {
             location: string;
             name: string;
             portfolioEntries: components["schemas"]["ProfessionalPortfolioEntry"][] | null;
-            portfolioStats: components["schemas"]["ProfessionalPortfolioStat"][] | null;
             practiceLocation?: components["schemas"]["ProfessionalPracticeLocation"];
             /** Format: double */
             rating: number;
@@ -1643,13 +1642,6 @@ export interface components {
             serviceId?: string;
             summary: string;
             title: string;
-        };
-        ProfessionalPortfolioStat: {
-            detail: string;
-            /** Format: int64 */
-            index: number;
-            label: string;
-            value: string;
         };
         ProfessionalPracticeLocation: {
             address: string;

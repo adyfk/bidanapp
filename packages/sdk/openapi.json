@@ -1917,15 +1917,6 @@
               "null"
             ]
           },
-          "portfolioStats": {
-            "items": {
-              "$ref": "#/components/schemas/ProfessionalPortfolioStat"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          },
           "practiceLocation": {
             "$ref": "#/components/schemas/ProfessionalPracticeLocation"
           },
@@ -2005,7 +1996,6 @@
           "addressLines",
           "coverage",
           "about",
-          "portfolioStats",
           "credentials",
           "activityStories",
           "portfolioEntries",
@@ -3461,31 +3451,6 @@
           "summary",
           "outcomes",
           "image"
-        ],
-        "type": "object"
-      },
-      "ProfessionalPortfolioStat": {
-        "additionalProperties": false,
-        "properties": {
-          "detail": {
-            "type": "string"
-          },
-          "index": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "label": {
-            "type": "string"
-          },
-          "value": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "index",
-          "label",
-          "value",
-          "detail"
         ],
         "type": "object"
       },
