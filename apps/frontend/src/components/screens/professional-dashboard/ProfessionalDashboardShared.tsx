@@ -3,6 +3,7 @@
 import { ArrowRight, BadgeCheck, ClipboardList, MapPin, Star, Wallet, X } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+import { standardFieldLabelClass } from '@/components/ui/form-styles';
 import {
   blushPanelClass,
   filterChipClass,
@@ -506,7 +507,7 @@ export const RequestCard = ({
 
 export const LabeledField = ({ children, label }: { children: ReactNode; label: string }) => (
   <div className="block">
-    <span className="mb-2 block text-[12px] font-semibold text-slate-500">{label}</span>
+    <span className={standardFieldLabelClass}>{label}</span>
     {children}
   </div>
 );

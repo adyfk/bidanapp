@@ -2,6 +2,7 @@
 
 import { Save } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { StandardCurrencyInput } from '@/components/ui/form-controls';
 import {
   accentSoftPillClass,
   blushSubtlePanelClass,
@@ -95,10 +96,11 @@ export const ProfessionalDashboardServiceEditorDialog = ({
         <div className={`${softWhitePanelClass} p-4`}>
           <div className="grid gap-3">
             <LabeledField label={t('services.fields.price')}>
-              <input
-                type="text"
+              <StandardCurrencyInput
                 value={serviceDraft.price}
-                onChange={(event) => updateDraft({ price: event.target.value })}
+                onValueChange={(nextValue) => updateDraft({ price: nextValue })}
+                accent="blue"
+                surface="muted"
                 className={dashboardInputClass}
               />
             </LabeledField>

@@ -23,6 +23,7 @@ import {
 import { useLocale, useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
+import { StandardPhoneInput } from '@/components/ui/form-controls';
 import { useSupportDesk } from '@/features/admin/hooks/useSupportDesk';
 import { APP_CONFIG } from '@/lib/config';
 import type {
@@ -433,13 +434,24 @@ const CustomerProfileSupportSheet = ({
               </div>
 
               <ProfileSheetField label={t('support.form.contactLabel')}>
-                <input
-                  type="text"
-                  value={draft.contactValue}
-                  onChange={(event) => updateDraftField('contactValue', event.target.value)}
-                  placeholder={t('support.form.contactPlaceholder')}
-                  className={profileSheetInputClassName}
-                />
+                {draft.preferredChannel === 'email' ? (
+                  <input
+                    type="email"
+                    value={draft.contactValue}
+                    onChange={(event) => updateDraftField('contactValue', event.target.value)}
+                    placeholder={t('support.form.contactPlaceholder')}
+                    className={profileSheetInputClassName}
+                  />
+                ) : (
+                  <StandardPhoneInput
+                    value={draft.contactValue}
+                    onValueChange={(nextValue) => updateDraftField('contactValue', nextValue)}
+                    placeholder={t('support.form.contactPlaceholder')}
+                    accent="pink"
+                    surface="muted"
+                    className={profileSheetInputClassName}
+                  />
+                )}
               </ProfileSheetField>
 
               <div>
@@ -839,13 +851,24 @@ const ProfessionalProfileSupportSheet = ({
               </div>
 
               <ProfileSheetField label={t('support.form.contactLabel')}>
-                <input
-                  type="text"
-                  value={draft.contactValue}
-                  onChange={(event) => updateDraftField('contactValue', event.target.value)}
-                  placeholder={t('support.form.contactPlaceholder')}
-                  className={profileSheetInputClassName}
-                />
+                {draft.preferredChannel === 'email' ? (
+                  <input
+                    type="email"
+                    value={draft.contactValue}
+                    onChange={(event) => updateDraftField('contactValue', event.target.value)}
+                    placeholder={t('support.form.contactPlaceholder')}
+                    className={profileSheetInputClassName}
+                  />
+                ) : (
+                  <StandardPhoneInput
+                    value={draft.contactValue}
+                    onValueChange={(nextValue) => updateDraftField('contactValue', nextValue)}
+                    placeholder={t('support.form.contactPlaceholder')}
+                    accent="pink"
+                    surface="muted"
+                    className={profileSheetInputClassName}
+                  />
+                )}
               </ProfileSheetField>
 
               <div>

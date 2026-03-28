@@ -5,6 +5,8 @@ import { useLocale, useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 import { useEffect, useId, useState } from 'react';
 import { AppAvatar } from '@/components/ui/AppAvatar';
+import { StandardPhoneInput } from '@/components/ui/form-controls';
+import { buildStandardInputClass, standardFieldLabelClass } from '@/components/ui/form-styles';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { useRouter } from '@/i18n/routing';
 import { getProfessionalCategoryLabel } from '@/lib/catalog-selectors';
@@ -30,8 +32,10 @@ type AccessErrorKey =
   | 'registerFailed'
   | null;
 
-const fieldClass =
-  'w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-[14px] text-gray-800 outline-none transition-all focus:border-pink-300 focus:ring-2 focus:ring-pink-100';
+const fieldClass = buildStandardInputClass({
+  accent: 'pink',
+  surface: 'muted',
+});
 
 const getLocalizedProfessionalTitle = (title: string, locale: string) => {
   if (!locale.startsWith('id')) {
@@ -431,15 +435,16 @@ export const ProfessionalAccessScreen = ({ defaultTab = 'login' }: ProfessionalA
               {activeTab === 'login' ? (
                 <div className="mt-5 space-y-4">
                   <FormField htmlFor={`${inputIdPrefix}-login-phone`} label={t('fields.phone')}>
-                    <input
+                    <StandardPhoneInput
                       id={`${inputIdPrefix}-login-phone`}
-                      type="tel"
                       value={loginPhone}
-                      onChange={(event) => {
-                        setLoginPhone(event.target.value);
-                        setRecoveryPhone((currentPhone) => currentPhone || event.target.value);
+                      onValueChange={(nextValue) => {
+                        setLoginPhone(nextValue);
+                        setRecoveryPhone((currentPhone) => currentPhone || nextValue);
                       }}
                       placeholder={t('placeholders.phone')}
+                      accent="pink"
+                      surface="muted"
                       className={fieldClass}
                     />
                   </FormField>
@@ -476,15 +481,16 @@ export const ProfessionalAccessScreen = ({ defaultTab = 'login' }: ProfessionalA
                       </p>
                       <div className="mt-4 space-y-4">
                         <FormField htmlFor={`${inputIdPrefix}-recovery-phone`} label={t('forgotPassword.phoneLabel')}>
-                          <input
+                          <StandardPhoneInput
                             id={`${inputIdPrefix}-recovery-phone`}
-                            type="tel"
                             value={recoveryPhone}
-                            onChange={(event) => {
+                            onValueChange={(nextValue) => {
                               setRecoveryState('idle');
-                              setRecoveryPhone(event.target.value);
+                              setRecoveryPhone(nextValue);
                             }}
                             placeholder={t('placeholders.phone')}
+                            accent="pink"
+                            surface="muted"
                             className={fieldClass}
                           />
                         </FormField>
@@ -541,12 +547,13 @@ export const ProfessionalAccessScreen = ({ defaultTab = 'login' }: ProfessionalA
                     />
                   </FormField>
                   <FormField htmlFor={`${inputIdPrefix}-register-phone`} label={t('fields.phone')}>
-                    <input
+                    <StandardPhoneInput
                       id={`${inputIdPrefix}-register-phone`}
-                      type="tel"
                       value={registerPhone}
-                      onChange={(event) => setRegisterPhone(event.target.value)}
+                      onValueChange={setRegisterPhone}
                       placeholder={t('placeholders.phone')}
+                      accent="pink"
+                      surface="muted"
                       className={fieldClass}
                     />
                   </FormField>
@@ -660,7 +667,7 @@ const ProfessionalAccessSkeleton = () => (
 
 const FormField = ({ children, htmlFor, label }: { children: ReactNode; htmlFor: string; label: string }) => (
   <div>
-    <label htmlFor={htmlFor} className="mb-2 block text-[12px] font-semibold text-gray-500">
+    <label htmlFor={htmlFor} className={standardFieldLabelClass}>
       {label}
     </label>
     {children}

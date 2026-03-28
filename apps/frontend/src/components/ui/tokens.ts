@@ -1,3 +1,5 @@
+import { buildStandardInputClass } from '@/components/ui/form-styles';
+
 export const surfaceCardClass =
   'rounded-[24px] border border-slate-200/80 bg-white shadow-[0_14px_40px_-28px_rgba(15,23,42,0.18)]';
 
@@ -5,11 +7,15 @@ export const surfaceCardPaddedClass = `${surfaceCardClass} p-4`;
 
 export const insetSurfaceClass = 'rounded-[20px] border border-slate-200 bg-slate-50';
 
-export const softInputClass =
-  'w-full rounded-[18px] border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition-all placeholder:text-slate-400 focus:border-blue-300 focus:ring-2 focus:ring-blue-100';
+export const softInputClass = buildStandardInputClass({
+  accent: 'blue',
+  surface: 'soft',
+});
 
-export const mutedInputClass =
-  'w-full rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none transition-all placeholder:text-slate-400 focus:border-blue-300 focus:ring-2 focus:ring-blue-100';
+export const mutedInputClass = buildStandardInputClass({
+  accent: 'blue',
+  surface: 'muted',
+});
 
 export const segmentedContainerClass = 'rounded-[18px] bg-slate-100 p-1';
 

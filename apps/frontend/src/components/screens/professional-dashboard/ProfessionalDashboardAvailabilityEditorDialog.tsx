@@ -3,6 +3,7 @@
 import { Plus, Save, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
+import { StandardDateInput, StandardTimeInput } from '@/components/ui/form-controls';
 import {
   accentPrimaryButtonClass,
   blushSubtlePanelClass,
@@ -265,23 +266,25 @@ export const ProfessionalDashboardAvailabilityEditorDialog = ({
                 {window.isEnabled ? (
                   <div className="mt-3 grid grid-cols-2 gap-3">
                     <LabeledField label={t('availability.startTimeLabel')}>
-                      <input
-                        type="time"
+                      <StandardTimeInput
                         value={window.startTime}
-                        onChange={(event) =>
-                          updateWeeklyWindow(selectedMode, window.id, { startTime: event.target.value })
+                        onValueChange={(nextValue) =>
+                          updateWeeklyWindow(selectedMode, window.id, { startTime: nextValue })
                         }
+                        accent="blue"
+                        surface="muted"
                         className={dashboardInputClass}
                       />
                     </LabeledField>
 
                     <LabeledField label={t('availability.endTimeLabel')}>
-                      <input
-                        type="time"
+                      <StandardTimeInput
                         value={window.endTime}
-                        onChange={(event) =>
-                          updateWeeklyWindow(selectedMode, window.id, { endTime: event.target.value })
+                        onValueChange={(nextValue) =>
+                          updateWeeklyWindow(selectedMode, window.id, { endTime: nextValue })
                         }
+                        accent="blue"
+                        surface="muted"
                         className={dashboardInputClass}
                       />
                     </LabeledField>
@@ -330,12 +333,13 @@ export const ProfessionalDashboardAvailabilityEditorDialog = ({
 
                   <div className="mt-4 grid gap-3">
                     <LabeledField label={t('availability.specialDateLabel')}>
-                      <input
-                        type="date"
+                      <StandardDateInput
                         value={override.dateIso}
-                        onChange={(event) =>
-                          updateDateOverride(selectedMode, override.id, { dateIso: event.target.value })
+                        onValueChange={(nextValue) =>
+                          updateDateOverride(selectedMode, override.id, { dateIso: nextValue })
                         }
+                        accent="blue"
+                        surface="muted"
                         className={dashboardInputClass}
                       />
                     </LabeledField>
@@ -362,23 +366,25 @@ export const ProfessionalDashboardAvailabilityEditorDialog = ({
                     {!override.isClosed ? (
                       <div className="grid grid-cols-2 gap-3">
                         <LabeledField label={t('availability.startTimeLabel')}>
-                          <input
-                            type="time"
+                          <StandardTimeInput
                             value={override.startTime || '09:00'}
-                            onChange={(event) =>
-                              updateDateOverride(selectedMode, override.id, { startTime: event.target.value })
+                            onValueChange={(nextValue) =>
+                              updateDateOverride(selectedMode, override.id, { startTime: nextValue })
                             }
+                            accent="blue"
+                            surface="muted"
                             className={dashboardInputClass}
                           />
                         </LabeledField>
 
                         <LabeledField label={t('availability.endTimeLabel')}>
-                          <input
-                            type="time"
+                          <StandardTimeInput
                             value={override.endTime || '17:00'}
-                            onChange={(event) =>
-                              updateDateOverride(selectedMode, override.id, { endTime: event.target.value })
+                            onValueChange={(nextValue) =>
+                              updateDateOverride(selectedMode, override.id, { endTime: nextValue })
                             }
+                            accent="blue"
+                            surface="muted"
                             className={dashboardInputClass}
                           />
                         </LabeledField>

@@ -2,10 +2,11 @@
 
 import { Save } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { StandardMultiSelect, StandardNumberInput } from '@/components/ui/form-controls';
 import { accentPrimaryButtonClass, blushSubtlePanelClass, softWhitePanelClass } from '@/components/ui/tokens';
 import type { Area } from '@/types/catalog';
 import { dashboardInputClass, dashboardTextareaClass, dashboardTextareaTallClass } from './editorStyles';
-import { DashboardDialog, LabeledField, SelectableChip, SwitchRow } from './ProfessionalDashboardShared';
+import { DashboardDialog, LabeledField, SwitchRow } from './ProfessionalDashboardShared';
 import type { CoverageDraft } from './types';
 
 interface ProfessionalDashboardCoverageEditorDialogProps {
@@ -86,26 +87,35 @@ export const ProfessionalDashboardCoverageEditorDialog = ({
             />
           </LabeledField>
           <LabeledField label={t('coverage.fields.radius')}>
-            <input
-              type="number"
+            <StandardNumberInput
               value={coverageDraft.homeVisitRadiusKm}
-              onChange={(event) => updateDraft({ homeVisitRadiusKm: event.target.value })}
+              onValueChange={(nextValue) => updateDraft({ homeVisitRadiusKm: nextValue })}
+              accent="blue"
+              surface="muted"
               className={dashboardInputClass}
             />
           </LabeledField>
           <LabeledField label={t('coverage.fields.latitude')}>
-            <input
-              type="number"
+            <StandardNumberInput
+              allowDecimal
+              allowNegative
+              maxDecimals={6}
               value={coverageDraft.latitude}
-              onChange={(event) => updateDraft({ latitude: event.target.value })}
+              onValueChange={(nextValue) => updateDraft({ latitude: nextValue })}
+              accent="blue"
+              surface="muted"
               className={dashboardInputClass}
             />
           </LabeledField>
           <LabeledField label={t('coverage.fields.longitude')}>
-            <input
-              type="number"
+            <StandardNumberInput
+              allowDecimal
+              allowNegative
+              maxDecimals={6}
               value={coverageDraft.longitude}
-              onChange={(event) => updateDraft({ longitude: event.target.value })}
+              onValueChange={(nextValue) => updateDraft({ longitude: nextValue })}
+              accent="blue"
+              surface="muted"
               className={dashboardInputClass}
             />
           </LabeledField>
@@ -131,22 +141,20 @@ export const ProfessionalDashboardCoverageEditorDialog = ({
         <div className={`${softWhitePanelClass} grid gap-4 p-4`}>
           <div>
             <p className="mb-2 text-[12px] font-semibold text-slate-500">{t('coverage.fields.areaSelection')}</p>
-            <div className="flex flex-wrap gap-2">
-              {areas.map((area) => (
-                <SelectableChip
-                  key={area.id}
-                  isActive={coverageDraft.coverageAreaIds.includes(area.id)}
-                  label={area.label}
-                  onClick={() =>
-                    updateDraft({
-                      coverageAreaIds: coverageDraft.coverageAreaIds.includes(area.id)
-                        ? coverageDraft.coverageAreaIds.filter((currentAreaId) => currentAreaId !== area.id)
-                        : [...coverageDraft.coverageAreaIds, area.id],
-                    })
-                  }
-                />
-              ))}
-            </div>
+            <StandardMultiSelect
+              accent="blue"
+              emptyStateLabel={t('coverage.emptyAreaSelection')}
+              options={areas.map((area) => ({
+                description: `${area.district}, ${area.city}`,
+                label: area.label,
+                value: area.id,
+              }))}
+              placeholder={t('coverage.fields.areaSelection')}
+              searchPlaceholder={t('coverage.fields.areaSelection')}
+              surface="muted"
+              values={coverageDraft.coverageAreaIds}
+              onValuesChange={(nextValues) => updateDraft({ coverageAreaIds: nextValues })}
+            />
           </div>
         </div>
       </div>

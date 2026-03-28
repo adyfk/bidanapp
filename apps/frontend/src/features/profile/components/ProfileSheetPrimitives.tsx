@@ -2,6 +2,7 @@
 
 import { ChevronLeft } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { buildStandardInputClass, standardFieldLabelClass } from '@/components/ui/form-styles';
 
 interface ProfileSheetShellProps {
   children: ReactNode;
@@ -36,8 +37,10 @@ interface ProfileSheetRuleRowProps {
   readyLabel?: string;
 }
 
-const inputClassName =
-  'w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-[14px] text-gray-800 transition-all focus:border-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-100';
+const inputClassName = buildStandardInputClass({
+  accent: 'pink',
+  surface: 'muted',
+});
 
 export const profileSheetInputClassName = inputClassName;
 
@@ -111,7 +114,7 @@ export const ProfileSheetSection = ({
 
 export const ProfileSheetField = ({ children, label }: ProfileSheetFieldProps) => (
   <div className="block">
-    <span className="mb-2 block text-[12px] font-semibold text-gray-500">{label}</span>
+    <span className={standardFieldLabelClass}>{label}</span>
     {children}
   </div>
 );

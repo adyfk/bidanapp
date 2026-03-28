@@ -3,6 +3,7 @@
 import { KeyRound, ShieldCheck, User } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useId } from 'react';
+import { StandardPhoneInput } from '@/components/ui/form-controls';
 import type {
   PasswordDraft,
   PasswordSaveErrorKey,
@@ -113,11 +114,12 @@ export const ProfileSettingsSheet = ({
                 </ProfileSheetField>
 
                 <ProfileSheetField label={t('accountSheet.phoneLabel')}>
-                  <input
+                  <StandardPhoneInput
                     id={`${identityPrefix}-phone`}
-                    type="tel"
                     value={profileDraft.phone}
-                    onChange={(event) => onUpdateProfileField('phone', event.target.value)}
+                    onValueChange={(nextValue) => onUpdateProfileField('phone', nextValue)}
+                    accent="pink"
+                    surface="muted"
                     className={profileSheetInputClassName}
                   />
                 </ProfileSheetField>

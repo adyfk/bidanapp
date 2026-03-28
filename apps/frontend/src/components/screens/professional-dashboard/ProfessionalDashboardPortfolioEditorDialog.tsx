@@ -2,6 +2,7 @@
 
 import { Save, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { StandardSearchableSelect } from '@/components/ui/form-controls';
 import type { ProfessionalManagedService } from '@/lib/use-professional-portal';
 import { dashboardInputClass, dashboardTextareaClass, dashboardTextareaTallClass } from './editorStyles';
 import { DashboardDialog, LabeledField, SegmentButton } from './ProfessionalDashboardShared';
@@ -89,18 +90,25 @@ export const ProfessionalDashboardPortfolioEditorDialog = ({
                 />
               </LabeledField>
               <LabeledField label={t('portfolio.fields.service')}>
-                <select
+                <StandardSearchableSelect
+                  accent="blue"
+                  emptyStateLabel={t('portfolio.noServiceOption')}
+                  options={[
+                    {
+                      label: t('portfolio.noServiceOption'),
+                      value: '',
+                    },
+                    ...activeServiceConfigurations.map((service) => ({
+                      label: getServiceLabel(service.serviceId),
+                      value: service.serviceId,
+                    })),
+                  ]}
+                  placeholder={t('portfolio.noServiceOption')}
+                  searchPlaceholder={t('portfolio.fields.service')}
+                  surface="muted"
                   value={portfolioDraft.serviceId}
-                  onChange={(event) => updateDraft({ serviceId: event.target.value })}
-                  className={dashboardInputClass}
-                >
-                  <option value="">{t('portfolio.noServiceOption')}</option>
-                  {activeServiceConfigurations.map((service) => (
-                    <option key={service.serviceId} value={service.serviceId}>
-                      {getServiceLabel(service.serviceId)}
-                    </option>
-                  ))}
-                </select>
+                  onValueChange={(nextValue) => updateDraft({ serviceId: nextValue })}
+                />
               </LabeledField>
             </div>
           </div>

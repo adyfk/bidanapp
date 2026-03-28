@@ -2,6 +2,7 @@
 
 import { Save, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { StandardNumberInput } from '@/components/ui/form-controls';
 import { dashboardInputClass, dashboardTextareaClass } from './editorStyles';
 import { DashboardDialog, LabeledField } from './ProfessionalDashboardShared';
 import type { CredentialDraft } from './types';
@@ -73,10 +74,12 @@ export const ProfessionalDashboardTrustCredentialEditorDialog = ({
             />
           </LabeledField>
           <LabeledField label={t('trust.credentialEditor.fields.year')}>
-            <input
-              type="text"
+            <StandardNumberInput
+              maxLength={4}
               value={credentialDraft.year}
-              onChange={(event) => updateDraft({ year: event.target.value })}
+              onValueChange={(nextValue) => updateDraft({ year: nextValue })}
+              accent="blue"
+              surface="muted"
               className={dashboardInputClass}
             />
           </LabeledField>

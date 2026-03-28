@@ -26,6 +26,7 @@ import {
 } from '@/features/profile/components/ProfilePagePrimitives';
 import { ProfileSupportEntryCard, ProfileSupportSheet } from '@/features/profile/components/ProfileSupportCenter';
 import { useRouter } from '@/i18n/routing';
+import { sanitizePhoneValue } from '@/lib/form-input';
 import { APP_ROUTES, professionalDashboardRoute, professionalRoute } from '@/lib/routes';
 import { useProfessionalAuthSession } from '@/lib/use-professional-auth-session';
 import { useProfessionalPortal } from '@/lib/use-professional-portal';
@@ -54,7 +55,6 @@ const buildPasswordDraft = (phone: string): ProfessionalPasswordDraft => ({
 });
 
 const hasValue = (value: string) => value.trim().length > 0;
-const sanitizePhone = (value: string) => value.replace(/[^\d+\s()-]/g, '');
 
 export const ProfessionalProfileScreen = () => {
   const router = useRouter();
@@ -153,7 +153,7 @@ export const ProfessionalProfileScreen = () => {
 
     setProfileDraft((currentDraft) => ({
       ...currentDraft,
-      [field]: field === 'phone' ? sanitizePhone(String(value)) : value,
+      [field]: field === 'phone' ? sanitizePhoneValue(String(value)) : value,
     }));
   };
 
@@ -171,7 +171,7 @@ export const ProfessionalProfileScreen = () => {
 
     setPasswordDraft((currentDraft) => ({
       ...currentDraft,
-      [field]: field === 'resetPhone' ? sanitizePhone(String(value)) : value,
+      [field]: field === 'resetPhone' ? sanitizePhoneValue(String(value)) : value,
     }));
   };
 

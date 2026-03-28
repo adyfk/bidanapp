@@ -3,6 +3,7 @@
 import { MessageSquareMore, ShieldCheck, UserRound } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useId } from 'react';
+import { StandardPhoneInput } from '@/components/ui/form-controls';
 import { APP_CONFIG } from '@/lib/config';
 import {
   ProfileSheetField,
@@ -158,11 +159,12 @@ export const ProfessionalProfileSettingsSheet = ({
                 </ProfileSheetField>
 
                 <ProfileSheetField label={t('account.fields.phone')}>
-                  <input
+                  <StandardPhoneInput
                     id={`${fieldPrefix}-phone`}
-                    type="tel"
                     value={profileDraft.phone}
-                    onChange={(event) => onUpdateProfileField('phone', event.target.value)}
+                    onValueChange={(nextValue) => onUpdateProfileField('phone', nextValue)}
+                    accent="pink"
+                    surface="muted"
                     className={profileSheetInputClassName}
                   />
                 </ProfileSheetField>
@@ -309,11 +311,12 @@ export const ProfessionalProfileSettingsSheet = ({
 
               <div className="grid gap-4">
                 <ProfileSheetField label={t('security.fields.resetPhone')}>
-                  <input
+                  <StandardPhoneInput
                     id={`${fieldPrefix}-reset-phone`}
-                    type="tel"
                     value={passwordDraft.resetPhone}
-                    onChange={(event) => onUpdatePasswordField('resetPhone', event.target.value)}
+                    onValueChange={(nextValue) => onUpdatePasswordField('resetPhone', nextValue)}
+                    accent="pink"
+                    surface="muted"
                     className={profileSheetInputClassName}
                   />
                 </ProfileSheetField>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { sanitizePhoneValue } from '@/lib/form-input';
 import { useAppShell } from '@/lib/use-app-shell';
 import type { CustomerAuthSessionState } from '@/types/customer-auth';
 
@@ -33,7 +34,6 @@ const initialPasswordDraft: PasswordDraft = {
   confirmPassword: '',
 };
 
-const sanitizePhone = (value: string) => value.replace(/[^\d+\s()-]/g, '');
 const hasValue = (value: string) => value.trim().length > 0;
 
 interface UseProfileSettingsOptions {
@@ -86,7 +86,7 @@ export const useProfileSettings = ({ customerSession, updateAccount, updatePassw
 
     setProfileDraft((current) => ({
       ...current,
-      [field]: field === 'phone' ? sanitizePhone(String(value)) : value,
+      [field]: field === 'phone' ? sanitizePhoneValue(String(value)) : value,
     }));
   };
 

@@ -5,6 +5,8 @@ import type { Route } from 'next';
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 import { useEffect, useId, useState } from 'react';
+import { StandardPhoneInput } from '@/components/ui/form-controls';
+import { buildStandardInputClass, standardFieldLabelClass } from '@/components/ui/form-styles';
 import { useRouter } from '@/i18n/routing';
 import { APP_CONFIG } from '@/lib/config';
 import { APP_ROUTES, type CustomerAccessIntent, professionalAccessRoute } from '@/lib/routes';
@@ -36,6 +38,11 @@ const intentKeyByValue: Record<CustomerAccessIntent, 'general' | 'activity' | 'p
     notifications: 'notifications',
     profile: 'profile',
   };
+
+const fieldClass = buildStandardInputClass({
+  accent: 'pink',
+  surface: 'muted',
+});
 
 export const CustomerAccessScreen = ({ intent = 'general', nextHref = APP_ROUTES.home }: CustomerAccessScreenProps) => {
   const router = useRouter();
@@ -221,27 +228,22 @@ export const CustomerAccessScreen = ({ intent = 'general', nextHref = APP_ROUTES
           {activeTab === 'login' ? (
             <div className="mt-5 space-y-4">
               <div>
-                <label
-                  htmlFor={`${idPrefix}-login-phone`}
-                  className="mb-2 block text-[12px] font-semibold text-gray-500"
-                >
+                <label htmlFor={`${idPrefix}-login-phone`} className={standardFieldLabelClass}>
                   {t('fields.phone')}
                 </label>
-                <input
+                <StandardPhoneInput
                   id={`${idPrefix}-login-phone`}
-                  type="tel"
                   disabled={isSubmitting}
                   value={loginPhone}
-                  onChange={(event) => setLoginPhone(event.target.value)}
+                  onValueChange={setLoginPhone}
                   placeholder={t('placeholders.phone')}
-                  className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-[14px] text-gray-800 outline-none transition-all focus:border-pink-300 focus:ring-2 focus:ring-pink-100"
+                  accent="pink"
+                  surface="muted"
+                  className={fieldClass}
                 />
               </div>
               <div>
-                <label
-                  htmlFor={`${idPrefix}-login-password`}
-                  className="mb-2 block text-[12px] font-semibold text-gray-500"
-                >
+                <label htmlFor={`${idPrefix}-login-password`} className={standardFieldLabelClass}>
                   {t('fields.password')}
                 </label>
                 <input
@@ -251,7 +253,7 @@ export const CustomerAccessScreen = ({ intent = 'general', nextHref = APP_ROUTES
                   value={loginPassword}
                   onChange={(event) => setLoginPassword(event.target.value)}
                   placeholder={t('placeholders.password')}
-                  className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-[14px] text-gray-800 outline-none transition-all focus:border-pink-300 focus:ring-2 focus:ring-pink-100"
+                  className={fieldClass}
                 />
               </div>
               <button
@@ -268,10 +270,7 @@ export const CustomerAccessScreen = ({ intent = 'general', nextHref = APP_ROUTES
           ) : (
             <div className="mt-5 space-y-4">
               <div>
-                <label
-                  htmlFor={`${idPrefix}-register-name`}
-                  className="mb-2 block text-[12px] font-semibold text-gray-500"
-                >
+                <label htmlFor={`${idPrefix}-register-name`} className={standardFieldLabelClass}>
                   {t('fields.fullName')}
                 </label>
                 <input
@@ -281,31 +280,26 @@ export const CustomerAccessScreen = ({ intent = 'general', nextHref = APP_ROUTES
                   value={registerName}
                   onChange={(event) => setRegisterName(event.target.value)}
                   placeholder={t('placeholders.fullName')}
-                  className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-[14px] text-gray-800 outline-none transition-all focus:border-pink-300 focus:ring-2 focus:ring-pink-100"
+                  className={fieldClass}
                 />
               </div>
               <div>
-                <label
-                  htmlFor={`${idPrefix}-register-phone`}
-                  className="mb-2 block text-[12px] font-semibold text-gray-500"
-                >
+                <label htmlFor={`${idPrefix}-register-phone`} className={standardFieldLabelClass}>
                   {t('fields.phone')}
                 </label>
-                <input
+                <StandardPhoneInput
                   id={`${idPrefix}-register-phone`}
-                  type="tel"
                   disabled={isSubmitting}
                   value={registerPhone}
-                  onChange={(event) => setRegisterPhone(event.target.value)}
+                  onValueChange={setRegisterPhone}
                   placeholder={t('placeholders.phone')}
-                  className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-[14px] text-gray-800 outline-none transition-all focus:border-pink-300 focus:ring-2 focus:ring-pink-100"
+                  accent="pink"
+                  surface="muted"
+                  className={fieldClass}
                 />
               </div>
               <div>
-                <label
-                  htmlFor={`${idPrefix}-register-city`}
-                  className="mb-2 block text-[12px] font-semibold text-gray-500"
-                >
+                <label htmlFor={`${idPrefix}-register-city`} className={standardFieldLabelClass}>
                   {t('fields.city')}
                 </label>
                 <input
@@ -315,14 +309,11 @@ export const CustomerAccessScreen = ({ intent = 'general', nextHref = APP_ROUTES
                   value={registerCity}
                   onChange={(event) => setRegisterCity(event.target.value)}
                   placeholder={t('placeholders.city')}
-                  className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-[14px] text-gray-800 outline-none transition-all focus:border-pink-300 focus:ring-2 focus:ring-pink-100"
+                  className={fieldClass}
                 />
               </div>
               <div>
-                <label
-                  htmlFor={`${idPrefix}-register-password`}
-                  className="mb-2 block text-[12px] font-semibold text-gray-500"
-                >
+                <label htmlFor={`${idPrefix}-register-password`} className={standardFieldLabelClass}>
                   {t('fields.password')}
                 </label>
                 <input
@@ -332,7 +323,7 @@ export const CustomerAccessScreen = ({ intent = 'general', nextHref = APP_ROUTES
                   value={registerPassword}
                   onChange={(event) => setRegisterPassword(event.target.value)}
                   placeholder={t('placeholders.password')}
-                  className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-[14px] text-gray-800 outline-none transition-all focus:border-pink-300 focus:ring-2 focus:ring-pink-100"
+                  className={fieldClass}
                 />
               </div>
               <p className="rounded-[18px] bg-gray-50 px-4 py-3 text-[12px] leading-relaxed text-gray-500">

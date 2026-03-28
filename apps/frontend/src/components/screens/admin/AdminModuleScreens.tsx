@@ -16,6 +16,12 @@ import {
 import type { Route } from 'next';
 import Link from 'next/link';
 import { type ReactNode, useEffect, useState } from 'react';
+import { StandardCurrencyInput, StandardPhoneInput, StandardSearchInput } from '@/components/ui/form-controls';
+import {
+  buildStandardInputClass,
+  buildStandardSelectClass,
+  standardFieldLabelClass,
+} from '@/components/ui/form-styles';
 import {
   ADMIN_CONSOLE_TABLE_NAMES,
   type AdminConsoleTableName,
@@ -29,16 +35,20 @@ import type { SupportCategoryId } from '@/types/admin';
 import type { AppointmentStatus } from '@/types/appointments';
 
 const panelClass = 'rounded-[30px] border border-slate-200 bg-white p-5 shadow-[0_22px_50px_-38px_rgba(15,23,42,0.35)]';
-const inputClass =
-  'w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-slate-400 focus:bg-white';
+const inputClass = buildStandardInputClass({
+  accent: 'slate',
+  surface: 'muted',
+});
 const textareaClass = `${inputClass} min-h-[130px] resize-y`;
-const labelClass = 'text-[12px] font-semibold text-slate-500';
+const labelClass = standardFieldLabelClass;
 const buttonPrimaryClass =
   'inline-flex items-center justify-center rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800';
 const buttonSecondaryClass =
   'inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50';
-const compactSelectClass =
-  'rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 outline-none transition focus:border-slate-400';
+const compactSelectClass = `${buildStandardSelectClass({
+  accent: 'slate',
+  surface: 'soft',
+})} px-3 py-2 text-xs font-semibold`;
 const checkboxClass = 'mt-1 h-4 w-4 rounded border border-slate-300 text-slate-900 focus:ring-2 focus:ring-slate-300';
 
 const customerSupportCategoryOptions: SupportCategoryId[] = [
@@ -1513,10 +1523,12 @@ export const AdminCustomersScreen = () => {
                   />
                 </Field>
                 <Field label="Nomor telepon">
-                  <input
-                    className={inputClass}
+                  <StandardPhoneInput
                     value={customerDraft.phone}
-                    onChange={(event) => setCustomerDraft({ ...customerDraft, phone: event.target.value })}
+                    onValueChange={(nextValue) => setCustomerDraft({ ...customerDraft, phone: nextValue })}
+                    accent="slate"
+                    surface="muted"
+                    className={inputClass}
                   />
                 </Field>
                 <Field label="Avatar URL">
@@ -3875,20 +3887,22 @@ export const AdminAppointmentsScreen = () => {
               />
             </Field>
             <Field label="Total price label">
-              <input
-                className={inputClass}
+              <StandardCurrencyInput
                 value={appointmentDraft.totalPriceLabel}
-                onChange={(event) =>
+                onValueChange={(nextValue) =>
                   setAppointmentDraft({
                     ...appointmentDraft,
-                    totalPriceLabel: event.target.value,
+                    totalPriceLabel: nextValue,
                     serviceSnapshot: {
                       ...appointmentDraft.serviceSnapshot,
-                      priceAmount: parsePriceAmount(event.target.value),
-                      priceLabel: event.target.value,
+                      priceAmount: parsePriceAmount(nextValue),
+                      priceLabel: nextValue,
                     },
                   })
                 }
+                accent="slate"
+                surface="muted"
+                className={inputClass}
               />
             </Field>
             <Field label="Requested note">
@@ -4370,11 +4384,13 @@ export const AdminSupportScreen = () => {
                 { label: 'SLA risk', value: 'sla_risk' },
               ]}
             />
-            <input
-              className={inputClass}
+            <StandardSearchInput
               value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
+              onValueChange={setSearchQuery}
               placeholder="Cari summary, reporter, reference, category, channel, atau id ticket."
+              accent="slate"
+              surface="muted"
+              className={inputClass}
             />
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
               <select
