@@ -37,6 +37,8 @@ If you are new to the repository, read these documents in order:
 
 ### Supporting references
 
+- [Bidan Marketplace](./bidan-marketplace.md)
+  Product-facing analysis of the current marketplace shape, focus, goals, use cases, and strategic product direction inferred from implemented features.
 - [Environment Setup](./environment.md)
   Detailed environment variable reference for frontend, backend, and deploy templates.
 - [Production Rollout](./production-rollout.md)

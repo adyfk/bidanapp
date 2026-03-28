@@ -1,6 +1,6 @@
 import { spawn, spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import { copyFile, cp, mkdir, rename, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, rm } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
@@ -8,14 +8,11 @@ import { fileURLToPath } from 'node:url';
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDir, '..', '..');
 const frontendDir = path.join(repoRoot, 'apps', 'frontend');
-const envLocalPath = path.join(frontendDir, '.env.local');
-const envBackupPath = path.join(frontendDir, '.env.local.playwright-backup');
 const frontendPort = process.env.PLAYWRIGHT_FRONTEND_PORT ?? '3301';
 const backendApiBaseUrl =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? `http://127.0.0.1:${process.env.HTTP_PORT ?? '3302'}/api/v1`;
-
-let restored = false;
-let hadOriginalEnvLocal = false;
+  process.env.PLAYWRIGHT_BACKEND_API_BASE_URL ??
+  process.env.NEXT_PUBLIC_API_BASE_URL ??
+  `http://127.0.0.1:${process.env.HTTP_PORT ?? '3302'}/api/v1`;
 
 function buildChildEnv(overrides = {}) {
   const env = { ...process.env, ...overrides };
@@ -24,23 +21,6 @@ function buildChildEnv(overrides = {}) {
   delete env.NO_COLOR;
 
   return env;
-}
-
-async function restoreEnvFile() {
-  if (restored) {
-    return;
-  }
-
-  restored = true;
-
-  if (hadOriginalEnvLocal && existsSync(envBackupPath)) {
-    await rename(envBackupPath, envLocalPath);
-    return;
-  }
-
-  if (existsSync(envLocalPath)) {
-    await rm(envLocalPath, { force: true });
-  }
 }
 
 function run(command, args, options = {}) {
@@ -83,31 +63,21 @@ async function prepareStandaloneAssets() {
 }
 
 async function main() {
-  hadOriginalEnvLocal = existsSync(envLocalPath);
+  const playwrightEnv = {
+    NEXT_PUBLIC_ADMIN_CONSOLE_ENABLED: 'true',
+    NEXT_PUBLIC_API_BASE_URL: backendApiBaseUrl,
+    NEXT_PUBLIC_APP_STATE_DATA_SOURCE: 'api',
+    NEXT_PUBLIC_APP_VERSION: 'playwright',
+    NEXT_PUBLIC_PROFESSIONAL_PORTAL_DATA_SOURCE: 'api',
+    NEXT_PUBLIC_SITE_URL: `http://127.0.0.1:${frontendPort}`,
+  };
 
-  if (hadOriginalEnvLocal) {
-    if (existsSync(envBackupPath)) {
-      await rm(envBackupPath, { force: true });
-    }
-
-    await copyFile(envLocalPath, envBackupPath);
-  }
-
-  const playwrightEnv = [
-    `NEXT_PUBLIC_SITE_URL=http://127.0.0.1:${frontendPort}`,
-    `NEXT_PUBLIC_API_BASE_URL=${backendApiBaseUrl}`,
-    'NEXT_PUBLIC_APP_VERSION=playwright',
-    'NEXT_PUBLIC_PROFESSIONAL_PORTAL_DATA_SOURCE=api',
-    'NEXT_PUBLIC_APP_STATE_DATA_SOURCE=api',
-    'NEXT_PUBLIC_ADMIN_CONSOLE_ENABLED=true',
-  ].join('\n');
-
-  await writeFile(envLocalPath, `${playwrightEnv}\n`, 'utf8');
   await rm(path.join(frontendDir, '.next'), { force: true, recursive: true });
 
   run('node', ['../../node_modules/next/dist/bin/next', 'build'], {
     env: {
       NEXT_TELEMETRY_DISABLED: '1',
+      ...playwrightEnv,
     },
   });
 
@@ -118,6 +88,7 @@ async function main() {
         env: buildChildEnv({
           HOSTNAME: '127.0.0.1',
           NEXT_TELEMETRY_DISABLED: '1',
+          ...playwrightEnv,
           PORT: frontendPort,
         }),
         stdio: 'inherit',
@@ -129,14 +100,13 @@ async function main() {
           cwd: frontendDir,
           env: buildChildEnv({
             NEXT_TELEMETRY_DISABLED: '1',
+            ...playwrightEnv,
           }),
           stdio: 'inherit',
         },
       );
 
-  const cleanupAndExit = async (code, signal) => {
-    await restoreEnvFile();
-
+  const cleanupAndExit = (code, signal) => {
     if (signal) {
       process.kill(process.pid, signal);
       return;
@@ -157,12 +127,11 @@ async function main() {
   });
 
   server.on('exit', (code, signal) => {
-    void cleanupAndExit(code, signal);
+    cleanupAndExit(code, signal);
   });
 }
 
-main().catch(async (error) => {
-  await restoreEnvFile();
+main().catch((error) => {
   process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`);
   process.exit(1);
 });
