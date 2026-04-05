@@ -152,6 +152,58 @@ func TestRouterRejectsUnauthorizedCustomerNotificationRequests(t *testing.T) {
 	}
 }
 
+func TestRouterRejectsUnauthorizedCustomerAppointmentRequests(t *testing.T) {
+	cfg := testConfig(t)
+	router := NewRouter(cfg, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	request := httptest.NewRequest(http.MethodGet, "/api/v1/customers/appointments", nil)
+	recorder := httptest.NewRecorder()
+
+	router.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusUnauthorized {
+		t.Fatalf("unexpected status: got %d want %d", recorder.Code, http.StatusUnauthorized)
+	}
+
+	if !strings.Contains(recorder.Body.String(), `"code":"missing_customer_session"`) {
+		t.Fatalf("unexpected response: %s", recorder.Body.String())
+	}
+}
+
+func TestRouterRejectsUnauthorizedProfessionalAppointmentRequests(t *testing.T) {
+	cfg := testConfig(t)
+	router := NewRouter(cfg, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	request := httptest.NewRequest(http.MethodGet, "/api/v1/professionals/appointments", nil)
+	recorder := httptest.NewRecorder()
+
+	router.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusUnauthorized {
+		t.Fatalf("unexpected status: got %d want %d", recorder.Code, http.StatusUnauthorized)
+	}
+
+	if !strings.Contains(recorder.Body.String(), `"code":"missing_professional_session"`) {
+		t.Fatalf("unexpected response: %s", recorder.Body.String())
+	}
+}
+
+func TestRouterRejectsUnauthorizedAppointmentChangeRequestActor(t *testing.T) {
+	cfg := testConfig(t)
+	router := NewRouter(cfg, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	request := httptest.NewRequest(http.MethodPost, "/api/v1/appointments/apt-001/change-requests", strings.NewReader(`{}`))
+	request.Header.Set("Content-Type", "application/json")
+	recorder := httptest.NewRecorder()
+
+	router.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusUnauthorized {
+		t.Fatalf("unexpected status: got %d want %d", recorder.Code, http.StatusUnauthorized)
+	}
+
+	if !strings.Contains(recorder.Body.String(), `"code":"appointment_actor_not_found"`) {
+		t.Fatalf("unexpected response: %s", recorder.Body.String())
+	}
+}
+
 func TestRouterRejectsCookieAuthenticatedMutationWithoutTrustedOrigin(t *testing.T) {
 	cfg := testConfig(t)
 	router := NewRouter(cfg, slog.New(slog.NewTextHandler(io.Discard, nil)))

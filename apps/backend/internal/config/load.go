@@ -25,6 +25,7 @@ const (
 	defaultAdminAuthTTL        = 24 * time.Hour
 	defaultCustomerAuthTTL     = 24 * time.Hour
 	defaultProfessionalAuthTTL = 24 * time.Hour
+	defaultPaymentCurrency     = "IDR"
 	defaultAdminPassword       = "$2a$12$VUpiMPsu6djn6JDj.a0a8OACtyvGtGninz4/ZwTsPGGQOK0CL./1C"
 )
 
@@ -114,6 +115,13 @@ func loadFromAppRoot(appRoot string) (Config, error) {
 	if err != nil {
 		return Config{}, err
 	}
+	paymentProvider := envOrDefault("PAYMENT_PROVIDER", defaultPaymentProvider(environment))
+	paymentCurrency := strings.ToUpper(envOrDefault("PAYMENT_CURRENCY", defaultPaymentCurrency))
+	xenditSecretKey := strings.TrimSpace(os.Getenv("XENDIT_SECRET_KEY"))
+	xenditWebhookToken := strings.TrimSpace(os.Getenv("XENDIT_WEBHOOK_TOKEN"))
+	webPushSubject := strings.TrimSpace(os.Getenv("WEB_PUSH_SUBJECT"))
+	webPushPublicKey := strings.TrimSpace(os.Getenv("WEB_PUSH_PUBLIC_KEY"))
+	webPushPrivateKey := strings.TrimSpace(os.Getenv("WEB_PUSH_PRIVATE_KEY"))
 
 	adminCredentials, err := loadAdminCredentials(environment)
 	if err != nil {
@@ -179,6 +187,19 @@ func loadFromAppRoot(appRoot string) (Config, error) {
 				Secure:   authCookieSecure,
 			},
 			SessionTTL: professionalSessionTTL,
+		},
+		Payment: PaymentConfig{
+			Provider: paymentProvider,
+			Currency: paymentCurrency,
+			Xendit: XenditConfig{
+				SecretKey:    xenditSecretKey,
+				WebhookToken: xenditWebhookToken,
+			},
+		},
+		WebPush: WebPushConfig{
+			Subject:    webPushSubject,
+			PublicKey:  webPushPublicKey,
+			PrivateKey: webPushPrivateKey,
 		},
 		Redis: RedisConfig{
 			URL: envOrDefault("REDIS_URL", "redis://localhost:6379"),
@@ -290,9 +311,32 @@ func (c *Config) validate() error {
 	if c.AuthRateLimit.MaxAttempts <= 0 {
 		issues = append(issues, "AUTH_RATE_LIMIT_MAX_ATTEMPTS must be greater than 0")
 	}
+	c.Payment.Provider = strings.ToLower(strings.TrimSpace(c.Payment.Provider))
+	c.Payment.Currency = strings.ToUpper(strings.TrimSpace(c.Payment.Currency))
+	c.Payment.Xendit.SecretKey = strings.TrimSpace(c.Payment.Xendit.SecretKey)
+	c.Payment.Xendit.WebhookToken = strings.TrimSpace(c.Payment.Xendit.WebhookToken)
+
+	if !oneOf(c.Payment.Provider, "manual_test", "xendit") {
+		issues = append(issues, fmt.Sprintf("PAYMENT_PROVIDER must be one of manual_test, xendit (got %q)", c.Payment.Provider))
+	}
+	if strings.TrimSpace(c.Payment.Currency) == "" {
+		issues = append(issues, "PAYMENT_CURRENCY must not be empty")
+	}
+	if c.Payment.Provider == "xendit" {
+		if c.Payment.Xendit.SecretKey == "" {
+			issues = append(issues, "XENDIT_SECRET_KEY must not be empty when PAYMENT_PROVIDER=xendit")
+		}
+		if c.Payment.Xendit.WebhookToken == "" {
+			issues = append(issues, "XENDIT_WEBHOOK_TOKEN must not be empty when PAYMENT_PROVIDER=xendit")
+		}
+	}
+	if isProductionLike(c.App.Environment) && c.Payment.Provider != "xendit" {
+		issues = append(issues, fmt.Sprintf("PAYMENT_PROVIDER must be xendit in %s", c.App.Environment))
+	}
 	issues = append(issues, validateSessionCookieConfig("ADMIN_AUTH", c.AdminAuth.Cookie, c.App.Environment)...)
 	issues = append(issues, validateSessionCookieConfig("CUSTOMER_AUTH", c.CustomerAuth.Cookie, c.App.Environment)...)
 	issues = append(issues, validateSessionCookieConfig("PROFESSIONAL_AUTH", c.ProfessionalAuth.Cookie, c.App.Environment)...)
+	issues = append(issues, validateWebPushConfig(c.WebPush)...)
 
 	if len(c.AdminAuth.Credentials) == 0 {
 		issues = append(issues, "ADMIN_CONSOLE_CREDENTIALS_JSON must contain at least one credential")
@@ -408,6 +452,33 @@ func normalizeOrigin(raw string) (string, error) {
 	return parsed.Scheme + "://" + parsed.Host, nil
 }
 
+func validateWebPushConfig(cfg WebPushConfig) []string {
+	var issues []string
+
+	if cfg.Subject == "" && cfg.PublicKey == "" && cfg.PrivateKey == "" {
+		return issues
+	}
+
+	if cfg.Subject == "" {
+		issues = append(issues, "WEB_PUSH_SUBJECT must not be empty when web push is configured")
+	}
+	if cfg.PublicKey == "" {
+		issues = append(issues, "WEB_PUSH_PUBLIC_KEY must not be empty when web push is configured")
+	}
+	if cfg.PrivateKey == "" {
+		issues = append(issues, "WEB_PUSH_PRIVATE_KEY must not be empty when web push is configured")
+	}
+
+	if cfg.Subject != "" && !strings.HasPrefix(cfg.Subject, "mailto:") {
+		parsed, err := url.Parse(cfg.Subject)
+		if err != nil || parsed.Scheme == "" || parsed.Host == "" {
+			issues = append(issues, fmt.Sprintf("WEB_PUSH_SUBJECT must be a valid https URL or mailto address (got %q)", cfg.Subject))
+		}
+	}
+
+	return issues
+}
+
 func envOrDefault(key string, fallback string) string {
 	value := strings.TrimSpace(os.Getenv(key))
 	if value == "" {
@@ -481,6 +552,14 @@ func envCSVOrDefault(key string, fallback []string) []string {
 	}
 
 	return items
+}
+
+func defaultPaymentProvider(environment string) string {
+	if isProductionLike(environment) {
+		return "xendit"
+	}
+
+	return "manual_test"
 }
 
 func defaultAuthCookieSecure(environment string) bool {

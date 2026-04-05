@@ -29,9 +29,9 @@ flowchart LR
   sdk --> api["Go API Runtime<br/>apps/backend/cmd/api"]
   frontend --> ws["WebSocket /api/v1/ws/chat"]
   ws --> api
-  api --> content["content_documents<br/>public content documents"]
-  api --> appstate["app_state_documents<br/>viewer, notifications, admin state"]
-  api --> portal["professional_portal_sessions<br/>professional workspace state"]
+  api --> content["published_readmodel_documents<br/>published read-model dataset"]
+  api --> appstate["dedicated runtime state tables<br/>viewer, notifications, preferences, admin"]
+  api --> portal["professional_portal_states<br/>professional workspace state"]
   api --> chat["chat_threads + chat_messages<br/>realtime history"]
   api --> seed["seeddata JSON<br/>bootstrap import + tests only"]
   seed --> content
@@ -42,7 +42,7 @@ flowchart LR
 - Frontend owns route rendering, interaction state, and UX composition.
 - SDK owns typed transport boundaries between frontend and backend.
 - Backend owns API contract, auth, persistence, and error semantics.
-- PostgreSQL owns mutable runtime state and public content documents.
+- PostgreSQL owns mutable runtime state and the published read-model dataset.
 - Seed data is no longer the live request-time source of truth; it is import material and QA/test fixture input.
 
 ## 2. Monorepo Control Plane
@@ -97,7 +97,7 @@ flowchart TD
   load --> logger["Create structured logger"]
   logger --> db["Open PostgreSQL connection"]
   db --> contentStore["Create content store"]
-  contentStore --> bootstrap["Ensure content documents are bootstrapped"]
+  contentStore --> bootstrap["Ensure published read-model documents are bootstrapped"]
   bootstrap --> limiter{"Redis limiter available?"}
   limiter -- "Yes" --> redisLimiter["Use Redis auth limiter"]
   limiter -- "No in development/test" --> memoryLimiter["Fallback to in-memory limiter"]
@@ -199,10 +199,10 @@ sequenceDiagram
   User->>FE: Open home / explore / service / professional page
   FE->>SDK: Request bootstrap or professionals data
   SDK->>API: GET /bootstrap or GET /professionals
-  API->>Repo: Load content_documents payloads
-  Repo->>DB: Read content_documents
+  API->>Repo: Load published_readmodel_documents payloads
+  Repo->>DB: Read published_readmodel_documents
   API->>Portal: Read published professional overlays
-  Portal->>DB: Read professional_portal_sessions
+  Portal->>DB: Read professional_portal_states
   API-->>SDK: Return normalized { data: ... } payload
   SDK-->>FE: Typed result
   FE-->>User: Render localized page
@@ -243,9 +243,9 @@ sequenceDiagram
 
 ### Role-specific sources
 
-- Admin auth uses configured admin credentials plus session records in `app_state_documents`.
-- Customer auth persists customer account and session data in document state.
-- Professional auth persists professional account and session data and can validate against professional catalog identity.
+- Admin auth bootstraps credentials from config into relational auth tables and resolves runtime sessions from `auth_sessions`.
+- Customer auth persists customer account and session data in relational auth tables.
+- Professional auth persists professional account and session data in relational auth tables and can validate against professional catalog identity.
 
 ### Maintenance checkpoints
 
@@ -279,7 +279,7 @@ sequenceDiagram
   SDK->>API: Authenticated portal request
   API->>Service: Validate scoped professional id
   Service->>Store: Upsert resource + snapshot
-  Store->>DB: Write professional_portal_sessions
+  Store->>DB: Write professional_portal_states
   Service-->>API: Persisted resource response
   API-->>FE: Updated portal slice
   Service->>ReadModel: Published state can overlay public catalog data
@@ -308,7 +308,7 @@ flowchart LR
   sdk --> api["clientstate routes"]
   api --> service["ClientState service"]
   service --> documentStore["documentstore.PostgresStore"]
-  documentStore --> db["app_state_documents"]
+  documentStore --> db["viewer / notification / preference / admin runtime tables"]
 ```
 
 ### Main state families

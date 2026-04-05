@@ -2,6 +2,7 @@ import type { BidanappApiClient, BidanappComponents } from '../client';
 
 export type ViewerSessionState = BidanappComponents['schemas']['ViewerSessionData'];
 export type CustomerNotificationState = BidanappComponents['schemas']['CustomerNotificationStateData'];
+export type CustomerPushSubscriptionState = BidanappComponents['schemas']['CustomerPushSubscriptionData'];
 export type ProfessionalNotificationState = BidanappComponents['schemas']['ProfessionalNotificationStateData'];
 export type ConsumerPreferencesState = BidanappComponents['schemas']['ConsumerPreferencesData'];
 export type AdminSessionState = BidanappComponents['schemas']['AdminSessionData'];
@@ -84,6 +85,34 @@ export async function saveCustomerNotificationState(
   }
 
   return result.data.data;
+}
+
+export async function saveCustomerPushSubscriptionState(
+  client: BidanappApiClient,
+  input: CustomerPushSubscriptionState,
+): Promise<CustomerPushSubscriptionState> {
+  const result = await client.PUT('/notifications/customer/push-subscription', {
+    body: input,
+  });
+
+  if (result.error || !result.data?.data) {
+    throw new Error('Failed to persist customer push subscription');
+  }
+
+  return result.data.data;
+}
+
+export async function deleteCustomerPushSubscriptionState(
+  client: BidanappApiClient,
+  input: CustomerPushSubscriptionState,
+): Promise<void> {
+  const result = await client.DELETE('/notifications/customer/push-subscription', {
+    body: input,
+  });
+
+  if (result.error) {
+    throw new Error('Failed to delete customer push subscription');
+  }
 }
 
 export async function fetchProfessionalNotificationState(

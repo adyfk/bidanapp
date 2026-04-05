@@ -438,7 +438,7 @@ sequenceDiagram
   API-->>Session: active session payload
   Session-->>Screen: allow console route
   Screen->>API: fetch admin console tables or support desk state
-  API->>DB: read admin app-state documents
+  API->>DB: read admin runtime state tables
   API-->>Screen: render admin surface
 ```
 

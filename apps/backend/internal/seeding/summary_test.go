@@ -23,10 +23,10 @@ func TestSummaryWriteReportIncludesScenarioMatrices(t *testing.T) {
 		BearerTokens: []BearerToken{
 			{Role: "admin", Description: "Seeded admin API session", Token: "seed-admin-token"},
 		},
-		ChatMessageCount:     3,
-		ChatThreadCount:      2,
-		CoveredCities:        []string{"Bandung", "Jakarta Selatan", "Surabaya"},
-		ContentDocumentCount: 10,
+		ChatMessageCount:                3,
+		ChatThreadCount:                 2,
+		CoveredCities:                   []string{"Bandung", "Jakarta Selatan", "Surabaya"},
+		PublishedReadModelDocumentCount: 10,
 		CustomerAccounts: []AccountLogin{
 			{ID: "guest-primary", Phone: "+628123", Password: "Customer2026A"},
 		},
@@ -38,7 +38,7 @@ func TestSummaryWriteReportIncludesScenarioMatrices(t *testing.T) {
 		PortalReviewStatusCounts: map[string]int{
 			"published": 1,
 		},
-		PortalSessionCount: 1,
+		PortalStateCount: 1,
 		ProfessionalAccounts: []AccountLogin{
 			{ProfessionalID: "prof-01", Phone: "+628999", Password: "Professional2026A"},
 		},

@@ -112,7 +112,7 @@ flowchart TD
 ### Why this matters
 
 - Admin surfaces are not supposed to invent their own data ownership.
-- The console is hydrated from backend-owned admin state and read-model fallbacks.
+- The console is hydrated from backend-owned admin state and the same backend read-model tables used by active runtime flows.
 - Support desk is a separate operational surface from the general admin console snapshot.
 
 ## 5. Support Desk Journey
@@ -167,4 +167,4 @@ flowchart LR
 | "Admin is bounced back to login" | admin session hydration and last-route restore |
 | "Support desk is empty but tickets were submitted" | support desk hook and clientstate support endpoints |
 | "Studio changed data but screen did not refresh" | admin console table sync and local event propagation |
-| "Overview looks correct but module detail is stale" | read-model fallback versus table hydration path |
+| "Overview looks correct but module detail is stale" | admin console table sync, backend read-model writes, and local event propagation |

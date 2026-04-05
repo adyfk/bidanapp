@@ -16,10 +16,10 @@ func (s Summary) WriteReport(writer io.Writer) error {
 	lines := []string{
 		"BidanApp comprehensive seed completed",
 		"scenario: " + s.Scenario,
-		fmt.Sprintf("content_documents: %d", s.ContentDocumentCount),
+		fmt.Sprintf("published_readmodel_documents: %d", s.PublishedReadModelDocumentCount),
 		fmt.Sprintf("chat_threads: %d", s.ChatThreadCount),
 		fmt.Sprintf("chat_messages: %d", s.ChatMessageCount),
-		fmt.Sprintf("professional_portal_sessions: %d", s.PortalSessionCount),
+		fmt.Sprintf("professional_portal_states: %d", s.PortalStateCount),
 		fmt.Sprintf("customer_preferences: %d", s.CustomerPreferenceCount),
 		fmt.Sprintf("customer_notifications: %d", s.CustomerNotificationStateCount),
 		fmt.Sprintf("professional_notifications: %d", s.ProfessionalNotificationStateCount),
@@ -95,7 +95,7 @@ func (s Summary) WriteReport(writer io.Writer) error {
 		for _, admin := range s.AdminAccesses {
 			lines = append(lines, fmt.Sprintf("- %s | %s | %s", admin.AdminID, admin.Email, admin.FocusArea))
 		}
-		lines = append(lines, "admin UI login still uses the password configured in ADMIN_CONSOLE_CREDENTIALS_JSON")
+		lines = append(lines, "admin UI login uses credentials bootstrapped into the database from ADMIN_CONSOLE_CREDENTIALS_JSON")
 	}
 
 	if len(s.BearerTokens) > 0 {

@@ -46,6 +46,7 @@ type ProfessionalPortalAdminReviewStateData struct {
 }
 
 type ProfessionalPortalAdminReviewStatesData struct {
+	ProfilesByProfessionalID     map[string]ProfessionalPortalProfileData `json:"profilesByProfessionalId,omitempty"`
 	ReviewStatesByProfessionalID map[string]ProfessionalPortalReviewState `json:"reviewStatesByProfessionalId"`
 }
 

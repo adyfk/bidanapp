@@ -1,6 +1,6 @@
 # Professional Onboarding Flow
 
-Dokumen ini merangkum flow profesional yang lebih rapi untuk kondisi saat ini, dengan acuan fitur yang sudah ada di frontend dan tanpa menduplikasi seed data yang sebenarnya sudah tersedia.
+Dokumen ini merangkum flow onboarding profesional yang sekarang berjalan di runtime aktif, dengan acuan fitur frontend dan backend yang sudah sinkron serta tanpa fallback ke profil seed lain untuk akun baru.
 
 ## Ringkasan Kondisi Existing
 
@@ -20,13 +20,13 @@ Fitur editable yang sudah ada dan bisa dipakai untuk onboarding:
 - portofolio: `portfolioEntries`, `galleryItems`
 - trust milik profesional: `credentials`, `activityStories`
 
-Gap utama dari implementasi sekarang:
+Status implementasi sekarang:
 
-1. Register belum punya lifecycle profesional yang eksplisit.
-2. Status non-live, submit ke admin, hasil review admin, dan publish belum dimodelkan.
-3. `acceptingNewClients` bukan status lifecycle. Itu hanya switch operasional intake.
-4. `profileCompletionScore` hanya skor ringkas, belum cukup untuk jadi gate submit/live.
-5. Draft profesional baru masih mewarisi data demo publik dari profesional existing, sehingga kurang cocok untuk simulasi onboarding realistis.
+1. Register profesional sudah punya lifecycle eksplisit `draft -> ready_for_review -> submitted -> changes_requested|verified -> published`.
+2. Jalur submit ke admin, review admin, dan publish sudah dimodelkan dan dipersist ke backend.
+3. `acceptingNewClients` tetap diperlakukan sebagai switch operasional intake, bukan lifecycle approval.
+4. Gate submit/live memakai checklist onboarding yang diturunkan dari state portal, bukan skor ringkas tunggal.
+5. Draft profesional baru sudah dibersihkan dari warisan profil publik seeded lain, sehingga onboarding akun baru dimulai dari state yang realistis.
 
 ## Flow Yang Disarankan
 
@@ -195,12 +195,12 @@ Catatan domain:
 - mode layanan aktif tetap melekat di layanan, sedangkan jam kerja offline dikelola global di `availabilityRulesByMode` agar seed data tidak redundan.
 - source of truth untuk waktu booking ada di `availabilityRulesByMode`, termasuk `minimumNoticeHours`, bukan di tiap service configuration.
 
-## Strategi Mock Yang Tidak Redundan
+## Strategi State Yang Tidak Redundan
 
 Prinsipnya:
 
 1. Jangan buat tabel baru untuk services, coverage, portfolio, atau profile fields yang sudah ada di `ProfessionalPortalState`.
-2. Tambahkan seed data hanya untuk lifecycle review admin.
+2. Tambahkan seed data hanya untuk persona QA dan published read model yang memang dibutuhkan.
 3. Derive checklist dan progress dari state existing, jangan simpan ulang dalam JSON lain.
 
 Implementasi yang sudah disiapkan:
@@ -210,15 +210,15 @@ Implementasi yang sudah disiapkan:
 Isi helper tersebut:
 
 - `createProfessionalOnboardingDraft(...)`
-  Membersihkan state demo agar akun baru tidak langsung terlihat seperti profesional yang sudah live.
+  Membersihkan state awal agar akun baru tidak langsung terlihat seperti profesional yang sudah live.
 - `deriveProfessionalOnboardingState(...)`
   Menghasilkan state halaman onboarding dari `ProfessionalPortalState` existing.
-- `PROFESSIONAL_LIFECYCLE_REVIEW_STATE_MOCKS`
-  Mock minimal untuk state admin review tanpa menduplikasi data profil.
+- `PROFESSIONAL_LIFECYCLE_REVIEW_STATE_TEMPLATES`
+  Template status review untuk persona seeded dan fallback terkontrol tanpa menduplikasi data profil.
 
-## Kenapa Draft Perlu Dibersihkan
+## Kondisi Draft Registrasi Saat Ini
 
-Saat ini registrasi profesional masih menurunkan banyak data dari profil demo existing. Akibatnya akun baru langsung terlihat seperti sudah:
+Registrasi profesional sekarang tidak lagi menurunkan data publik dari profil seeded lain. Akun baru tidak langsung terlihat seperti sudah:
 
 - punya layanan aktif
 - punya portofolio
@@ -226,7 +226,7 @@ Saat ini registrasi profesional masih menurunkan banyak data dari profil demo ex
 - punya request board
 - siap tampil publik
 
-Untuk flow onboarding, itu menyesatkan. Karena itu draft registrasi sebaiknya:
+Untuk flow onboarding, itu memang harus dihindari. Karena itu draft registrasi sekarang:
 
 - menyimpan hanya identitas minimum hasil register
 - mengubah layanan existing menjadi template non-aktif

@@ -10,8 +10,11 @@ import {
   HISTORY_APPOINTMENT_STATUSES,
   isAppointmentChatAvailable,
 } from '@/features/appointments/lib/status';
+import { fetchCustomerAppointmentsWithApi } from '@/lib/appointment-actions-api';
+import { type AppointmentSeed, createHydratedAppointment } from '@/lib/appointment-utils';
 import { useUiText } from '@/lib/ui-text';
 import { useAppShell } from '@/lib/use-app-shell';
+import { useCatalogReadModel } from '@/lib/use-catalog-read-model';
 import { useProfessionalPortal } from '@/lib/use-professional-portal';
 import { useRealtimeChatThread } from '@/lib/use-realtime-chat-thread';
 import type { Appointment } from '@/types/appointments';
@@ -57,10 +60,12 @@ export const useAppointmentFlow = ({
   const uiText = useUiText();
   const { currentConsumer } = useAppShell();
   const { cancelCustomerAppointment, customerAppointments, markCustomerAppointmentPaid } = useProfessionalPortal();
+  const catalogSnapshot = useCatalogReadModel();
   const [activeTab, setActiveTab] = useState<AppointmentTab>(initialTab);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<AppointmentStatusFilter>(initialStatusFilter);
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | null>(initialSelectedAppointmentId);
+  const [fallbackSelectedAppointment, setFallbackSelectedAppointment] = useState<Appointment | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState('');
   const [isReviewOpen, setIsReviewOpen] = useState(false);
@@ -111,20 +116,69 @@ export const useAppointmentFlow = ({
     selectedAppointmentId === null
       ? null
       : appointments.find((appointment) => appointment.id === selectedAppointmentId) || null;
+  const resolvedSelectedAppointment = selectedAppointment || fallbackSelectedAppointment;
+
+  useEffect(() => {
+    if (!selectedAppointmentId) {
+      setFallbackSelectedAppointment(null);
+      return;
+    }
+
+    if (selectedAppointment) {
+      setFallbackSelectedAppointment(null);
+      return;
+    }
+
+    let isCancelled = false;
+
+    void fetchCustomerAppointmentsWithApi()
+      .then((payload) => {
+        if (isCancelled) {
+          return;
+        }
+
+        const matchingAppointment = (payload.appointments ?? []).find(
+          (appointment) => appointment.id === selectedAppointmentId,
+        );
+
+        if (!matchingAppointment) {
+          setFallbackSelectedAppointment(null);
+          return;
+        }
+
+        const professional =
+          catalogSnapshot.professionals.find((candidate) => candidate.id === matchingAppointment.professionalId) ||
+          null;
+
+        setFallbackSelectedAppointment(
+          createHydratedAppointment(matchingAppointment as unknown as AppointmentSeed, professional),
+        );
+      })
+      .catch(() => {
+        if (!isCancelled) {
+          setFallbackSelectedAppointment(null);
+        }
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [catalogSnapshot.professionals, selectedAppointment, selectedAppointmentId]);
 
   const selectedChatSession = useMemo(
-    () => (selectedAppointment === null ? null : createFallbackChatSession(selectedAppointment, uiText)),
-    [selectedAppointment, uiText],
+    () =>
+      resolvedSelectedAppointment === null ? null : createFallbackChatSession(resolvedSelectedAppointment, uiText),
+    [resolvedSelectedAppointment, uiText],
   );
-  const canChatSelectedAppointment = selectedAppointment
-    ? isAppointmentChatAvailable(selectedAppointment.status)
+  const canChatSelectedAppointment = resolvedSelectedAppointment
+    ? isAppointmentChatAvailable(resolvedSelectedAppointment.status)
     : false;
   const { messages: realtimeMessages, sendMessage: sendRealtimeMessage } = useRealtimeChatThread({
-    enabled: Boolean(selectedAppointment && canChatSelectedAppointment && isChatOpen),
+    enabled: Boolean(resolvedSelectedAppointment && canChatSelectedAppointment && isChatOpen),
     fallbackMessages: selectedChatSession?.messages ?? [],
-    professionalName: selectedAppointment?.professional.name || '',
+    professionalName: resolvedSelectedAppointment?.professional.name || '',
     senderName: currentConsumer.name,
-    threadId: selectedAppointment?.id || null,
+    threadId: resolvedSelectedAppointment?.id || null,
   });
   const activeChatSession =
     selectedChatSession === null
@@ -135,15 +189,15 @@ export const useAppointmentFlow = ({
         };
   const cancelPreview = useMemo(
     () =>
-      selectedAppointment
+      resolvedSelectedAppointment
         ? getAppointmentClosePreview({
             actor: 'customer',
-            policySnapshot: selectedAppointment.cancellationPolicySnapshot,
-            scheduleSnapshot: selectedAppointment.scheduleSnapshot,
-            status: selectedAppointment.status,
+            policySnapshot: resolvedSelectedAppointment.cancellationPolicySnapshot,
+            scheduleSnapshot: resolvedSelectedAppointment.scheduleSnapshot,
+            status: resolvedSelectedAppointment.status,
           })
         : null,
-    [selectedAppointment],
+    [resolvedSelectedAppointment],
   );
 
   const selectAppointment = (appointmentId: string) => {
@@ -168,7 +222,7 @@ export const useAppointmentFlow = ({
   };
 
   const openChat = () => {
-    if (!selectedAppointment || !isAppointmentChatAvailable(selectedAppointment.status)) {
+    if (!resolvedSelectedAppointment || !isAppointmentChatAvailable(resolvedSelectedAppointment.status)) {
       setIsChatOpen(false);
       setChatInput('');
       setNotice(uiText.chatUnavailableAlert);
@@ -187,7 +241,7 @@ export const useAppointmentFlow = ({
   };
 
   const openCancel = () => {
-    if (!selectedAppointment || !cancelPreview?.allowed) {
+    if (!resolvedSelectedAppointment || !cancelPreview?.allowed) {
       return;
     }
 
@@ -199,21 +253,23 @@ export const useAppointmentFlow = ({
     setCancelReason('');
   };
 
-  const markPaid = () => {
-    if (!selectedAppointment) {
+  const markPaid = async () => {
+    if (!resolvedSelectedAppointment) {
       return;
     }
 
-    markCustomerAppointmentPaid(selectedAppointment.id);
-    setNotice(uiText.paymentSuccessAlert);
+    const success = await markCustomerAppointmentPaid(resolvedSelectedAppointment.id);
+    if (success) {
+      setNotice(uiText.paymentSuccessAlert);
+    }
   };
 
-  const submitCancel = () => {
-    if (!selectedAppointment || !cancelPreview?.allowed || !cancelReason.trim()) {
+  const submitCancel = async () => {
+    if (!resolvedSelectedAppointment || !cancelPreview?.allowed || !cancelReason.trim()) {
       return;
     }
 
-    const result = cancelCustomerAppointment(selectedAppointment.id, cancelReason);
+    const result = await cancelCustomerAppointment(resolvedSelectedAppointment.id, cancelReason);
 
     if (!result.ok) {
       return;
@@ -233,10 +289,10 @@ export const useAppointmentFlow = ({
 
   const submitChatMessage = () => {
     if (
-      !selectedAppointment ||
+      !resolvedSelectedAppointment ||
       !activeChatSession ||
       !chatInput.trim() ||
-      !isAppointmentChatAvailable(selectedAppointment.status)
+      !isAppointmentChatAvailable(resolvedSelectedAppointment.status)
     ) {
       return;
     }
@@ -251,16 +307,16 @@ export const useAppointmentFlow = ({
   };
 
   useEffect(() => {
-    if (!selectedAppointment || isAppointmentChatAvailable(selectedAppointment.status)) {
+    if (!resolvedSelectedAppointment || isAppointmentChatAvailable(resolvedSelectedAppointment.status)) {
       return;
     }
 
     setIsChatOpen(false);
     setChatInput('');
-  }, [selectedAppointment]);
+  }, [resolvedSelectedAppointment]);
 
   const submitReview = () => {
-    if (!selectedAppointment || rating === 0) {
+    if (!resolvedSelectedAppointment || rating === 0) {
       return;
     }
 
@@ -297,7 +353,7 @@ export const useAppointmentFlow = ({
     searchedAppointments,
     selectAppointment,
     selectReviewPhoto,
-    selectedAppointment,
+    selectedAppointment: resolvedSelectedAppointment,
     selectedChatSession: activeChatSession,
     setActiveTab,
     setCancelReason,

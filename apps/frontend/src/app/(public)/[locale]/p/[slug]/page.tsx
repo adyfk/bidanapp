@@ -5,18 +5,12 @@ import { getProfessionalCategoryLabel } from '@/lib/catalog-selectors';
 import { APP_CONFIG } from '@/lib/config';
 import { getPublicBootstrapData } from '@/lib/public-bootstrap';
 
+export const dynamic = 'force-dynamic';
+
 interface Props {
   params: Promise<{
     slug: string;
   }>;
-}
-
-export async function generateStaticParams() {
-  const bootstrap = await getPublicBootstrapData();
-
-  return bootstrap.catalog.professionals.map((professional) => ({
-    slug: professional.slug,
-  }));
 }
 
 export async function generateMetadata(props: Props): Promise<Metadata> {

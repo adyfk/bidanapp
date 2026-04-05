@@ -5,9 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
+	"bidanapp/apps/backend/internal/platform/contentstore"
 	"bidanapp/apps/backend/internal/platform/documentstore"
+	"bidanapp/apps/backend/internal/platform/pushstore"
 )
 
 const (
@@ -21,10 +24,13 @@ const (
 	adminConsoleTableNamespace         = "admin_console_table"
 	defaultDocumentKey                 = "default"
 	adminConsoleSchemaVersion          = 1
+	adminConsolePublishedNamespace     = "published_readmodel"
 )
 
 var (
 	errInvalidAdminConsoleTable = errors.New("invalid admin console table")
+	errInvalidCustomerPushSubscription = errors.New("invalid customer push subscription")
+	errInvalidSupportDesk       = errors.New("invalid support desk payload")
 	adminConsoleTableNames      = []string{
 		"admin_staff",
 		"app_runtime_selections",
@@ -45,14 +51,80 @@ var (
 		}
 		return values
 	}()
+	adminConsoleTableFiles = map[string]string{
+		"admin_staff":                    "admin_staff.json",
+		"app_runtime_selections":         "app_runtime_selections.json",
+		"appointments":                   "appointments.json",
+		"consumers":                      "consumers.json",
+		"home_feed_snapshots":            "home_feed_snapshots.json",
+		"professional_service_offerings": "professional_service_offerings.json",
+		"professionals":                  "professionals.json",
+		"reference_appointment_statuses": "reference_appointment_statuses.json",
+		"service_categories":             "service_categories.json",
+		"services":                       "services.json",
+		"user_contexts":                  "user_contexts.json",
+	}
+	supportAllowedReporterRoles = map[string]struct{}{
+		"customer":     {},
+		"professional": {},
+	}
+	supportAllowedChannels = map[string]struct{}{
+		"call":     {},
+		"email":    {},
+		"whatsapp": {},
+	}
+	supportAllowedUrgencies = map[string]struct{}{
+		"normal": {},
+		"high":   {},
+		"urgent": {},
+	}
+	supportAllowedStatuses = map[string]struct{}{
+		"new":       {},
+		"triaged":   {},
+		"reviewing": {},
+		"resolved":  {},
+		"refunded":  {},
+	}
+	supportAllowedSourceSurfaces = map[string]struct{}{
+		"admin_manual":         {},
+		"profile_customer":     {},
+		"profile_professional": {},
+	}
+	supportAllowedCustomerCategories = map[string]struct{}{
+		"accountAccess":      {},
+		"other":              {},
+		"paymentIssue":       {},
+		"refundRequest":      {},
+		"reportProfessional": {},
+		"serviceComplaint":   {},
+	}
+	supportAllowedProfessionalCategories = map[string]struct{}{
+		"accountAccess":       {},
+		"other":               {},
+		"refundClarification": {},
+		"reportCustomer":      {},
+		"serviceDispute":      {},
+		"technicalIssue":      {},
+	}
 )
 
 type Service struct {
-	store documentstore.Store
+	store        documentstore.Store
+	contentStore contentstore.Store
+	pushStore    pushstore.Store
 }
 
-func NewService(store documentstore.Store) *Service {
-	return &Service{store: store}
+func NewService(store documentstore.Store, pushStore pushstore.Store, contentStores ...contentstore.Store) *Service {
+	var readModelContentStore contentstore.Store
+	if len(contentStores) > 0 {
+		readModelContentStore = contentStores[0]
+	}
+
+	return &Service{
+		store:        store,
+		contentStore: readModelContentStore,
+		pushStore:    pushStore,
+	}
 }
 
 func (s *Service) ViewerSession(ctx context.Context) (ViewerSessionData, error) {
@@ -79,6 +151,57 @@ func (s *Service) UpsertCustomerNotifications(ctx context.Context, input Custome
 		input.ReadIDs = []string{}
 	}
 	return upsertSnapshot(ctx, s.store, customerNotificationsNamespace, consumerDocumentKey(consumerID), input)
+}
+
+func (s *Service) UpsertCustomerPushSubscription(
+	ctx context.Context,
+	input CustomerPushSubscriptionData,
+	consumerID string,
+) (CustomerPushSubscriptionData, error) {
+	if s.pushStore == nil {
+		return CustomerPushSubscriptionData{}, errInvalidCustomerPushSubscription
+	}
+
+	normalized, err := normalizeCustomerPushSubscription(input)
+	if err != nil {
+		return CustomerPushSubscriptionData{}, err
+	}
+
+	_, err = s.pushStore.UpsertCustomerSubscription(ctx, pushstore.CustomerSubscription{
+		Endpoint:   normalized.Endpoint,
+		ConsumerID: consumerID,
+		P256DHKey:  normalized.Keys.P256DH,
+		AuthKey:    normalized.Keys.Auth,
+		Locale:     normalized.Locale,
+		UserAgent:  normalized.UserAgent,
+		UpdatedAt:  time.Now().UTC(),
+	})
+	if err != nil {
+		return CustomerPushSubscriptionData{}, err
+	}
+
+	return normalized, nil
+}
+
+func (s *Service) DeleteCustomerPushSubscription(
+	ctx context.Context,
+	input CustomerPushSubscriptionData,
+	consumerID string,
+) error {
+	if s.pushStore == nil {
+		return errInvalidCustomerPushSubscription
+	}
+
+	normalized, err := normalizeCustomerPushSubscription(input)
+	if err != nil {
+		return err
+	}
+
+	err = s.pushStore.DeleteCustomerSubscription(ctx, consumerID, normalized.Endpoint)
+	if errors.Is(err, pushstore.ErrNotFound) {
+		return nil
+	}
+	return err
 }
 
 func (s *Service) ProfessionalNotifications(ctx context.Context, professionalID string) (ProfessionalNotificationStateData, error) {
@@ -137,13 +260,49 @@ func (s *Service) UpsertSupportDesk(ctx context.Context, input SupportDeskData) 
 	if input.SavedAt == "" {
 		input.SavedAt = time.Now().UTC().Format(time.RFC3339)
 	}
-	return upsertSnapshot(ctx, s.store, adminSupportDeskNamespace, defaultDocumentKey, input)
+	normalized, err := normalizeSupportDeskData(input)
+	if err != nil {
+		return SupportDeskData{}, err
+	}
+	return upsertSnapshot(ctx, s.store, adminSupportDeskNamespace, defaultDocumentKey, normalized)
 }
 
 func (s *Service) AdminConsole(ctx context.Context) (AdminConsoleData, error) {
-	return readSnapshot(ctx, s.store, adminConsoleNamespace, defaultDocumentKey, AdminConsoleData{
+	payload, err := readSnapshot(ctx, s.store, adminConsoleNamespace, defaultDocumentKey, AdminConsoleData{
 		Tables: map[string][]map[string]any{},
 	})
+	if err != nil {
+		return AdminConsoleData{}, err
+	}
+	if payload.Tables == nil {
+		payload.Tables = map[string][]map[string]any{}
+	}
+	if payload.SchemaVersion == 0 {
+		payload.SchemaVersion = adminConsoleSchemaVersion
+	}
+
+	latestSavedAt := payload.SavedAt
+	for _, tableName := range adminConsoleTableNames {
+		rows, tableSavedAt, found, readErr := s.readAdminConsoleTableRowsFromContentStore(ctx, tableName)
+		if readErr != nil {
+			return AdminConsoleData{}, readErr
+		}
+		if !found {
+			if _, ok := payload.Tables[tableName]; !ok {
+				payload.Tables[tableName] = []map[string]any{}
+			}
+			continue
+		}
+
+		payload.Tables[tableName] = rows
+		if latestSavedAt == "" || tableSavedAt.After(parseRFC3339OrZero(latestSavedAt)) {
+			latestSavedAt = tableSavedAt.UTC().Format(time.RFC3339)
+		}
+	}
+	if payload.SavedAt == "" {
+		payload.SavedAt = latestSavedAt
+	}
+	return payload, nil
 }
 
 func (s *Service) UpsertAdminConsole(ctx context.Context, input AdminConsoleData) (AdminConsoleData, error) {
@@ -177,6 +336,11 @@ func (s *Service) AdminConsoleTable(ctx context.Context, tableName string) (Admi
 	fallback := AdminConsoleTableData{
 		TableName: tableName,
 		Rows:      []map[string]any{},
+	}
+	if payload, found, err := s.readAdminConsoleTableFromContentStore(ctx, tableName); err != nil {
+		return fallback, err
+	} else if found {
+		return payload, nil
 	}
 	if s.store == nil {
 		return fallback, nil
@@ -239,6 +403,9 @@ func (s *Service) UpsertAdminConsoleTable(
 	if payload.SchemaVersion == 0 {
 		payload.SchemaVersion = adminConsoleSchemaVersion
 	}
+	if err := s.syncAdminConsoleTableToContentStore(ctx, payload); err != nil {
+		return payload, err
+	}
 
 	if _, err := s.upsertAdminConsoleTableRecord(ctx, payload); err != nil {
 		return payload, err
@@ -286,6 +453,30 @@ func validateAdminConsoleTableName(tableName string) error {
 	return nil
 }
 
+func normalizeCustomerPushSubscription(input CustomerPushSubscriptionData) (CustomerPushSubscriptionData, error) {
+	normalized := CustomerPushSubscriptionData{
+		Endpoint: strings.TrimSpace(input.Endpoint),
+		Keys: CustomerPushSubscriptionKeysData{
+			Auth:   strings.TrimSpace(input.Keys.Auth),
+			P256DH: strings.TrimSpace(input.Keys.P256DH),
+		},
+		Locale:    strings.ToLower(strings.TrimSpace(input.Locale)),
+		UserAgent: strings.TrimSpace(input.UserAgent),
+	}
+
+	if normalized.Endpoint == "" || normalized.Keys.Auth == "" || normalized.Keys.P256DH == "" {
+		return CustomerPushSubscriptionData{}, errInvalidCustomerPushSubscription
+	}
+	if normalized.Locale == "" {
+		normalized.Locale = "id"
+	}
+	if normalized.Locale != "id" && normalized.Locale != "en" {
+		normalized.Locale = "id"
+	}
+
+	return normalized, nil
+}
+
 func normalizeAdminConsoleRows(rows []map[string]any) []map[string]any {
 	if rows == nil {
 		return []map[string]any{}
@@ -329,12 +520,21 @@ func (s *Service) upsertAdminConsoleTableRecord(ctx context.Context, payload Adm
 }
 
 func (s *Service) syncAdminConsoleTablesFromSnapshot(ctx context.Context, snapshot AdminConsoleData) error {
-	if s.store == nil {
+	if s.store == nil && s.contentStore == nil {
 		return nil
 	}
 
 	for _, tableName := range adminConsoleTableNames {
 		rows := normalizeAdminConsoleRows(snapshot.Tables[tableName])
+		payload := AdminConsoleTableData{
+			TableName:     tableName,
+			SavedAt:       snapshot.SavedAt,
+			SchemaVersion: snapshot.SchemaVersion,
+			Rows:          rows,
+		}
+		if err := s.syncAdminConsoleTableToContentStore(ctx, payload); err != nil {
+			return err
+		}
 		if _, err := s.upsertAdminConsoleTableRecord(ctx, AdminConsoleTableData{
 			TableName:     tableName,
 			SavedAt:       snapshot.SavedAt,
@@ -417,6 +617,213 @@ func toSnapshotMap(value any) (map[string]any, error) {
 	}
 
 	return snapshot, nil
+}
+
+func (s *Service) syncAdminConsoleTableToContentStore(ctx context.Context, payload AdminConsoleTableData) error {
+	if s.contentStore == nil {
+		return nil
+	}
+
+	fileName, ok := adminConsoleTableFiles[payload.TableName]
+	if !ok {
+		return nil
+	}
+
+	rows := normalizeAdminConsoleRows(payload.Rows)
+	rawRows, err := json.Marshal(rows)
+	if err != nil {
+		return err
+	}
+
+	savedAt := time.Now().UTC()
+	if payload.SavedAt != "" {
+		if parsedSavedAt, parseErr := time.Parse(time.RFC3339, payload.SavedAt); parseErr == nil {
+			savedAt = parsedSavedAt.UTC()
+		}
+	}
+
+	_, err = s.contentStore.Upsert(ctx, contentstore.Record{
+		Namespace: adminConsolePublishedNamespace,
+		Key:       fileName,
+		SavedAt:   savedAt,
+		Payload:   rawRows,
+	})
+	return err
+}
+
+func (s *Service) readAdminConsoleTableFromContentStore(
+	ctx context.Context,
+	tableName string,
+) (AdminConsoleTableData, bool, error) {
+	rows, savedAt, found, err := s.readAdminConsoleTableRowsFromContentStore(ctx, tableName)
+	if err != nil || !found {
+		return AdminConsoleTableData{}, found, err
+	}
+
+	schemaVersion, metadataSavedAt := s.readAdminConsoleMetadata(ctx)
+	if schemaVersion == 0 {
+		schemaVersion = adminConsoleSchemaVersion
+	}
+	if metadataSavedAt.After(savedAt) {
+		savedAt = metadataSavedAt
+	}
+
+	return AdminConsoleTableData{
+		TableName:     tableName,
+		SavedAt:       savedAt.UTC().Format(time.RFC3339),
+		SchemaVersion: schemaVersion,
+		Rows:          rows,
+	}, true, nil
+}
+
+func (s *Service) readAdminConsoleTableRowsFromContentStore(
+	ctx context.Context,
+	tableName string,
+) ([]map[string]any, time.Time, bool, error) {
+	if s.contentStore == nil {
+		return nil, time.Time{}, false, nil
+	}
+
+	fileName, ok := adminConsoleTableFiles[tableName]
+	if !ok {
+		return nil, time.Time{}, false, nil
+	}
+
+	record, err := s.contentStore.Read(ctx, adminConsolePublishedNamespace, fileName)
+	if err != nil {
+		if errors.Is(err, contentstore.ErrNotFound) {
+			return nil, time.Time{}, false, nil
+		}
+		return nil, time.Time{}, false, err
+	}
+
+	rows := []map[string]any{}
+	if len(record.Payload) != 0 && string(record.Payload) != "null" {
+		if err := json.Unmarshal(record.Payload, &rows); err != nil {
+			return nil, time.Time{}, false, err
+		}
+	}
+	if rows == nil {
+		rows = []map[string]any{}
+	}
+
+	return rows, record.SavedAt, true, nil
+}
+
+func (s *Service) readAdminConsoleMetadata(ctx context.Context) (schemaVersion int, savedAt time.Time) {
+	if s.store == nil {
+		return adminConsoleSchemaVersion, time.Time{}
+	}
+
+	record, err := s.store.Read(ctx, adminConsoleNamespace, defaultDocumentKey)
+	if err != nil {
+		return adminConsoleSchemaVersion, time.Time{}
+	}
+
+	payload, err := decodeSnapshot[AdminConsoleData](record.Snapshot)
+	if err != nil {
+		return adminConsoleSchemaVersion, time.Time{}
+	}
+
+	if payload.SchemaVersion != 0 {
+		schemaVersion = payload.SchemaVersion
+	} else {
+		schemaVersion = adminConsoleSchemaVersion
+	}
+
+	if payload.SavedAt != "" {
+		savedAt = parseRFC3339OrZero(payload.SavedAt)
+	} else {
+		savedAt = record.SavedAt
+	}
+	return schemaVersion, savedAt
+}
+
+func parseRFC3339OrZero(value string) time.Time {
+	if value == "" {
+		return time.Time{}
+	}
+
+	parsed, err := time.Parse(time.RFC3339, value)
+	if err != nil {
+		return time.Time{}
+	}
+	return parsed.UTC()
+}
+
+func normalizeSupportDeskData(input SupportDeskData) (SupportDeskData, error) {
+	input.SavedAt = normalizeRFC3339OrNow(input.SavedAt, time.Now().UTC())
+	for index := range input.Tickets {
+		normalizedTicket, err := normalizeSupportTicket(input.Tickets[index], input.SavedAt)
+		if err != nil {
+			return SupportDeskData{}, err
+		}
+		input.Tickets[index] = normalizedTicket
+	}
+	return input, nil
+}
+
+func normalizeSupportTicket(ticket SupportTicketData, fallbackTimestamp string) (SupportTicketData, error) {
+	if ticket.ID == "" {
+		return SupportTicketData{}, fmt.Errorf("%w: id", errInvalidSupportDesk)
+	}
+	if ticket.ReporterName == "" || ticket.ReporterPhone == "" || ticket.Summary == "" || ticket.Details == "" {
+		return SupportTicketData{}, fmt.Errorf("%w: missing required support ticket fields", errInvalidSupportDesk)
+	}
+	if !isAllowedValue(ticket.ReporterRole, supportAllowedReporterRoles) {
+		return SupportTicketData{}, fmt.Errorf("%w: reporterRole", errInvalidSupportDesk)
+	}
+	if !isAllowedValue(ticket.PreferredChannel, supportAllowedChannels) {
+		return SupportTicketData{}, fmt.Errorf("%w: preferredChannel", errInvalidSupportDesk)
+	}
+	if !isAllowedValue(ticket.Urgency, supportAllowedUrgencies) {
+		return SupportTicketData{}, fmt.Errorf("%w: urgency", errInvalidSupportDesk)
+	}
+	if !isAllowedValue(ticket.EtaKey, supportAllowedUrgencies) {
+		return SupportTicketData{}, fmt.Errorf("%w: etaKey", errInvalidSupportDesk)
+	}
+	if !isAllowedValue(ticket.Status, supportAllowedStatuses) {
+		return SupportTicketData{}, fmt.Errorf("%w: status", errInvalidSupportDesk)
+	}
+	if !isAllowedValue(ticket.SourceSurface, supportAllowedSourceSurfaces) {
+		return SupportTicketData{}, fmt.Errorf("%w: sourceSurface", errInvalidSupportDesk)
+	}
+	if !isAllowedSupportCategory(ticket.ReporterRole, ticket.CategoryID) {
+		return SupportTicketData{}, fmt.Errorf("%w: categoryId", errInvalidSupportDesk)
+	}
+
+	createdAt := normalizeRFC3339OrNow(ticket.CreatedAt, parseRFC3339OrZero(fallbackTimestamp))
+	updatedAt := normalizeRFC3339OrNow(ticket.UpdatedAt, parseRFC3339OrZero(createdAt))
+	ticket.CreatedAt = createdAt
+	ticket.UpdatedAt = updatedAt
+	return ticket, nil
+}
+
+func isAllowedSupportCategory(reporterRole string, categoryID string) bool {
+	switch reporterRole {
+	case "customer":
+		return isAllowedValue(categoryID, supportAllowedCustomerCategories)
+	case "professional":
+		return isAllowedValue(categoryID, supportAllowedProfessionalCategories)
+	default:
+		return false
+	}
+}
+
+func isAllowedValue(value string, allowed map[string]struct{}) bool {
+	_, ok := allowed[value]
+	return ok
+}
+
+func normalizeRFC3339OrNow(value string, fallback time.Time) string {
+	parsed := parseRFC3339OrZero(value)
+	if !parsed.IsZero() {
+		return parsed.UTC().Format(time.RFC3339)
+	}
+	if fallback.IsZero() {
+		fallback = time.Now().UTC()
+	}
+	return fallback.UTC().Format(time.RFC3339)
 }
 
 func decodeSnapshot[T any](snapshot map[string]any) (T, error) {

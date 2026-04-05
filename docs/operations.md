@@ -70,10 +70,10 @@ Mutable runtime state now persists in PostgreSQL-backed stores:
 - auth sessions and viewer session state
 - customer and professional notifications
 - consumer preferences
-- professional portal resources and session snapshots
+- professional portal resources and runtime state
 - admin session, support desk, and admin console tables
 - chat threads and messages
-- public content documents used by the current read-model layer
+- published read-model documents used by the current read-model layer
 
 `apps/backend/seeddata` remains in the repository, but it is now bootstrap import material and test/QA fixtures rather than the live request-time source of truth.
 
@@ -214,4 +214,4 @@ The current repository is operationally ready for Docker-hosted rollout with Pos
 - backup and restore policy for PostgreSQL and Redis
 - centralized log aggregation and alerting
 - uptime checks and incident routing
-- optional move from content documents to a fuller editorial or CMS workflow
+- optional move from published read-model documents to a fuller editorial or CMS workflow

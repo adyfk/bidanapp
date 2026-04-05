@@ -11,6 +11,7 @@ import {
   softMetricTileClass,
   softWhitePanelClass,
 } from '@/components/ui/tokens';
+import { useAppointmentHomeVisitStatus } from '@/features/appointments/hooks/useAppointmentHomeVisitStatus';
 import { getAppointmentClosePreview } from '@/features/appointments/lib/cancellation';
 import {
   getAppointmentStatusChipClassName,
@@ -79,6 +80,38 @@ export const AppointmentDetailSheet = ({
       : uiText.appointmentCancellation.getCutoffPolicyLabel(customerCancelPreview.cutoffHours);
   const canBookAgain =
     appointment.status === 'cancelled' || appointment.status === 'rejected' || appointment.status === 'expired';
+  const homeVisitStatus = useAppointmentHomeVisitStatus(
+    appointment.id,
+    appointment.requestedMode === 'home_visit' && appointment.status !== 'completed',
+  );
+  const homeVisitUpdatedAtLabel = homeVisitStatus.status?.updatedAt
+    ? new Intl.DateTimeFormat(locale === 'id' ? 'id-ID' : 'en-US', {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      }).format(new Date(homeVisitStatus.status.updatedAt))
+    : null;
+  const homeVisitDepartedAtLabel = homeVisitStatus.status?.departedAt
+    ? new Intl.DateTimeFormat(locale === 'id' ? 'id-ID' : 'en-US', {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      }).format(new Date(homeVisitStatus.status.departedAt))
+    : null;
+  const showHomeVisitPanel = appointment.requestedMode === 'home_visit';
+  const homeVisitTitle = appointment.status === 'in_service' ? t('homeVisit.serviceStarted') : t('homeVisit.title');
+  const homeVisitDescription =
+    appointment.status === 'in_service'
+      ? t('homeVisit.serviceStartedDescription')
+      : homeVisitStatus.status?.hasDeparted
+        ? t('homeVisit.departedDescription')
+        : homeVisitStatus.isLoading
+          ? t('homeVisit.loadingDescription')
+          : t('homeVisit.pendingDescription');
+  const homeVisitEtaLabel =
+    homeVisitStatus.status?.showEtaHint && homeVisitStatus.status.etaMinutesHint
+      ? t('homeVisit.etaMinutes', { minutes: homeVisitStatus.status.etaMinutesHint })
+      : homeVisitStatus.status?.hasDeparted
+        ? t('homeVisit.etaUnavailable')
+        : t('homeVisit.waitingEta');
 
   return (
     <div className="fixed inset-y-0 left-1/2 z-[60] flex w-full max-w-md -translate-x-1/2 flex-col bg-gray-50 animate-in fade-in slide-in-from-bottom-4 duration-300">
@@ -146,6 +179,47 @@ export const AppointmentDetailSheet = ({
               </p>
               <p className="text-[14px] font-semibold text-gray-900">{appointment.professional.location}</p>
             </div>
+            {showHomeVisitPanel ? (
+              <div className={`${softMetricTileClass} grid gap-3`}>
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400">
+                      {t('homeVisit.eyebrow')}
+                    </p>
+                    <p className="mt-1 text-[15px] font-bold text-gray-900">{homeVisitTitle}</p>
+                    <p className="mt-1 text-[12px] leading-relaxed text-gray-500">{homeVisitDescription}</p>
+                  </div>
+                  <span className={homeVisitStatus.status?.hasDeparted ? accentSoftPillClass : neutralSoftPillClass}>
+                    {homeVisitStatus.status?.hasDeparted ? t('homeVisit.departedBadge') : t('homeVisit.pendingBadge')}
+                  </span>
+                </div>
+
+                <div className="grid gap-2 rounded-[18px] bg-gray-50 px-4 py-3">
+                  <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400">{t('homeVisit.eta')}</p>
+                  <p className="text-[13px] font-semibold text-gray-900">{homeVisitEtaLabel}</p>
+                  {homeVisitStatus.status?.distanceKmHint ? (
+                    <p className="text-[12px] leading-relaxed text-gray-500">
+                      {t('homeVisit.distanceKm', { distance: homeVisitStatus.status.distanceKmHint.toFixed(1) })}
+                    </p>
+                  ) : null}
+                </div>
+
+                {homeVisitDepartedAtLabel || homeVisitUpdatedAtLabel ? (
+                  <div className="grid gap-1 rounded-[18px] bg-white px-4 py-3 ring-1 ring-gray-100">
+                    {homeVisitDepartedAtLabel ? (
+                      <p className="text-[12px] font-semibold text-gray-700">
+                        {t('homeVisit.departedAt', { time: homeVisitDepartedAtLabel })}
+                      </p>
+                    ) : null}
+                    {homeVisitUpdatedAtLabel ? (
+                      <p className="text-[12px] leading-relaxed text-gray-500">
+                        {t('homeVisit.updatedAt', { time: homeVisitUpdatedAtLabel })}
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
             <div>
               <p className="mb-1 text-[11px] font-bold uppercase tracking-widest text-gray-400">
                 {uiText.appointmentFieldLabels.service}
@@ -270,7 +344,7 @@ export const AppointmentDetailSheet = ({
       </div>
 
       <div className="absolute bottom-0 left-0 w-full border-t border-gray-100 bg-white p-5 shadow-[0_-10px_20px_rgba(0,0,0,0.02)]">
-        {appointment.status === 'approved_waiting_payment' ? (
+        {appointment.status === 'awaiting_payment' || appointment.status === 'approved_waiting_payment' ? (
           <div className="flex gap-3">
             <button
               type="button"
@@ -289,7 +363,7 @@ export const AppointmentDetailSheet = ({
           </div>
         ) : null}
 
-        {appointment.status !== 'approved_waiting_payment' && canCancel ? (
+        {appointment.status !== 'awaiting_payment' && appointment.status !== 'approved_waiting_payment' && canCancel ? (
           <button
             type="button"
             onClick={onOpenCancel}
@@ -319,7 +393,10 @@ export const AppointmentDetailSheet = ({
           </button>
         ) : null}
 
-        {appointment.status !== 'approved_waiting_payment' && appointment.status !== 'completed' && statusBanner ? (
+        {appointment.status !== 'awaiting_payment' &&
+        appointment.status !== 'approved_waiting_payment' &&
+        appointment.status !== 'completed' &&
+        statusBanner ? (
           <div className={`rounded-xl border p-4 ${getStatusBannerClasses(appointment.status)}`}>
             <p className="text-[13px] font-medium leading-relaxed">{statusBanner}</p>
           </div>

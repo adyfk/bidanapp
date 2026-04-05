@@ -16,6 +16,8 @@ type Config struct {
 	AdminAuth        AdminAuthConfig
 	CustomerAuth     CustomerAuthConfig
 	ProfessionalAuth ProfessionalAuthConfig
+	Payment          PaymentConfig
+	WebPush          WebPushConfig
 	Redis            RedisConfig
 	Observability    ObservabilityConfig
 }
@@ -95,6 +97,27 @@ type CustomerAuthConfig struct {
 type ProfessionalAuthConfig struct {
 	Cookie     SessionCookieConfig
 	SessionTTL time.Duration
+}
+
+type PaymentConfig struct {
+	Provider string
+	Currency string
+	Xendit   XenditConfig
+}
+
+type XenditConfig struct {
+	SecretKey     string
+	WebhookToken  string
+}
+
+type WebPushConfig struct {
+	Subject    string
+	PublicKey  string
+	PrivateKey string
+}
+
+func (c WebPushConfig) Enabled() bool {
+	return c.Subject != "" && c.PublicKey != "" && c.PrivateKey != ""
 }
 
 type RedisConfig struct {

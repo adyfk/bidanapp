@@ -2,10 +2,13 @@ package professionalauth
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
+
+	"bidanapp/apps/backend/internal/platform/authstore"
 )
 
 type SeedAccountInput struct {
@@ -34,7 +37,6 @@ func (s *Service) SeedAccount(ctx context.Context, input SeedAccountInput) error
 	if professionalID == "" {
 		return ErrInvalidProfessionalID
 	}
-
 	if err := s.ensureProfessionalExists(ctx, professionalID); err != nil {
 		return err
 	}
@@ -72,12 +74,12 @@ func (s *Service) SeedAccount(ctx context.Context, input SeedAccountInput) error
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	registry, err := s.readAccountRegistry(ctx)
-	if err != nil {
-		return err
+	existing, lookupErr := s.store.ProfessionalAccountByProfessionalID(ctx, professionalID)
+	if lookupErr != nil && !errors.Is(lookupErr, authstore.ErrNotFound) {
+		return lookupErr
 	}
 
-	registry.AccountsByProfessionalID[professionalID] = accountRecord{
+	account := authstore.ProfessionalAccount{
 		City:             strings.TrimSpace(input.City),
 		CredentialNumber: credentialNumber,
 		DisplayName:      displayName,
@@ -85,10 +87,30 @@ func (s *Service) SeedAccount(ctx context.Context, input SeedAccountInput) error
 		Phone:            phone,
 		PhoneNormalized:  phone,
 		ProfessionalID:   professionalID,
-		RegisteredAt:     registeredAt.Format(time.RFC3339),
+		RegisteredAt:     registeredAt,
+		UserID:           existing.UserID,
+	}
+	if account.UserID == "" {
+		account.UserID, err = authstore.NewUserID()
+		if err != nil {
+			return err
+		}
 	}
 
-	return s.writeAccountRegistry(ctx, registry, registeredAt)
+	if errors.Is(lookupErr, authstore.ErrNotFound) {
+		_, err = s.store.CreateProfessionalAccount(ctx, account)
+	} else {
+		account.RecoveryRequestedAt = existing.RecoveryRequestedAt
+		_, err = s.store.UpdateProfessionalAccount(ctx, account)
+	}
+	if err != nil {
+		if errors.Is(err, authstore.ErrConflict) {
+			return ErrPhoneAlreadyInUse
+		}
+		return err
+	}
+
+	return nil
 }
 
 func (s *Service) SeedSession(ctx context.Context, input SeedSessionInput) (ProfessionalAuthSessionData, error) {
@@ -115,23 +137,25 @@ func (s *Service) SeedSession(ctx context.Context, input SeedSessionInput) (Prof
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	registry, err := s.readAccountRegistry(ctx)
+	account, err := s.store.ProfessionalAccountByProfessionalID(ctx, professionalID)
 	if err != nil {
+		if errors.Is(err, authstore.ErrNotFound) {
+			return ProfessionalAuthSessionData{}, ErrAccountNotFound
+		}
 		return ProfessionalAuthSessionData{}, err
 	}
 
-	account, ok := registry.AccountsByProfessionalID[professionalID]
-	if !ok {
-		return ProfessionalAuthSessionData{}, ErrAccountNotFound
+	session := authstore.Session{
+		ExpiresAt:   expiresAt,
+		LastLoginAt: lastLoginAt,
+		Role:        sessionRole,
+		SavedAt:     lastLoginAt,
+		SubjectID:   professionalID,
+		TokenHash:   hashToken(rawToken),
+		UserID:      account.UserID,
 	}
 
-	session := sessionRecord{
-		ExpiresAt:      expiresAt.Format(time.RFC3339),
-		LastLoginAt:    lastLoginAt.Format(time.RFC3339),
-		ProfessionalID: professionalID,
-	}
-
-	if err := s.writeSessionRecord(ctx, hashToken(rawToken), session, lastLoginAt); err != nil {
+	if _, err := s.store.SaveSession(ctx, session); err != nil {
 		return ProfessionalAuthSessionData{}, err
 	}
 

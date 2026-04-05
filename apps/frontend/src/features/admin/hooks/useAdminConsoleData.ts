@@ -208,6 +208,8 @@ const buildDefaultSnapshot = (): AdminConsoleSnapshot => ({
   tables: buildDefaultTables(),
 });
 
+const cloneSnapshot = (snapshot: AdminConsoleSnapshot): AdminConsoleSnapshot => normalizeSnapshot(cloneValue(snapshot));
+
 const buildSnapshotFromReadModel = (readModel: AdminConsoleReadModelSnapshot): AdminConsoleSnapshot => {
   const tables = buildDefaultTables();
 
@@ -449,6 +451,7 @@ const createAdminRequestedTimeline = ({
 
 export const useAdminConsoleData = () => {
   const [snapshot, setSnapshot] = useState<AdminConsoleSnapshot>(() => readAdminConsoleSnapshot());
+  const [baselineSnapshot, setBaselineSnapshot] = useState<AdminConsoleSnapshot>(() => readAdminConsoleSnapshot());
   const hasLoadedBackendRef = useRef(false);
 
   useEffect(() => {
@@ -467,8 +470,10 @@ export const useAdminConsoleData = () => {
       .then(async (apiState) => {
         if (apiState) {
           const nextSnapshot = normalizeSnapshot(apiState);
-          setSnapshot(nextSnapshot);
-          writeAdminConsoleSnapshotToStorage(nextSnapshot);
+          const nextBaselineSnapshot = cloneSnapshot(nextSnapshot);
+          setBaselineSnapshot(nextBaselineSnapshot);
+          setSnapshot(nextBaselineSnapshot);
+          writeAdminConsoleSnapshotToStorage(nextBaselineSnapshot);
           return;
         }
 
@@ -485,8 +490,10 @@ export const useAdminConsoleData = () => {
           readModel,
           tableRows,
         });
-        setSnapshot(nextSnapshot);
-        writeAdminConsoleSnapshotToStorage(nextSnapshot);
+        const nextBaselineSnapshot = cloneSnapshot(nextSnapshot);
+        setBaselineSnapshot(nextBaselineSnapshot);
+        setSnapshot(nextBaselineSnapshot);
+        writeAdminConsoleSnapshotToStorage(nextBaselineSnapshot);
       })
       .finally(() => {
         hasLoadedBackendRef.current = true;
@@ -1006,19 +1013,19 @@ export const useAdminConsoleData = () => {
   };
 
   const resetTable = (tableName: AdminConsoleTableName) => {
-    const baselineTables = buildDefaultTables();
+    const baselineTables = baselineSnapshot.tables;
 
     updateSnapshot((currentSnapshot) => ({
       ...currentSnapshot,
       tables: {
         ...currentSnapshot.tables,
-        [tableName]: baselineTables[tableName],
+        [tableName]: cloneValue(baselineTables[tableName]),
       },
     }));
   };
 
   const resetAll = () => {
-    const nextSnapshot = buildDefaultSnapshot();
+    const nextSnapshot = cloneSnapshot(baselineSnapshot);
     setSnapshot(nextSnapshot);
     persistAdminConsoleSnapshot(nextSnapshot, hasLoadedBackendRef.current);
   };
@@ -1037,17 +1044,17 @@ export const useAdminConsoleData = () => {
   const getProvidersCountForService = (serviceId: string) =>
     snapshot.tables.professional_service_offerings.filter((offering) => offering.serviceId === serviceId).length;
 
-  const seedTables = buildDefaultTables();
-  const getSeedTableRows = <TName extends AdminConsoleTableName>(tableName: TName) => seedTables[tableName];
+  const baselineTables = baselineSnapshot.tables;
+  const getSeedTableRows = <TName extends AdminConsoleTableName>(tableName: TName) => baselineTables[tableName];
   const getTableMeta = (tableName: AdminConsoleTableName) => {
     const currentRows = snapshot.tables[tableName];
-    const seedRows = seedTables[tableName];
-    const isModified = JSON.stringify(currentRows) !== JSON.stringify(seedRows);
+    const baselineRows = baselineTables[tableName];
+    const isModified = JSON.stringify(currentRows) !== JSON.stringify(baselineRows);
 
     return {
+      baselineCount: baselineRows.length,
       currentCount: currentRows.length,
       isModified,
-      seedCount: seedRows.length,
     };
   };
   const modifiedTableNames = ADMIN_CONSOLE_TABLE_NAMES.filter((tableName) => getTableMeta(tableName).isModified);

@@ -146,7 +146,7 @@ export const useProfessionalAuthSession = () => {
     displayName: string;
     password: string;
     phone: string;
-    professionalId: string;
+    professionalId?: string;
   }) => {
     const apiSession = await registerProfessionalWithApi(input);
     const nextSession = normalizeSession(apiSession);

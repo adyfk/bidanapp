@@ -21,6 +21,7 @@ export const useUiText = () => {
 
   const appointmentStatusBanners: Partial<Record<AppointmentStatus, string>> = {
     requested: t('appointment.statusBanners.requested'),
+    awaiting_payment: t('appointment.statusBanners.approved_waiting_payment'),
     paid: t('appointment.statusBanners.paid'),
     confirmed: t('appointment.statusBanners.confirmed'),
     in_service: t('appointment.statusBanners.inService'),

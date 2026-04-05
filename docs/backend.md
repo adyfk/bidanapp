@@ -1,6 +1,6 @@
 # Backend Guide
 
-This guide explains how the Go backend is structured, how routes and OpenAPI are defined, what the current modules do, and how PostgreSQL-backed content documents now support the public read-model surfaces.
+This guide explains how the Go backend is structured, how routes and OpenAPI are defined, what the current modules do, and how PostgreSQL-backed published read-model documents now support the public read-model surfaces.
 
 ## 1. Backend Stack
 
@@ -62,8 +62,8 @@ The startup sequence is:
 
 1. load config through `internal/config`
 2. create logger through `internal/platform/log`
-3. open the PostgreSQL connection used by runtime mutable state and content documents
-4. bootstrap content documents from `seeddata` when missing
+3. open the PostgreSQL connection used by runtime mutable state and published read-model documents
+4. bootstrap published read-model documents from `seeddata` when missing
 5. create the router through `internal/http`
 6. create the HTTP server through `internal/server`
 7. start the server and log runtime metadata
@@ -84,7 +84,7 @@ For automation-friendly output, use:
 npm run seed:json --workspace @bidanapp/backend
 ```
 
-The seeder truncates mutable runtime tables, bootstraps `content_documents`, repopulates `app_state_documents`, rebuilds `professional_portal_sessions`, restores chat history, and emits a login/token summary for manual checks.
+The seeder truncates mutable runtime tables, bootstraps `published_readmodel_documents`, repopulates dedicated runtime state tables for viewer, notifications, preferences, admin console, and support, rebuilds `professional_portal_states`, restores chat history, and emits a login/token summary for manual checks.
 The JSON report additionally exposes customer, professional, and admin verification matrices so manual QA or smoke scripts can pick the right seeded branch deterministically. See [QA Seed Matrix](./qa-seed-matrix.md).
 
 To smoke the seeded runtime automatically against a real local API process:
@@ -189,7 +189,7 @@ Current route:
 
 Purpose:
 
-- serve catalog, professionals, appointments, chat snapshots, and app bootstrap data from PostgreSQL-backed content documents plus persisted overlays
+- serve catalog, professionals, appointments, chat snapshots, and app bootstrap data from PostgreSQL-backed published read-model documents plus persisted overlays
 - act as the primary backend read-model boundary while remaining catalog/feed surfaces are still being retired slice by slice
 - keep FE and BE aligned around shared contract payloads without reviving old aggregate simulation objects
 
@@ -328,17 +328,26 @@ Current schema contains:
 
 - `chat_threads`
 - `chat_messages`
-- `professional_portal_sessions`
-- `app_state_documents`
-- `content_documents`
+- `professional_portal_states`
+- `viewer_session_states`
+- `customer_notification_states`
+- `professional_notification_states`
+- `consumer_preference_states`
+- `admin_session_states`
+- `admin_support_desk_states`
+- `support_tickets`
+- `admin_console_states`
+- `admin_console_tables`
+- `admin_console_table_rows`
+- `published_readmodel_documents`
 
 Current runtime usage:
 
 - chat websocket history persists into `chat_threads` and `chat_messages`
-- professional portal session/resource persistence lives in `professional_portal_sessions`
-- viewer session, notifications, consumer preferences, admin session, support desk, and admin console snapshots persist into `app_state_documents`
-- read-model catalog/bootstrap content persists in `content_documents`, bootstrapped from `seeddata` when missing
-- published professional portal snapshots can overlay the stored content documents during reads
+- professional portal state/resource persistence lives in `professional_portal_states`
+- viewer session, notifications, consumer preferences, admin session, support desk, and admin console runtime state persists in dedicated tables
+- read-model catalog/bootstrap content persists in `published_readmodel_documents`, bootstrapped from `seeddata` when missing
+- published professional portal state can overlay the stored read-model dataset during reads
 
 ## 10. Testing Strategy
 
@@ -376,5 +385,5 @@ Recommended flow:
 - returning raw internal errors to clients
 - skipping slug or input validation for path-based resource lookup
 - putting feature-specific logic directly in the router instead of a module
-- assuming bootstrapped content documents remove the need for richer relational/content modeling later
+- assuming bootstrapped published read-model documents remove the need for richer relational/content modeling later
 - changing API shape without regenerating the SDK contract

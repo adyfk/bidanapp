@@ -30,10 +30,18 @@ export const createDefaultCancellationPolicySnapshot = (
 });
 
 export const isCustomerCancellationAllowed = (status: AppointmentStatus) =>
-  status === 'requested' || status === 'approved_waiting_payment' || status === 'paid' || status === 'confirmed';
+  status === 'requested' ||
+  status === 'awaiting_payment' ||
+  status === 'approved_waiting_payment' ||
+  status === 'paid' ||
+  status === 'confirmed';
 
 export const isProfessionalCloseAllowed = (status: AppointmentStatus) =>
-  status === 'requested' || status === 'approved_waiting_payment' || status === 'paid' || status === 'confirmed';
+  status === 'requested' ||
+  status === 'awaiting_payment' ||
+  status === 'approved_waiting_payment' ||
+  status === 'paid' ||
+  status === 'confirmed';
 
 const parseDateIsoTime = (dateIso: string, timeLabel: string) => {
   const match = timeLabel.match(timePattern);
@@ -137,7 +145,7 @@ export const getAppointmentClosePreview = ({
     };
   }
 
-  if (status === 'approved_waiting_payment') {
+  if (status === 'awaiting_payment' || status === 'approved_waiting_payment') {
     return {
       allowed: true,
       cutoffHours: null,

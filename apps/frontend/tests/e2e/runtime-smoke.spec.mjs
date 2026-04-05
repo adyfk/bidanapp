@@ -11,6 +11,7 @@ const backendDir = resolve(frontendDir, '..', 'backend');
 const consumers = JSON.parse(await readFile(resolve(backendDir, 'seeddata/consumers.json'), 'utf8'));
 const professionals = JSON.parse(await readFile(resolve(backendDir, 'seeddata/professionals.json'), 'utf8'));
 const services = JSON.parse(await readFile(resolve(backendDir, 'seeddata/services.json'), 'utf8'));
+const areas = JSON.parse(await readFile(resolve(backendDir, 'seeddata/areas.json'), 'utf8'));
 const appointments = JSON.parse(await readFile(resolve(backendDir, 'seeddata/appointments.json'), 'utf8'));
 
 const normalizePhone = (value = '') => {
@@ -40,9 +41,17 @@ const reviewStatusTitles = {
 const professionalSlug = professionals[0]?.slug;
 const serviceSlug = services[0]?.slug;
 const appointmentId = appointments[0]?.id;
+const confirmedHomeVisitAppointment = appointments.find(
+  (appointment) => appointment.requestedMode === 'home_visit' && appointment.status === 'confirmed',
+);
+const confirmedHomeVisitArea = areas.find((area) => area.id === confirmedHomeVisitAppointment?.areaId) ?? null;
 const customerPhone = normalizePhone(consumers[0]?.phone ?? '');
 const professionalPhone = buildSeedProfessionalPhone(0);
 const professionalName = professionals[0]?.name ?? '';
+const professionalRegistrationPhone = '+6281391000001';
+const professionalRegistrationName = 'Self Signup Midwife';
+const professionalPublishPhone = '+6281391000002';
+const professionalPublishName = 'Portal Publish Midwife';
 const customerBearerToken = `seed-customer-session-${consumers[0]?.id}`;
 const professionalBearerToken = `seed-professional-session-${professionals[0]?.id}`;
 const seededCustomerSessions = consumers.map((consumer) => ({
@@ -61,6 +70,10 @@ const seededProfessionalSessions = professionals.map((professional, index) => {
     reviewTitle: reviewStatusTitles[reviewStatus],
   };
 });
+const confirmedHomeVisitProfessionalSession =
+  seededProfessionalSessions.find(
+    (session) => session.professionalId === confirmedHomeVisitAppointment?.professionalId,
+  ) ?? null;
 const submittedProfessionalSession = seededProfessionalSessions.find((session) => session.reviewStatus === 'submitted');
 const adminBearerToken = 'seed-admin-session-adm-01';
 const backendApiBaseUrl = process.env.PLAYWRIGHT_BACKEND_API_BASE_URL ?? 'http://127.0.0.1:3302/api/v1';
@@ -176,7 +189,9 @@ const readProfessionalPortalReviewStatus = async (browser, professionalSession) 
     assert.equal(
       response.ok(),
       true,
-      `Expected professional portal session to hydrate for ${professionalSession.professionalId}, got ${response.status()} from ${response.url()}.`,
+      `Expected professional portal session to hydrate for ${
+        professionalSession.professionalId
+      }, got ${response.status()} from ${response.url()}.`,
     );
 
     const body = await response.json();
@@ -214,6 +229,48 @@ const waitForApiOutcome = async (page, pathFragment) => {
     }));
 
   return await Promise.race([requestFailurePromise, responsePromise]);
+};
+
+const readJson = async (response, message) => {
+  assert.equal(response.ok(), true, `${message}. Got ${response.status()} from ${response.url()}.`);
+  return await response.json();
+};
+
+const fetchJsonFromPage = async (page, url, init = {}) =>
+  await page.evaluate(
+    async ({ init, url }) => {
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(init.headers || {}),
+      };
+      const response = await fetch(url, {
+        ...init,
+        body: typeof init.body === 'undefined' ? undefined : JSON.stringify(init.body),
+        credentials: 'include',
+        headers,
+      });
+      const text = await response.text();
+      let body = null;
+
+      try {
+        body = text ? JSON.parse(text) : null;
+      } catch {
+        body = text;
+      }
+
+      return {
+        body,
+        ok: response.ok,
+        status: response.status,
+        url: response.url,
+      };
+    },
+    { init, url },
+  );
+
+const expectPageJsonOk = (response, message) => {
+  assert.equal(response.ok, true, `${message}. Got ${response.status} from ${response.url}.`);
+  return response.body;
 };
 
 const visitRoutes = async (page, errors, routes) => {
@@ -267,7 +324,9 @@ test('customer can sign in through the UI and reuse the restored session on prot
   assert.equal(
     customerAuthOutcome.response.ok(),
     true,
-    `Expected customer auth UI login request to succeed, got ${customerAuthOutcome.response.status()} from ${customerAuthOutcome.url}.\n${customerAuthOutcome.body}`,
+    `Expected customer auth UI login request to succeed, got ${customerAuthOutcome.response.status()} from ${
+      customerAuthOutcome.url
+    }.\n${customerAuthOutcome.body}`,
   );
   await expect(page).toHaveURL(/\/en\/home$/);
   await assertHealthyPage(page, runtimeErrors, '/en/home after customer UI login');
@@ -311,7 +370,9 @@ test('professional can sign in through the UI and reuse the restored session on 
   assert.equal(
     professionalAuthOutcome.response.ok(),
     true,
-    `Expected professional auth UI login request to succeed, got ${professionalAuthOutcome.response.status()} from ${professionalAuthOutcome.url}.\n${professionalAuthOutcome.body}`,
+    `Expected professional auth UI login request to succeed, got ${professionalAuthOutcome.response.status()} from ${
+      professionalAuthOutcome.url
+    }.\n${professionalAuthOutcome.body}`,
   );
   await expect(page).toHaveURL(/\/en\/for-professionals\/dashboard/);
   await assertHealthyPage(page, runtimeErrors, '/en/for-professionals/dashboard after professional UI login');
@@ -325,6 +386,495 @@ test('professional can sign in through the UI and reuse the restored session on 
   await page.goto('/en/for-professionals/profile');
   await assertHealthyPage(page, runtimeErrors, '/en/for-professionals/profile after professional UI login');
   await expect(page).not.toHaveURL(/\/en\/for-professionals(\?|$)/);
+});
+
+test('home visit departure syncs OTW status to the customer activity screen with a ready service worker channel', async ({
+  browser,
+}) => {
+  assert.ok(confirmedHomeVisitAppointment?.id, 'Expected a seeded confirmed home-visit appointment for OTW testing.');
+  assert.ok(
+    confirmedHomeVisitArea?.id,
+    `Expected a seeded area for appointment ${confirmedHomeVisitAppointment?.id ?? 'unknown'}.`,
+  );
+  assert.ok(
+    confirmedHomeVisitProfessionalSession?.professionalId,
+    `Expected a seeded professional session for appointment ${confirmedHomeVisitAppointment?.id ?? 'unknown'}.`,
+  );
+
+  const customerContext = await browser.newContext({
+    baseURL: 'http://127.0.0.1:3301',
+    extraHTTPHeaders: {
+      Authorization: `Bearer seed-customer-session-${confirmedHomeVisitAppointment.consumerId}`,
+    },
+  });
+  await customerContext.grantPermissions(['notifications'], { origin: 'http://127.0.0.1:3301' });
+  const customerPage = await customerContext.newPage();
+  const customerRuntimeErrors = trackRuntimeErrors(customerPage);
+
+  await customerPage.goto(`/en/activity/${confirmedHomeVisitAppointment.id}`);
+  await assertHealthyPage(customerPage, customerRuntimeErrors, `/en/activity/${confirmedHomeVisitAppointment.id}`);
+
+  await customerPage.evaluate(() => {
+    window.__bidanappPushPayloads = [];
+    window.addEventListener('bidanapp:push-received', (event) => {
+      window.__bidanappPushPayloads.push(event.detail ?? null);
+    });
+  });
+
+  await expect
+    .poll(async () => {
+      return await customerPage.evaluate(async () => {
+        if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) {
+          return {
+            hasPushManager: false,
+            hasServiceWorker: false,
+            notificationPermission: 'unsupported',
+            registrationScope: null,
+          };
+        }
+
+        const registration =
+          (await navigator.serviceWorker.getRegistration()) || (await navigator.serviceWorker.ready.catch(() => null));
+
+        return {
+          hasPushManager: 'PushManager' in window,
+          hasServiceWorker: Boolean(registration?.active),
+          notificationPermission: typeof Notification === 'undefined' ? 'unsupported' : Notification.permission,
+          registrationScope: registration?.scope ?? null,
+        };
+      });
+    })
+    .toMatchObject({
+      hasPushManager: true,
+      hasServiceWorker: true,
+    });
+
+  const customerPushChannel = await customerPage.evaluate(async () => {
+    const registration =
+      typeof navigator !== 'undefined' && 'serviceWorker' in navigator
+        ? (await navigator.serviceWorker.getRegistration()) || (await navigator.serviceWorker.ready.catch(() => null))
+        : null;
+
+    return {
+      hasPushManager: true,
+      hasServiceWorker: Boolean(registration?.active),
+      notificationPermission: typeof Notification === 'undefined' ? 'unsupported' : Notification.permission,
+      registrationScope: registration?.scope ?? null,
+    };
+  });
+
+  assert.equal(
+    typeof customerPushChannel.registrationScope,
+    'string',
+    'Expected the customer browser to keep an active service worker registration scope.',
+  );
+
+  await expect(customerPage.locator('body')).toContainText('The professional has not started the trip yet.');
+
+  const professionalContext = await browser.newContext({
+    baseURL: 'http://127.0.0.1:3301',
+    extraHTTPHeaders: {
+      Authorization: `Bearer seed-professional-session-${confirmedHomeVisitProfessionalSession.professionalId}`,
+    },
+    geolocation: {
+      latitude: confirmedHomeVisitArea.latitude + 0.03,
+      longitude: confirmedHomeVisitArea.longitude + 0.03,
+    },
+  });
+  await professionalContext.grantPermissions(['geolocation'], { origin: 'http://127.0.0.1:3301' });
+  const professionalPage = await professionalContext.newPage();
+  const professionalRuntimeErrors = trackRuntimeErrors(professionalPage);
+
+  await professionalPage.goto('/en/for-professionals/dashboard/requests');
+  await assertHealthyPage(
+    professionalPage,
+    professionalRuntimeErrors,
+    '/en/for-professionals/dashboard/requests for home-visit departure',
+  );
+
+  const departureResponse = await professionalContext.request.post(
+    `${backendApiBaseUrl}/appointments/${confirmedHomeVisitAppointment.id}/depart`,
+    {
+      data: {
+        currentLocation: {
+          latitude: confirmedHomeVisitArea.latitude + 0.03,
+          longitude: confirmedHomeVisitArea.longitude + 0.03,
+        },
+      },
+      headers: {
+        Authorization: `Bearer seed-professional-session-${confirmedHomeVisitProfessionalSession.professionalId}`,
+      },
+    },
+  );
+  assert.equal(
+    departureResponse.ok(),
+    true,
+    `Expected home-visit departure request to succeed, got ${departureResponse.status()} from ${departureResponse.url()}.`,
+  );
+
+  await expect
+    .poll(
+      async () => {
+        return await customerPage.locator('body').innerText();
+      },
+      { timeout: 20_000 },
+    )
+    .toContain('The professional has departed and is heading to your location.');
+  await expect(customerPage.locator('body')).not.toContainText('The professional has not started the trip yet.');
+  await expect(customerPage.locator('body')).toContainText('About');
+
+  if (customerPushChannel.notificationPermission === 'granted') {
+    await expect
+      .poll(
+        async () => {
+          return await customerPage.evaluate(() => window.__bidanappPushPayloads.length);
+        },
+        { timeout: 20_000 },
+      )
+      .toBeGreaterThan(0);
+  } else {
+    assert.equal(
+      customerPushChannel.notificationPermission,
+      'denied',
+      `Expected headless browser notification permission to stay denied when native web push cannot be subscribed. Received ${customerPushChannel.notificationPermission}.`,
+    );
+  }
+
+  await professionalContext.close();
+  await customerContext.close();
+});
+
+test('professional can self-register into a clean onboarding draft', async ({ page }) => {
+  const runtimeErrors = trackRuntimeErrors(page);
+
+  await page.goto('/en/for-professionals');
+  await assertHealthyPage(page, runtimeErrors, '/en/for-professionals register flow');
+
+  await page.getByRole('button', { name: 'Register' }).click();
+  await page.getByLabel('Full name').fill(professionalRegistrationName);
+  await page.getByLabel('WhatsApp number').fill(professionalRegistrationPhone);
+  await page.getByLabel('City').fill('Jakarta Selatan');
+  await page.getByLabel('STR / license number').fill('STR-SELF-PLAYWRIGHT');
+  await page.getByLabel('Password').fill(seededProfessionalPassword);
+
+  runtimeErrors.length = 0;
+  const professionalRegisterOutcomePromise = waitForApiOutcome(page, '/api/v1/professionals/auth/register');
+  await page.getByRole('button', { name: 'Register and open profile' }).click();
+  const professionalRegisterOutcome = await professionalRegisterOutcomePromise;
+  assert.equal(
+    professionalRegisterOutcome.type,
+    'response',
+    `Expected professional registration to receive an HTTP response, but saw ${professionalRegisterOutcome.type} for ${professionalRegisterOutcome.url}: ${professionalRegisterOutcome.errorText}`,
+  );
+  assert.equal(
+    professionalRegisterOutcome.response.ok(),
+    true,
+    `Expected professional registration to succeed, got ${professionalRegisterOutcome.response.status()} from ${
+      professionalRegisterOutcome.url
+    }.\n${professionalRegisterOutcome.body}`,
+  );
+  await expect(page).toHaveURL(/\/en\/for-professionals\/dashboard/);
+  await assertHealthyPage(page, runtimeErrors, '/en/for-professionals/dashboard after professional self-registration');
+  await expect(page.locator('body')).toContainText('Profile is still inactive');
+  await expect(page.locator('body')).toContainText('Active services0');
+  await expect(page.locator('body')).toContainText('Average priceRp');
+  await expect(page.locator('body')).toContainText('Coverage0 areas');
+});
+
+test('professional self-signup can complete onboarding, submit, get published by admin, and appear on public routes', async ({
+  browser,
+}) => {
+  const area = areas[0];
+  assert.ok(area?.id, 'Expected seeded areas to be available for professional onboarding coverage.');
+
+  const context = await browser.newContext({
+    baseURL: 'http://127.0.0.1:3301',
+  });
+  const page = await context.newPage();
+  const runtimeErrors = trackRuntimeErrors(page);
+
+  await page.goto('/en/for-professionals');
+  await assertHealthyPage(page, runtimeErrors, '/en/for-professionals publish flow register');
+
+  await page.getByRole('button', { name: 'Register' }).click();
+  await page.getByLabel('Full name').fill(professionalPublishName);
+  await page.getByLabel('WhatsApp number').fill(professionalPublishPhone);
+  await page.getByLabel('City').fill(area.city);
+  await page.getByLabel('STR / license number').fill('STR-PORTAL-PUBLISH');
+  await page.getByLabel('Password').fill(seededProfessionalPassword);
+
+  runtimeErrors.length = 0;
+  const professionalRegisterOutcomePromise = waitForApiOutcome(page, '/api/v1/professionals/auth/register');
+  await page.getByRole('button', { name: 'Register and open profile' }).click();
+  const professionalRegisterOutcome = await professionalRegisterOutcomePromise;
+  assert.equal(
+    professionalRegisterOutcome.type,
+    'response',
+    `Expected professional registration to receive an HTTP response, but saw ${professionalRegisterOutcome.type} for ${professionalRegisterOutcome.url}: ${professionalRegisterOutcome.errorText}`,
+  );
+  assert.equal(
+    professionalRegisterOutcome.response.ok(),
+    true,
+    `Expected professional registration to succeed, got ${professionalRegisterOutcome.response.status()} from ${
+      professionalRegisterOutcome.url
+    }.\n${professionalRegisterOutcome.body}`,
+  );
+  await expect(page).toHaveURL(/\/en\/for-professionals\/dashboard/);
+  await assertHealthyPage(page, runtimeErrors, '/en/for-professionals/dashboard after publish-flow registration');
+
+  const professionalRegisterBody = JSON.parse(professionalRegisterOutcome.body);
+  const professionalId = professionalRegisterBody?.data?.professionalId;
+  assert.ok(professionalId, 'Expected professional registration response to include a professionalId.');
+
+  const initialPortalSessionBody = expectPageJsonOk(
+    await fetchJsonFromPage(
+      page,
+      `${backendApiBaseUrl}/professionals/portal/session?professional_id=${professionalId}`,
+    ),
+    'Expected the newly registered professional portal session to hydrate',
+  );
+  const serviceConfigurations =
+    initialPortalSessionBody?.data?.snapshot?.state?.serviceConfigurations &&
+    Array.isArray(initialPortalSessionBody.data.snapshot.state.serviceConfigurations)
+      ? initialPortalSessionBody.data.snapshot.state.serviceConfigurations
+      : [];
+  assert.ok(serviceConfigurations.length > 0, 'Expected registration to provision service configuration templates.');
+
+  const targetService = serviceConfigurations.find((service) => service.serviceId === 's5') ?? serviceConfigurations[0];
+  assert.ok(targetService?.serviceId, 'Expected at least one service configuration to be available.');
+
+  const profileResponse = await fetchJsonFromPage(page, `${backendApiBaseUrl}/professionals/me/profile`, {
+    body: {
+      acceptingNewClients: false,
+      autoApproveInstantBookings: false,
+      city: area.city,
+      credentialNumber: 'STR-PORTAL-PUBLISH',
+      displayName: professionalPublishName,
+      phone: professionalPublishPhone,
+      professionalId,
+      publicBio: 'Home, clinic, and virtual postpartum support for newborn and lactation care.',
+      responseTimeGoal: 'Responds within 15 minutes during clinic hours',
+      reviewState: {
+        status: 'draft',
+      },
+      yearsExperience: '7 years',
+    },
+    method: 'PUT',
+  });
+  expectPageJsonOk(profileResponse, 'Expected professional profile upsert to succeed');
+
+  const coverageResponse = await fetchJsonFromPage(page, `${backendApiBaseUrl}/professionals/me/coverage`, {
+    body: {
+      acceptingNewClients: false,
+      autoApproveInstantBookings: false,
+      availabilityRulesByMode: {},
+      city: area.city,
+      coverageAreaIds: [area.id],
+      coverageCenter: {
+        latitude: area.latitude,
+        longitude: area.longitude,
+      },
+      homeVisitRadiusKm: 0,
+      practiceAddress: 'Jl. Kesehatan Ibu No. 10, Jakarta Selatan',
+      practiceLabel: 'Klinik Laktasi Cilandak',
+      professionalId,
+      publicBio: 'Home, clinic, and virtual postpartum support for newborn and lactation care.',
+      responseTimeGoal: 'Responds within 15 minutes during clinic hours',
+    },
+    method: 'PUT',
+  });
+  expectPageJsonOk(coverageResponse, 'Expected professional coverage upsert to succeed');
+
+  const servicesResponse = await fetchJsonFromPage(page, `${backendApiBaseUrl}/professionals/me/services`, {
+    body: {
+      professionalId,
+      serviceConfigurations: serviceConfigurations.map((service, index) =>
+        service.id === targetService.id
+          ? {
+              ...service,
+              bookingFlow: service.bookingFlow || 'request',
+              defaultMode: 'online',
+              duration: '60 menit',
+              featured: true,
+              index: index + 1,
+              isActive: true,
+              price: 'Rp 250.000',
+              serviceModes: {
+                homeVisit: false,
+                online: true,
+                onsite: false,
+              },
+              source: service.source || 'template',
+              summary: 'Virtual lactation consultation with feeding review and action plan.',
+            }
+          : {
+              ...service,
+              bookingFlow: service.bookingFlow || 'request',
+              defaultMode: service.defaultMode || 'online',
+              duration: service.duration || '',
+              featured: false,
+              index: index + 1,
+              isActive: false,
+              price: service.price || '',
+              serviceModes: {
+                homeVisit: Boolean(service.serviceModes?.homeVisit),
+                online: Boolean(service.serviceModes?.online),
+                onsite: Boolean(service.serviceModes?.onsite),
+              },
+              source: service.source || 'template',
+              summary: service.summary || '',
+            },
+      ),
+    },
+    method: 'PUT',
+  });
+  expectPageJsonOk(servicesResponse, 'Expected professional services upsert to succeed');
+
+  const portfolioResponse = await fetchJsonFromPage(page, `${backendApiBaseUrl}/professionals/me/portfolio`, {
+    body: {
+      portfolioEntries: [
+        {
+          id: 'portfolio-publish-1',
+          image: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=1200&auto=format&fit=crop',
+          index: 1,
+          outcomes: ['Exclusive breastfeeding plan completed', '24-hour follow-up delivered'],
+          periodLabel: 'March 2026',
+          serviceId: targetService.serviceId,
+          summary: 'Guided a postpartum mother through latch correction and pumping adjustments.',
+          title: 'Postpartum lactation support case',
+          visibility: 'public',
+        },
+      ],
+      professionalId,
+    },
+    method: 'PUT',
+  });
+  expectPageJsonOk(portfolioResponse, 'Expected professional portfolio upsert to succeed');
+
+  runtimeErrors.length = 0;
+  await page.goto('/en/for-professionals/dashboard');
+  await assertHealthyPage(page, runtimeErrors, '/en/for-professionals/dashboard before submission');
+  await expect(page.locator('body')).toContainText('Ready to submit for admin review');
+
+  const submitResponsePromise = page.waitForResponse(
+    (response) =>
+      response.url().includes('/api/v1/professionals/me/profile') &&
+      response.request().method() === 'PUT' &&
+      response.ok(),
+  );
+  await page.getByRole('button', { name: 'Submit to admin' }).click();
+  await submitResponsePromise;
+
+  const submittedPortalSessionBody = expectPageJsonOk(
+    await fetchJsonFromPage(
+      page,
+      `${backendApiBaseUrl}/professionals/portal/session?professional_id=${professionalId}`,
+    ),
+    'Expected professional portal session to remain readable after submission',
+  );
+  assert.equal(
+    submittedPortalSessionBody?.data?.snapshot?.reviewStatesByProfessionalId?.[professionalId]?.status,
+    'submitted',
+    `Expected ${professionalId} to be submitted after the onboarding handoff.`,
+  );
+
+  const adminContext = await browser.newContext({
+    baseURL: 'http://127.0.0.1:3301',
+    extraHTTPHeaders: {
+      Authorization: `Bearer ${adminBearerToken}`,
+    },
+  });
+  const adminPage = await adminContext.newPage();
+  const adminRuntimeErrors = trackRuntimeErrors(adminPage);
+  const searchInput = adminPage.getByPlaceholder('Cari nama, title, id, atau status approval.');
+  const approvalQueueSection = adminPage
+    .locator('section')
+    .filter({ hasText: 'Antrian review FIFO profesional' })
+    .first();
+  const queueEntryCheckbox = () =>
+    approvalQueueSection
+      .getByRole('button', {
+        name: new RegExp(professionalPublishName, 'i'),
+      })
+      .first()
+      .locator('xpath=..')
+      .locator('input[type="checkbox"]');
+
+  await adminPage.goto('/admin/professionals');
+  await assertHealthyPage(adminPage, adminRuntimeErrors, '/admin/professionals for new professional publish flow');
+
+  await searchInput.fill(professionalId);
+  await queueEntryCheckbox().check();
+
+  const verifySyncResponsePromise = adminPage.waitForResponse(
+    (response) =>
+      response.url().includes('/api/v1/admin/professionals/review-state') &&
+      response.request().method() === 'PUT' &&
+      response.ok(),
+  );
+  await adminPage.getByRole('button', { name: 'Bulk verified' }).click();
+  await verifySyncResponsePromise;
+
+  const verifiedPortalSessionBody = expectPageJsonOk(
+    await fetchJsonFromPage(
+      page,
+      `${backendApiBaseUrl}/professionals/portal/session?professional_id=${professionalId}`,
+    ),
+    'Expected professional portal session to remain readable after admin verification',
+  );
+  assert.equal(
+    verifiedPortalSessionBody?.data?.snapshot?.reviewStatesByProfessionalId?.[professionalId]?.status,
+    'verified',
+    `Expected ${professionalId} to be verified after the admin review action.`,
+  );
+
+  await searchInput.fill(professionalId);
+  await queueEntryCheckbox().check();
+
+  const publishSyncResponsePromise = adminPage.waitForResponse(
+    (response) =>
+      response.url().includes('/api/v1/admin/professionals/review-state') &&
+      response.request().method() === 'PUT' &&
+      response.ok(),
+  );
+  await adminPage.getByRole('button', { name: 'Bulk publish' }).click();
+  await publishSyncResponsePromise;
+
+  const publishedPortalSessionBody = expectPageJsonOk(
+    await fetchJsonFromPage(
+      page,
+      `${backendApiBaseUrl}/professionals/portal/session?professional_id=${professionalId}`,
+    ),
+    'Expected professional portal session to remain readable after publish',
+  );
+  assert.equal(
+    publishedPortalSessionBody?.data?.snapshot?.reviewStatesByProfessionalId?.[professionalId]?.status,
+    'published',
+    `Expected ${professionalId} to be published after the admin publish action.`,
+  );
+
+  const catalogBody = await readJson(
+    await context.request.get(`${backendApiBaseUrl}/catalog`),
+    'Expected public catalog request to succeed after publishing a new professional',
+  );
+  const publishedProfessional = Array.isArray(catalogBody?.data?.professionals)
+    ? catalogBody.data.professionals.find((professional) => professional.id === professionalId)
+    : undefined;
+  assert.ok(
+    publishedProfessional?.slug,
+    `Expected published professional ${professionalId} to appear in the public catalog with a slug.`,
+  );
+
+  runtimeErrors.length = 0;
+  await page.goto(`/en/p/${publishedProfessional.slug}`);
+  await assertHealthyPage(page, runtimeErrors, `/en/p/${publishedProfessional.slug} after admin publish`);
+  await expect(page.locator('body')).toContainText(professionalPublishName);
+  await expect(page.locator('body')).toContainText(
+    'Virtual lactation consultation with feeding review and action plan.',
+  );
+
+  await adminContext.close();
+  await context.close();
 });
 
 test('customer protected routes render with the seeded customer session bearer token', async ({ browser }) => {
@@ -441,7 +991,9 @@ test('all seeded professional review states render the expected onboarding statu
     assert.equal(
       portalSessionResponse.ok(),
       true,
-      `Expected professional portal session to hydrate for ${professionalSession.professionalId}, got ${portalSessionResponse.status()} from ${portalSessionResponse.url()}.`,
+      `Expected professional portal session to hydrate for ${
+        professionalSession.professionalId
+      }, got ${portalSessionResponse.status()} from ${portalSessionResponse.url()}.`,
     );
     const portalSessionBody = await portalSessionResponse.json();
     assert.equal(
@@ -472,7 +1024,6 @@ test('admin console routes render with the seeded admin session bearer token', a
     '/admin/services',
     '/admin/appointments',
     '/admin/support',
-    '/admin/studio',
   ];
 
   for (const route of routes) {
@@ -501,7 +1052,9 @@ test('admin bulk review and publish actions persist professional lifecycle state
 
   const queueEntryCheckbox = () =>
     approvalQueueSection
-      .getByRole('button', { name: new RegExp(submittedProfessionalSession.displayName, 'i') })
+      .getByRole('button', {
+        name: new RegExp(submittedProfessionalSession.displayName, 'i'),
+      })
       .first()
       .locator('xpath=..')
       .locator('input[type="checkbox"]');
@@ -550,6 +1103,60 @@ test('admin bulk review and publish actions persist professional lifecycle state
     'published',
     `Expected ${submittedProfessionalSession.professionalId} to persist as published after bulk publish.`,
   );
+
+  await context.close();
+});
+
+test('admin service mutations are reflected by public service routes', async ({ browser }) => {
+  const context = await browser.newContext({
+    baseURL: 'http://127.0.0.1:3301',
+    extraHTTPHeaders: {
+      Authorization: `Bearer ${adminBearerToken}`,
+    },
+  });
+  const page = await context.newPage();
+  const runtimeErrors = trackRuntimeErrors(page);
+
+  const servicesTableResponse = await context.request.get(`${backendApiBaseUrl}/admin/console/tables/services`, {
+    headers: {
+      Authorization: `Bearer ${adminBearerToken}`,
+    },
+  });
+  assert.equal(servicesTableResponse.ok(), true, 'Expected admin services table request to succeed.');
+
+  const servicesTableBody = await servicesTableResponse.json();
+  const serviceRows = Array.isArray(servicesTableBody?.data?.rows) ? servicesTableBody.data.rows : [];
+  const seedService = serviceRows.find((candidate) => candidate.slug === serviceSlug) ?? serviceRows[0];
+
+  assert.ok(seedService?.id, 'Expected a seed service row to be present in the admin console services table.');
+
+  const updatedServiceName = `${seedService.name} Synced`;
+  const updateResponse = await context.request.put(`${backendApiBaseUrl}/admin/console/tables/services`, {
+    data: {
+      rows: serviceRows.map((row, index) =>
+        row.id === seedService.id
+          ? {
+              ...row,
+              index: index + 1,
+              name: updatedServiceName,
+            }
+          : {
+              ...row,
+              index: index + 1,
+            },
+      ),
+      savedAt: servicesTableBody?.data?.savedAt,
+      schemaVersion: servicesTableBody?.data?.schemaVersion ?? 1,
+    },
+    headers: {
+      Authorization: `Bearer ${adminBearerToken}`,
+    },
+  });
+  assert.equal(updateResponse.ok(), true, 'Expected admin services table mutation to succeed.');
+
+  await page.goto(`/en/s/${seedService.slug}`);
+  await assertHealthyPage(page, runtimeErrors, `/en/s/${seedService.slug} after admin service mutation`);
+  await expect(page.locator('body')).toContainText(updatedServiceName);
 
   await context.close();
 });

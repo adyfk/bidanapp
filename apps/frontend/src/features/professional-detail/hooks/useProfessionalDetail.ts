@@ -241,7 +241,7 @@ export const useProfessionalDetail = ({
     selectedServiceEntry && selectedBookingMode && (!requiresOfflineScheduleSelection || selectedTimeSlot),
   );
 
-  const requestBooking = () => {
+  const requestBooking = async () => {
     if (!selectedServiceEntry || !selectedBookingMode) {
       return;
     }
@@ -265,7 +265,7 @@ export const useProfessionalDetail = ({
     );
 
     if (professional) {
-      const created = createCustomerRequest({
+      const created = await createCustomerRequest({
         note: nextNotice,
         professionalId: professional.id,
         requestedMode: selectedBookingMode,

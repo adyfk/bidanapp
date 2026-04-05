@@ -15,20 +15,27 @@ import (
 	"bidanapp/apps/backend/internal/modules/professionalauth"
 	"bidanapp/apps/backend/internal/modules/professionalportal"
 	"bidanapp/apps/backend/internal/modules/readmodel"
+	"bidanapp/apps/backend/internal/platform/appointmentstore"
+	"bidanapp/apps/backend/internal/platform/authstore"
 	"bidanapp/apps/backend/internal/platform/contentstore"
 	"bidanapp/apps/backend/internal/platform/documentstore"
 	openapibuilder "bidanapp/apps/backend/internal/platform/openapi"
 	"bidanapp/apps/backend/internal/platform/portalstore"
+	"bidanapp/apps/backend/internal/platform/pushstore"
 	"bidanapp/apps/backend/internal/platform/ratelimit"
 	"bidanapp/apps/backend/internal/platform/web"
+	internalwebpush "bidanapp/apps/backend/internal/platform/webpush"
 )
 
 type Dependencies struct {
-	AuthRateLimiter ratelimit.Limiter
-	ChatStore       chat.Store
-	PortalStore     portalstore.Store
-	ContentStore    contentstore.Store
-	DocumentStore   documentstore.Store
+	AuthRateLimiter  ratelimit.Limiter
+	AppointmentStore appointmentstore.Store
+	AuthStore        authstore.Store
+	ChatStore        chat.Store
+	PortalStore      portalstore.Store
+	ContentStore     contentstore.Store
+	DocumentStore    documentstore.Store
+	PushStore        pushstore.Store
 }
 
 func NewRouter(cfg config.Config, logger *slog.Logger, deps ...Dependencies) http.Handler {
@@ -43,16 +50,22 @@ func NewRouter(cfg config.Config, logger *slog.Logger, deps ...Dependencies) htt
 		cfg.SeedData.DataDir,
 		runtimeDependencies.ContentStore,
 		runtimeDependencies.PortalStore,
+		runtimeDependencies.AppointmentStore,
 	)
-	adminAuthService := adminauth.NewService(cfg.AdminAuth, runtimeDependencies.DocumentStore)
-	customerAuthService := customerauth.NewService(cfg.CustomerAuth, runtimeDependencies.DocumentStore)
+	adminAuthService := adminauth.NewService(cfg.AdminAuth, runtimeDependencies.AuthStore)
+	customerAuthService := customerauth.NewService(cfg.CustomerAuth, runtimeDependencies.AuthStore)
 	professionalAuthService := professionalauth.NewService(
 		cfg.ProfessionalAuth,
 		readModelService,
-		runtimeDependencies.DocumentStore,
+		runtimeDependencies.AuthStore,
 	)
 	professionalPortalService := professionalportal.NewService(runtimeDependencies.PortalStore)
-	clientStateService := clientstate.NewService(runtimeDependencies.DocumentStore)
+	pushSender := internalwebpush.NewVAPIDSender(cfg.WebPush)
+	clientStateService := clientstate.NewService(
+		runtimeDependencies.DocumentStore,
+		runtimeDependencies.PushStore,
+		runtimeDependencies.ContentStore,
+	)
 
 	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		web.WriteJSON(w, http.StatusOK, map[string]any{
@@ -69,10 +82,19 @@ func NewRouter(cfg config.Config, logger *slog.Logger, deps ...Dependencies) htt
 	mux.Handle("GET /api/v1/ws/chat", chatHandler)
 
 	openapibuilder.BuildRuntime(mux, cfg, openapibuilder.RuntimeServices{
-		AdminAuth:          adminAuthService,
-		CustomerAuth:       customerAuthService,
-		ProfessionalAuth:   professionalAuthService,
-		AppointmentWrites:  appointments.NewService(professionalPortalService),
+		AdminAuth:        adminAuthService,
+		CustomerAuth:     customerAuthService,
+		ProfessionalAuth: professionalAuthService,
+		AppointmentWrites: appointments.NewService(
+			professionalPortalService,
+			readModelService,
+			readModelService,
+			runtimeDependencies.AppointmentStore,
+			runtimeDependencies.PushStore,
+			pushSender,
+			appointments.WithPaymentConfig(cfg.Payment),
+			appointments.WithFrontendOrigin(cfg.CORS.PrimaryOrigin()),
+		),
 		ProfessionalPortal: professionalPortalService,
 		ReadModel:          readModelService,
 		ClientState:        clientStateService,
@@ -91,6 +113,7 @@ func NewRouter(cfg config.Config, logger *slog.Logger, deps ...Dependencies) htt
 			cfg.CustomerAuth.Cookie.Name,
 			cfg.ProfessionalAuth.Cookie.Name,
 		}),
+		middleware.AppointmentActorAuth(customerAuthService, professionalAuthService),
 		middleware.AdminAuth(adminAuthService),
 		middleware.CustomerAuth(customerAuthService),
 		middleware.ProfessionalAuth(professionalAuthService),
@@ -103,6 +126,12 @@ func resolveDependencies(deps []Dependencies) Dependencies {
 		if resolved.ChatStore == nil {
 			resolved.ChatStore = chat.NewMemoryStore()
 		}
+		if resolved.AppointmentStore == nil {
+			resolved.AppointmentStore = appointmentstore.NewMemoryStore()
+		}
+		if resolved.AuthStore == nil {
+			resolved.AuthStore = authstore.NewMemoryStore()
+		}
 		if resolved.PortalStore == nil {
 			resolved.PortalStore = portalstore.NewMemoryStore()
 		}
@@ -112,13 +141,19 @@ func resolveDependencies(deps []Dependencies) Dependencies {
 		if resolved.DocumentStore == nil {
 			resolved.DocumentStore = documentstore.NewMemoryStore()
 		}
+		if resolved.PushStore == nil {
+			resolved.PushStore = pushstore.NewMemoryStore()
+		}
 		return resolved
 	}
 
 	return Dependencies{
-		ChatStore:     chat.NewMemoryStore(),
-		PortalStore:   portalstore.NewMemoryStore(),
-		ContentStore:  contentstore.NewMemoryStore(),
-		DocumentStore: documentstore.NewMemoryStore(),
+		AppointmentStore: appointmentstore.NewMemoryStore(),
+		AuthStore:        authstore.NewMemoryStore(),
+		ChatStore:        chat.NewMemoryStore(),
+		PortalStore:      portalstore.NewMemoryStore(),
+		ContentStore:     contentstore.NewMemoryStore(),
+		DocumentStore:    documentstore.NewMemoryStore(),
+		PushStore:        pushstore.NewMemoryStore(),
 	}
 }

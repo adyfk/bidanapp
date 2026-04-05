@@ -84,7 +84,7 @@ Folder ini adalah blueprint seed data backend untuk read-model dan bootstrap yan
 ### Consumer context dan komposisi UI
 
 - `consumers.json`
-  Data pengguna dummy yang bertindak sebagai customer aplikasi.
+  Data pengguna seed yang bertindak sebagai customer aplikasi.
 - `user_contexts.json`
   Context aktif pengguna: area terpilih, koordinat user, dan label online status.
 - `home_feed_snapshots.json`
@@ -98,7 +98,7 @@ Folder ini adalah blueprint seed data backend untuk read-model dan bootstrap yan
 - `media_presets.json`
   Preset asset visual untuk onboarding, cover service detail, dan background map.
 - Wording UI tidak disimpan di seed data.
-  Semua teks UI sekarang memakai locale file [en.json](/Users/adi/Code/startup/bidanapp/apps/frontend/messages/en.json) dan [id.json](/Users/adi/Code/startup/bidanapp/apps/frontend/messages/id.json), jadi tidak ada preset wording atau pseudo CMS layer di database dummy.
+  Semua teks UI sekarang memakai locale file [en.json](/Users/adi/Code/startup/bidanapp/apps/frontend/messages/en.json) dan [id.json](/Users/adi/Code/startup/bidanapp/apps/frontend/messages/id.json), jadi tidak ada preset wording atau pseudo CMS layer di database seed.
 
 ### Transaksi dan komunikasi
 

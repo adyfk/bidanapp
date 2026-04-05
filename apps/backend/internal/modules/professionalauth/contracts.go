@@ -14,7 +14,7 @@ type ProfessionalAuthRegisterRequest struct {
 	DisplayName      string `json:"displayName" required:"true"`
 	Password         string `json:"password" required:"true"`
 	Phone            string `json:"phone" required:"true"`
-	ProfessionalID   string `json:"professionalId" required:"true"`
+	ProfessionalID   string `json:"professionalId,omitempty"`
 }
 
 type ProfessionalAuthUpdateAccountRequest struct {

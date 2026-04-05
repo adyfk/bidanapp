@@ -4,6 +4,7 @@ type AppointmentStatus string
 
 const (
 	AppointmentStatusRequested              AppointmentStatus = "requested"
+	AppointmentStatusAwaitingPayment        AppointmentStatus = "awaiting_payment"
 	AppointmentStatusApprovedWaitingPayment AppointmentStatus = "approved_waiting_payment"
 	AppointmentStatusPaid                   AppointmentStatus = "paid"
 	AppointmentStatusConfirmed              AppointmentStatus = "confirmed"

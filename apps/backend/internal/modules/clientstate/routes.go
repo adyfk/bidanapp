@@ -29,6 +29,10 @@ type customerNotificationsInput struct {
 	Body CustomerNotificationStateData
 }
 
+type customerPushSubscriptionInput struct {
+	Body CustomerPushSubscriptionData
+}
+
 type professionalNotificationsInput struct {
 	ProfessionalID string `query:"professional_id" doc:"Optional professional id to scope professional notification read state"`
 	Body           ProfessionalNotificationStateData
@@ -74,6 +78,10 @@ type customerNotificationsResponseBody struct {
 	Data CustomerNotificationStateData `json:"data"`
 }
 
+type customerPushSubscriptionResponseBody struct {
+	Data CustomerPushSubscriptionData `json:"data"`
+}
+
 type professionalNotificationsResponseBody struct {
 	Data ProfessionalNotificationStateData `json:"data"`
 }
@@ -104,6 +112,10 @@ type viewerSessionResponse struct {
 
 type customerNotificationsResponse struct {
 	Body customerNotificationsResponseBody
+}
+
+type customerPushSubscriptionResponse struct {
+	Body customerPushSubscriptionResponseBody
 }
 
 type professionalNotificationsResponse struct {
@@ -213,6 +225,49 @@ func RegisterRoutes(api huma.API, service *Service) {
 		response := &customerNotificationsResponse{}
 		response.Body.Data = payload
 		return response, nil
+	})
+
+	huma.Register(api, withCustomerSecurity(huma.Operation{
+		OperationID: "upsert-customer-push-subscription",
+		Method:      http.MethodPut,
+		Path:        "/notifications/customer/push-subscription",
+		Summary:     "Persist customer web push subscription",
+		Tags:        []string{"Notifications"},
+		Errors:      []int{http.StatusBadRequest, http.StatusUnauthorized, http.StatusInternalServerError},
+	}), func(ctx context.Context, input *customerPushSubscriptionInput) (*customerPushSubscriptionResponse, error) {
+		consumerID, err := resolveCustomerScope(ctx, "")
+		if err != nil {
+			return nil, err
+		}
+
+		payload, err := service.UpsertCustomerPushSubscription(ctx, input.Body, consumerID)
+		if err != nil {
+			return nil, toAPIError(err)
+		}
+
+		response := &customerPushSubscriptionResponse{}
+		response.Body.Data = payload
+		return response, nil
+	})
+
+	huma.Register(api, withCustomerSecurity(huma.Operation{
+		OperationID: "delete-customer-push-subscription",
+		Method:      http.MethodDelete,
+		Path:        "/notifications/customer/push-subscription",
+		Summary:     "Delete customer web push subscription",
+		Tags:        []string{"Notifications"},
+		Errors:      []int{http.StatusBadRequest, http.StatusUnauthorized, http.StatusInternalServerError},
+	}), func(ctx context.Context, input *customerPushSubscriptionInput) (*struct{}, error) {
+		consumerID, err := resolveCustomerScope(ctx, "")
+		if err != nil {
+			return nil, err
+		}
+
+		if err := service.DeleteCustomerPushSubscription(ctx, input.Body, consumerID); err != nil {
+			return nil, toAPIError(err)
+		}
+
+		return &struct{}{}, nil
 	})
 
 	huma.Register(api, withProfessionalSecurity(huma.Operation{
@@ -510,6 +565,10 @@ func toAPIError(err error) error {
 	switch {
 	case errors.Is(err, errInvalidAdminConsoleTable):
 		return web.NewAPIError(http.StatusBadRequest, "invalid_admin_console_table", "invalid admin console table")
+	case errors.Is(err, errInvalidCustomerPushSubscription):
+		return web.NewAPIError(http.StatusBadRequest, "invalid_customer_push_subscription", "invalid customer push subscription")
+	case errors.Is(err, errInvalidSupportDesk):
+		return web.NewAPIError(http.StatusBadRequest, "invalid_support_desk", "invalid support desk payload")
 	case errors.Is(err, context.DeadlineExceeded), errors.Is(err, http.ErrHandlerTimeout):
 		return web.NewAPIError(http.StatusGatewayTimeout, "timeout", "upstream operation timed out")
 	default:

@@ -23,6 +23,10 @@ type Reader interface {
 	Read(ctx context.Context, namespace string, key string) (Record, error)
 }
 
+type BatchReader interface {
+	ReadMany(ctx context.Context, namespace string, keys []string) (map[string]Record, error)
+}
+
 type Store interface {
 	Reader
 	Upsert(ctx context.Context, record Record) (Record, error)

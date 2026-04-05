@@ -19,6 +19,7 @@ import {
   type ProfessionalManagedPortfolioEntry,
   type ProfessionalManagedRequest,
   type ProfessionalManagedService,
+  type ProfessionalPortalAdminProfile,
   type ProfessionalPortalSnapshot,
   type ProfessionalPortalState,
   type ProfessionalRequestStatus,
@@ -37,13 +38,27 @@ import {
 } from '@/features/professional-portal/lib/repository';
 import { validateProfessionalRequestStatusUpdate } from '@/features/professional-portal/lib/request-status';
 import { ACTIVE_RUNTIME_CLOCK_ISO } from '@/lib/app-runtime';
-import { appointmentPriceLabelToNumber, createHydratedAppointment } from '@/lib/appointment-utils';
+import {
+  approveAppointmentWithApi,
+  cancelCustomerAppointmentWithApi,
+  cancelProfessionalAppointmentWithApi,
+  completeAppointmentWithApi,
+  completeTestPaymentRequestWithApi,
+  createAppointmentPaymentRequestWithApi,
+  createCustomerAppointmentWithApi,
+  fetchCustomerAppointmentsWithApi,
+  fetchProfessionalAppointmentsWithApi,
+  rejectAppointmentWithApi,
+  startAppointmentServiceWithApi,
+} from '@/lib/appointment-actions-api';
+import { type AppointmentSeed as AppointmentReadModelSeed, createHydratedAppointment } from '@/lib/appointment-utils';
 import { normalizeAvailabilityRulesByMode } from '@/lib/availability-rules';
 import { getProfessionalCoverageAreaIds, normalizeProfessional } from '@/lib/catalog-normalizers';
 import { getAreaById, getProfessionalCategoryLabel, getServiceById } from '@/lib/catalog-selectors';
 import { getProfessionalAvailabilityScheduleDays } from '@/lib/professional-availability';
 import { useAppShell } from '@/lib/use-app-shell';
 import { useCatalogReadModel } from '@/lib/use-catalog-read-model';
+import { useCustomerAuthSession } from '@/lib/use-customer-auth-session';
 import type {
   Appointment,
   AppointmentCancellationPolicySnapshot,
@@ -69,13 +84,11 @@ import type {
 } from '@/types/catalog';
 import {
   hydrateProfessionalPortalAdminReviewStatesFromApi,
-  syncAppointmentRecordResource,
   syncProfessionalPortalAdminReviewStateResource,
   syncProfessionalPortalCoverageResource,
   syncProfessionalPortalGalleryResource,
   syncProfessionalPortalPortfolioResource,
   syncProfessionalPortalProfileResource,
-  syncProfessionalPortalRequestsResource,
   syncProfessionalPortalServicesResource,
   syncProfessionalPortalTrustResource,
 } from './professional-portal-api';
@@ -94,6 +107,7 @@ export type {
   ProfessionalManagedPortfolioEntry,
   ProfessionalManagedRequest,
   ProfessionalManagedService,
+  ProfessionalPortalAdminProfile,
   ProfessionalPortalState,
   ProfessionalRequestPriority,
   ProfessionalRequestStatus,
@@ -132,12 +146,167 @@ const isGeoPoint = (value: unknown): value is GeoPoint =>
 
 const priceToNumber = (priceLabel: string) => Number.parseInt(priceLabel.replace(/\D/g, ''), 10) || 0;
 
+const slugifyPortalProfessional = (value: string, fallback: string) => {
+  const slug = value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+  if (slug) {
+    return slug;
+  }
+
+  return fallback
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+};
+
 const formatRupiah = (amount: number) =>
   new Intl.NumberFormat('id-ID', {
     currency: 'IDR',
     maximumFractionDigits: 0,
     style: 'currency',
   }).format(amount);
+
+const buildPortalDerivedProfessional = (
+  catalogData: PortalCatalogLookupData,
+  portalState: ProfessionalPortalState,
+  activeReviewState: ProfessionalLifecycleReviewState,
+  fallbackProfessional: Professional | null,
+): Professional => {
+  const activeServices = [...portalState.serviceConfigurations]
+    .filter((service) => service.isActive)
+    .sort((leftService, rightService) => {
+      if (leftService.featured !== rightService.featured) {
+        return leftService.featured ? -1 : 1;
+      }
+
+      return leftService.index - rightService.index;
+    })
+    .map<ProfessionalService>((service, index) => ({
+      bookingFlow: service.bookingFlow,
+      defaultMode: service.defaultMode,
+      duration: service.duration,
+      id: service.id || `professional-service-${portalState.activeProfessionalId}-${service.serviceId}`,
+      index: index + 1,
+      price: service.price,
+      serviceId: service.serviceId,
+      serviceModes: service.serviceModes,
+      summary: service.summary,
+    }));
+  const primaryCatalogService = activeServices[0]
+    ? getServiceById(catalogData.services, activeServices[0].serviceId)
+    : null;
+  const candidate = normalizeProfessional({
+    about: portalState.publicBio || fallbackProfessional?.about || '',
+    activityStories: portalState.activityStories.map((story, index) => ({
+      capturedAt: story.capturedAt,
+      image: story.image,
+      index: index + 1,
+      location: story.location,
+      note: story.note,
+      title: story.title,
+    })),
+    availability: {
+      isAvailable: portalState.acceptingNewClients,
+    },
+    availabilityRulesByMode: portalState.availabilityRulesByMode,
+    badgeLabel:
+      fallbackProfessional?.badgeLabel || (activeReviewState.status === 'published' ? 'Published' : 'Needs review'),
+    cancellationPoliciesByMode: fallbackProfessional?.cancellationPoliciesByMode,
+    clientsServed: fallbackProfessional?.clientsServed || '0',
+    coverImage: fallbackProfessional?.coverImage,
+    coverage: {
+      areaIds: portalState.coverageAreaIds,
+      center: portalState.coverageCenter,
+      homeVisitRadiusKm: portalState.homeVisitRadiusKm,
+    },
+    credentials: portalState.credentials.map((credential, index) => ({
+      index: index + 1,
+      issuer: credential.issuer,
+      note: credential.note,
+      title: credential.title,
+      year: credential.year,
+    })),
+    experience: portalState.yearsExperience || fallbackProfessional?.experience || '',
+    feedbackBreakdown: fallbackProfessional?.feedbackBreakdown || [],
+    feedbackMetrics: fallbackProfessional?.feedbackMetrics || [],
+    feedbackSummary: fallbackProfessional?.feedbackSummary || {
+      recommendationRate: '',
+      repeatClientRate: '',
+    },
+    gallery: portalState.galleryItems.map((item, index) => ({
+      alt: item.alt,
+      id: item.id,
+      image: item.image,
+      index: index + 1,
+      label: item.label,
+    })),
+    gender: fallbackProfessional?.gender || 'female',
+    id: portalState.activeProfessionalId,
+    image: fallbackProfessional?.image || '',
+    index: fallbackProfessional?.index || catalogData.professionals.length + 1,
+    languages: fallbackProfessional?.languages || [],
+    location: portalState.practiceLabel || portalState.city || fallbackProfessional?.location || '',
+    name: portalState.displayName || fallbackProfessional?.name || portalState.activeProfessionalId,
+    portfolioEntries: portalState.portfolioEntries
+      .filter((entry) => entry.visibility === 'public')
+      .map((entry, index) => ({
+        id: entry.id,
+        image: entry.image,
+        index: index + 1,
+        outcomes: entry.outcomes,
+        periodLabel: entry.periodLabel,
+        serviceId: entry.serviceId,
+        summary: entry.summary,
+        title: entry.title,
+      })),
+    practiceLocation:
+      portalState.practiceAddress || portalState.practiceLabel || portalState.coverageAreaIds[0]
+        ? {
+            address: portalState.practiceAddress,
+            areaId: portalState.coverageAreaIds[0] || '',
+            coordinates: portalState.coverageCenter,
+            label: portalState.practiceLabel || portalState.city || fallbackProfessional?.location || '',
+          }
+        : fallbackProfessional?.practiceLocation,
+    rating: fallbackProfessional?.rating || 0,
+    recentActivities: fallbackProfessional?.recentActivities || [],
+    responseTime: portalState.responseTimeGoal || fallbackProfessional?.responseTime || '',
+    reviews: fallbackProfessional?.reviews || '0',
+    services: activeServices,
+    slug:
+      fallbackProfessional?.slug ||
+      slugifyPortalProfessional(portalState.displayName, portalState.activeProfessionalId),
+    specialties: fallbackProfessional?.specialties || [],
+    testimonials: fallbackProfessional?.testimonials || [],
+    title: fallbackProfessional?.title || primaryCatalogService?.name || 'Professional',
+  });
+
+  return {
+    ...candidate,
+    title:
+      getProfessionalCategoryLabel({
+        categories: catalogData.categories,
+        professional: candidate,
+        services: catalogData.services,
+      }) || candidate.title,
+  };
+};
+
+const resolveCatalogProfessional = (
+  catalogData: PortalCatalogLookupData,
+  professionalId: string,
+): Professional | null => {
+  if (professionalId.trim()) {
+    return catalogData.getProfessionalById(professionalId);
+  }
+
+  return catalogData.defaultProfessional;
+};
 
 const getProfessionalPortalLocale = (): 'en' | 'id' => {
   if (typeof document !== 'undefined') {
@@ -509,7 +678,7 @@ const getProfessionalRequestStatusFromAppointmentStatus = (status: AppointmentSt
     return 'new';
   }
 
-  if (status === 'approved_waiting_payment' || status === 'paid') {
+  if (status === 'awaiting_payment' || status === 'approved_waiting_payment' || status === 'paid') {
     return 'quoted';
   }
 
@@ -520,27 +689,13 @@ const getProfessionalRequestStatusFromAppointmentStatus = (status: AppointmentSt
   return 'completed';
 };
 
-const getCustomerStatusFromRequestStatus = (
-  requestStatus: ProfessionalRequestStatus,
-  currentCustomerStatus?: AppointmentStatus,
-): AppointmentStatus => {
-  if (requestStatus === 'new') {
-    return 'requested';
-  }
-
-  if (requestStatus === 'quoted') {
-    return currentCustomerStatus === 'paid' ? 'paid' : 'approved_waiting_payment';
-  }
-
-  if (requestStatus === 'scheduled') {
-    return currentCustomerStatus === 'in_service' ? 'in_service' : 'confirmed';
-  }
-
-  return 'completed';
-};
-
 const getRequestPriorityFromCustomerStatus = (status: AppointmentStatus): ProfessionalManagedRequest['priority'] => {
-  if (status === 'requested' || status === 'approved_waiting_payment' || status === 'in_service') {
+  if (
+    status === 'requested' ||
+    status === 'awaiting_payment' ||
+    status === 'approved_waiting_payment' ||
+    status === 'in_service'
+  ) {
     return 'high';
   }
 
@@ -580,56 +735,6 @@ const createAppointmentTimelineEvent = ({
   internalNote: internalNote?.trim() || undefined,
   toStatus,
 });
-
-const formatFinancialOutcomeLabel = (
-  outcome: AppointmentCancellationResolution['financialOutcome'],
-  locale: 'en' | 'id' = getProfessionalPortalLocale(),
-) => {
-  if (outcome === 'void_pending_payment') {
-    return locale === 'id' ? 'pembayaran dibatalkan sebelum settlement' : 'pending payment was voided';
-  }
-
-  if (outcome === 'full_refund') {
-    return locale === 'id' ? 'refund penuh' : 'full refund';
-  }
-
-  if (outcome === 'no_refund') {
-    return locale === 'id' ? 'tanpa refund' : 'no refund';
-  }
-
-  if (outcome === 'manual_refund_required') {
-    return locale === 'id' ? 'refund manual diperlukan' : 'manual refund required';
-  }
-
-  return locale === 'id' ? 'tanpa dampak finansial' : 'no financial impact';
-};
-
-const createAppointmentCancellationResolution = ({
-  cancelledAt,
-  cancelledBy,
-  cancellationReason,
-  financialOutcome,
-}: {
-  cancelledAt: Date;
-  cancelledBy: AppointmentCancellationResolution['cancelledBy'];
-  cancellationReason: string;
-  financialOutcome: AppointmentCancellationResolution['financialOutcome'];
-}): AppointmentCancellationResolution => ({
-  cancelledAt: cancelledAt.toISOString(),
-  cancelledBy,
-  cancellationReason: cancellationReason.trim(),
-  financialOutcome,
-});
-
-const resolveAppointmentCancellationPolicySnapshot = (
-  _professionalId: string,
-  requestedMode: ServiceDeliveryMode,
-  professional?: Professional | null,
-  fallback?: AppointmentCancellationPolicySnapshot,
-) =>
-  fallback ||
-  professional?.cancellationPoliciesByMode?.[requestedMode] ||
-  createDefaultCancellationPolicySnapshot(requestedMode);
 
 const getAppointmentRecordLastUpdatedAt = (record: ProfessionalManagedAppointmentRecord) =>
   record.timeline[record.timeline.length - 1]?.createdAt || record.requestedAt;
@@ -711,6 +816,54 @@ const buildRequestBoardFromAppointmentRecords = (
     )
     .map((record) => buildRequestFromAppointmentRecord(record, currentConsumerName));
 
+const toManagedAppointmentRecordFromReadModel = (
+  appointment: AppointmentReadModelSeed,
+): ProfessionalManagedAppointmentRecord => ({
+  areaId: appointment.areaId,
+  bookingFlow: appointment.bookingFlow,
+  cancellationPolicySnapshot:
+    appointment.cancellationPolicySnapshot || createDefaultCancellationPolicySnapshot(appointment.requestedMode),
+  cancellationResolution: appointment.cancellationResolution,
+  consumerId: appointment.consumerId,
+  id: appointment.id,
+  index: new Date(appointment.requestedAt).getTime() || 0,
+  professionalId: appointment.professionalId,
+  requestNote: appointment.requestNote,
+  requestedAt: appointment.requestedAt,
+  requestedMode: appointment.requestedMode,
+  scheduleSnapshot: appointment.scheduleSnapshot,
+  serviceId: appointment.serviceSnapshot.serviceId,
+  serviceOfferingId: appointment.serviceSnapshot.serviceOfferingId,
+  serviceSnapshot: appointment.serviceSnapshot,
+  status: appointment.status,
+  timeline: appointment.timeline,
+});
+
+const buildAppointmentRecordsByProfessionalIdFromReadModel = (
+  appointments: AppointmentReadModelSeed[],
+  professionals: Professional[],
+) => {
+  const nextRecords = buildDefaultAppointmentRecordsByProfessionalId(professionals);
+
+  for (const appointment of appointments) {
+    const professionalId = appointment.professionalId;
+    if (!professionalId) {
+      continue;
+    }
+
+    nextRecords[professionalId] = [
+      ...(nextRecords[professionalId] || []),
+      toManagedAppointmentRecordFromReadModel(appointment),
+    ].sort(
+      (leftRecord, rightRecord) =>
+        new Date(getAppointmentRecordLastUpdatedAt(rightRecord)).getTime() -
+        new Date(getAppointmentRecordLastUpdatedAt(leftRecord)).getTime(),
+    );
+  }
+
+  return nextRecords;
+};
+
 const buildDefaultAppointmentRecords = (professional: Professional | null): ProfessionalManagedAppointmentRecord[] => {
   if (!professional) {
     return [];
@@ -742,12 +895,16 @@ const buildDefaultServiceConfigurations = (
 
   return catalogData.services.map((serviceTemplate, index) => {
     const existingService = professionalServiceById.get(serviceTemplate.id);
-    const templateService = existingService || catalogData.serviceDefaultsByServiceId.get(serviceTemplate.id);
+    const templateService = existingService
+      ? existingService
+      : professional
+        ? catalogData.serviceDefaultsByServiceId.get(serviceTemplate.id)
+        : undefined;
 
     return {
       bookingFlow: existingService?.bookingFlow || templateService?.bookingFlow || 'request',
       defaultMode: existingService?.defaultMode || templateService?.defaultMode || serviceTemplate.defaultMode,
-      duration: existingService?.duration || templateService?.duration || '45 min',
+      duration: existingService?.duration || templateService?.duration || '',
       featured: featuredServiceId === serviceTemplate.id,
       id:
         existingService?.id ||
@@ -755,11 +912,11 @@ const buildDefaultServiceConfigurations = (
         `professional-service-${professional?.id || 'template'}-${serviceTemplate.id}`,
       index: existingService?.index || index + 1,
       isActive: Boolean(existingService),
-      price: existingService?.price || templateService?.price || 'Rp 150.000',
+      price: existingService?.price || templateService?.price || '',
       serviceId: serviceTemplate.id,
       serviceModes: existingService?.serviceModes || templateService?.serviceModes || serviceTemplate.serviceModes,
       source: existingService ? 'existing' : 'template',
-      summary: existingService?.summary || templateService?.summary || serviceTemplate.shortDescription,
+      summary: existingService?.summary || templateService?.summary || '',
     };
   });
 };
@@ -837,7 +994,8 @@ const buildDefaultPortalState = (
   currentConsumerName: string,
   professionalId = catalogData.defaultProfessional?.id || '',
 ): ProfessionalPortalState => {
-  const professional = catalogData.getProfessionalById(professionalId) || catalogData.defaultProfessional;
+  const professional =
+    catalogData.getProfessionalById(professionalId) || (professionalId.trim() ? null : catalogData.defaultProfessional);
   const coverageAreaIds = getProfessionalCoverageAreaIds(professional);
   const primaryArea = coverageAreaIds[0] ? getAreaById(catalogData.areas, coverageAreaIds[0]) : undefined;
 
@@ -861,13 +1019,13 @@ const buildDefaultPortalState = (
     displayName: professional?.name || '',
     galleryItems: buildDefaultGalleryItems(professional),
     homeVisitRadiusKm: professional?.coverage.homeVisitRadiusKm || 0,
-    phone: '+62 812 3000 0000',
+    phone: '',
     portfolioEntries: buildDefaultPortfolioEntries(professional),
     practiceAddress: professional?.practiceLocation?.address || professional?.about || '',
     practiceLabel: professional?.practiceLocation?.label || professional?.location || '',
     publicBio: professional?.about || '',
     requestBoard: buildDefaultRequestBoard(professional, currentConsumerName),
-    responseTimeGoal: professional?.responseTime || '< 30 menit',
+    responseTimeGoal: professional?.responseTime || '',
     serviceConfigurations: buildDefaultServiceConfigurations(catalogData, professional),
     yearsExperience: professional?.experience || '',
   };
@@ -1240,9 +1398,7 @@ const sanitizeAppointmentRecordsByProfessionalId = (
 
   return Object.entries(value).reduce<Record<string, ProfessionalManagedAppointmentRecord[]>>(
     (records, [professionalId, board]) => {
-      const fallbackRecords = buildDefaultAppointmentRecords(
-        catalogData.getProfessionalById(professionalId) || catalogData.defaultProfessional,
-      );
+      const fallbackRecords = buildDefaultAppointmentRecords(resolveCatalogProfessional(catalogData, professionalId));
       records[professionalId] = Array.isArray(board)
         ? board.flatMap((item, index) => {
             if (!item || typeof item !== 'object') {
@@ -1267,7 +1423,7 @@ const sanitizeRequestBoard = (
   catalogData: PortalCatalogLookupData,
   currentConsumerName: string,
 ): ProfessionalManagedRequest[] => {
-  const professional = catalogData.getProfessionalById(professionalId) || catalogData.defaultProfessional;
+  const professional = resolveCatalogProfessional(catalogData, professionalId);
   const fallbackRequestBoard = buildDefaultRequestBoard(professional, currentConsumerName);
 
   if (!Array.isArray(requestBoard)) {
@@ -1314,6 +1470,31 @@ const sanitizeReviewStatesByProfessionalId = (value: unknown): Record<string, Pr
     },
     {},
   );
+};
+
+const mergeAdminReviewStateHydration = (
+  nextReviewStates: Record<string, ProfessionalLifecycleReviewState>,
+  currentReviewStates: Record<string, ProfessionalLifecycleReviewState>,
+) => {
+  if (typeof window === 'undefined' || !window.location.pathname.startsWith('/admin')) {
+    return nextReviewStates;
+  }
+
+  const mergedReviewStates = { ...nextReviewStates };
+
+  for (const [professionalId, currentReviewState] of Object.entries(currentReviewStates)) {
+    const nextReviewState = mergedReviewStates[professionalId];
+
+    if (
+      !nextReviewState ||
+      nextReviewState.status === 'published' ||
+      (nextReviewState.status === 'draft' && currentReviewState.status !== 'draft')
+    ) {
+      mergedReviewStates[professionalId] = currentReviewState;
+    }
+  }
+
+  return mergedReviewStates;
 };
 
 const sanitizePortalState = (
@@ -1424,10 +1605,6 @@ const readProfessionalPortalData = (
       storedSnapshot.schemaVersion !== PROFESSIONAL_PORTAL_SCHEMA_VERSION ||
       !storedSnapshot.appointmentRecordsByProfessionalId
     ) {
-      if (professionalPortalRepository.source !== 'api') {
-        persistProfessionalPortalState(defaultState, defaultAppointmentRecords, defaultReviewStates);
-      }
-
       return {
         appointmentRecordsByProfessionalId: defaultAppointmentRecords,
         portalState: defaultState,
@@ -1484,7 +1661,7 @@ const persistProfessionalPortalState = (
     return;
   }
 
-  professionalPortalRepository.write(
+  void professionalPortalRepository.write(
     createProfessionalPortalSnapshot(
       nextState,
       appointmentRecordsByProfessionalId,
@@ -1635,7 +1812,8 @@ const mergeProfessionalWithPortalState = (
 };
 
 export const useProfessionalPortal = () => {
-  const { currentConsumer, currentUserContext } = useAppShell();
+  const { currentConsumer } = useAppShell();
+  const { hasHydrated: hasHydratedCustomerAuth, isAuthenticated: isCustomerAuthenticated } = useCustomerAuthSession();
   const {
     hasHydrated: hasHydratedProfessionalAuth,
     isAuthenticated: isProfessionalAuthenticated,
@@ -1662,6 +1840,9 @@ export const useProfessionalPortal = () => {
   const [reviewStatesByProfessionalId, setReviewStatesByProfessionalId] = useState<
     Record<string, ProfessionalLifecycleReviewState>
   >(() => readPortalData().reviewStatesByProfessionalId);
+  const [adminProfilesByProfessionalId, setAdminProfilesByProfessionalId] = useState<
+    Record<string, ProfessionalPortalAdminProfile>
+  >({});
   const requestBoardsByProfessionalId = Object.fromEntries(
     Object.entries(appointmentRecordsByProfessionalId).map(([professionalId, records]) => [
       professionalId,
@@ -1681,7 +1862,9 @@ export const useProfessionalPortal = () => {
       const nextData = readProfessionalPortalData(effectCatalogLookupData, currentConsumer.name);
       setPortalState(nextData.portalState);
       setAppointmentRecordsByProfessionalId(nextData.appointmentRecordsByProfessionalId);
-      setReviewStatesByProfessionalId(nextData.reviewStatesByProfessionalId);
+      setReviewStatesByProfessionalId((currentReviewStates) =>
+        mergeAdminReviewStateHydration(nextData.reviewStatesByProfessionalId, currentReviewStates),
+      );
     };
 
     syncPortalState();
@@ -1705,9 +1888,51 @@ export const useProfessionalPortal = () => {
       const nextData = readPortalData(storedSnapshotOverride);
       setPortalState(nextData.portalState);
       setAppointmentRecordsByProfessionalId(nextData.appointmentRecordsByProfessionalId);
-      setReviewStatesByProfessionalId(nextData.reviewStatesByProfessionalId);
+      setReviewStatesByProfessionalId((currentReviewStates) =>
+        mergeAdminReviewStateHydration(nextData.reviewStatesByProfessionalId, currentReviewStates),
+      );
     },
   );
+
+  const syncAppointmentRecordsFromApi = useEffectEvent(async () => {
+    const shouldSyncCustomerAppointments = hasHydratedCustomerAuth && isCustomerAuthenticated;
+    const shouldSyncProfessionalAppointments =
+      hasHydratedProfessionalAuth && isProfessionalAuthenticated && Boolean(professionalAuthSession?.professionalId);
+
+    if (!shouldSyncCustomerAppointments && !shouldSyncProfessionalAppointments) {
+      return;
+    }
+
+    try {
+      const appointmentPayloads = await Promise.allSettled([
+        shouldSyncCustomerAppointments ? fetchCustomerAppointmentsWithApi() : Promise.resolve({ appointments: [] }),
+        shouldSyncProfessionalAppointments
+          ? fetchProfessionalAppointmentsWithApi()
+          : Promise.resolve({ appointments: [] }),
+      ]);
+      const mergedAppointments = new Map<string, AppointmentReadModelSeed>();
+
+      for (const payload of appointmentPayloads) {
+        if (payload.status !== 'fulfilled') {
+          continue;
+        }
+
+        for (const appointment of (payload.value.appointments || []) as AppointmentReadModelSeed[]) {
+          mergedAppointments.set(appointment.id, appointment);
+        }
+      }
+
+      const nextAppointmentRecords = buildAppointmentRecordsByProfessionalIdFromReadModel(
+        [...mergedAppointments.values()],
+        catalogData.professionals,
+      );
+
+      setAppointmentRecordsByProfessionalId(nextAppointmentRecords);
+      persistProfessionalPortalState(portalState, nextAppointmentRecords, reviewStatesByProfessionalId);
+    } catch {
+      // Keep local state as a fallback when the backend read-model is unavailable.
+    }
+  });
 
   const syncAdminReviewStatesFromApi = useEffectEvent(async () => {
     if (typeof window === 'undefined' || !window.location.pathname.startsWith('/admin')) {
@@ -1716,8 +1941,36 @@ export const useProfessionalPortal = () => {
 
     const adminReviewStates = await hydrateProfessionalPortalAdminReviewStatesFromApi();
     const nextReviewStates = sanitizeReviewStatesByProfessionalId(adminReviewStates?.reviewStatesByProfessionalId);
+    const nextAdminProfiles =
+      adminReviewStates?.profilesByProfessionalId && typeof adminReviewStates.profilesByProfessionalId === 'object'
+        ? Object.entries(adminReviewStates.profilesByProfessionalId).reduce<
+            Record<string, ProfessionalPortalAdminProfile>
+          >((profiles, [professionalId, profile]) => {
+            if (!profile || typeof profile !== 'object') {
+              return profiles;
+            }
 
-    if (Object.keys(nextReviewStates).length === 0) {
+            profiles[professionalId] = {
+              acceptingNewClients: Boolean(profile.acceptingNewClients),
+              autoApproveInstantBookings: Boolean(profile.autoApproveInstantBookings),
+              city: typeof profile.city === 'string' ? profile.city : '',
+              credentialNumber: typeof profile.credentialNumber === 'string' ? profile.credentialNumber : '',
+              displayName: typeof profile.displayName === 'string' ? profile.displayName : '',
+              phone: typeof profile.phone === 'string' ? profile.phone : '',
+              professionalId,
+              publicBio: typeof profile.publicBio === 'string' ? profile.publicBio : '',
+              responseTimeGoal: typeof profile.responseTimeGoal === 'string' ? profile.responseTimeGoal : '',
+              reviewState: sanitizeReviewState(
+                (profile as Partial<ProfessionalPortalAdminProfile>).reviewState,
+                nextReviewStates[professionalId] || createDraftReviewState(),
+              ),
+              yearsExperience: typeof profile.yearsExperience === 'string' ? profile.yearsExperience : '',
+            };
+            return profiles;
+          }, {})
+        : {};
+
+    if (Object.keys(nextReviewStates).length === 0 && Object.keys(nextAdminProfiles).length === 0) {
       return;
     }
 
@@ -1732,8 +1985,32 @@ export const useProfessionalPortal = () => {
     };
 
     setReviewStatesByProfessionalId(mergedReviewStates);
+    if (Object.keys(nextAdminProfiles).length > 0) {
+      setAdminProfilesByProfessionalId((currentProfiles) => ({
+        ...currentProfiles,
+        ...nextAdminProfiles,
+      }));
+    }
     persistProfessionalPortalState(portalState, appointmentRecordsByProfessionalId, mergedReviewStates);
   });
+
+  useEffect(() => {
+    if (
+      catalogSnapshot.professionals.length === 0 ||
+      (!hasHydratedCustomerAuth && !hasHydratedProfessionalAuth) ||
+      (!isCustomerAuthenticated && !isProfessionalAuthenticated)
+    ) {
+      return;
+    }
+
+    void syncAppointmentRecordsFromApi();
+  }, [
+    catalogSnapshot.professionals.length,
+    hasHydratedCustomerAuth,
+    hasHydratedProfessionalAuth,
+    isCustomerAuthenticated,
+    isProfessionalAuthenticated,
+  ]);
 
   useEffect(() => {
     void syncAdminReviewStatesFromApi();
@@ -1794,7 +2071,7 @@ export const useProfessionalPortal = () => {
   };
 
   const selectProfessionalProfile = (professionalId: string) => {
-    const professional = getCatalogProfessionalById(professionalId) || catalogData.defaultProfessional;
+    const professional = resolveCatalogProfessional(catalogLookupData, professionalId);
     const appointmentRecords =
       appointmentRecordsByProfessionalId[professionalId] || buildDefaultAppointmentRecords(professional);
     const requestBoard = buildRequestBoardFromAppointmentRecords(appointmentRecords, currentConsumer.name);
@@ -1825,7 +2102,7 @@ export const useProfessionalPortal = () => {
     continueAsProfessional();
   };
 
-  const startProfessionalRegistration = ({
+  const startProfessionalRegistration = async ({
     city,
     credentialNumber,
     displayName,
@@ -1857,13 +2134,14 @@ export const useProfessionalPortal = () => {
       },
     );
 
-    syncProfessionalPortalProfileResource(
-      nextPortalData.portalState,
-      nextPortalData.reviewStatesByProfessionalId[professionalId] || createDraftReviewState(),
+    await professionalPortalRepository.write(
+      createProfessionalPortalSnapshot(
+        nextPortalData.portalState,
+        nextPortalData.appointmentRecordsByProfessionalId,
+        undefined,
+        nextPortalData.reviewStatesByProfessionalId,
+      ),
     );
-    syncProfessionalPortalCoverageResource(nextPortalData.portalState);
-    syncProfessionalPortalServicesResource(professionalId, nextPortalData.portalState.serviceConfigurations);
-    syncProfessionalPortalRequestsResource(professionalId, []);
     continueAsProfessional();
   };
 
@@ -1880,7 +2158,7 @@ export const useProfessionalPortal = () => {
     }
 
     if (portalState.activeProfessionalId !== authenticatedProfessionalID) {
-      const professional = getCatalogProfessionalById(authenticatedProfessionalID) || catalogData.defaultProfessional;
+      const professional = resolveCatalogProfessional(catalogLookupData, authenticatedProfessionalID);
       const appointmentRecords =
         appointmentRecordsByProfessionalId[authenticatedProfessionalID] || buildDefaultAppointmentRecords(professional);
       const requestBoard = buildRequestBoardFromAppointmentRecords(appointmentRecords, currentConsumer.name);
@@ -2377,7 +2655,7 @@ export const useProfessionalPortal = () => {
     return appliedCount;
   };
 
-  const createCustomerRequest = ({
+  const createCustomerRequest = async ({
     note,
     professionalId,
     requestedMode,
@@ -2389,8 +2667,7 @@ export const useProfessionalPortal = () => {
   }: CreateCustomerRequestInput) => {
     const professional =
       publicProfessionals.find((candidateProfessional) => candidateProfessional.id === professionalId) ||
-      getCatalogProfessionalById(professionalId) ||
-      catalogData.defaultProfessional;
+      resolveCatalogProfessional(catalogLookupData, professionalId);
 
     if (!professional) {
       return false;
@@ -2436,170 +2713,51 @@ export const useProfessionalPortal = () => {
       return false;
     }
 
-    const requestTimestamp = Date.now();
-    const requestedAt = new Date();
     const nextScheduledTimeLabel =
       scheduledTimeLabel?.trim() ||
       (requestedMode === 'online' ? 'Menunggu detail sesi online' : 'Menunggu konfirmasi jadwal');
-    const appointmentId = `apt-local-${professionalId}-${requestTimestamp}`;
-    const initialStatus: AppointmentStatus =
-      serviceMapping.bookingFlow === 'instant' ? 'approved_waiting_payment' : 'requested';
-    const timeline = [
-      initialStatus === 'approved_waiting_payment'
-        ? createAppointmentTimelineEvent({
-            actor: 'system',
-            createdAt: requestedAt,
-            customerSummary: `Booking instan ${catalogService.name} langsung masuk tahap pembayaran pelanggan.`,
-            fromStatus: 'requested',
-            id: `${appointmentId}-timeline-1`,
-            internalNote: `Booking instan ${appointmentId} tidak butuh approval manual dan menunggu pembayaran.`,
-            toStatus: 'approved_waiting_payment',
-          })
-        : createAppointmentTimelineEvent({
-            actor: 'customer',
-            createdAt: requestedAt,
-            customerSummary: note,
-            id: `${appointmentId}-timeline-1`,
-            internalNote: `Request ${appointmentId} dibuat pelanggan dan menunggu review profesional.`,
-            toStatus: 'requested',
-          }),
-    ];
-    const nextRecord: ProfessionalManagedAppointmentRecord = {
-      areaId: currentUserContext.area.id,
-      bookingFlow: serviceMapping.bookingFlow,
-      cancellationPolicySnapshot: resolveAppointmentCancellationPolicySnapshot(professionalId, requestedMode),
-      cancellationResolution: undefined,
-      consumerId: currentConsumer.id,
-      id: appointmentId,
-      index: requestTimestamp,
-      professionalId,
-      requestNote: note,
-      requestedAt: requestedAt.toISOString(),
-      requestedMode,
-      scheduleSnapshot: {
-        dateIso: selectedScheduleDay?.dateIso,
-        requiresSchedule,
-        scheduleDayId: selectedScheduleDay?.id,
-        scheduleDayLabel: selectedScheduleDay?.label,
-        scheduledTimeLabel: nextScheduledTimeLabel,
-        timeSlotId: selectedTimeSlot?.id,
-        timeSlotLabel: selectedTimeSlot?.label,
-      },
-      serviceId,
-      serviceOfferingId: serviceMapping.id || serviceOfferingId,
-      serviceSnapshot: {
-        bookingFlow: serviceMapping.bookingFlow,
-        categoryId: catalogService.categoryId,
-        coverImage: catalogService.coverImage,
-        defaultMode: serviceMapping.defaultMode,
-        description: catalogService.description,
-        durationLabel: serviceMapping.duration,
-        highlights: catalogService.highlights,
-        image: catalogService.image,
-        name: catalogService.name,
-        priceAmount: appointmentPriceLabelToNumber(serviceMapping.price),
-        priceLabel: serviceMapping.price,
-        serviceId,
-        serviceModes: serviceMapping.serviceModes,
-        serviceOfferingId: serviceMapping.id || serviceOfferingId,
-        shortDescription: catalogService.shortDescription,
-        slug: catalogService.slug,
-        summary: serviceMapping.summary || catalogService.shortDescription,
-        tags: catalogService.tags,
-      },
-      status: initialStatus,
-      timeline,
-    };
-    const nextAppointmentRecords = [nextRecord, ...baseAppointmentRecords];
-    const nextRequestBoard = buildRequestBoardFromAppointmentRecords(nextAppointmentRecords, currentConsumer.name);
-
-    updatePortalState(
-      portalState.activeProfessionalId === professionalId
-        ? {
-            ...portalState,
-            requestBoard: nextRequestBoard,
-          }
-        : portalState,
-      {
-        ...appointmentRecordsByProfessionalId,
-        [professionalId]: nextAppointmentRecords,
-      },
-    );
-
-    syncAppointmentRecordResource(professionalId, nextRecord);
-
-    return true;
-  };
-
-  const markCustomerAppointmentPaid = (appointmentId: string) => {
-    let hasChanged = false;
-    let affectedProfessionalId = '';
-    const nextAppointmentRecords = Object.fromEntries(
-      Object.entries(appointmentRecordsByProfessionalId).map(([professionalId, records]) => [
+    try {
+      await createCustomerAppointmentWithApi({
         professionalId,
-        records.map((record) => {
-          if (record.id !== appointmentId || record.status !== 'approved_waiting_payment') {
-            return record;
-          }
-
-          hasChanged = true;
-          affectedProfessionalId = professionalId;
-          const updatedAt = new Date();
-
-          return sanitizeManagedAppointmentRecord(
-            {
-              ...record,
-              status: 'paid',
-              timeline: [
-                ...record.timeline,
-                createAppointmentTimelineEvent({
-                  actor: 'customer',
-                  createdAt: updatedAt,
-                  customerSummary: `Pembayaran untuk ${record.serviceSnapshot.name} sudah diterima dan booking siap dikonfirmasi.`,
-                  evidenceUrl: undefined,
-                  fromStatus: record.status,
-                  id: `${record.id}-timeline-${record.timeline.length + 1}`,
-                  internalNote: `Pembayaran booking ${record.id} tervalidasi dari sisi pelanggan.`,
-                  toStatus: 'paid',
-                }),
-              ],
-            },
-            record,
-          );
-        }),
-      ]),
-    );
-
-    if (!hasChanged) {
+        requestNote: note,
+        requestedMode,
+        scheduleSnapshot: {
+          dateIso: selectedScheduleDay?.dateIso,
+          requiresSchedule,
+          scheduleDayId: selectedScheduleDay?.id,
+          scheduleDayLabel: selectedScheduleDay?.label,
+          scheduledTimeLabel: nextScheduledTimeLabel,
+          timeSlotId: selectedTimeSlot?.id,
+          timeSlotLabel: selectedTimeSlot?.label,
+        },
+        serviceId,
+        serviceOfferingId: serviceMapping.id || serviceOfferingId,
+      });
+      await syncAppointmentRecordsFromApi();
+      return true;
+    } catch {
       return false;
     }
-
-    const nextPortalData = updatePortalState(
-      {
-        ...portalState,
-        requestBoard:
-          buildRequestBoardFromAppointmentRecords(
-            nextAppointmentRecords[portalState.activeProfessionalId] || [],
-            currentConsumer.name,
-          ) || portalState.requestBoard,
-      },
-      nextAppointmentRecords,
-    );
-
-    if (affectedProfessionalId) {
-      const updatedRecord =
-        nextPortalData.appointmentRecordsByProfessionalId[affectedProfessionalId]?.find(
-          (record) => record.id === appointmentId,
-        ) || null;
-      if (updatedRecord) {
-        syncAppointmentRecordResource(affectedProfessionalId, updatedRecord);
-      }
-    }
-
-    return true;
   };
 
-  const cancelCustomerAppointment = (appointmentId: string, cancellationReason: string) => {
+  const markCustomerAppointmentPaid = async (appointmentId: string) => {
+    try {
+      const paymentRequest = await createAppointmentPaymentRequestWithApi(appointmentId, {});
+      if (paymentRequest.paymentProvider === 'manual_test' && paymentRequest.paymentRequestId) {
+        await completeTestPaymentRequestWithApi(paymentRequest.paymentRequestId);
+      } else if (paymentRequest.checkoutUrl && typeof window !== 'undefined') {
+        window.location.assign(paymentRequest.checkoutUrl);
+        return true;
+      }
+
+      await syncAppointmentRecordsFromApi();
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const cancelCustomerAppointment = async (appointmentId: string, cancellationReason: string) => {
     const trimmedReason = cancellationReason.trim();
 
     if (!trimmedReason) {
@@ -2608,108 +2766,23 @@ export const useProfessionalPortal = () => {
       };
     }
 
-    const locale = getProfessionalPortalLocale();
-    let hasChanged = false;
-    let affectedProfessionalId = '';
-    const updatedAt = new Date(ACTIVE_RUNTIME_CLOCK_ISO);
-    const nextAppointmentRecords = Object.fromEntries(
-      Object.entries(appointmentRecordsByProfessionalId).map(([professionalId, records]) => [
-        professionalId,
-        records.map((record) => {
-          if (record.id !== appointmentId) {
-            return record;
-          }
-
-          const closePreview = getAppointmentClosePreview({
-            actor: 'customer',
-            policySnapshot: record.cancellationPolicySnapshot,
-            referenceDateTimeIso: ACTIVE_RUNTIME_CLOCK_ISO,
-            scheduleSnapshot: record.scheduleSnapshot,
-            status: record.status,
-          });
-
-          if (!closePreview.allowed || !closePreview.nextStatus || !closePreview.financialOutcome) {
-            return record;
-          }
-
-          hasChanged = true;
-          affectedProfessionalId = professionalId;
-          const financialOutcomeLabel = formatFinancialOutcomeLabel(closePreview.financialOutcome, locale);
-          const customerSummary =
-            locale === 'id'
-              ? `Pelanggan membatalkan ${record.serviceSnapshot.name}. Hasil finansial: ${financialOutcomeLabel}.`
-              : `The customer cancelled ${record.serviceSnapshot.name}. Financial outcome: ${financialOutcomeLabel}.`;
-          const internalNote =
-            locale === 'id'
-              ? `Pembatalan pelanggan dicatat dengan alasan: ${trimmedReason}. Outcome: ${financialOutcomeLabel}.`
-              : `Customer cancellation recorded with reason: ${trimmedReason}. Outcome: ${financialOutcomeLabel}.`;
-
-          return sanitizeManagedAppointmentRecord(
-            {
-              ...record,
-              cancellationResolution:
-                closePreview.nextStatus === 'cancelled'
-                  ? createAppointmentCancellationResolution({
-                      cancelledAt: updatedAt,
-                      cancelledBy: 'customer',
-                      cancellationReason: trimmedReason,
-                      financialOutcome: closePreview.financialOutcome,
-                    })
-                  : record.cancellationResolution,
-              status: closePreview.nextStatus,
-              timeline: [
-                ...record.timeline,
-                createAppointmentTimelineEvent({
-                  actor: 'customer',
-                  createdAt: updatedAt,
-                  customerSummary,
-                  fromStatus: record.status,
-                  id: `${record.id}-timeline-${record.timeline.length + 1}`,
-                  internalNote,
-                  toStatus: closePreview.nextStatus,
-                }),
-              ],
-            },
-            record,
-          );
-        }),
-      ]),
-    );
-
-    if (!hasChanged) {
+    try {
+      await cancelCustomerAppointmentWithApi(appointmentId, {
+        customerSummary: trimmedReason,
+        reason: trimmedReason,
+      });
+      await syncAppointmentRecordsFromApi();
+      return {
+        ok: true as const,
+      };
+    } catch {
       return {
         ok: false as const,
       };
     }
-
-    const nextPortalData = updatePortalState(
-      {
-        ...portalState,
-        requestBoard:
-          buildRequestBoardFromAppointmentRecords(
-            nextAppointmentRecords[portalState.activeProfessionalId] || [],
-            currentConsumer.name,
-          ) || portalState.requestBoard,
-      },
-      nextAppointmentRecords,
-    );
-
-    if (affectedProfessionalId) {
-      const updatedRecord =
-        nextPortalData.appointmentRecordsByProfessionalId[affectedProfessionalId]?.find(
-          (record) => record.id === appointmentId,
-        ) || null;
-      if (updatedRecord) {
-        syncAppointmentRecordResource(affectedProfessionalId, updatedRecord);
-      }
-    }
-
-    return {
-      ok: true as const,
-    };
   };
 
-  const closeProfessionalRequest = (requestId: string, cancellationReason: string) => {
+  const closeProfessionalRequest = async (requestId: string, cancellationReason: string) => {
     const request = portalState.requestBoard.find((currentRequest) => currentRequest.id === requestId);
     const trimmedReason = cancellationReason.trim();
 
@@ -2719,110 +2792,56 @@ export const useProfessionalPortal = () => {
       };
     }
 
-    const locale = getProfessionalPortalLocale();
-    let hasChanged = false;
-    const updatedAt = new Date(ACTIVE_RUNTIME_CLOCK_ISO);
-    const nextAppointmentRecords = {
-      ...appointmentRecordsByProfessionalId,
-      [portalState.activeProfessionalId]: (
-        appointmentRecordsByProfessionalId[portalState.activeProfessionalId] || []
-      ).map((record) => {
-        if (record.id !== request.appointmentId) {
-          return record;
-        }
-
-        const closePreview = getAppointmentClosePreview({
-          actor: 'professional',
-          policySnapshot: record.cancellationPolicySnapshot,
-          referenceDateTimeIso: ACTIVE_RUNTIME_CLOCK_ISO,
-          scheduleSnapshot: record.scheduleSnapshot,
-          status: record.status,
-        });
-
-        if (!closePreview.allowed || !closePreview.nextStatus || !closePreview.financialOutcome) {
-          return record;
-        }
-
-        hasChanged = true;
-        const financialOutcomeLabel = formatFinancialOutcomeLabel(closePreview.financialOutcome, locale);
-        const customerSummary =
-          closePreview.nextStatus === 'rejected'
-            ? locale === 'id'
-              ? `${record.serviceSnapshot.name} tidak dapat dilanjutkan dan permintaan ditolak profesional.`
-              : `${record.serviceSnapshot.name} cannot proceed and the request was declined by the professional.`
-            : locale === 'id'
-              ? `Profesional membatalkan ${record.serviceSnapshot.name}. Hasil finansial untuk pelanggan: ${financialOutcomeLabel}.`
-              : `The professional cancelled ${record.serviceSnapshot.name}. Customer financial outcome: ${financialOutcomeLabel}.`;
-        const internalNote =
-          closePreview.nextStatus === 'rejected'
-            ? locale === 'id'
-              ? `Profesional menolak request dengan alasan: ${trimmedReason}.`
-              : `Professional declined the request with reason: ${trimmedReason}.`
-            : locale === 'id'
-              ? `Profesional membatalkan appointment dengan alasan: ${trimmedReason}. Outcome: ${financialOutcomeLabel}.`
-              : `Professional cancelled the appointment with reason: ${trimmedReason}. Outcome: ${financialOutcomeLabel}.`;
-
-        return sanitizeManagedAppointmentRecord(
-          {
-            ...record,
-            cancellationResolution:
-              closePreview.nextStatus === 'cancelled'
-                ? createAppointmentCancellationResolution({
-                    cancelledAt: updatedAt,
-                    cancelledBy: 'professional',
-                    cancellationReason: trimmedReason,
-                    financialOutcome: closePreview.financialOutcome,
-                  })
-                : undefined,
-            status: closePreview.nextStatus,
-            timeline: [
-              ...record.timeline,
-              createAppointmentTimelineEvent({
-                actor: 'professional',
-                createdAt: updatedAt,
-                customerSummary,
-                fromStatus: record.status,
-                id: `${record.id}-timeline-${record.timeline.length + 1}`,
-                internalNote,
-                toStatus: closePreview.nextStatus,
-              }),
-            ],
-          },
-          record,
-        );
-      }),
-    };
-
-    if (!hasChanged) {
+    const targetRecord =
+      appointmentRecordsByProfessionalId[portalState.activeProfessionalId]?.find(
+        (record) => record.id === request.appointmentId,
+      ) || null;
+    if (!targetRecord) {
       return {
         ok: false as const,
       };
     }
 
-    const nextRequestBoard = buildRequestBoardFromAppointmentRecords(
-      nextAppointmentRecords[portalState.activeProfessionalId] || [],
-      currentConsumer.name,
-    );
+    const closePreview = getAppointmentClosePreview({
+      actor: 'professional',
+      policySnapshot: targetRecord.cancellationPolicySnapshot,
+      referenceDateTimeIso: ACTIVE_RUNTIME_CLOCK_ISO,
+      scheduleSnapshot: targetRecord.scheduleSnapshot,
+      status: targetRecord.status,
+    });
 
-    const nextPortalData = updatePortalState(
-      {
-        ...portalState,
-        requestBoard: nextRequestBoard,
-      },
-      nextAppointmentRecords,
-    );
+    if (!closePreview.allowed || !closePreview.nextStatus) {
+      return {
+        ok: false as const,
+      };
+    }
 
-    syncProfessionalPortalRequestsResource(
-      portalState.activeProfessionalId,
-      nextPortalData.appointmentRecordsByProfessionalId[portalState.activeProfessionalId] || [],
-    );
-
-    return {
-      ok: true as const,
-    };
+    try {
+      if (closePreview.nextStatus === 'rejected') {
+        await rejectAppointmentWithApi(request.appointmentId, {
+          customerSummary: trimmedReason,
+          internalNote: trimmedReason,
+          reason: trimmedReason,
+        });
+      } else {
+        await cancelProfessionalAppointmentWithApi(request.appointmentId, {
+          customerSummary: trimmedReason,
+          internalNote: trimmedReason,
+          reason: trimmedReason,
+        });
+      }
+      await syncAppointmentRecordsFromApi();
+      return {
+        ok: true as const,
+      };
+    } catch {
+      return {
+        ok: false as const,
+      };
+    }
   };
 
-  const updateRequestStatus = (
+  const updateRequestStatus = async (
     requestId: string,
     status: ProfessionalRequestStatus,
     input?: UpdateRequestStatusInput,
@@ -2845,75 +2864,64 @@ export const useProfessionalPortal = () => {
       };
     }
 
-    const updatedAt = new Date();
-    const nextAppointmentRecords = {
-      ...appointmentRecordsByProfessionalId,
-      [portalState.activeProfessionalId]: (
-        appointmentRecordsByProfessionalId[portalState.activeProfessionalId] || []
-      ).map((record) => {
-        if (record.id !== request.appointmentId) {
-          return record;
+    try {
+      if (request.status === 'new' && status === 'quoted') {
+        await approveAppointmentWithApi(request.appointmentId, {
+          customerSummary: input?.customerSummary,
+          evidenceUrl: input?.evidenceUrl,
+          internalNote: input?.evidenceNote,
+        });
+      } else if (request.status === 'scheduled' && status === 'completed') {
+        if (request.customerStatus === 'confirmed') {
+          await startAppointmentServiceWithApi(request.appointmentId, {
+            customerSummary: input?.customerSummary,
+            evidenceUrl: input?.evidenceUrl,
+            internalNote: input?.evidenceNote,
+          });
         }
+        await completeAppointmentWithApi(request.appointmentId, {
+          customerSummary: input?.customerSummary,
+          evidenceUrl: input?.evidenceUrl,
+          internalNote: input?.evidenceNote,
+        });
+      } else {
+        return {
+          ok: false as const,
+          error: 'invalidTransition' as const,
+        };
+      }
 
-        const nextCustomerStatus = getCustomerStatusFromRequestStatus(status, record.status);
-
-        return sanitizeManagedAppointmentRecord(
-          {
-            ...record,
-            status: nextCustomerStatus,
-            timeline: [
-              ...record.timeline,
-              createAppointmentTimelineEvent({
-                actor: 'professional',
-                createdAt: updatedAt,
-                customerSummary: input?.customerSummary,
-                evidenceUrl: input?.evidenceUrl,
-                fromStatus: record.status,
-                id: `${record.id}-timeline-${record.timeline.length + 1}`,
-                internalNote: input?.evidenceNote,
-                toStatus: nextCustomerStatus,
-              }),
-            ],
-          },
-          record,
-        );
-      }),
-    };
-    const nextRequestBoard = buildRequestBoardFromAppointmentRecords(
-      nextAppointmentRecords[portalState.activeProfessionalId] || [],
-      currentConsumer.name,
-    );
-
-    const nextPortalData = updatePortalState(
-      {
-        ...portalState,
-        requestBoard: nextRequestBoard,
-      },
-      nextAppointmentRecords,
-    );
-
-    syncProfessionalPortalRequestsResource(
-      portalState.activeProfessionalId,
-      nextPortalData.appointmentRecordsByProfessionalId[portalState.activeProfessionalId] || [],
-    );
-
-    return {
-      ok: true as const,
-    };
+      await syncAppointmentRecordsFromApi();
+      return {
+        ok: true as const,
+      };
+    } catch {
+      return {
+        ok: false as const,
+        error: 'invalidTransition' as const,
+      };
+    }
   };
 
-  const baseProfessional =
-    getCatalogProfessionalById(portalState.activeProfessionalId) || catalogData.defaultProfessional;
+  const baseProfessional = resolveCatalogProfessional(catalogLookupData, portalState.activeProfessionalId);
   const activeReviewState =
     reviewStatesByProfessionalId[portalState.activeProfessionalId] || createPublishedReviewState();
   const onboardingState = deriveProfessionalOnboardingState(portalState, activeReviewState);
-  const previewProfessional = baseProfessional ? mergeProfessionalWithPortalState(baseProfessional, portalState) : null;
+  const previewProfessional = baseProfessional
+    ? mergeProfessionalWithPortalState(baseProfessional, portalState)
+    : buildPortalDerivedProfessional(catalogLookupData, portalState, activeReviewState, null);
   const activeProfessional = previewProfessional;
   const publicProfessionals = catalogData.professionals.map((professional) =>
     professional.id === previewProfessional?.id && activeReviewState.status === 'published'
       ? previewProfessional
       : professional,
   );
+  const publicProfessionalsWithPortalPreview =
+    previewProfessional &&
+    activeReviewState.status === 'published' &&
+    !publicProfessionals.some((professional) => professional.id === previewProfessional.id)
+      ? [previewProfessional, ...publicProfessionals]
+      : publicProfessionals;
   const activeCoverageAreas = portalState.coverageAreaIds
     .map((areaId) => getAreaById(catalogData.areas, areaId))
     .filter((area): area is Area => Boolean(area));
@@ -2974,7 +2982,7 @@ export const useProfessionalPortal = () => {
     averageServicePriceLabel,
     catalogAreas: catalogData.areas,
     customerAppointments,
-    highlightedProfessionals: publicProfessionals.slice(0, 4),
+    highlightedProfessionals: publicProfessionalsWithPortalPreview.slice(0, 4),
     featuredServiceConfiguration,
     inactiveServiceTemplates,
     isPublishedProfessional,
@@ -2983,9 +2991,10 @@ export const useProfessionalPortal = () => {
     publishProfessionalProfiles,
     profileCompletionScore,
     publicPortfolioEntries,
-    publicProfessionals,
+    publicProfessionals: publicProfessionalsWithPortalPreview,
     publishProfessionalProfile,
     requestStatusCounts,
+    adminProfilesByProfessionalId,
     reviewStatesByProfessionalId,
     serviceCategories: catalogData.categories,
     serviceTemplates: catalogData.services,
@@ -3035,12 +3044,12 @@ export const useProfessionalPortal = () => {
     getPreviewProfessionalBySlug: (professionalSlug: string) =>
       previewProfessional?.slug === professionalSlug ? previewProfessional : null,
     getPublicProfessionalById: (professionalId: string) =>
-      publicProfessionals.find((professional) => professional.id === professionalId) || null,
+      publicProfessionalsWithPortalPreview.find((professional) => professional.id === professionalId) || null,
     getPublicProfessionalBySlug: (professionalSlug: string) =>
-      publicProfessionals.find((professional) => professional.slug === professionalSlug) || null,
+      publicProfessionalsWithPortalPreview.find((professional) => professional.slug === professionalSlug) || null,
     getAppointmentRecordsForProfessional: (professionalId: string) =>
       appointmentRecordsByProfessionalId[professionalId] ||
-      buildDefaultAppointmentRecords(getCatalogProfessionalById(professionalId)),
+      buildDefaultAppointmentRecords(resolveCatalogProfessional(catalogLookupData, professionalId)),
     getServiceLabel: (serviceId: string) => getCatalogServiceById(serviceId)?.name || serviceId,
     getAreaLabel: (areaId: string) => getAreaById(catalogData.areas, areaId)?.label || areaId,
   };

@@ -2,10 +2,13 @@ package customerauth
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
+
+	"bidanapp/apps/backend/internal/platform/authstore"
 )
 
 type SeedAccountInput struct {
@@ -62,22 +65,41 @@ func (s *Service) SeedAccount(ctx context.Context, input SeedAccountInput) error
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	registry, err := s.readAccountRegistry(ctx)
-	if err != nil {
-		return err
+	existing, lookupErr := s.store.CustomerAccountByConsumerID(ctx, consumerID)
+	if lookupErr != nil && !errors.Is(lookupErr, authstore.ErrNotFound) {
+		return lookupErr
 	}
 
-	registry.AccountsByConsumerID[consumerID] = accountRecord{
+	account := authstore.CustomerAccount{
 		City:            strings.TrimSpace(input.City),
 		ConsumerID:      consumerID,
 		DisplayName:     displayName,
 		PasswordHash:    string(passwordHash),
 		Phone:           phone,
 		PhoneNormalized: phone,
-		RegisteredAt:    registeredAt.Format(time.RFC3339),
+		RegisteredAt:    registeredAt,
+		UserID:          existing.UserID,
+	}
+	if account.UserID == "" {
+		account.UserID, err = authstore.NewUserID()
+		if err != nil {
+			return err
+		}
 	}
 
-	return s.writeAccountRegistry(ctx, registry, registeredAt)
+	if errors.Is(lookupErr, authstore.ErrNotFound) {
+		_, err = s.store.CreateCustomerAccount(ctx, account)
+	} else {
+		_, err = s.store.UpdateCustomerAccount(ctx, account)
+	}
+	if err != nil {
+		if errors.Is(err, authstore.ErrConflict) {
+			return ErrPhoneAlreadyInUse
+		}
+		return err
+	}
+
+	return nil
 }
 
 func (s *Service) SeedSession(ctx context.Context, input SeedSessionInput) (CustomerAuthSessionData, error) {
@@ -104,23 +126,25 @@ func (s *Service) SeedSession(ctx context.Context, input SeedSessionInput) (Cust
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	registry, err := s.readAccountRegistry(ctx)
+	account, err := s.store.CustomerAccountByConsumerID(ctx, consumerID)
 	if err != nil {
+		if errors.Is(err, authstore.ErrNotFound) {
+			return CustomerAuthSessionData{}, ErrAccountNotFound
+		}
 		return CustomerAuthSessionData{}, err
 	}
 
-	account, ok := registry.AccountsByConsumerID[consumerID]
-	if !ok {
-		return CustomerAuthSessionData{}, ErrAccountNotFound
+	session := authstore.Session{
+		ExpiresAt:   expiresAt,
+		LastLoginAt: lastLoginAt,
+		Role:        sessionRole,
+		SavedAt:     lastLoginAt,
+		SubjectID:   consumerID,
+		TokenHash:   hashToken(rawToken),
+		UserID:      account.UserID,
 	}
 
-	session := sessionRecord{
-		ConsumerID:  consumerID,
-		ExpiresAt:   expiresAt.Format(time.RFC3339),
-		LastLoginAt: lastLoginAt.Format(time.RFC3339),
-	}
-
-	if err := s.writeSessionRecord(ctx, hashToken(rawToken), session, lastLoginAt); err != nil {
+	if _, err := s.store.SaveSession(ctx, session); err != nil {
 		return CustomerAuthSessionData{}, err
 	}
 

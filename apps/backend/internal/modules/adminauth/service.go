@@ -5,7 +5,6 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
-	"encoding/json"
 	"errors"
 	"net/http"
 	"strings"
@@ -14,13 +13,13 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"bidanapp/apps/backend/internal/config"
-	"bidanapp/apps/backend/internal/platform/documentstore"
+	"bidanapp/apps/backend/internal/platform/authstore"
 	"bidanapp/apps/backend/internal/platform/web"
 )
 
 const (
-	sessionNamespace = "admin_auth_session"
-	tokenPrefix      = "badm_"
+	sessionRole = "admin"
+	tokenPrefix = "badm_"
 )
 
 var (
@@ -34,10 +33,10 @@ var (
 )
 
 type Service struct {
-	credentialsByEmail map[string]config.AdminCredentialConfig
-	cookie             config.SessionCookieConfig
-	sessionTTL         time.Duration
-	store              documentstore.Store
+	bootstrapCredentials []config.AdminCredentialConfig
+	cookie               config.SessionCookieConfig
+	sessionTTL           time.Duration
+	store                authstore.Store
 }
 
 type AuthenticatedSession struct {
@@ -50,45 +49,81 @@ type issuedSession struct {
 	Session  AdminAuthSessionData
 }
 
-type sessionRecord struct {
-	AdminID          string `json:"adminId"`
-	Email            string `json:"email"`
-	FocusArea        string `json:"focusArea"`
-	LastLoginAt      string `json:"lastLoginAt,omitempty"`
-	LastVisitedRoute string `json:"lastVisitedRoute,omitempty"`
-	ExpiresAt        string `json:"expiresAt,omitempty"`
-	RevokedAt        string `json:"revokedAt,omitempty"`
-}
-
-func NewService(cfg config.AdminAuthConfig, store documentstore.Store) *Service {
-	credentialsByEmail := make(map[string]config.AdminCredentialConfig, len(cfg.Credentials))
+func NewService(cfg config.AdminAuthConfig, store authstore.Store) *Service {
+	credentials := make([]config.AdminCredentialConfig, 0, len(cfg.Credentials))
 	for _, credential := range cfg.Credentials {
-		normalizedEmail := normalizeEmail(credential.Email)
-		if normalizedEmail == "" {
+		credential.Email = normalizeEmail(credential.Email)
+		if credential.Email == "" || strings.TrimSpace(credential.AdminID) == "" {
 			continue
 		}
-
-		credential.Email = normalizedEmail
-		credentialsByEmail[normalizedEmail] = credential
+		credentials = append(credentials, credential)
 	}
 
 	return &Service{
-		credentialsByEmail: credentialsByEmail,
-		cookie:             cfg.Cookie,
-		sessionTTL:         cfg.SessionTTL,
-		store:              store,
+		bootstrapCredentials: credentials,
+		cookie:               cfg.Cookie,
+		sessionTTL:           cfg.SessionTTL,
+		store:                store,
 	}
+}
+
+func (s *Service) Bootstrap(ctx context.Context) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if s.store == nil {
+		return nil
+	}
+
+	now := time.Now().UTC()
+	for _, credential := range s.bootstrapCredentials {
+		account, err := s.store.AdminAccountByAdminID(ctx, credential.AdminID)
+		switch {
+		case errors.Is(err, authstore.ErrNotFound):
+			userID, idErr := authstore.NewUserID()
+			if idErr != nil {
+				return idErr
+			}
+
+			_, err = s.store.CreateAdminAccount(ctx, authstore.AdminAccount{
+				AdminID:      credential.AdminID,
+				CreatedAt:    now,
+				Email:        credential.Email,
+				FocusArea:    credential.FocusArea,
+				PasswordHash: credential.PasswordHash,
+				UserID:       userID,
+			})
+		case err != nil:
+			return err
+		default:
+			account.Email = credential.Email
+			account.FocusArea = credential.FocusArea
+			account.PasswordHash = credential.PasswordHash
+			_, err = s.store.UpdateAdminAccount(ctx, account)
+		}
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (s *Service) Login(ctx context.Context, input AdminAuthCreateSessionRequest) (issuedSession, error) {
 	email := normalizeEmail(input.Email)
 	password := strings.TrimSpace(input.Password)
-	credential, ok := s.credentialsByEmail[email]
-	if !ok || password == "" {
+	if email == "" || password == "" {
 		return issuedSession{}, ErrInvalidCredentials
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(credential.PasswordHash), []byte(password)); err != nil {
+	account, err := s.store.AdminAccountByEmail(ctx, email)
+	if err != nil {
+		if errors.Is(err, authstore.ErrNotFound) {
+			return issuedSession{}, ErrInvalidCredentials
+		}
+		return issuedSession{}, err
+	}
+	if err := bcrypt.CompareHashAndPassword([]byte(account.PasswordHash), []byte(password)); err != nil {
 		return issuedSession{}, ErrInvalidCredentials
 	}
 
@@ -98,33 +133,22 @@ func (s *Service) Login(ctx context.Context, input AdminAuthCreateSessionRequest
 	}
 
 	now := time.Now().UTC()
-	expiresAt := now.Add(s.sessionTTL)
-	record := sessionRecord{
-		AdminID:     credential.AdminID,
-		Email:       credential.Email,
-		FocusArea:   credential.FocusArea,
-		LastLoginAt: now.Format(time.RFC3339),
-		ExpiresAt:   expiresAt.Format(time.RFC3339),
+	session := authstore.Session{
+		ExpiresAt:   now.Add(s.sessionTTL),
+		LastLoginAt: now,
+		Role:        sessionRole,
+		SavedAt:     now,
+		SubjectID:   account.AdminID,
+		TokenHash:   hashToken(rawToken),
+		UserID:      account.UserID,
 	}
-	if _, err := s.store.Upsert(ctx, documentstore.Record{
-		Namespace: sessionNamespace,
-		Key:       hashToken(rawToken),
-		SavedAt:   now,
-		Snapshot:  marshalRecord(record),
-	}); err != nil {
+	if _, err := s.store.SaveSession(ctx, session); err != nil {
 		return issuedSession{}, err
 	}
 
 	return issuedSession{
 		RawToken: rawToken,
-		Session: AdminAuthSessionData{
-			AdminID:         record.AdminID,
-			Email:           record.Email,
-			FocusArea:       record.FocusArea,
-			IsAuthenticated: true,
-			LastLoginAt:     record.LastLoginAt,
-			ExpiresAt:       record.ExpiresAt,
-		},
+		Session:  sessionDataFrom(session, account),
 	}, nil
 }
 
@@ -159,144 +183,104 @@ func (s *Service) CookieName() string {
 }
 
 func (s *Service) UpdateSession(ctx context.Context, tokenHash string, input AdminAuthSessionUpdateRequest) (AdminAuthSessionData, error) {
-	record, err := s.readSessionRecord(ctx, tokenHash)
+	session, account, err := s.readSessionAccount(ctx, tokenHash)
 	if err != nil {
 		return AdminAuthSessionData{}, err
 	}
 
-	record.LastVisitedRoute = strings.TrimSpace(input.LastVisitedRoute)
-	if _, err := s.store.Upsert(ctx, documentstore.Record{
-		Namespace: sessionNamespace,
-		Key:       tokenHash,
-		SavedAt:   time.Now().UTC(),
-		Snapshot:  marshalRecord(record),
-	}); err != nil {
+	session.LastVisitedRoute = strings.TrimSpace(input.LastVisitedRoute)
+	session.SavedAt = time.Now().UTC()
+	if _, err := s.store.SaveSession(ctx, session); err != nil {
 		return AdminAuthSessionData{}, err
 	}
 
-	return sessionDataFromRecord(record), nil
+	return sessionDataFrom(session, account), nil
 }
 
 func (s *Service) Logout(ctx context.Context, tokenHash string) (AdminAuthSessionData, error) {
-	record, err := s.readSessionRecord(ctx, tokenHash)
+	session, account, err := s.readSessionAccount(ctx, tokenHash)
 	if err != nil {
 		return AdminAuthSessionData{}, err
 	}
 
-	record.RevokedAt = time.Now().UTC().Format(time.RFC3339)
-	if _, err := s.store.Upsert(ctx, documentstore.Record{
-		Namespace: sessionNamespace,
-		Key:       tokenHash,
-		SavedAt:   time.Now().UTC(),
-		Snapshot:  marshalRecord(record),
-	}); err != nil {
+	now := time.Now().UTC()
+	session.RevokedAt = &now
+	session.SavedAt = now
+	if _, err := s.store.SaveSession(ctx, session); err != nil {
 		return AdminAuthSessionData{}, err
 	}
 
-	loggedOut := sessionDataFromRecord(record)
+	loggedOut := sessionDataFrom(session, account)
 	loggedOut.IsAuthenticated = false
 	return loggedOut, nil
 }
 
 func (s *Service) authenticateToken(ctx context.Context, rawToken string) (AuthenticatedSession, error) {
 	tokenHash := hashToken(rawToken)
-	record, err := s.readSessionRecord(ctx, tokenHash)
+	session, account, err := s.readSessionAccount(ctx, tokenHash)
 	if err != nil {
 		return AuthenticatedSession{}, err
 	}
 
 	return AuthenticatedSession{
 		TokenHash: tokenHash,
-		Session:   sessionDataFromRecord(record),
+		Session:   sessionDataFrom(session, account),
 	}, nil
 }
 
-func (s *Service) readSessionRecord(ctx context.Context, tokenHash string) (sessionRecord, error) {
-	if s.store == nil {
-		return sessionRecord{}, ErrSessionNotFound
+func (s *Service) readSessionAccount(ctx context.Context, tokenHash string) (authstore.Session, authstore.AdminAccount, error) {
+	session, err := s.readSessionRecord(ctx, tokenHash)
+	if err != nil {
+		return authstore.Session{}, authstore.AdminAccount{}, err
 	}
 
-	record, err := s.store.Read(ctx, sessionNamespace, tokenHash)
+	account, err := s.store.AdminAccountByAdminID(ctx, session.SubjectID)
 	if err != nil {
-		if errors.Is(err, documentstore.ErrNotFound) {
-			return sessionRecord{}, ErrSessionNotFound
+		if errors.Is(err, authstore.ErrNotFound) {
+			return authstore.Session{}, authstore.AdminAccount{}, ErrSessionNotFound
 		}
-
-		return sessionRecord{}, err
+		return authstore.Session{}, authstore.AdminAccount{}, err
 	}
 
-	payload, err := decodeSessionRecord(record.Snapshot)
-	if err != nil {
-		return sessionRecord{}, err
-	}
-
-	if strings.TrimSpace(payload.RevokedAt) != "" {
-		return sessionRecord{}, ErrSessionRevoked
-	}
-
-	expiresAt, err := time.Parse(time.RFC3339, payload.ExpiresAt)
-	if err != nil {
-		return sessionRecord{}, ErrInvalidSessionPayload
-	}
-
-	if time.Now().UTC().After(expiresAt) {
-		return sessionRecord{}, ErrSessionExpired
-	}
-
-	return payload, nil
+	return session, account, nil
 }
 
-func sessionDataFromRecord(record sessionRecord) AdminAuthSessionData {
+func (s *Service) readSessionRecord(ctx context.Context, tokenHash string) (authstore.Session, error) {
+	if s.store == nil {
+		return authstore.Session{}, ErrSessionNotFound
+	}
+
+	session, err := s.store.SessionByTokenHash(ctx, sessionRole, tokenHash)
+	if err != nil {
+		if errors.Is(err, authstore.ErrNotFound) {
+			return authstore.Session{}, ErrSessionNotFound
+		}
+		return authstore.Session{}, err
+	}
+
+	if session.UserID == "" || session.SubjectID == "" || session.ExpiresAt.IsZero() {
+		return authstore.Session{}, ErrInvalidSessionPayload
+	}
+	if session.RevokedAt != nil && !session.RevokedAt.IsZero() {
+		return authstore.Session{}, ErrSessionRevoked
+	}
+	if time.Now().UTC().After(session.ExpiresAt.UTC()) {
+		return authstore.Session{}, ErrSessionExpired
+	}
+
+	return session, nil
+}
+
+func sessionDataFrom(session authstore.Session, account authstore.AdminAccount) AdminAuthSessionData {
 	return AdminAuthSessionData{
-		AdminID:          record.AdminID,
-		Email:            record.Email,
-		FocusArea:        record.FocusArea,
+		AdminID:          account.AdminID,
+		Email:            account.Email,
+		FocusArea:        account.FocusArea,
 		IsAuthenticated:  true,
-		LastLoginAt:      record.LastLoginAt,
-		LastVisitedRoute: record.LastVisitedRoute,
-		ExpiresAt:        record.ExpiresAt,
+		LastLoginAt:      session.LastLoginAt.UTC().Format(time.RFC3339),
+		LastVisitedRoute: session.LastVisitedRoute,
+		ExpiresAt:        session.ExpiresAt.UTC().Format(time.RFC3339),
 	}
-}
-
-func decodeSessionRecord(snapshot map[string]any) (sessionRecord, error) {
-	if snapshot == nil {
-		return sessionRecord{}, ErrInvalidSessionPayload
-	}
-
-	payloadBytes, err := json.Marshal(snapshot)
-	if err != nil {
-		return sessionRecord{}, err
-	}
-
-	var payload sessionRecord
-	if err := json.Unmarshal(payloadBytes, &payload); err != nil {
-		return sessionRecord{}, err
-	}
-
-	if payload.AdminID == "" || payload.Email == "" || payload.FocusArea == "" || payload.ExpiresAt == "" {
-		return sessionRecord{}, ErrInvalidSessionPayload
-	}
-
-	return payload, nil
-}
-
-func marshalRecord(record sessionRecord) map[string]any {
-	payload := map[string]any{
-		"adminId":     record.AdminID,
-		"email":       record.Email,
-		"focusArea":   record.FocusArea,
-		"expiresAt":   record.ExpiresAt,
-		"lastLoginAt": record.LastLoginAt,
-	}
-
-	if record.LastVisitedRoute != "" {
-		payload["lastVisitedRoute"] = record.LastVisitedRoute
-	}
-	if record.RevokedAt != "" {
-		payload["revokedAt"] = record.RevokedAt
-	}
-
-	return payload
 }
 
 func parseBearerToken(headerValue string) (string, error) {

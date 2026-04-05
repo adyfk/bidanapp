@@ -88,7 +88,7 @@ const withTimeout = <T>(promise: Promise<T>, timeoutMs: number) =>
     );
   });
 
-export const buildFallbackPublicBootstrapData = (): PublicBootstrapData => ({
+export const buildEmptyPublicBootstrapData = (): PublicBootstrapData => ({
   activeHomeFeed: {
     currentUser: EMPTY_CONSUMER,
     featuredAppointment: undefined,

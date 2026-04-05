@@ -8,7 +8,7 @@ func SecurityHeaders() Middleware {
 			w.Header().Set("X-Content-Type-Options", "nosniff")
 			w.Header().Set("X-Frame-Options", "DENY")
 			w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
-			w.Header().Set("Permissions-Policy", "camera=(), geolocation=(), microphone=()")
+			w.Header().Set("Permissions-Policy", "camera=(), geolocation=(self), microphone=()")
 			next.ServeHTTP(w, r)
 		})
 	}

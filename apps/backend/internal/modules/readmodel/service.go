@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strings"
 
+	"bidanapp/apps/backend/internal/platform/appointmentstore"
 	"bidanapp/apps/backend/internal/platform/contentstore"
 	"bidanapp/apps/backend/internal/platform/portalstore"
 )
@@ -18,34 +19,62 @@ var ErrInvalidSlug = errors.New("invalid slug")
 var slugPattern = regexp.MustCompile(`^[a-z0-9]+(?:-[a-z0-9]+)*$`)
 
 type Service struct {
-	repository  SeedRepository
-	portalStore portalstore.Reader
+	repository       DocumentRepository
+	portalStore      portalstore.Reader
+	appointmentStore appointmentstore.Reader
 }
 
-func NewService(dataDir string, portalStore portalstore.Reader) Service {
-	return NewServiceWithRepository(NewRepository(dataDir, nil), portalStore)
+func NewService(dataDir string, portalStore portalstore.Reader, appointmentStores ...appointmentstore.Reader) Service {
+	return NewServiceWithRepository(NewRepository(dataDir, nil), portalStore, appointmentStores...)
 }
 
-func NewServiceWithStore(dataDir string, repositoryStore contentstore.Store, portalStore portalstore.Reader) Service {
-	return NewServiceWithRepository(NewRepository(dataDir, repositoryStore), portalStore)
+func NewServiceWithStore(
+	dataDir string,
+	repositoryStore contentstore.Store,
+	portalStore portalstore.Reader,
+	appointmentStores ...appointmentstore.Reader,
+) Service {
+	return NewServiceWithRepository(NewRepository(dataDir, repositoryStore), portalStore, appointmentStores...)
 }
 
-func NewServiceWithRepository(repository SeedRepository, portalStore portalstore.Reader) Service {
-	return Service{repository: repository, portalStore: portalStore}
+func NewServiceWithRepository(
+	repository DocumentRepository,
+	portalStore portalstore.Reader,
+	appointmentStores ...appointmentstore.Reader,
+) Service {
+	var appointmentStore appointmentstore.Reader
+	if len(appointmentStores) > 0 {
+		appointmentStore = appointmentStores[0]
+	}
+
+	return Service{
+		repository:       repository,
+		portalStore:      portalStore,
+		appointmentStore: appointmentStore,
+	}
 }
 
 func (s Service) Catalog(ctx context.Context) (CatalogData, error) {
-	areaRows, err := readJSON[[]Area](ctx, s.repository, "areas.json")
+	bundle, err := readJSONBundle(ctx, s.repository, []string{
+		"areas.json",
+		"service_categories.json",
+		"services.json",
+	})
 	if err != nil {
 		return CatalogData{}, err
 	}
 
-	categoryRows, err := readJSON[[]Category](ctx, s.repository, "service_categories.json")
+	areaRows, err := decodeBundleJSON[[]Area](bundle, "areas.json")
 	if err != nil {
 		return CatalogData{}, err
 	}
 
-	serviceRows, err := readJSON[[]seedDataServiceRow](ctx, s.repository, "services.json")
+	categoryRows, err := decodeBundleJSON[[]Category](bundle, "service_categories.json")
+	if err != nil {
+		return CatalogData{}, err
+	}
+
+	serviceRows, err := decodeBundleJSON[[]seedDataServiceRow](bundle, "services.json")
 	if err != nil {
 		return CatalogData{}, err
 	}
@@ -85,19 +114,43 @@ func (s Service) Catalog(ctx context.Context) (CatalogData, error) {
 }
 
 func (s Service) Appointments(ctx context.Context) (AppointmentData, error) {
-	appointmentRows, err := readJSON[[]seedDataAppointmentRow](ctx, s.repository, "appointments.json")
+	if s.appointmentStore != nil {
+		appointments, err := s.appointmentStore.ListAppointments(ctx)
+		if err == nil {
+			historyByAppointmentID, historyErr := s.appointmentStore.ListAppointmentStatusHistory(ctx)
+			if historyErr != nil {
+				return AppointmentData{}, historyErr
+			}
+
+			payload := make([]AppointmentSeed, 0, len(appointments))
+			for _, appointment := range appointments {
+				payload = append(payload, AppointmentSeedFromStoreRecord(appointment, historyByAppointmentID[appointment.ID]))
+			}
+			return AppointmentData{Appointments: payload}, nil
+		}
+	}
+
+	bundle, err := readJSONBundle(ctx, s.repository, []string{
+		"appointments.json",
+		"professional_service_offerings.json",
+		"services.json",
+	})
 	if err != nil {
 		return AppointmentData{}, err
 	}
 
-	serviceRows, err := readOptionalJSON[[]seedDataServiceRow](ctx, s.repository, "services.json", []seedDataServiceRow{})
+	appointmentRows, err := decodeBundleJSON[[]seedDataAppointmentRow](bundle, "appointments.json")
 	if err != nil {
 		return AppointmentData{}, err
 	}
 
-	serviceOfferingRows, err := readOptionalJSON[[]seedDataProfessionalServiceOfferingRow](
-		ctx,
-		s.repository,
+	serviceRows, err := decodeOptionalBundleJSON[[]seedDataServiceRow](bundle, "services.json", []seedDataServiceRow{})
+	if err != nil {
+		return AppointmentData{}, err
+	}
+
+	serviceOfferingRows, err := decodeOptionalBundleJSON[[]seedDataProfessionalServiceOfferingRow](
+		bundle,
 		"professional_service_offerings.json",
 		[]seedDataProfessionalServiceOfferingRow{},
 	)
@@ -128,18 +181,117 @@ func (s Service) Appointments(ctx context.Context) (AppointmentData, error) {
 	}, nil
 }
 
+func (s Service) AppointmentsByConsumerID(ctx context.Context, consumerID string) (AppointmentData, error) {
+	if s.appointmentStore != nil {
+		appointments, err := s.appointmentStore.AppointmentsByConsumerID(ctx, consumerID)
+		if err == nil {
+			historyByAppointmentID, historyErr := s.appointmentStore.ListAppointmentStatusHistory(ctx)
+			if historyErr != nil {
+				return AppointmentData{}, historyErr
+			}
+
+			payload := make([]AppointmentSeed, 0, len(appointments))
+			for _, appointment := range appointments {
+				payload = append(payload, AppointmentSeedFromStoreRecord(appointment, historyByAppointmentID[appointment.ID]))
+			}
+			return AppointmentData{Appointments: payload}, nil
+		}
+	}
+
+	payload, err := s.Appointments(ctx)
+	if err != nil {
+		return AppointmentData{}, err
+	}
+
+	filtered := make([]AppointmentSeed, 0, len(payload.Appointments))
+	for _, appointment := range payload.Appointments {
+		if appointment.ConsumerID == consumerID {
+			filtered = append(filtered, appointment)
+		}
+	}
+
+	return AppointmentData{Appointments: filtered}, nil
+}
+
+func (s Service) AppointmentsByProfessionalID(ctx context.Context, professionalID string) (AppointmentData, error) {
+	if s.appointmentStore != nil {
+		appointments, err := s.appointmentStore.AppointmentsByProfessionalID(ctx, professionalID)
+		if err == nil {
+			historyByAppointmentID, historyErr := s.appointmentStore.ListAppointmentStatusHistory(ctx)
+			if historyErr != nil {
+				return AppointmentData{}, historyErr
+			}
+
+			payload := make([]AppointmentSeed, 0, len(appointments))
+			for _, appointment := range appointments {
+				payload = append(payload, AppointmentSeedFromStoreRecord(appointment, historyByAppointmentID[appointment.ID]))
+			}
+			return AppointmentData{Appointments: payload}, nil
+		}
+	}
+
+	payload, err := s.Appointments(ctx)
+	if err != nil {
+		return AppointmentData{}, err
+	}
+
+	filtered := make([]AppointmentSeed, 0, len(payload.Appointments))
+	for _, appointment := range payload.Appointments {
+		if appointment.ProfessionalID == professionalID {
+			filtered = append(filtered, appointment)
+		}
+	}
+
+	return AppointmentData{Appointments: filtered}, nil
+}
+
+func (s Service) AppointmentByID(ctx context.Context, appointmentID string) (AppointmentSeed, error) {
+	if s.appointmentStore != nil {
+		appointment, err := s.appointmentStore.AppointmentByID(ctx, appointmentID)
+		if err == nil {
+			history, historyErr := s.appointmentStore.AppointmentStatusHistoryByAppointmentID(ctx, appointmentID)
+			if historyErr != nil {
+				return AppointmentSeed{}, historyErr
+			}
+			return AppointmentSeedFromStoreRecord(appointment, history), nil
+		}
+	}
+
+	payload, err := s.Appointments(ctx)
+	if err != nil {
+		return AppointmentSeed{}, err
+	}
+
+	for _, appointment := range payload.Appointments {
+		if appointment.ID == appointmentID {
+			return appointment, nil
+		}
+	}
+
+	return AppointmentSeed{}, ErrNotFound
+}
+
 func (s Service) Chat(ctx context.Context) (ChatData, error) {
-	threadRows, err := readJSON[[]seedDataChatThreadRow](ctx, s.repository, "chat_threads.json")
+	bundle, err := readJSONBundle(ctx, s.repository, []string{
+		"chat_messages.json",
+		"chat_threads.json",
+		"professionals.json",
+	})
 	if err != nil {
 		return ChatData{}, err
 	}
 
-	messageRows, err := readJSON[[]seedDataChatMessageRow](ctx, s.repository, "chat_messages.json")
+	threadRows, err := decodeBundleJSON[[]seedDataChatThreadRow](bundle, "chat_threads.json")
 	if err != nil {
 		return ChatData{}, err
 	}
 
-	professionalRows, err := readOptionalJSON[[]seedDataProfessionalRow](ctx, s.repository, "professionals.json", []seedDataProfessionalRow{})
+	messageRows, err := decodeBundleJSON[[]seedDataChatMessageRow](bundle, "chat_messages.json")
+	if err != nil {
+		return ChatData{}, err
+	}
+
+	professionalRows, err := decodeOptionalBundleJSON[[]seedDataProfessionalRow](bundle, "professionals.json", []seedDataProfessionalRow{})
 	if err != nil {
 		return ChatData{}, err
 	}
@@ -189,107 +341,134 @@ func (s Service) Chat(ctx context.Context) (ChatData, error) {
 }
 
 func (s Service) Professionals(ctx context.Context) ([]Professional, error) {
-	professionalRows, err := readJSON[[]seedDataProfessionalRow](ctx, s.repository, "professionals.json")
+	bundle, err := readJSONBundle(ctx, s.repository, []string{
+		"appointments.json",
+		"professional_activity_stories.json",
+		"professional_availability_date_overrides.json",
+		"professional_availability_policies.json",
+		"professional_availability_weekly_hours.json",
+		"professional_cancellation_policies.json",
+		"professional_coverage_areas.json",
+		"professional_coverage_policies.json",
+		"professional_credentials.json",
+		"professional_feedback_breakdowns.json",
+		"professional_feedback_metrics.json",
+		"professional_feedback_summaries.json",
+		"professional_gallery_items.json",
+		"professional_languages.json",
+		"professional_portfolio_entries.json",
+		"professional_practice_locations.json",
+		"professional_service_offerings.json",
+		"professional_specialties.json",
+		"professional_testimonials.json",
+		"professionals.json",
+		"services.json",
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	serviceRows, err := readOptionalJSON[[]seedDataServiceRow](ctx, s.repository, "services.json", []seedDataServiceRow{})
+	professionalRows, err := decodeBundleJSON[[]seedDataProfessionalRow](bundle, "professionals.json")
 	if err != nil {
 		return nil, err
 	}
 
-	specialtyRows, err := readOptionalJSON[[]seedDataProfessionalLabelRow](ctx, s.repository, "professional_specialties.json", []seedDataProfessionalLabelRow{})
+	serviceRows, err := decodeOptionalBundleJSON[[]seedDataServiceRow](bundle, "services.json", []seedDataServiceRow{})
 	if err != nil {
 		return nil, err
 	}
 
-	languageRows, err := readOptionalJSON[[]seedDataProfessionalLabelRow](ctx, s.repository, "professional_languages.json", []seedDataProfessionalLabelRow{})
+	specialtyRows, err := decodeOptionalBundleJSON[[]seedDataProfessionalLabelRow](bundle, "professional_specialties.json", []seedDataProfessionalLabelRow{})
 	if err != nil {
 		return nil, err
 	}
 
-	practiceLocationRows, err := readOptionalJSON[[]seedDataProfessionalPracticeLocationRow](ctx, s.repository, "professional_practice_locations.json", []seedDataProfessionalPracticeLocationRow{})
+	languageRows, err := decodeOptionalBundleJSON[[]seedDataProfessionalLabelRow](bundle, "professional_languages.json", []seedDataProfessionalLabelRow{})
 	if err != nil {
 		return nil, err
 	}
 
-	coveragePolicyRows, err := readOptionalJSON[[]seedDataProfessionalCoveragePolicyRow](ctx, s.repository, "professional_coverage_policies.json", []seedDataProfessionalCoveragePolicyRow{})
+	practiceLocationRows, err := decodeOptionalBundleJSON[[]seedDataProfessionalPracticeLocationRow](bundle, "professional_practice_locations.json", []seedDataProfessionalPracticeLocationRow{})
 	if err != nil {
 		return nil, err
 	}
 
-	coverageAreaRows, err := readOptionalJSON[[]seedDataProfessionalCoverageAreaRow](ctx, s.repository, "professional_coverage_areas.json", []seedDataProfessionalCoverageAreaRow{})
+	coveragePolicyRows, err := decodeOptionalBundleJSON[[]seedDataProfessionalCoveragePolicyRow](bundle, "professional_coverage_policies.json", []seedDataProfessionalCoveragePolicyRow{})
 	if err != nil {
 		return nil, err
 	}
 
-	credentialRows, err := readOptionalJSON[[]seedDataProfessionalCredentialRow](ctx, s.repository, "professional_credentials.json", []seedDataProfessionalCredentialRow{})
+	coverageAreaRows, err := decodeOptionalBundleJSON[[]seedDataProfessionalCoverageAreaRow](bundle, "professional_coverage_areas.json", []seedDataProfessionalCoverageAreaRow{})
 	if err != nil {
 		return nil, err
 	}
 
-	activityStoryRows, err := readOptionalJSON[[]seedDataProfessionalStoryRow](ctx, s.repository, "professional_activity_stories.json", []seedDataProfessionalStoryRow{})
+	credentialRows, err := decodeOptionalBundleJSON[[]seedDataProfessionalCredentialRow](bundle, "professional_credentials.json", []seedDataProfessionalCredentialRow{})
 	if err != nil {
 		return nil, err
 	}
 
-	portfolioEntryRows, err := readOptionalJSON[[]seedDataProfessionalPortfolioEntryRow](ctx, s.repository, "professional_portfolio_entries.json", []seedDataProfessionalPortfolioEntryRow{})
+	activityStoryRows, err := decodeOptionalBundleJSON[[]seedDataProfessionalStoryRow](bundle, "professional_activity_stories.json", []seedDataProfessionalStoryRow{})
 	if err != nil {
 		return nil, err
 	}
 
-	availabilityWeeklyHourRows, err := readOptionalJSON[[]seedDataProfessionalAvailabilityWeeklyHoursRow](ctx, s.repository, "professional_availability_weekly_hours.json", []seedDataProfessionalAvailabilityWeeklyHoursRow{})
+	portfolioEntryRows, err := decodeOptionalBundleJSON[[]seedDataProfessionalPortfolioEntryRow](bundle, "professional_portfolio_entries.json", []seedDataProfessionalPortfolioEntryRow{})
 	if err != nil {
 		return nil, err
 	}
 
-	availabilityPolicyRows, err := readOptionalJSON[[]seedDataProfessionalAvailabilityPolicyRow](ctx, s.repository, "professional_availability_policies.json", []seedDataProfessionalAvailabilityPolicyRow{})
+	availabilityWeeklyHourRows, err := decodeOptionalBundleJSON[[]seedDataProfessionalAvailabilityWeeklyHoursRow](bundle, "professional_availability_weekly_hours.json", []seedDataProfessionalAvailabilityWeeklyHoursRow{})
 	if err != nil {
 		return nil, err
 	}
 
-	cancellationPolicyRows, err := readOptionalJSON[[]seedDataProfessionalCancellationPolicyRow](ctx, s.repository, "professional_cancellation_policies.json", []seedDataProfessionalCancellationPolicyRow{})
+	availabilityPolicyRows, err := decodeOptionalBundleJSON[[]seedDataProfessionalAvailabilityPolicyRow](bundle, "professional_availability_policies.json", []seedDataProfessionalAvailabilityPolicyRow{})
 	if err != nil {
 		return nil, err
 	}
 
-	availabilityDateOverrideRows, err := readOptionalJSON[[]seedDataProfessionalAvailabilityDateOverrideRow](ctx, s.repository, "professional_availability_date_overrides.json", []seedDataProfessionalAvailabilityDateOverrideRow{})
+	cancellationPolicyRows, err := decodeOptionalBundleJSON[[]seedDataProfessionalCancellationPolicyRow](bundle, "professional_cancellation_policies.json", []seedDataProfessionalCancellationPolicyRow{})
 	if err != nil {
 		return nil, err
 	}
 
-	galleryRows, err := readOptionalJSON[[]seedDataProfessionalGalleryItemRow](ctx, s.repository, "professional_gallery_items.json", []seedDataProfessionalGalleryItemRow{})
+	availabilityDateOverrideRows, err := decodeOptionalBundleJSON[[]seedDataProfessionalAvailabilityDateOverrideRow](bundle, "professional_availability_date_overrides.json", []seedDataProfessionalAvailabilityDateOverrideRow{})
 	if err != nil {
 		return nil, err
 	}
 
-	testimonialRows, err := readOptionalJSON[[]seedDataProfessionalTestimonialRow](ctx, s.repository, "professional_testimonials.json", []seedDataProfessionalTestimonialRow{})
+	galleryRows, err := decodeOptionalBundleJSON[[]seedDataProfessionalGalleryItemRow](bundle, "professional_gallery_items.json", []seedDataProfessionalGalleryItemRow{})
 	if err != nil {
 		return nil, err
 	}
 
-	feedbackSummaryRows, err := readOptionalJSON[[]seedDataProfessionalFeedbackSummaryRow](ctx, s.repository, "professional_feedback_summaries.json", []seedDataProfessionalFeedbackSummaryRow{})
+	testimonialRows, err := decodeOptionalBundleJSON[[]seedDataProfessionalTestimonialRow](bundle, "professional_testimonials.json", []seedDataProfessionalTestimonialRow{})
 	if err != nil {
 		return nil, err
 	}
 
-	feedbackMetricRows, err := readOptionalJSON[[]seedDataProfessionalFeedbackMetricRow](ctx, s.repository, "professional_feedback_metrics.json", []seedDataProfessionalFeedbackMetricRow{})
+	feedbackSummaryRows, err := decodeOptionalBundleJSON[[]seedDataProfessionalFeedbackSummaryRow](bundle, "professional_feedback_summaries.json", []seedDataProfessionalFeedbackSummaryRow{})
 	if err != nil {
 		return nil, err
 	}
 
-	feedbackBreakdownRows, err := readOptionalJSON[[]seedDataProfessionalFeedbackBreakdownRow](ctx, s.repository, "professional_feedback_breakdowns.json", []seedDataProfessionalFeedbackBreakdownRow{})
+	feedbackMetricRows, err := decodeOptionalBundleJSON[[]seedDataProfessionalFeedbackMetricRow](bundle, "professional_feedback_metrics.json", []seedDataProfessionalFeedbackMetricRow{})
 	if err != nil {
 		return nil, err
 	}
 
-	serviceOfferingRows, err := readOptionalJSON[[]seedDataProfessionalServiceOfferingRow](ctx, s.repository, "professional_service_offerings.json", []seedDataProfessionalServiceOfferingRow{})
+	feedbackBreakdownRows, err := decodeOptionalBundleJSON[[]seedDataProfessionalFeedbackBreakdownRow](bundle, "professional_feedback_breakdowns.json", []seedDataProfessionalFeedbackBreakdownRow{})
 	if err != nil {
 		return nil, err
 	}
 
-	appointmentRows, err := readOptionalJSON[[]seedDataAppointmentRow](ctx, s.repository, "appointments.json", []seedDataAppointmentRow{})
+	serviceOfferingRows, err := decodeOptionalBundleJSON[[]seedDataProfessionalServiceOfferingRow](bundle, "professional_service_offerings.json", []seedDataProfessionalServiceOfferingRow{})
+	if err != nil {
+		return nil, err
+	}
+
+	appointmentRows, err := decodeOptionalBundleJSON[[]seedDataAppointmentRow](bundle, "appointments.json", []seedDataAppointmentRow{})
 	if err != nil {
 		return nil, err
 	}
@@ -830,7 +1009,7 @@ func toProfessionalCoverage(policy seedDataProfessionalCoveragePolicyRow, areaID
 	}
 }
 
-func readJSON[T any](ctx context.Context, repository SeedRepository, filename string) (T, error) {
+func readJSON[T any](ctx context.Context, repository DocumentRepository, filename string) (T, error) {
 	var zero T
 
 	select {
@@ -856,7 +1035,49 @@ func readJSON[T any](ctx context.Context, repository SeedRepository, filename st
 	return payload, nil
 }
 
-func readOptionalJSON[T any](ctx context.Context, repository SeedRepository, filename string, fallback T) (T, error) {
+func readJSONBundle(ctx context.Context, repository DocumentRepository, filenames []string) (map[string][]byte, error) {
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
+	}
+
+	return repository.ReadMany(ctx, filenames)
+}
+
+func decodeBundleJSON[T any](bundle map[string][]byte, filename string) (T, error) {
+	var zero T
+
+	bytes, ok := bundle[filename]
+	if !ok {
+		return zero, os.ErrNotExist
+	}
+	if !json.Valid(bytes) {
+		return zero, errors.New("invalid json payload")
+	}
+
+	var payload T
+	if err := json.Unmarshal(bytes, &payload); err != nil {
+		return zero, err
+	}
+
+	return payload, nil
+}
+
+func decodeOptionalBundleJSON[T any](bundle map[string][]byte, filename string, fallback T) (T, error) {
+	payload, err := decodeBundleJSON[T](bundle, filename)
+	if err == nil {
+		return payload, nil
+	}
+
+	if errors.Is(err, os.ErrNotExist) {
+		return fallback, nil
+	}
+
+	return fallback, err
+}
+
+func readOptionalJSON[T any](ctx context.Context, repository DocumentRepository, filename string, fallback T) (T, error) {
 	payload, err := readJSON[T](ctx, repository, filename)
 	if err == nil {
 		return payload, nil

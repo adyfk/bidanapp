@@ -5,7 +5,6 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
-	"encoding/json"
 	"errors"
 	"net/http"
 	"strings"
@@ -15,16 +14,14 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"bidanapp/apps/backend/internal/config"
-	"bidanapp/apps/backend/internal/platform/documentstore"
+	"bidanapp/apps/backend/internal/platform/authstore"
 	"bidanapp/apps/backend/internal/platform/web"
 )
 
 const (
-	accountRegistryNamespace = "customer_auth_account"
-	accountRegistryKey       = "registry"
-	sessionNamespace         = "customer_auth_session"
-	tokenPrefix              = "bcus_"
-	consumerIDPrefix         = "consumer_"
+	consumerIDPrefix = "consumer_"
+	sessionRole      = "customer"
+	tokenPrefix      = "bcus_"
 )
 
 var (
@@ -47,7 +44,7 @@ type Service struct {
 	mu         sync.Mutex
 	cookie     config.SessionCookieConfig
 	sessionTTL time.Duration
-	store      documentstore.Store
+	store      authstore.Store
 }
 
 type AuthenticatedSession struct {
@@ -60,28 +57,7 @@ type issuedSession struct {
 	Session  CustomerAuthSessionData
 }
 
-type accountRegistry struct {
-	AccountsByConsumerID map[string]accountRecord `json:"accountsByConsumerId,omitempty"`
-}
-
-type accountRecord struct {
-	City            string `json:"city,omitempty"`
-	ConsumerID      string `json:"consumerId"`
-	DisplayName     string `json:"displayName"`
-	PasswordHash    string `json:"passwordHash"`
-	Phone           string `json:"phone"`
-	PhoneNormalized string `json:"phoneNormalized"`
-	RegisteredAt    string `json:"registeredAt"`
-}
-
-type sessionRecord struct {
-	ConsumerID  string `json:"consumerId"`
-	ExpiresAt   string `json:"expiresAt"`
-	LastLoginAt string `json:"lastLoginAt"`
-	RevokedAt   string `json:"revokedAt,omitempty"`
-}
-
-func NewService(cfg config.CustomerAuthConfig, store documentstore.Store) *Service {
+func NewService(cfg config.CustomerAuthConfig, store authstore.Store) *Service {
 	return &Service{
 		cookie:     cfg.Cookie,
 		sessionTTL: cfg.SessionTTL,
@@ -113,37 +89,44 @@ func (s *Service) Register(ctx context.Context, input CustomerAuthRegisterReques
 	}
 
 	now := time.Now().UTC()
-
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	registry, err := s.readAccountRegistry(ctx)
-	if err != nil {
-		return issuedSession{}, err
-	}
-	if phoneInUse(registry, phone, "") {
-		return issuedSession{}, ErrPhoneAlreadyInUse
-	}
-
 	consumerID, err := generateConsumerID()
 	if err != nil {
 		return issuedSession{}, err
 	}
-	account := accountRecord{
+	userID, err := authstore.NewUserID()
+	if err != nil {
+		return issuedSession{}, err
+	}
+
+	account := authstore.CustomerAccount{
 		City:            strings.TrimSpace(input.City),
 		ConsumerID:      consumerID,
 		DisplayName:     displayName,
 		PasswordHash:    string(passwordHash),
 		Phone:           phone,
 		PhoneNormalized: phone,
-		RegisteredAt:    now.Format(time.RFC3339),
+		RegisteredAt:    now,
+		UserID:          userID,
 	}
-	registry.AccountsByConsumerID[consumerID] = account
-	if err := s.writeAccountRegistry(ctx, registry, now); err != nil {
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if _, err := s.store.CustomerAccountByPhone(ctx, phone); err == nil {
+		return issuedSession{}, ErrPhoneAlreadyInUse
+	} else if err != nil && !errors.Is(err, authstore.ErrNotFound) {
 		return issuedSession{}, err
 	}
 
-	return s.createSession(ctx, account, now)
+	created, err := s.store.CreateCustomerAccount(ctx, account)
+	if err != nil {
+		if errors.Is(err, authstore.ErrConflict) {
+			return issuedSession{}, ErrPhoneAlreadyInUse
+		}
+		return issuedSession{}, err
+	}
+
+	return s.createSession(ctx, created, now)
 }
 
 func (s *Service) Login(ctx context.Context, input CustomerAuthCreateSessionRequest) (issuedSession, error) {
@@ -163,13 +146,12 @@ func (s *Service) Login(ctx context.Context, input CustomerAuthCreateSessionRequ
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	registry, err := s.readAccountRegistry(ctx)
+	account, err := s.store.CustomerAccountByPhone(ctx, phone)
 	if err != nil {
+		if errors.Is(err, authstore.ErrNotFound) {
+			return issuedSession{}, ErrInvalidCredentials
+		}
 		return issuedSession{}, err
-	}
-	account, ok := findAccountByPhone(registry, phone)
-	if !ok {
-		return issuedSession{}, ErrInvalidCredentials
 	}
 	if err := bcrypt.CompareHashAndPassword([]byte(account.PasswordHash), []byte(password)); err != nil {
 		return issuedSession{}, ErrInvalidCredentials
@@ -228,25 +210,30 @@ func (s *Service) UpdateAccount(ctx context.Context, tokenHash string, input Cus
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	session, account, registry, err := s.readSessionAccountAndRegistry(ctx, tokenHash)
+	session, account, err := s.readSessionAccount(ctx, tokenHash)
 	if err != nil {
 		return CustomerAuthSessionData{}, err
 	}
-	if phoneInUse(registry, phone, account.ConsumerID) {
+	if existing, err := s.store.CustomerAccountByPhone(ctx, phone); err == nil && existing.ConsumerID != account.ConsumerID {
 		return CustomerAuthSessionData{}, ErrPhoneAlreadyInUse
+	} else if err != nil && !errors.Is(err, authstore.ErrNotFound) {
+		return CustomerAuthSessionData{}, err
 	}
 
 	account.Phone = phone
 	account.PhoneNormalized = phone
 	account.DisplayName = displayName
 	account.City = strings.TrimSpace(input.City)
-	registry.AccountsByConsumerID[account.ConsumerID] = account
 
-	if err := s.writeAccountRegistry(ctx, registry, time.Now().UTC()); err != nil {
+	updated, err := s.store.UpdateCustomerAccount(ctx, account)
+	if err != nil {
+		if errors.Is(err, authstore.ErrConflict) {
+			return CustomerAuthSessionData{}, ErrPhoneAlreadyInUse
+		}
 		return CustomerAuthSessionData{}, err
 	}
 
-	return sessionDataFrom(session, account), nil
+	return sessionDataFrom(session, updated), nil
 }
 
 func (s *Service) UpdatePassword(ctx context.Context, tokenHash string, input CustomerAuthUpdatePasswordRequest) (CustomerAuthSessionData, error) {
@@ -266,7 +253,7 @@ func (s *Service) UpdatePassword(ctx context.Context, tokenHash string, input Cu
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	session, account, registry, err := s.readSessionAccountAndRegistry(ctx, tokenHash)
+	session, account, err := s.readSessionAccount(ctx, tokenHash)
 	if err != nil {
 		return CustomerAuthSessionData{}, err
 	}
@@ -279,13 +266,13 @@ func (s *Service) UpdatePassword(ctx context.Context, tokenHash string, input Cu
 		return CustomerAuthSessionData{}, err
 	}
 	account.PasswordHash = string(passwordHash)
-	registry.AccountsByConsumerID[account.ConsumerID] = account
 
-	if err := s.writeAccountRegistry(ctx, registry, time.Now().UTC()); err != nil {
+	updated, err := s.store.UpdateCustomerAccount(ctx, account)
+	if err != nil {
 		return CustomerAuthSessionData{}, err
 	}
 
-	return sessionDataFrom(session, account), nil
+	return sessionDataFrom(session, updated), nil
 }
 
 func (s *Service) Logout(ctx context.Context, tokenHash string) (CustomerAuthSessionData, error) {
@@ -302,8 +289,9 @@ func (s *Service) Logout(ctx context.Context, tokenHash string) (CustomerAuthSes
 	}
 
 	now := time.Now().UTC()
-	session.RevokedAt = now.Format(time.RFC3339)
-	if err := s.writeSessionRecord(ctx, tokenHash, session, now); err != nil {
+	session.RevokedAt = &now
+	session.SavedAt = now
+	if _, err := s.store.SaveSession(ctx, session); err != nil {
 		return CustomerAuthSessionData{}, err
 	}
 
@@ -325,18 +313,22 @@ func (s *Service) authenticateToken(ctx context.Context, rawToken string) (Authe
 	}, nil
 }
 
-func (s *Service) createSession(ctx context.Context, account accountRecord, now time.Time) (issuedSession, error) {
+func (s *Service) createSession(ctx context.Context, account authstore.CustomerAccount, now time.Time) (issuedSession, error) {
 	rawToken, err := generateToken()
 	if err != nil {
 		return issuedSession{}, err
 	}
 
-	session := sessionRecord{
-		ConsumerID:  account.ConsumerID,
-		ExpiresAt:   now.Add(s.sessionTTL).Format(time.RFC3339),
-		LastLoginAt: now.Format(time.RFC3339),
+	session := authstore.Session{
+		ExpiresAt:   now.Add(s.sessionTTL),
+		LastLoginAt: now,
+		Role:        sessionRole,
+		SavedAt:     now,
+		SubjectID:   account.ConsumerID,
+		TokenHash:   hashToken(rawToken),
+		UserID:      account.UserID,
 	}
-	if err := s.writeSessionRecord(ctx, hashToken(rawToken), session, now); err != nil {
+	if _, err := s.store.SaveSession(ctx, session); err != nil {
 		return issuedSession{}, err
 	}
 
@@ -346,200 +338,59 @@ func (s *Service) createSession(ctx context.Context, account accountRecord, now 
 	}, nil
 }
 
-func (s *Service) readSessionAccountAndRegistry(
-	ctx context.Context,
-	tokenHash string,
-) (sessionRecord, accountRecord, accountRegistry, error) {
+func (s *Service) readSessionAccount(ctx context.Context, tokenHash string) (authstore.Session, authstore.CustomerAccount, error) {
 	session, err := s.readSessionRecord(ctx, tokenHash)
 	if err != nil {
-		return sessionRecord{}, accountRecord{}, accountRegistry{}, err
+		return authstore.Session{}, authstore.CustomerAccount{}, err
 	}
-	registry, err := s.readAccountRegistry(ctx)
-	if err != nil {
-		return sessionRecord{}, accountRecord{}, accountRegistry{}, err
-	}
-	account, ok := registry.AccountsByConsumerID[session.ConsumerID]
-	if !ok {
-		return sessionRecord{}, accountRecord{}, accountRegistry{}, ErrAccountNotFound
-	}
-	return session, account, registry, nil
-}
 
-func (s *Service) readSessionAccount(ctx context.Context, tokenHash string) (sessionRecord, accountRecord, error) {
-	session, err := s.readSessionRecord(ctx, tokenHash)
+	account, err := s.store.CustomerAccountByConsumerID(ctx, session.SubjectID)
 	if err != nil {
-		return sessionRecord{}, accountRecord{}, err
+		if errors.Is(err, authstore.ErrNotFound) {
+			return authstore.Session{}, authstore.CustomerAccount{}, ErrAccountNotFound
+		}
+		return authstore.Session{}, authstore.CustomerAccount{}, err
 	}
-	registry, err := s.readAccountRegistry(ctx)
-	if err != nil {
-		return sessionRecord{}, accountRecord{}, err
-	}
-	account, ok := registry.AccountsByConsumerID[session.ConsumerID]
-	if !ok {
-		return sessionRecord{}, accountRecord{}, ErrAccountNotFound
-	}
+
 	return session, account, nil
 }
 
-func (s *Service) readSessionRecord(ctx context.Context, tokenHash string) (sessionRecord, error) {
+func (s *Service) readSessionRecord(ctx context.Context, tokenHash string) (authstore.Session, error) {
 	if s.store == nil {
-		return sessionRecord{}, ErrSessionNotFound
+		return authstore.Session{}, ErrSessionNotFound
 	}
 
-	record, err := s.store.Read(ctx, sessionNamespace, tokenHash)
+	session, err := s.store.SessionByTokenHash(ctx, sessionRole, tokenHash)
 	if err != nil {
-		if errors.Is(err, documentstore.ErrNotFound) {
-			return sessionRecord{}, ErrSessionNotFound
+		if errors.Is(err, authstore.ErrNotFound) {
+			return authstore.Session{}, ErrSessionNotFound
 		}
-		return sessionRecord{}, err
+		return authstore.Session{}, err
 	}
 
-	payload, err := decodeSessionRecord(record.Snapshot)
-	if err != nil {
-		return sessionRecord{}, err
+	if session.UserID == "" || session.SubjectID == "" || session.ExpiresAt.IsZero() || session.LastLoginAt.IsZero() {
+		return authstore.Session{}, ErrInvalidSessionPayload
 	}
-	if strings.TrimSpace(payload.RevokedAt) != "" {
-		return sessionRecord{}, ErrSessionRevoked
+	if session.RevokedAt != nil && !session.RevokedAt.IsZero() {
+		return authstore.Session{}, ErrSessionRevoked
 	}
-
-	expiresAt, err := time.Parse(time.RFC3339, payload.ExpiresAt)
-	if err != nil {
-		return sessionRecord{}, ErrInvalidSessionPayload
-	}
-	if time.Now().UTC().After(expiresAt) {
-		return sessionRecord{}, ErrSessionExpired
+	if time.Now().UTC().After(session.ExpiresAt.UTC()) {
+		return authstore.Session{}, ErrSessionExpired
 	}
 
-	return payload, nil
+	return session, nil
 }
 
-func (s *Service) writeSessionRecord(ctx context.Context, tokenHash string, payload sessionRecord, now time.Time) error {
-	if s.store == nil {
-		return ErrSessionNotFound
-	}
-
-	_, err := s.store.Upsert(ctx, documentstore.Record{
-		Namespace: sessionNamespace,
-		Key:       tokenHash,
-		SavedAt:   now,
-		Snapshot:  marshalSessionRecord(payload),
-	})
-	return err
-}
-
-func (s *Service) readAccountRegistry(ctx context.Context) (accountRegistry, error) {
-	if s.store == nil {
-		return accountRegistry{AccountsByConsumerID: map[string]accountRecord{}}, nil
-	}
-
-	record, err := s.store.Read(ctx, accountRegistryNamespace, accountRegistryKey)
-	if err != nil {
-		if errors.Is(err, documentstore.ErrNotFound) {
-			return accountRegistry{AccountsByConsumerID: map[string]accountRecord{}}, nil
-		}
-		return accountRegistry{}, err
-	}
-
-	payload, err := decodeAccountRegistry(record.Snapshot)
-	if err != nil {
-		return accountRegistry{}, err
-	}
-	return payload, nil
-}
-
-func (s *Service) writeAccountRegistry(ctx context.Context, registry accountRegistry, now time.Time) error {
-	if s.store == nil {
-		return ErrAccountNotFound
-	}
-
-	_, err := s.store.Upsert(ctx, documentstore.Record{
-		Namespace: accountRegistryNamespace,
-		Key:       accountRegistryKey,
-		SavedAt:   now,
-		Snapshot:  marshalAccountRegistry(registry),
-	})
-	return err
-}
-
-func sessionDataFrom(session sessionRecord, account accountRecord) CustomerAuthSessionData {
+func sessionDataFrom(session authstore.Session, account authstore.CustomerAccount) CustomerAuthSessionData {
 	return CustomerAuthSessionData{
 		City:            account.City,
 		ConsumerID:      account.ConsumerID,
 		DisplayName:     account.DisplayName,
-		ExpiresAt:       session.ExpiresAt,
+		ExpiresAt:       session.ExpiresAt.UTC().Format(time.RFC3339),
 		IsAuthenticated: true,
-		LastLoginAt:     session.LastLoginAt,
+		LastLoginAt:     session.LastLoginAt.UTC().Format(time.RFC3339),
 		Phone:           account.Phone,
-		RegisteredAt:    account.RegisteredAt,
-	}
-}
-
-func decodeSessionRecord(snapshot map[string]any) (sessionRecord, error) {
-	if snapshot == nil {
-		return sessionRecord{}, ErrInvalidSessionPayload
-	}
-
-	payloadBytes, err := json.Marshal(snapshot)
-	if err != nil {
-		return sessionRecord{}, err
-	}
-
-	var payload sessionRecord
-	if err := json.Unmarshal(payloadBytes, &payload); err != nil {
-		return sessionRecord{}, err
-	}
-	if payload.ConsumerID == "" || payload.ExpiresAt == "" || payload.LastLoginAt == "" {
-		return sessionRecord{}, ErrInvalidSessionPayload
-	}
-
-	return payload, nil
-}
-
-func marshalSessionRecord(record sessionRecord) map[string]any {
-	payload := map[string]any{
-		"consumerId":  record.ConsumerID,
-		"expiresAt":   record.ExpiresAt,
-		"lastLoginAt": record.LastLoginAt,
-	}
-	if record.RevokedAt != "" {
-		payload["revokedAt"] = record.RevokedAt
-	}
-	return payload
-}
-
-func decodeAccountRegistry(snapshot map[string]any) (accountRegistry, error) {
-	if snapshot == nil {
-		return accountRegistry{AccountsByConsumerID: map[string]accountRecord{}}, nil
-	}
-
-	payloadBytes, err := json.Marshal(snapshot)
-	if err != nil {
-		return accountRegistry{}, err
-	}
-
-	var payload accountRegistry
-	if err := json.Unmarshal(payloadBytes, &payload); err != nil {
-		return accountRegistry{}, err
-	}
-	if payload.AccountsByConsumerID == nil {
-		payload.AccountsByConsumerID = map[string]accountRecord{}
-	}
-	for consumerID, account := range payload.AccountsByConsumerID {
-		if consumerID == "" || account.ConsumerID == "" || account.PhoneNormalized == "" || account.PasswordHash == "" {
-			return accountRegistry{}, ErrInvalidAccountPayload
-		}
-	}
-
-	return payload, nil
-}
-
-func marshalAccountRegistry(registry accountRegistry) map[string]any {
-	accountsByConsumerID := map[string]accountRecord{}
-	for consumerID, account := range registry.AccountsByConsumerID {
-		accountsByConsumerID[consumerID] = account
-	}
-	return map[string]any{
-		"accountsByConsumerId": accountsByConsumerID,
+		RegisteredAt:    account.RegisteredAt.UTC().Format(time.RFC3339),
 	}
 }
 
@@ -570,27 +421,6 @@ func resolveRawSessionToken(cookieValue string, authorizationHeader string) (str
 	}
 
 	return parseBearerToken(authorizationHeader)
-}
-
-func findAccountByPhone(registry accountRegistry, normalizedPhone string) (accountRecord, bool) {
-	for _, account := range registry.AccountsByConsumerID {
-		if account.PhoneNormalized == normalizedPhone {
-			return account, true
-		}
-	}
-	return accountRecord{}, false
-}
-
-func phoneInUse(registry accountRegistry, normalizedPhone string, excludedConsumerID string) bool {
-	for consumerID, account := range registry.AccountsByConsumerID {
-		if consumerID == excludedConsumerID {
-			continue
-		}
-		if account.PhoneNormalized == normalizedPhone {
-			return true
-		}
-	}
-	return false
 }
 
 func normalizePhone(value string) (string, error) {

@@ -233,7 +233,7 @@
     "tableName": "consumers.json",
     "group": "consumer",
     "entityKind": "master",
-    "description": "Profil consumer dummy.",
+    "description": "Profil consumer seed.",
     "keyRelations": []
   },
   {

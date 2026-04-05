@@ -4,6 +4,7 @@ import { cp, mkdir, rm } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
+import { PLAYWRIGHT_WEB_PUSH_PUBLIC_KEY } from './web-push-test-keys.mjs';
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDir, '..', '..');
@@ -66,10 +67,9 @@ async function main() {
   const playwrightEnv = {
     NEXT_PUBLIC_ADMIN_CONSOLE_ENABLED: 'true',
     NEXT_PUBLIC_API_BASE_URL: backendApiBaseUrl,
-    NEXT_PUBLIC_APP_STATE_DATA_SOURCE: 'api',
     NEXT_PUBLIC_APP_VERSION: 'playwright',
-    NEXT_PUBLIC_PROFESSIONAL_PORTAL_DATA_SOURCE: 'api',
     NEXT_PUBLIC_SITE_URL: `http://127.0.0.1:${frontendPort}`,
+    NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY: process.env.NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY ?? PLAYWRIGHT_WEB_PUSH_PUBLIC_KEY,
   };
 
   await rm(path.join(frontendDir, '.next'), { force: true, recursive: true });

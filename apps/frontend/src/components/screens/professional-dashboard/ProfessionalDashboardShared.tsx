@@ -270,8 +270,10 @@ export const RequestCard = ({
   htmlId,
   isHighlighted,
   moveToLabel,
+  homeVisitTravel,
   onCloseRequest,
   onChangeStatus,
+  onDepartRequest,
   priorityLabel,
   request,
   requestStatuses,
@@ -305,10 +307,18 @@ export const RequestCard = ({
   getModeLabel: (mode: ProfessionalManagedRequest['requestedMode']) => string;
   getServiceLabel: (serviceId: string) => string;
   htmlId?: string;
+  homeVisitTravel?: {
+    actionLabel: string;
+    description: string;
+    isDeparting?: boolean;
+    pendingLabel: string;
+    title: string;
+  };
   isHighlighted?: boolean;
   moveToLabel: string;
   onCloseRequest?: () => void;
   onChangeStatus: (status: ProfessionalRequestStatus) => void;
+  onDepartRequest?: () => void;
   priorityLabel: string;
   request: ProfessionalManagedRequest;
   requestStatuses: ProfessionalRequestStatus[];
@@ -390,6 +400,25 @@ export const RequestCard = ({
         <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">{fieldLabels.note}</p>
         <p className="mt-2 line-clamp-3 text-[13px] leading-relaxed text-slate-600">{request.note}</p>
       </div>
+
+      {homeVisitTravel ? (
+        <div className={`${insetSurfaceClass} mt-4 px-4 py-3.5`}>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+            {homeVisitTravel.title}
+          </p>
+          <p className="mt-2 text-[13px] leading-relaxed text-slate-600">{homeVisitTravel.description}</p>
+          {onDepartRequest ? (
+            <button
+              type="button"
+              onClick={onDepartRequest}
+              disabled={homeVisitTravel.isDeparting}
+              className="mt-3 inline-flex w-full items-center justify-center rounded-[16px] bg-pink-600 px-4 py-3 text-[13px] font-semibold text-white transition-colors hover:bg-pink-500 disabled:cursor-wait disabled:bg-pink-300"
+            >
+              {homeVisitTravel.isDeparting ? homeVisitTravel.pendingLabel : homeVisitTravel.actionLabel}
+            </button>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className={`${insetSurfaceClass} mt-4 px-4 py-3.5`}>
         <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">

@@ -158,6 +158,9 @@ const buildNextSnapshot = (
 export const useSupportDesk = () => {
   const { adminStaff } = useAdminDirectory();
   const [snapshot, setSnapshot] = useState<SupportDeskSnapshot>(() => readSupportDeskSnapshot(adminStaff));
+  const [baselineSnapshot, setBaselineSnapshot] = useState<SupportDeskSnapshot>(() =>
+    readSupportDeskSnapshot(adminStaff),
+  );
   const hasLoadedBackendRef = useRef(false);
 
   useEffect(() => {
@@ -177,6 +180,7 @@ export const useSupportDesk = () => {
         }
 
         const nextSnapshot = normalizeSupportDeskSnapshot(apiState, adminStaff);
+        setBaselineSnapshot(nextSnapshot);
         setSnapshot(nextSnapshot);
         writeSupportDeskSnapshotToStorage(nextSnapshot);
       })
@@ -274,7 +278,7 @@ export const useSupportDesk = () => {
   };
 
   const resetSupportDesk = () => {
-    const nextSnapshot = buildDefaultSupportDeskSnapshot(adminStaff);
+    const nextSnapshot = normalizeSupportDeskSnapshot(baselineSnapshot, adminStaff);
     setSnapshot(nextSnapshot);
     persistSupportDeskSnapshot(nextSnapshot, hasLoadedBackendRef.current);
   };
@@ -290,8 +294,8 @@ export const useSupportDesk = () => {
     adminStaff,
     commandCenter: snapshot.commandCenter,
     customerTickets: snapshot.tickets.filter((ticket) => ticket.reporterRole === 'customer'),
-    defaultCommandCenter: buildDefaultCommandCenterState(adminStaff),
-    defaultTickets: [] as SupportTicket[],
+    defaultCommandCenter: baselineSnapshot.commandCenter,
+    defaultTickets: baselineSnapshot.tickets,
     exportSnapshot: () => JSON.stringify(snapshot, null, 2),
     importSnapshot,
     professionalTickets: snapshot.tickets.filter((ticket) => ticket.reporterRole === 'professional'),

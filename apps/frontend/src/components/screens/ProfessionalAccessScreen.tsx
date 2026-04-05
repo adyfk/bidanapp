@@ -185,20 +185,19 @@ export const ProfessionalAccessScreen = ({ defaultTab = 'login' }: ProfessionalA
     try {
       setIsSubmitting(true);
       setErrorKey(null);
-      await register({
+      const registeredSession = await register({
         city: registerCity.trim(),
         credentialNumber: registerCredential.trim(),
         displayName: registerName.trim(),
         password: registerPassword,
         phone: registerPhone.trim(),
-        professionalId: selectedProfessionalId,
       });
-      startProfessionalRegistration({
+      await startProfessionalRegistration({
         city: registerCity.trim(),
         credentialNumber: registerCredential.trim(),
         displayName: registerName.trim(),
         phone: registerPhone.trim(),
-        professionalId: selectedProfessionalId,
+        professionalId: registeredSession.professionalId,
       });
       router.push(APP_ROUTES.professionalDashboard);
     } catch {
@@ -588,7 +587,7 @@ export const ProfessionalAccessScreen = ({ defaultTab = 'login' }: ProfessionalA
                     />
                   </FormField>
                   <p className="rounded-[18px] bg-gray-50 px-4 py-3 text-[12px] leading-relaxed text-gray-500">
-                    {t('registerHelper', { category: selectedProfessionalTitle })}
+                    {t('registerHelper')}
                   </p>
                   <button
                     type="button"

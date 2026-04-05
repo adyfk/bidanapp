@@ -1,6 +1,8 @@
 import { ExploreScreen } from '@/components/screens/ExploreScreen';
 import { getPublicBootstrapData } from '@/lib/public-bootstrap';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Explore Professionals - BidanCare',
   description: 'Find and filter independent professionals near you.',

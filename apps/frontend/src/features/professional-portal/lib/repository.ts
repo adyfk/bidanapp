@@ -5,32 +5,29 @@ import {
   saveProfessionalPortalSession,
 } from '@bidanapp/sdk';
 import { getBackendApiBaseUrl } from '@/lib/backend';
-import { PUBLIC_ENV } from '@/lib/env';
-import { hasProfessionalAuthSessionHint } from '@/lib/professional-auth-storage';
 import {
   PROFESSIONAL_PORTAL_SCHEMA_VERSION,
   type ProfessionalLifecycleReviewState,
   type ProfessionalManagedAppointmentRecord,
   type ProfessionalManagedRequest,
-  type ProfessionalPortalDataSource,
   type ProfessionalPortalSnapshot,
   type ProfessionalPortalState,
 } from './contracts';
 
 export interface ProfessionalPortalRepository {
-  readonly source: ProfessionalPortalDataSource;
+  readonly source: 'api';
   hydrate(professionalId?: string): Promise<ProfessionalPortalSnapshot | null>;
   read(): ProfessionalPortalSnapshot | null;
   subscribe(listener: () => void): () => void;
-  write(snapshot: ProfessionalPortalSnapshot): void;
+  write(snapshot: ProfessionalPortalSnapshot): Promise<void>;
 }
 
 const requestTimeoutMs = 1500;
 
 let hasApiFallbackWarning = false;
 let cachedProfessionalPortalSnapshot: ProfessionalPortalSnapshot | null = null;
-const repositoryCache = new Map<ProfessionalPortalDataSource, ProfessionalPortalRepository>();
 const professionalPortalListeners = new Set<() => void>();
+let cachedRepository: ProfessionalPortalRepository | null = null;
 
 const withTimeout = <T>(promise: Promise<T>, timeoutMs: number) =>
   new Promise<T>((resolve, reject) => {
@@ -54,29 +51,12 @@ const notifyProfessionalPortalSubscribers = () => {
   }
 };
 
-const createInMemoryProfessionalPortalRepository = (): ProfessionalPortalRepository => ({
-  source: 'local',
-  async hydrate() {
-    return this.read();
-  },
-  read() {
-    return cachedProfessionalPortalSnapshot;
-  },
-  subscribe(listener) {
-    professionalPortalListeners.add(listener);
-
-    return () => {
-      professionalPortalListeners.delete(listener);
-    };
-  },
-  write(snapshot) {
-    cachedProfessionalPortalSnapshot = snapshot;
-    notifyProfessionalPortalSubscribers();
-  },
-});
+const writeCachedSnapshot = (snapshot: ProfessionalPortalSnapshot | null) => {
+  cachedProfessionalPortalSnapshot = snapshot;
+  notifyProfessionalPortalSubscribers();
+};
 
 const createApiProfessionalPortalRepository = (): ProfessionalPortalRepository => {
-  const localRepository = createInMemoryProfessionalPortalRepository();
   const client = createBidanappApiClient(getBackendApiBaseUrl());
   const hydrationPromises = new Map<string, Promise<ProfessionalPortalSnapshot | null>>();
 
@@ -94,24 +74,21 @@ const createApiProfessionalPortalRepository = (): ProfessionalPortalRepository =
 
     const request = (async () => {
       try {
-        if (!hasProfessionalAuthSessionHint()) {
-          return localRepository.read();
-        }
-
         const session = await withTimeout(fetchProfessionalPortalSession(client, professionalId), requestTimeoutMs);
 
         if (!session.hasSnapshot || !session.snapshot) {
-          return localRepository.read();
+          writeCachedSnapshot(null);
+          return null;
         }
 
         const snapshot = session.snapshot as unknown as ProfessionalPortalSnapshot;
-        localRepository.write(snapshot);
+        writeCachedSnapshot(snapshot);
         return snapshot;
       } catch {
         warnAboutApiFallback(
-          '[ProfessionalPortal] Backend sync is unavailable. Continuing with the local cache for this browser session.',
+          '[ProfessionalPortal] Backend sync is unavailable. The latest persisted backend snapshot remains the source of truth.',
         );
-        return localRepository.read();
+        return cachedProfessionalPortalSnapshot;
       } finally {
         hydrationPromises.delete(cacheKey);
       }
@@ -125,28 +102,45 @@ const createApiProfessionalPortalRepository = (): ProfessionalPortalRepository =
     source: 'api',
     hydrate,
     read() {
-      return localRepository.read();
+      return cachedProfessionalPortalSnapshot;
     },
     subscribe(listener) {
-      return localRepository.subscribe(listener);
-    },
-    write(snapshot) {
-      localRepository.write(snapshot);
-      if (!hasProfessionalAuthSessionHint()) {
-        return;
-      }
+      professionalPortalListeners.add(listener);
 
-      void withTimeout(
-        saveProfessionalPortalSession(client, {
-          professionalId: snapshot.state.activeProfessionalId,
-          snapshot: snapshot as unknown as ProfessionalPortalSessionSnapshot,
-        }),
-        requestTimeoutMs,
-      ).catch(() => {
-        warnAboutApiFallback(
-          '[ProfessionalPortal] Failed to persist the latest portal state to the backend. Local cache is still active.',
+      return () => {
+        professionalPortalListeners.delete(listener);
+      };
+    },
+    async write(snapshot) {
+      const previousSnapshot = cachedProfessionalPortalSnapshot;
+      writeCachedSnapshot(snapshot);
+
+      try {
+        const savedSession = await withTimeout(
+          saveProfessionalPortalSession(client, {
+            professionalId: snapshot.state.activeProfessionalId,
+            snapshot: snapshot as unknown as ProfessionalPortalSessionSnapshot,
+          }),
+          requestTimeoutMs,
         );
-      });
+
+        if (savedSession.hasSnapshot && savedSession.snapshot) {
+          writeCachedSnapshot(savedSession.snapshot as unknown as ProfessionalPortalSnapshot);
+          return;
+        }
+
+        writeCachedSnapshot(snapshot);
+      } catch {
+        warnAboutApiFallback(
+          '[ProfessionalPortal] Failed to persist the latest portal state to the backend. Reverting to the latest persisted backend snapshot.',
+        );
+        if (previousSnapshot && previousSnapshot.state.activeProfessionalId === snapshot.state.activeProfessionalId) {
+          writeCachedSnapshot(previousSnapshot);
+          return;
+        }
+
+        writeCachedSnapshot(snapshot);
+      }
     },
   };
 };
@@ -175,16 +169,10 @@ export const createProfessionalPortalSnapshot = (
 });
 
 export const getProfessionalPortalRepository = (): ProfessionalPortalRepository => {
-  const source = PUBLIC_ENV.professionalPortalDataSource;
-  const cachedRepository = repositoryCache.get(source);
-
   if (cachedRepository) {
     return cachedRepository;
   }
 
-  const nextRepository =
-    source === 'api' ? createApiProfessionalPortalRepository() : createInMemoryProfessionalPortalRepository();
-
-  repositoryCache.set(source, nextRepository);
-  return nextRepository;
+  cachedRepository = createApiProfessionalPortalRepository();
+  return cachedRepository;
 };

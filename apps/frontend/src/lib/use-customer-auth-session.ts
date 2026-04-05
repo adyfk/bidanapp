@@ -10,6 +10,7 @@ import {
   syncCustomerAuthPasswordToApi,
 } from '@/lib/customer-auth-api';
 import { subscribeCustomerAuthSessionHint } from '@/lib/customer-auth-storage';
+import { cleanupCustomerPushSubscription } from '@/lib/customer-push';
 import { useViewerSession } from '@/lib/use-viewer-session';
 import type { CustomerAuthSessionState } from '@/types/customer-auth';
 
@@ -146,6 +147,9 @@ export const useCustomerAuthSession = () => {
   };
 
   const logout = async () => {
+    if (session.isAuthenticated) {
+      await cleanupCustomerPushSubscription();
+    }
     await logoutCustomerFromApi();
     updateSession(buildLoggedOutSession(session));
     continueAsVisitor();

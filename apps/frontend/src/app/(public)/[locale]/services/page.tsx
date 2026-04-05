@@ -1,6 +1,8 @@
 import { ServicesScreen } from '@/components/screens/ServicesScreen';
 import { getPublicBootstrapData } from '@/lib/public-bootstrap';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Explore Services - BidanCare',
   description: 'Browse all available services provided by our independent professionals.',

@@ -9,7 +9,7 @@ The repository needs one FE-facing integration boundary that is:
 - generated from backend-owned contracts
 - usable by the frontend without duplicating schemas
 - capable of handling REST and realtime concerns together
-- stable enough to support screen-by-screen migration from bootstrapped content documents to richer backend persistence
+- stable enough to support screen-by-screen migration from bootstrapped published read-model documents to richer backend persistence
 
 `packages/sdk` is that boundary.
 
@@ -154,7 +154,7 @@ If only a frontend mapping changes and backend contract is unchanged:
 
 - `@bidanapp/sdk` is not intended for npm publishing at this stage
 - it is a workspace integration boundary for this monorepo
-- some public read-model surfaces still use bootstrapped content documents until richer relational or editorial pipelines land
+- some public read-model surfaces still use bootstrapped published read-model documents until richer relational or editorial pipelines land
 - websocket frame contracts are modeled outside raw OpenAPI because the REST contract is not the right abstraction for bidirectional events
 
 ## 11. Key Commands

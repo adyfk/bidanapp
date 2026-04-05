@@ -1,4 +1,5 @@
 import type { Route } from 'next';
+import { PUBLIC_ENV } from '@/lib/env';
 import type { AdminFocusArea } from '@/types/admin';
 
 export const ADMIN_ROUTES = {
@@ -22,7 +23,7 @@ export interface AdminNavItem {
   shortLabel: string;
 }
 
-export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
+const BASE_ADMIN_NAV_ITEMS: AdminNavItem[] = [
   {
     description: 'Command center, KPI harian, dan quick actions lintas operasional.',
     focusArea: 'all',
@@ -72,14 +73,19 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     shortLabel: 'Desk',
   },
   {
-    description: 'Raw tables, import-export snapshot, reset seed, dan audit data operasional.',
+    description: 'Raw tables, import-export snapshot, reset baseline backend, dan audit data operasional.',
     focusArea: 'all',
     href: ADMIN_ROUTES.studio,
-    keywords: ['studio', 'snapshot', 'seed', 'import', 'export', 'reset'],
+    keywords: ['studio', 'snapshot', 'baseline', 'import', 'export', 'reset'],
     label: 'Data Studio',
     shortLabel: 'Data',
   },
 ];
 
+export const getAdminNavItems = (): AdminNavItem[] =>
+  BASE_ADMIN_NAV_ITEMS.filter((item) => item.href !== ADMIN_ROUTES.studio || PUBLIC_ENV.adminStudioEnabled);
+
+export const ADMIN_NAV_ITEMS: AdminNavItem[] = getAdminNavItems();
+
 export const getAdminNavItem = (pathname?: string | null) =>
-  ADMIN_NAV_ITEMS.find((item) => item.href === pathname) || null;
+  getAdminNavItems().find((item) => item.href === pathname) || null;

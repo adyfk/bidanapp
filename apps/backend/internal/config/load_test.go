@@ -32,6 +32,10 @@ func TestLoadFromAppRootReadsEnvFilesAndNormalizesConfig(t *testing.T) {
 		"DATABASE_URL=postgres://postgres:postgres@localhost:5432/bidanapp?sslmode=disable",
 		"CUSTOMER_AUTH_SESSION_TTL=10h",
 		"PROFESSIONAL_AUTH_SESSION_TTL=12h",
+		"PAYMENT_PROVIDER=xendit",
+		"PAYMENT_CURRENCY=IDR",
+		"XENDIT_SECRET_KEY=xnd_development_secret_key",
+		"XENDIT_WEBHOOK_TOKEN=xnd_webhook_token",
 		`ADMIN_CONSOLE_CREDENTIALS_JSON=[{"adminId":"adm-01","email":"naya@ops.bidanapp.id","passwordHash":"$2a$12$9kXq1E5j3H6m7L8n2P4rUeB9tJ0vC1xYzAqR4mTnV7pQwS6dF8gHi","focusArea":"support"}]`,
 		"REDIS_URL=redis://localhost:6379",
 		"LOG_LEVEL=warn",
@@ -59,6 +63,10 @@ func TestLoadFromAppRootReadsEnvFilesAndNormalizesConfig(t *testing.T) {
 		"DATABASE_URL",
 		"CUSTOMER_AUTH_SESSION_TTL",
 		"PROFESSIONAL_AUTH_SESSION_TTL",
+		"PAYMENT_PROVIDER",
+		"PAYMENT_CURRENCY",
+		"XENDIT_SECRET_KEY",
+		"XENDIT_WEBHOOK_TOKEN",
 		"ADMIN_CONSOLE_CREDENTIALS_JSON",
 		"REDIS_URL",
 		"LOG_LEVEL",
@@ -114,6 +122,14 @@ func TestLoadFromAppRootReadsEnvFilesAndNormalizesConfig(t *testing.T) {
 	if got, want := cfg.AuthRateLimit.MaxAttempts, 10; got != want {
 		t.Fatalf("unexpected auth rate limit max attempts: got %d want %d", got, want)
 	}
+
+	if got, want := cfg.Payment.Provider, "xendit"; got != want {
+		t.Fatalf("unexpected payment provider: got %s want %s", got, want)
+	}
+
+	if got, want := cfg.Payment.Currency, "IDR"; got != want {
+		t.Fatalf("unexpected payment currency: got %s want %s", got, want)
+	}
 }
 
 func TestLoadFromAppRootFailsForInvalidPort(t *testing.T) {
@@ -159,6 +175,9 @@ func TestLoadFromAppRootFailsWhenProductionAdminCredentialsAreMissing(t *testing
 		"SEED_DATA_DIR=./seeddata",
 		"DATABASE_URL=postgres://postgres:postgres@localhost:5432/bidanapp?sslmode=disable",
 		"CORS_ALLOWED_ORIGINS=https://app.bidanapp.id",
+		"PAYMENT_PROVIDER=xendit",
+		"XENDIT_SECRET_KEY=xnd_test_key",
+		"XENDIT_WEBHOOK_TOKEN=xnd_test_token",
 		"REDIS_URL=redis://localhost:6379",
 	}, "\n")
 
@@ -166,7 +185,7 @@ func TestLoadFromAppRootFailsWhenProductionAdminCredentialsAreMissing(t *testing
 		t.Fatalf("write env file: %v", err)
 	}
 
-	restore := clearEnv("APP_ENV", "SEED_DATA_DIR", "DATABASE_URL", "CORS_ALLOWED_ORIGINS", "REDIS_URL", "ADMIN_CONSOLE_CREDENTIALS_JSON")
+	restore := clearEnv("APP_ENV", "SEED_DATA_DIR", "DATABASE_URL", "CORS_ALLOWED_ORIGINS", "PAYMENT_PROVIDER", "XENDIT_SECRET_KEY", "XENDIT_WEBHOOK_TOKEN", "REDIS_URL", "ADMIN_CONSOLE_CREDENTIALS_JSON")
 	defer restore()
 
 	_, err := loadFromAppRoot(appRoot)
@@ -192,6 +211,9 @@ func TestLoadFromAppRootFailsWhenProductionUsesDefaultAdminPasswordHash(t *testi
 		"SEED_DATA_DIR=./seeddata",
 		"DATABASE_URL=postgres://postgres:postgres@localhost:5432/bidanapp?sslmode=disable",
 		"CORS_ALLOWED_ORIGINS=https://app.bidanapp.id",
+		"PAYMENT_PROVIDER=xendit",
+		"XENDIT_SECRET_KEY=xnd_test_key",
+		"XENDIT_WEBHOOK_TOKEN=xnd_test_token",
 		`ADMIN_CONSOLE_CREDENTIALS_JSON=[{"adminId":"adm-01","email":"ops@bidanapp.id","passwordHash":"` + defaultAdminPassword + `","focusArea":"support"}]`,
 		"REDIS_URL=redis://localhost:6379",
 	}, "\n")
@@ -200,7 +222,7 @@ func TestLoadFromAppRootFailsWhenProductionUsesDefaultAdminPasswordHash(t *testi
 		t.Fatalf("write env file: %v", err)
 	}
 
-	restore := clearEnv("APP_ENV", "SEED_DATA_DIR", "DATABASE_URL", "CORS_ALLOWED_ORIGINS", "REDIS_URL", "ADMIN_CONSOLE_CREDENTIALS_JSON")
+	restore := clearEnv("APP_ENV", "SEED_DATA_DIR", "DATABASE_URL", "CORS_ALLOWED_ORIGINS", "PAYMENT_PROVIDER", "XENDIT_SECRET_KEY", "XENDIT_WEBHOOK_TOKEN", "REDIS_URL", "ADMIN_CONSOLE_CREDENTIALS_JSON")
 	defer restore()
 
 	_, err := loadFromAppRoot(appRoot)
@@ -244,6 +266,10 @@ func TestLoadFromAppRootAllowsDevelopmentDefaultAdminCredentials(t *testing.T) {
 	if len(cfg.AdminAuth.Credentials) == 0 {
 		t.Fatal("expected default development admin credentials")
 	}
+
+	if got, want := cfg.Payment.Provider, "manual_test"; got != want {
+		t.Fatalf("unexpected development payment provider: got %s want %s", got, want)
+	}
 }
 
 func TestLoadFromAppRootFailsWhenProductionCookiesAreNotSecure(t *testing.T) {
@@ -259,6 +285,9 @@ func TestLoadFromAppRootFailsWhenProductionCookiesAreNotSecure(t *testing.T) {
 		"SEED_DATA_DIR=./seeddata",
 		"DATABASE_URL=postgres://postgres:postgres@localhost:5432/bidanapp?sslmode=disable",
 		"CORS_ALLOWED_ORIGINS=https://app.bidanapp.id",
+		"PAYMENT_PROVIDER=xendit",
+		"XENDIT_SECRET_KEY=xnd_test_key",
+		"XENDIT_WEBHOOK_TOKEN=xnd_test_token",
 		"AUTH_COOKIE_SECURE=false",
 		`ADMIN_CONSOLE_CREDENTIALS_JSON=[{"adminId":"adm-01","email":"ops@bidanapp.id","passwordHash":"$2a$12$9kXq1E5j3H6m7L8n2P4rUeB9tJ0vC1xYzAqR4mTnV7pQwS6dF8gHi","focusArea":"support"}]`,
 		"REDIS_URL=redis://localhost:6379",
@@ -268,7 +297,7 @@ func TestLoadFromAppRootFailsWhenProductionCookiesAreNotSecure(t *testing.T) {
 		t.Fatalf("write env file: %v", err)
 	}
 
-	restore := clearEnv("APP_ENV", "SEED_DATA_DIR", "DATABASE_URL", "CORS_ALLOWED_ORIGINS", "AUTH_COOKIE_SECURE", "ADMIN_CONSOLE_CREDENTIALS_JSON", "REDIS_URL")
+	restore := clearEnv("APP_ENV", "SEED_DATA_DIR", "DATABASE_URL", "CORS_ALLOWED_ORIGINS", "PAYMENT_PROVIDER", "XENDIT_SECRET_KEY", "XENDIT_WEBHOOK_TOKEN", "AUTH_COOKIE_SECURE", "ADMIN_CONSOLE_CREDENTIALS_JSON", "REDIS_URL")
 	defer restore()
 
 	_, err := loadFromAppRoot(appRoot)
@@ -294,6 +323,9 @@ func TestLoadFromAppRootFailsWhenProductionOriginIsNotHTTPS(t *testing.T) {
 		"SEED_DATA_DIR=./seeddata",
 		"DATABASE_URL=postgres://postgres:postgres@localhost:5432/bidanapp?sslmode=disable",
 		"CORS_ALLOWED_ORIGINS=http://app.bidanapp.id",
+		"PAYMENT_PROVIDER=xendit",
+		"XENDIT_SECRET_KEY=xnd_test_key",
+		"XENDIT_WEBHOOK_TOKEN=xnd_test_token",
 		`ADMIN_CONSOLE_CREDENTIALS_JSON=[{"adminId":"adm-01","email":"ops@bidanapp.id","passwordHash":"$2a$12$9kXq1E5j3H6m7L8n2P4rUeB9tJ0vC1xYzAqR4mTnV7pQwS6dF8gHi","focusArea":"support"}]`,
 		"REDIS_URL=redis://localhost:6379",
 	}, "\n")
@@ -302,7 +334,7 @@ func TestLoadFromAppRootFailsWhenProductionOriginIsNotHTTPS(t *testing.T) {
 		t.Fatalf("write env file: %v", err)
 	}
 
-	restore := clearEnv("APP_ENV", "SEED_DATA_DIR", "DATABASE_URL", "CORS_ALLOWED_ORIGINS", "ADMIN_CONSOLE_CREDENTIALS_JSON", "REDIS_URL")
+	restore := clearEnv("APP_ENV", "SEED_DATA_DIR", "DATABASE_URL", "CORS_ALLOWED_ORIGINS", "PAYMENT_PROVIDER", "XENDIT_SECRET_KEY", "XENDIT_WEBHOOK_TOKEN", "ADMIN_CONSOLE_CREDENTIALS_JSON", "REDIS_URL")
 	defer restore()
 
 	_, err := loadFromAppRoot(appRoot)
@@ -311,6 +343,76 @@ func TestLoadFromAppRootFailsWhenProductionOriginIsNotHTTPS(t *testing.T) {
 	}
 
 	if !strings.Contains(err.Error(), "must use https in production") {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestLoadFromAppRootFailsWhenProductionPaymentProviderIsNotXendit(t *testing.T) {
+	appRoot := t.TempDir()
+	seedDataDir := filepath.Join(appRoot, "seeddata")
+
+	if err := os.MkdirAll(seedDataDir, 0o755); err != nil {
+		t.Fatalf("create seed data dir: %v", err)
+	}
+
+	envFile := strings.Join([]string{
+		"APP_ENV=production",
+		"SEED_DATA_DIR=./seeddata",
+		"DATABASE_URL=postgres://postgres:postgres@localhost:5432/bidanapp?sslmode=disable",
+		"CORS_ALLOWED_ORIGINS=https://app.bidanapp.id",
+		"PAYMENT_PROVIDER=manual_test",
+		`ADMIN_CONSOLE_CREDENTIALS_JSON=[{"adminId":"adm-01","email":"ops@bidanapp.id","passwordHash":"$2a$12$9kXq1E5j3H6m7L8n2P4rUeB9tJ0vC1xYzAqR4mTnV7pQwS6dF8gHi","focusArea":"support"}]`,
+		"REDIS_URL=redis://localhost:6379",
+	}, "\n")
+
+	if err := os.WriteFile(filepath.Join(appRoot, ".env"), []byte(envFile), 0o644); err != nil {
+		t.Fatalf("write env file: %v", err)
+	}
+
+	restore := clearEnv("APP_ENV", "SEED_DATA_DIR", "DATABASE_URL", "CORS_ALLOWED_ORIGINS", "PAYMENT_PROVIDER", "ADMIN_CONSOLE_CREDENTIALS_JSON", "REDIS_URL")
+	defer restore()
+
+	_, err := loadFromAppRoot(appRoot)
+	if err == nil {
+		t.Fatal("expected config load error")
+	}
+
+	if !strings.Contains(err.Error(), "PAYMENT_PROVIDER must be xendit in production") {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestLoadFromAppRootFailsWhenXenditSecretsAreMissing(t *testing.T) {
+	appRoot := t.TempDir()
+	seedDataDir := filepath.Join(appRoot, "seeddata")
+
+	if err := os.MkdirAll(seedDataDir, 0o755); err != nil {
+		t.Fatalf("create seed data dir: %v", err)
+	}
+
+	envFile := strings.Join([]string{
+		"APP_ENV=staging",
+		"SEED_DATA_DIR=./seeddata",
+		"DATABASE_URL=postgres://postgres:postgres@localhost:5432/bidanapp?sslmode=disable",
+		"CORS_ALLOWED_ORIGINS=https://staging.bidanapp.id",
+		"PAYMENT_PROVIDER=xendit",
+		`ADMIN_CONSOLE_CREDENTIALS_JSON=[{"adminId":"adm-01","email":"ops@bidanapp.id","passwordHash":"$2a$12$9kXq1E5j3H6m7L8n2P4rUeB9tJ0vC1xYzAqR4mTnV7pQwS6dF8gHi","focusArea":"support"}]`,
+		"REDIS_URL=redis://localhost:6379",
+	}, "\n")
+
+	if err := os.WriteFile(filepath.Join(appRoot, ".env"), []byte(envFile), 0o644); err != nil {
+		t.Fatalf("write env file: %v", err)
+	}
+
+	restore := clearEnv("APP_ENV", "SEED_DATA_DIR", "DATABASE_URL", "CORS_ALLOWED_ORIGINS", "PAYMENT_PROVIDER", "ADMIN_CONSOLE_CREDENTIALS_JSON", "REDIS_URL")
+	defer restore()
+
+	_, err := loadFromAppRoot(appRoot)
+	if err == nil {
+		t.Fatal("expected config load error")
+	}
+
+	if !strings.Contains(err.Error(), "XENDIT_SECRET_KEY must not be empty when PAYMENT_PROVIDER=xendit") {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }

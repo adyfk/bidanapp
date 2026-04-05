@@ -130,13 +130,13 @@ npm run seed:json --workspace @bidanapp/backend
 
 This seeder resets and rehydrates:
 
-- public content documents
-- customer and professional auth registries
-- professional portal sessions
+- published read-model documents
+- database-backed customer, professional, and admin auth accounts plus sessions
+- professional portal runtime state
 - chat threads and messages
-- customer and professional notification state
-- consumer preferences
-- admin support desk and admin console tables
+- customer and professional notification state tables
+- consumer preferences state tables
+- admin support desk and admin console runtime tables
 
 The command prints seeded customer/professional login credentials and API bearer tokens for quick verification.
 See [QA Seed Matrix](./qa-seed-matrix.md) for the scenario map and suggested validation flow.

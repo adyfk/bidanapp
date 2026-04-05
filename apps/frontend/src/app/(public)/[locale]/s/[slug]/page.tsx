@@ -4,21 +4,14 @@ import { ServiceDetailScreen } from '@/components/screens/ServiceDetailScreen';
 import { APP_CONFIG } from '@/lib/config';
 import { getPublicBootstrapData } from '@/lib/public-bootstrap';
 
+export const dynamic = 'force-dynamic';
+
 interface Props {
   params: Promise<{
     slug: string;
   }>;
 }
 
-export async function generateStaticParams() {
-  const bootstrap = await getPublicBootstrapData();
-
-  return bootstrap.catalog.services.map((service) => ({
-    slug: service.slug,
-  }));
-}
-
-// Generate dynamic metadata for SEO
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const bootstrap = await getPublicBootstrapData();

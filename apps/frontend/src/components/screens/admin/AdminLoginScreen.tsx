@@ -119,7 +119,7 @@ export const AdminLoginScreen = () => {
             />
             <InfoTile
               title="State ops"
-              body="Desk support, data studio, dan snapshot admin hanya dihydrate setelah session tervalidasi."
+              body="Desk support dan modul operasional internal hanya dihydrate setelah session tervalidasi."
             />
             <InfoTile
               title="Flow cepat"

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { hydrateCustomerAuthSessionFromApi } from '@/lib/customer-auth-api';
 import { hasCustomerAuthSessionHint, subscribeCustomerAuthSessionHint } from '@/lib/customer-auth-storage';
 import {
-  buildFallbackPublicBootstrapData,
+  buildEmptyPublicBootstrapData,
   fetchPublicBootstrapData,
   type PublicBootstrapData,
 } from '@/lib/public-bootstrap-source';
@@ -12,7 +12,7 @@ import { readCachedCustomerAuthSession, subscribeCustomerAuthSession } from '@/l
 import type { CustomerAuthSessionState } from '@/types/customer-auth';
 
 const appShellChangeEventName = 'bidanapp:app-shell-change';
-let cachedBootstrap = buildFallbackPublicBootstrapData();
+let cachedBootstrap = buildEmptyPublicBootstrapData();
 let hydrateBootstrapPromise: Promise<PublicBootstrapData | null> | null = null;
 
 const readAuthenticatedConsumerOverlay = (): Pick<

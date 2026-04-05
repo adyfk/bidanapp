@@ -19,17 +19,16 @@ import type {
   ProfessionalManagedGalleryItem,
   ProfessionalManagedPortfolioEntry,
   ProfessionalManagedService,
+  ProfessionalPortalAdminProfile,
   ProfessionalPortalState,
 } from '@/features/professional-portal/lib/contracts';
 import { getBackendApiBaseUrl } from '@/lib/backend';
-import { PUBLIC_ENV } from '@/lib/env';
-import { hasProfessionalAuthSessionHint } from '@/lib/professional-auth-storage';
 
 const requestTimeoutMs = 1500;
 const syncWarnings = new Set<string>();
 const client = createBidanappApiClient(getBackendApiBaseUrl());
 
-const isApiSyncEnabled = () => PUBLIC_ENV.professionalPortalDataSource === 'api' && typeof window !== 'undefined';
+const isApiSyncEnabled = () => typeof window !== 'undefined';
 const isAdminPortalSyncEnabled = () => isApiSyncEnabled() && window.location.pathname.startsWith('/admin');
 
 const withTimeout = <T>(promise: Promise<T>, timeoutMs: number) =>
@@ -68,7 +67,7 @@ const fireAndForgetSync = (promise: Promise<unknown>, warningMessage: string) =>
 };
 
 const fireAndForgetProtectedSync = (promiseFactory: () => Promise<unknown>, warningMessage: string) => {
-  if (!hasProfessionalAuthSessionHint() || !isApiSyncEnabled()) {
+  if (!isApiSyncEnabled()) {
     return;
   }
 
@@ -158,6 +157,7 @@ export const hydrateProfessionalPortalAdminReviewStatesFromApi = async () => {
     const body = await response.json();
     return body?.data as
       | {
+          profilesByProfessionalId?: Record<string, ProfessionalPortalAdminProfile>;
           reviewStatesByProfessionalId?: Record<string, ProfessionalLifecycleReviewState>;
         }
       | undefined;

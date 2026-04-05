@@ -2,40 +2,36 @@ package seeding
 
 import (
 	"context"
-	"crypto/sha256"
 	"database/sql"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
-	"golang.org/x/crypto/bcrypt"
-
 	"bidanapp/apps/backend/internal/config"
+	"bidanapp/apps/backend/internal/modules/adminauth"
 	"bidanapp/apps/backend/internal/modules/clientstate"
+	"bidanapp/apps/backend/internal/modules/customerauth"
+	"bidanapp/apps/backend/internal/modules/professionalauth"
 	"bidanapp/apps/backend/internal/modules/professionalportal"
 	"bidanapp/apps/backend/internal/modules/readmodel"
+	"bidanapp/apps/backend/internal/platform/appointmentstore"
+	"bidanapp/apps/backend/internal/platform/authstore"
 	"bidanapp/apps/backend/internal/platform/contentstore"
 	"bidanapp/apps/backend/internal/platform/documentstore"
 	"bidanapp/apps/backend/internal/platform/portalstore"
+	"bidanapp/apps/backend/internal/platform/pushstore"
 )
 
 const (
 	scenarioComprehensive            = "comprehensive"
 	defaultCustomerPassword          = "Customer2026A"
 	defaultProfessionalPassword      = "Professional2026A"
-	customerAccountNamespace         = "customer_auth_account"
-	customerAccountRegistryKey       = "registry"
-	customerSessionNamespace         = "customer_auth_session"
-	professionalAccountNamespace     = "professional_auth_account"
-	professionalAccountRegistryKey   = "registry"
-	professionalSessionNamespace     = "professional_auth_session"
-	adminSessionNamespace            = "admin_auth_session"
 	defaultSeededAdminRoute          = "/admin/support"
 	defaultSupportDeskSchemaVersion  = 1
 	defaultAdminConsoleSchemaVersion = 1
@@ -110,14 +106,14 @@ type Summary struct {
 	ChatMessageCount                   int                    `json:"chatMessageCount"`
 	ChatThreadCount                    int                    `json:"chatThreadCount"`
 	CoveredCities                      []string               `json:"coveredCities"`
-	ContentDocumentCount               int                    `json:"contentDocumentCount"`
+	PublishedReadModelDocumentCount    int                    `json:"publishedReadModelDocumentCount"`
 	CustomerAccounts                   []AccountLogin         `json:"customerAccounts"`
 	CustomerNotificationStateCount     int                    `json:"customerNotificationStateCount"`
 	CustomerPassword                   string                 `json:"customerPassword"`
 	CustomerPreferenceCount            int                    `json:"customerPreferenceCount"`
 	CustomerScenarios                  []CustomerScenario     `json:"customerScenarios"`
 	PortalReviewStatusCounts           map[string]int         `json:"portalReviewStatusCounts"`
-	PortalSessionCount                 int                    `json:"portalSessionCount"`
+	PortalStateCount                   int                    `json:"portalStateCount"`
 	ProfessionalAccounts               []AccountLogin         `json:"professionalAccounts"`
 	ProfessionalNotificationStateCount int                    `json:"professionalNotificationStateCount"`
 	ProfessionalPassword               string                 `json:"professionalPassword"`
@@ -130,16 +126,21 @@ type Summary struct {
 }
 
 type seeder struct {
-	appointments  []readmodel.AppointmentSeed
-	cfg           config.Config
-	contentStore  contentstore.Store
-	dataset       dataset
-	db            *sql.DB
-	documentStore documentstore.Store
-	opts          Options
-	portalService *professionalportal.Service
-	portalStore   portalstore.Store
-	summary       Summary
+	adminAuth        *adminauth.Service
+	appointments     []readmodel.AppointmentSeed
+	appointmentStore appointmentstore.Store
+	cfg              config.Config
+	contentStore     contentstore.Store
+	customerAuth     *customerauth.Service
+	dataset          dataset
+	db               *sql.DB
+	documentStore    documentstore.Store
+	opts             Options
+	portalService    *professionalportal.Service
+	portalStore      portalstore.Store
+	pushStore        pushstore.Store
+	profAuth         *professionalauth.Service
+	summary          Summary
 }
 
 func Run(ctx context.Context, cfg config.Config, db *sql.DB, writer io.Writer, options Options) (Summary, error) {
@@ -151,14 +152,16 @@ func Run(ctx context.Context, cfg config.Config, db *sql.DB, writer io.Writer, o
 	}
 
 	instance := &seeder{
-		appointments:  buildSeedAppointments(dataset),
-		cfg:           cfg,
-		contentStore:  contentstore.NewPostgresStore(db),
-		dataset:       dataset,
-		db:            db,
-		documentStore: documentstore.NewPostgresStore(db),
-		opts:          appliedOptions,
-		portalStore:   portalstore.NewPostgresStore(db),
+		appointments:     buildSeedAppointments(dataset),
+		appointmentStore: appointmentstore.NewPostgresStore(db),
+		cfg:              cfg,
+		contentStore:     contentstore.NewPostgresStore(db),
+		dataset:          dataset,
+		db:               db,
+		documentStore:    documentstore.NewPostgresStore(db),
+		opts:             appliedOptions,
+		portalStore:      portalstore.NewPostgresStore(db),
+		pushStore:        pushstore.NewPostgresStore(db),
 		summary: Summary{
 			AdminAccesses:             []AdminAccess{},
 			AdminScenarios:            []AdminScenario{},
@@ -179,6 +182,16 @@ func Run(ctx context.Context, cfg config.Config, db *sql.DB, writer io.Writer, o
 		},
 	}
 	instance.portalService = professionalportal.NewService(instance.portalStore)
+	authStore := authstore.NewPostgresStore(db)
+	readModelService := readmodel.NewServiceWithStore(
+		cfg.SeedData.DataDir,
+		instance.contentStore,
+		instance.portalStore,
+		instance.appointmentStore,
+	)
+	instance.adminAuth = adminauth.NewService(cfg.AdminAuth, authStore)
+	instance.customerAuth = customerauth.NewService(cfg.CustomerAuth, authStore)
+	instance.profAuth = professionalauth.NewService(cfg.ProfessionalAuth, readModelService, authStore)
 
 	if err := instance.run(ctx); err != nil {
 		return Summary{}, err
@@ -217,7 +230,7 @@ func (s *seeder) run(ctx context.Context) error {
 		}
 	}
 
-	if err := s.bootstrapContentDocuments(ctx); err != nil {
+	if err := s.bootstrapPublishedReadModelDocuments(ctx); err != nil {
 		return err
 	}
 
@@ -245,6 +258,10 @@ func (s *seeder) run(ctx context.Context) error {
 		return err
 	}
 
+	if err := s.seedAppointments(ctx); err != nil {
+		return err
+	}
+
 	if err := s.seedProfessionalPortal(ctx); err != nil {
 		return err
 	}
@@ -267,9 +284,37 @@ func resetMutableState(ctx context.Context, db *sql.DB) error {
 		TRUNCATE TABLE
 			chat_messages,
 			chat_threads,
-			professional_portal_sessions,
-			app_state_documents,
-			content_documents
+			auth_sessions,
+			admin_auth_accounts,
+			professional_auth_accounts,
+			customer_auth_accounts,
+			auth_users,
+			admin_console_table_rows,
+			admin_console_tables,
+			admin_console_states,
+			support_tickets,
+			admin_support_desk_states,
+			admin_session_states,
+			consumer_preference_states,
+			professional_notification_states,
+			customer_notification_states,
+			customer_push_subscriptions,
+			payout_batches,
+			professional_earnings_ledger,
+			refund_events,
+			refund_requests,
+			payment_events,
+			payment_requests,
+			appointment_operational_events,
+			appointment_participants,
+			appointment_change_requests,
+			appointment_status_history,
+			viewer_session_states,
+			appointment_home_visit_executions,
+			appointments,
+			professional_portal_runtime_state,
+			professional_portal_states,
+			published_readmodel_documents
 		RESTART IDENTITY CASCADE
 	`)
 	if err != nil {
@@ -279,10 +324,10 @@ func resetMutableState(ctx context.Context, db *sql.DB) error {
 	return nil
 }
 
-func (s *seeder) bootstrapContentDocuments(ctx context.Context) error {
+func (s *seeder) bootstrapPublishedReadModelDocuments(ctx context.Context) error {
 	repository := readmodel.NewRepository(s.cfg.SeedData.DataDir, s.contentStore)
 	if err := repository.EnsureBootstrapped(ctx); err != nil {
-		return fmt.Errorf("bootstrap content documents: %w", err)
+		return fmt.Errorf("bootstrap published read-model documents: %w", err)
 	}
 
 	entries, err := jsonSeedFiles(s.cfg.SeedData.DataDir)
@@ -290,7 +335,7 @@ func (s *seeder) bootstrapContentDocuments(ctx context.Context) error {
 		return err
 	}
 
-	s.summary.ContentDocumentCount = len(entries)
+	s.summary.PublishedReadModelDocumentCount = len(entries)
 	return nil
 }
 
@@ -362,25 +407,60 @@ func (s *seeder) seedChatRuntime(ctx context.Context) error {
 	return nil
 }
 
-func (s *seeder) seedCustomerAuthRegistry(ctx context.Context) error {
-	passwordHash, err := bcrypt.GenerateFromPassword([]byte(s.opts.CustomerPassword), bcrypt.DefaultCost)
-	if err != nil {
-		return fmt.Errorf("hash customer seed password: %w", err)
+func (s *seeder) seedAppointments(ctx context.Context) error {
+	if s.appointmentStore == nil {
+		return fmt.Errorf("appointment store is required")
 	}
 
-	accountsByConsumerID := make(map[string]any, len(s.dataset.Consumers))
+	for _, appointment := range s.appointments {
+		record := appointmentRecordFromSeed(appointment)
+		if _, err := s.appointmentStore.UpsertAppointment(ctx, record); err != nil {
+			return fmt.Errorf("seed appointment %s: %w", appointment.ID, err)
+		}
+
+		if err := s.appointmentStore.ReplaceAppointmentParticipants(ctx, appointment.ID, []appointmentstore.AppointmentParticipant{
+			{
+				AppointmentID:   appointment.ID,
+				ParticipantKind: "customer",
+				ParticipantID:   appointment.ConsumerID,
+				DisplayName:     appointment.ConsumerID,
+				CreatedAt:       record.CreatedAt,
+			},
+			{
+				AppointmentID:   appointment.ID,
+				ParticipantKind: "professional",
+				ParticipantID:   appointment.ProfessionalID,
+				DisplayName:     appointment.ProfessionalID,
+				CreatedAt:       record.CreatedAt,
+			},
+		}); err != nil {
+			return fmt.Errorf("seed appointment participants %s: %w", appointment.ID, err)
+		}
+
+		for _, event := range appointmentStatusHistoryFromSeed(appointment) {
+			if _, err := s.appointmentStore.AppendAppointmentStatusEvent(ctx, event); err != nil {
+				return fmt.Errorf("seed appointment timeline %s: %w", appointment.ID, err)
+			}
+		}
+	}
+
+	return nil
+}
+
+func (s *seeder) seedCustomerAuthRegistry(ctx context.Context) error {
 	for index, consumer := range s.dataset.Consumers {
 		area := s.areaForConsumerIndex(index)
 		city := area.City
 		normalizedPhone := normalizePhone(consumer.Phone)
-		accountsByConsumerID[consumer.ID] = map[string]any{
-			"city":            city,
-			"consumerId":      consumer.ID,
-			"displayName":     consumer.Name,
-			"passwordHash":    string(passwordHash),
-			"phone":           normalizedPhone,
-			"phoneNormalized": normalizedPhone,
-			"registeredAt":    seededReferenceTime.Add(-time.Duration(index+1) * 24 * time.Hour).Format(time.RFC3339),
+		if err := s.customerAuth.SeedAccount(ctx, customerauth.SeedAccountInput{
+			City:         city,
+			ConsumerID:   consumer.ID,
+			DisplayName:  consumer.Name,
+			Password:     s.opts.CustomerPassword,
+			Phone:        normalizedPhone,
+			RegisteredAt: seededReferenceTime.Add(-time.Duration(index+1) * 24 * time.Hour),
+		}); err != nil {
+			return fmt.Errorf("seed customer auth account %s: %w", consumer.ID, err)
 		}
 
 		s.summary.CustomerAccounts = append(s.summary.CustomerAccounts, AccountLogin{
@@ -391,42 +471,25 @@ func (s *seeder) seedCustomerAuthRegistry(ctx context.Context) error {
 			Phone:       normalizedPhone,
 		})
 	}
-
-	if _, err := s.documentStore.Upsert(ctx, documentstore.Record{
-		Namespace: customerAccountNamespace,
-		Key:       customerAccountRegistryKey,
-		SavedAt:   seededReferenceTime.UTC(),
-		Snapshot: map[string]any{
-			"accountsByConsumerId": accountsByConsumerID,
-		},
-	}); err != nil {
-		return fmt.Errorf("seed customer auth registry: %w", err)
-	}
 	return nil
 }
 
 func (s *seeder) seedProfessionalAuthRegistry(ctx context.Context) error {
-	passwordHash, err := bcrypt.GenerateFromPassword([]byte(s.opts.ProfessionalPassword), bcrypt.DefaultCost)
-	if err != nil {
-		return fmt.Errorf("hash professional seed password: %w", err)
-	}
-
 	areasByID := areasByID(s.dataset.Areas)
-	accountsByProfessionalID := make(map[string]any, len(s.dataset.Professionals))
 	for index, professional := range s.dataset.Professionals {
 		normalizedPhone := normalizePhone(seedProfessionalPhone(index))
 		city := primaryProfessionalCity(professional, areasByID)
 		credentialNumber := seedCredentialNumber(professional.ID)
-		accountsByProfessionalID[professional.ID] = map[string]any{
-			"city":                city,
-			"credentialNumber":    credentialNumber,
-			"displayName":         professional.Name,
-			"passwordHash":        string(passwordHash),
-			"phone":               normalizedPhone,
-			"phoneNormalized":     normalizedPhone,
-			"professionalId":      professional.ID,
-			"recoveryRequestedAt": "",
-			"registeredAt":        seededReferenceTime.Add(-time.Duration(index+2) * 12 * time.Hour).Format(time.RFC3339),
+		if err := s.profAuth.SeedAccount(ctx, professionalauth.SeedAccountInput{
+			City:             city,
+			CredentialNumber: credentialNumber,
+			DisplayName:      professional.Name,
+			Password:         s.opts.ProfessionalPassword,
+			Phone:            normalizedPhone,
+			ProfessionalID:   professional.ID,
+			RegisteredAt:     seededReferenceTime.Add(-time.Duration(index+2) * 12 * time.Hour),
+		}); err != nil {
+			return fmt.Errorf("seed professional auth account %s: %w", professional.ID, err)
 		}
 
 		s.summary.ProfessionalAccounts = append(s.summary.ProfessionalAccounts, AccountLogin{
@@ -439,17 +502,6 @@ func (s *seeder) seedProfessionalAuthRegistry(ctx context.Context) error {
 		})
 	}
 
-	if _, err := s.documentStore.Upsert(ctx, documentstore.Record{
-		Namespace: professionalAccountNamespace,
-		Key:       professionalAccountRegistryKey,
-		SavedAt:   seededReferenceTime.UTC(),
-		Snapshot: map[string]any{
-			"accountsByProfessionalId": accountsByProfessionalID,
-		},
-	}); err != nil {
-		return fmt.Errorf("seed professional auth registry: %w", err)
-	}
-
 	return nil
 }
 
@@ -458,8 +510,11 @@ func (s *seeder) seedAdminAccessTokens(ctx context.Context) error {
 		return nil
 	}
 
+	if err := s.adminAuth.Bootstrap(ctx); err != nil {
+		return fmt.Errorf("bootstrap admin auth accounts: %w", err)
+	}
+
 	now := time.Now().UTC()
-	expiresAt := now.Add(s.cfg.AdminAuth.SessionTTL).Format(time.RFC3339)
 	for _, credential := range s.cfg.AdminAuth.Credentials {
 		s.summary.AdminAccesses = append(s.summary.AdminAccesses, AdminAccess{
 			AdminID:   credential.AdminID,
@@ -467,18 +522,14 @@ func (s *seeder) seedAdminAccessTokens(ctx context.Context) error {
 			FocusArea: credential.FocusArea,
 		})
 		rawToken := "seed-admin-session-" + credential.AdminID
-		if _, err := s.documentStore.Upsert(ctx, documentstore.Record{
-			Namespace: adminSessionNamespace,
-			Key:       hashToken(rawToken),
-			SavedAt:   now,
-			Snapshot: map[string]any{
-				"adminId":          credential.AdminID,
-				"email":            strings.ToLower(strings.TrimSpace(credential.Email)),
-				"expiresAt":        expiresAt,
-				"focusArea":        credential.FocusArea,
-				"lastLoginAt":      now.Format(time.RFC3339),
-				"lastVisitedRoute": defaultSeededAdminRoute,
-			},
+		if _, err := s.adminAuth.SeedSession(ctx, adminauth.SeedSessionInput{
+			AdminID:          credential.AdminID,
+			Email:            credential.Email,
+			ExpiresAt:        now.Add(s.cfg.AdminAuth.SessionTTL),
+			FocusArea:        credential.FocusArea,
+			LastLoginAt:      now,
+			LastVisitedRoute: defaultSeededAdminRoute,
+			RawToken:         rawToken,
 		}); err != nil {
 			return fmt.Errorf("seed admin bearer token for %s: %w", credential.AdminID, err)
 		}
@@ -498,18 +549,13 @@ func (s *seeder) seedCustomerAccessToken(ctx context.Context) error {
 	}
 
 	now := time.Now().UTC()
-	expiresAt := now.Add(s.cfg.CustomerAuth.SessionTTL).Format(time.RFC3339)
 	for _, consumer := range s.dataset.Consumers {
 		rawToken := "seed-customer-session-" + consumer.ID
-		if _, err := s.documentStore.Upsert(ctx, documentstore.Record{
-			Namespace: customerSessionNamespace,
-			Key:       hashToken(rawToken),
-			SavedAt:   now,
-			Snapshot: map[string]any{
-				"consumerId":  consumer.ID,
-				"expiresAt":   expiresAt,
-				"lastLoginAt": now.Format(time.RFC3339),
-			},
+		if _, err := s.customerAuth.SeedSession(ctx, customerauth.SeedSessionInput{
+			ConsumerID:  consumer.ID,
+			ExpiresAt:   now.Add(s.cfg.CustomerAuth.SessionTTL),
+			LastLoginAt: now,
+			RawToken:    rawToken,
 		}); err != nil {
 			return fmt.Errorf("seed customer bearer token for %s: %w", consumer.ID, err)
 		}
@@ -529,18 +575,13 @@ func (s *seeder) seedProfessionalAccessToken(ctx context.Context) error {
 	}
 
 	now := time.Now().UTC()
-	expiresAt := now.Add(s.cfg.ProfessionalAuth.SessionTTL).Format(time.RFC3339)
 	for _, professional := range s.dataset.Professionals {
 		rawToken := "seed-professional-session-" + professional.ID
-		if _, err := s.documentStore.Upsert(ctx, documentstore.Record{
-			Namespace: professionalSessionNamespace,
-			Key:       hashToken(rawToken),
-			SavedAt:   now,
-			Snapshot: map[string]any{
-				"expiresAt":      expiresAt,
-				"lastLoginAt":    now.Format(time.RFC3339),
-				"professionalId": professional.ID,
-			},
+		if _, err := s.profAuth.SeedSession(ctx, professionalauth.SeedSessionInput{
+			ExpiresAt:      now.Add(s.cfg.ProfessionalAuth.SessionTTL),
+			LastLoginAt:    now,
+			ProfessionalID: professional.ID,
+			RawToken:       rawToken,
 		}); err != nil {
 			return fmt.Errorf("seed professional bearer token for %s: %w", professional.ID, err)
 		}
@@ -596,7 +637,7 @@ func (s *seeder) seedProfessionalPortal(ctx context.Context) error {
 			return fmt.Errorf("seed portal requests for professional %s: %w", professional.ID, err)
 		}
 
-		s.summary.PortalSessionCount += 1
+		s.summary.PortalStateCount += 1
 		s.summary.PortalReviewStatusCounts[status] += 1
 
 		session, err := s.portalService.Session(ctx, professional.ID)
@@ -617,7 +658,7 @@ func (s *seeder) seedProfessionalPortal(ctx context.Context) error {
 }
 
 func (s *seeder) seedClientState(ctx context.Context) error {
-	service := clientstate.NewService(s.documentStore)
+	service := clientstate.NewService(s.documentStore, s.pushStore, s.contentStore)
 
 	if _, err := service.UpsertViewerSession(ctx, clientstate.ViewerSessionData{
 		Mode: "visitor",
@@ -851,6 +892,174 @@ func cloneAppointmentTimeline(
 	}
 
 	return timeline
+}
+
+func appointmentRecordFromSeed(appointment readmodel.AppointmentSeed) appointmentstore.AppointmentRecord {
+	requestedAt := seededReferenceTime.UTC()
+	if parsedRequestedAt, err := time.Parse(time.RFC3339, strings.TrimSpace(appointment.RequestedAt)); err == nil {
+		requestedAt = parsedRequestedAt.UTC()
+	}
+
+	serviceSnapshotBytes, _ := json.Marshal(appointment.ServiceSnapshot)
+	scheduleSnapshotBytes, _ := json.Marshal(appointment.ScheduleSnapshot)
+	cancellationPolicyBytes, _ := json.Marshal(appointment.CancellationPolicySnapshot)
+	recentActivityBytes, _ := json.Marshal(appointment.RecentActivity)
+	feedbackBytes, _ := json.Marshal(appointment.CustomerFeedback)
+	cancellationResolutionBytes, _ := json.Marshal(appointment.CancellationResolution)
+
+	record := appointmentstore.AppointmentRecord{
+		ID:                         appointment.ID,
+		AreaID:                     appointment.AreaID,
+		BookingFlow:                appointment.BookingFlow,
+		ConsumerID:                 appointment.ConsumerID,
+		ProfessionalID:             appointment.ProfessionalID,
+		RequestNote:                appointment.RequestNote,
+		RequestedAt:                requestedAt,
+		RequestedMode:              appointment.RequestedMode,
+		ServiceID:                  appointment.ServiceID,
+		ServiceOfferingID:          appointment.ServiceOfferingID,
+		Status:                     normalizeSeedAppointmentStatus(string(appointment.Status)),
+		TotalPriceAmount:           priceAmountFromLabel(appointment.TotalPriceLabel),
+		TotalPriceLabel:            appointment.TotalPriceLabel,
+		Currency:                   "IDR",
+		ServiceSnapshot:            mapFromJSONBytes(serviceSnapshotBytes),
+		ScheduleSnapshot:           mapFromJSONBytes(scheduleSnapshotBytes),
+		PricingSnapshot:            map[string]any{"amount": priceAmountFromLabel(appointment.TotalPriceLabel), "currency": "IDR", "label": appointment.TotalPriceLabel},
+		CancellationPolicySnapshot: mapFromJSONBytes(cancellationPolicyBytes),
+		CancellationResolution:     mapFromJSONBytes(cancellationResolutionBytes),
+		RecentActivity:             mapFromJSONBytes(recentActivityBytes),
+		CustomerFeedback:           mapFromJSONBytes(feedbackBytes),
+		CreatedAt:                  requestedAt,
+		UpdatedAt:                  requestedAt,
+	}
+
+	if len(appointment.Timeline) > 0 {
+		if parsedUpdatedAt, err := time.Parse(time.RFC3339, strings.TrimSpace(appointment.Timeline[len(appointment.Timeline)-1].CreatedAt)); err == nil {
+			record.UpdatedAt = parsedUpdatedAt.UTC()
+		}
+	}
+
+	return record
+}
+
+func appointmentStatusHistoryFromSeed(
+	appointment readmodel.AppointmentSeed,
+) []appointmentstore.AppointmentStatusEvent {
+	if len(appointment.Timeline) == 0 {
+		return []appointmentstore.AppointmentStatusEvent{}
+	}
+
+	events := make([]appointmentstore.AppointmentStatusEvent, 0, len(appointment.Timeline))
+	lastStatus := ""
+	for _, event := range appointment.Timeline {
+		createdAt := seededReferenceTime.UTC()
+		if parsedCreatedAt, err := time.Parse(time.RFC3339, strings.TrimSpace(event.CreatedAt)); err == nil {
+			createdAt = parsedCreatedAt.UTC()
+		}
+
+		toStatus := normalizeSeedAppointmentStatus(string(event.ToStatus))
+		fromStatus := normalizeSeedAppointmentStatus(string(event.FromStatus))
+		if fromStatus == "" {
+			fromStatus = lastStatus
+		}
+		if toStatus == lastStatus {
+			continue
+		}
+
+		events = append(events, appointmentstore.AppointmentStatusEvent{
+			ID:              event.ID,
+			AppointmentID:   appointment.ID,
+			FromStatus:      fromStatus,
+			ToStatus:        toStatus,
+			ActorKind:       normalizeSeedTimelineActor(event.Actor),
+			ActorID:         actorIDForTimelineEvent(appointment, event.Actor),
+			ActorName:       actorNameForTimelineEvent(appointment, event.Actor),
+			CustomerSummary: event.CustomerSummary,
+			InternalNote:    event.InternalNote,
+			EvidenceURL:     event.EvidenceURL,
+			CreatedAt:       createdAt,
+			CreatedAtLabel:  event.CreatedAtLabel,
+		})
+		lastStatus = toStatus
+	}
+
+	return events
+}
+
+func normalizeSeedAppointmentStatus(status string) string {
+	switch strings.TrimSpace(status) {
+	case string(readmodel.AppointmentStatusApprovedWaitingPayment):
+		return appointmentstore.StatusAwaitingPayment
+	case string(readmodel.AppointmentStatusPaid):
+		return appointmentstore.StatusConfirmed
+	case "":
+		return ""
+	default:
+		return status
+	}
+}
+
+func normalizeSeedTimelineActor(actor string) string {
+	switch strings.TrimSpace(actor) {
+	case "customer":
+		return "customer"
+	case "professional":
+		return "professional"
+	default:
+		return "system"
+	}
+}
+
+func actorIDForTimelineEvent(appointment readmodel.AppointmentSeed, actor string) string {
+	switch strings.TrimSpace(actor) {
+	case "customer":
+		return appointment.ConsumerID
+	case "professional":
+		return appointment.ProfessionalID
+	default:
+		return "system"
+	}
+}
+
+func actorNameForTimelineEvent(appointment readmodel.AppointmentSeed, actor string) string {
+	switch strings.TrimSpace(actor) {
+	case "customer":
+		return appointment.ConsumerID
+	case "professional":
+		return appointment.ProfessionalID
+	default:
+		return "System"
+	}
+}
+
+func mapFromJSONBytes(payload []byte) map[string]any {
+	if len(payload) == 0 || string(payload) == "null" {
+		return map[string]any{}
+	}
+
+	var decoded map[string]any
+	if err := json.Unmarshal(payload, &decoded); err != nil || decoded == nil {
+		return map[string]any{}
+	}
+	return decoded
+}
+
+func priceAmountFromLabel(value string) int {
+	digitsOnly := strings.Map(func(r rune) rune {
+		if r >= '0' && r <= '9' {
+			return r
+		}
+		return -1
+	}, value)
+	if digitsOnly == "" {
+		return 0
+	}
+
+	amount, err := strconv.Atoi(digitsOnly)
+	if err != nil {
+		return 0
+	}
+	return amount
 }
 
 func buildSupportCommandCenter(data dataset) clientstate.AdminCommandCenterStateData {
@@ -1637,11 +1846,6 @@ func normalizePhone(value string) string {
 		}
 	}
 	return builder.String()
-}
-
-func hashToken(rawToken string) string {
-	checksum := sha256.Sum256([]byte(rawToken))
-	return hex.EncodeToString(checksum[:])
 }
 
 func deriveChatParticipant(thread seedChatThreadRow) (string, string) {

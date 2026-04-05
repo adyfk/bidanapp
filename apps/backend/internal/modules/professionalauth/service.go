@@ -5,7 +5,6 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
-	"encoding/json"
 	"errors"
 	"net/http"
 	"strings"
@@ -16,15 +15,13 @@ import (
 
 	"bidanapp/apps/backend/internal/config"
 	"bidanapp/apps/backend/internal/modules/readmodel"
-	"bidanapp/apps/backend/internal/platform/documentstore"
+	"bidanapp/apps/backend/internal/platform/authstore"
 	"bidanapp/apps/backend/internal/platform/web"
 )
 
 const (
-	accountRegistryNamespace = "professional_auth_account"
-	accountRegistryKey       = "registry"
-	sessionNamespace         = "professional_auth_session"
-	tokenPrefix              = "bpro_"
+	sessionRole = "professional"
+	tokenPrefix = "bpro_"
 )
 
 var (
@@ -56,7 +53,7 @@ type Service struct {
 	catalogReader CatalogReader
 	cookie        config.SessionCookieConfig
 	sessionTTL    time.Duration
-	store         documentstore.Store
+	store         authstore.Store
 }
 
 type AuthenticatedSession struct {
@@ -69,30 +66,7 @@ type issuedSession struct {
 	Session  ProfessionalAuthSessionData
 }
 
-type accountRegistry struct {
-	AccountsByProfessionalID map[string]accountRecord `json:"accountsByProfessionalId,omitempty"`
-}
-
-type accountRecord struct {
-	City                string `json:"city,omitempty"`
-	CredentialNumber    string `json:"credentialNumber"`
-	DisplayName         string `json:"displayName"`
-	PasswordHash        string `json:"passwordHash"`
-	Phone               string `json:"phone"`
-	PhoneNormalized     string `json:"phoneNormalized"`
-	ProfessionalID      string `json:"professionalId"`
-	RecoveryRequestedAt string `json:"recoveryRequestedAt,omitempty"`
-	RegisteredAt        string `json:"registeredAt"`
-}
-
-type sessionRecord struct {
-	ExpiresAt      string `json:"expiresAt"`
-	LastLoginAt    string `json:"lastLoginAt"`
-	ProfessionalID string `json:"professionalId"`
-	RevokedAt      string `json:"revokedAt,omitempty"`
-}
-
-func NewService(cfg config.ProfessionalAuthConfig, catalogReader CatalogReader, store documentstore.Store) *Service {
+func NewService(cfg config.ProfessionalAuthConfig, catalogReader CatalogReader, store authstore.Store) *Service {
 	return &Service{
 		catalogReader: catalogReader,
 		cookie:        cfg.Cookie,
@@ -107,11 +81,16 @@ func (s *Service) Register(ctx context.Context, input ProfessionalAuthRegisterRe
 	}
 
 	professionalID := strings.TrimSpace(input.ProfessionalID)
-	if professionalID == "" {
-		return issuedSession{}, ErrInvalidProfessionalID
-	}
-	if err := s.ensureProfessionalExists(ctx, professionalID); err != nil {
-		return issuedSession{}, err
+	if professionalID != "" {
+		if err := s.ensureProfessionalExists(ctx, professionalID); err != nil {
+			return issuedSession{}, err
+		}
+	} else {
+		var err error
+		professionalID, err = s.newProfessionalID(ctx)
+		if err != nil {
+			return issuedSession{}, err
+		}
 	}
 
 	phone, err := normalizePhone(input.Phone)
@@ -136,23 +115,13 @@ func (s *Service) Register(ctx context.Context, input ProfessionalAuthRegisterRe
 		return issuedSession{}, err
 	}
 
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	registry, err := s.readAccountRegistry(ctx)
+	now := time.Now().UTC()
+	userID, err := authstore.NewUserID()
 	if err != nil {
 		return issuedSession{}, err
 	}
 
-	if _, exists := registry.AccountsByProfessionalID[professionalID]; exists {
-		return issuedSession{}, ErrAccountAlreadyExists
-	}
-	if phoneInUse(registry, phone, "") {
-		return issuedSession{}, ErrPhoneAlreadyInUse
-	}
-
-	now := time.Now().UTC()
-	account := accountRecord{
+	account := authstore.ProfessionalAccount{
 		City:             strings.TrimSpace(input.City),
 		CredentialNumber: credentialNumber,
 		DisplayName:      displayName,
@@ -160,14 +129,33 @@ func (s *Service) Register(ctx context.Context, input ProfessionalAuthRegisterRe
 		Phone:            phone,
 		PhoneNormalized:  phone,
 		ProfessionalID:   professionalID,
-		RegisteredAt:     now.Format(time.RFC3339),
+		RegisteredAt:     now,
+		UserID:           userID,
 	}
-	registry.AccountsByProfessionalID[professionalID] = account
-	if err := s.writeAccountRegistry(ctx, registry, now); err != nil {
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if _, err := s.store.ProfessionalAccountByProfessionalID(ctx, professionalID); err == nil {
+		return issuedSession{}, ErrAccountAlreadyExists
+	} else if err != nil && !errors.Is(err, authstore.ErrNotFound) {
+		return issuedSession{}, err
+	}
+	if _, err := s.store.ProfessionalAccountByPhone(ctx, phone); err == nil {
+		return issuedSession{}, ErrPhoneAlreadyInUse
+	} else if err != nil && !errors.Is(err, authstore.ErrNotFound) {
 		return issuedSession{}, err
 	}
 
-	return s.createSession(ctx, account, now)
+	created, err := s.store.CreateProfessionalAccount(ctx, account)
+	if err != nil {
+		if errors.Is(err, authstore.ErrConflict) {
+			return issuedSession{}, ErrAccountAlreadyExists
+		}
+		return issuedSession{}, err
+	}
+
+	return s.createSession(ctx, created, now)
 }
 
 func (s *Service) Login(ctx context.Context, input ProfessionalAuthCreateSessionRequest) (issuedSession, error) {
@@ -193,13 +181,12 @@ func (s *Service) Login(ctx context.Context, input ProfessionalAuthCreateSession
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	registry, err := s.readAccountRegistry(ctx)
+	account, err := s.store.ProfessionalAccountByProfessionalID(ctx, professionalID)
 	if err != nil {
+		if errors.Is(err, authstore.ErrNotFound) {
+			return issuedSession{}, ErrInvalidCredentials
+		}
 		return issuedSession{}, err
-	}
-	account, ok := registry.AccountsByProfessionalID[professionalID]
-	if !ok {
-		return issuedSession{}, ErrInvalidCredentials
 	}
 	if account.PhoneNormalized != phone {
 		return issuedSession{}, ErrInvalidCredentials
@@ -265,12 +252,14 @@ func (s *Service) UpdateAccount(ctx context.Context, tokenHash string, input Pro
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	session, account, registry, err := s.readSessionAccountAndRegistry(ctx, tokenHash)
+	session, account, err := s.readSessionAccount(ctx, tokenHash)
 	if err != nil {
 		return ProfessionalAuthSessionData{}, err
 	}
-	if phoneInUse(registry, phone, account.ProfessionalID) {
+	if existing, err := s.store.ProfessionalAccountByPhone(ctx, phone); err == nil && existing.ProfessionalID != account.ProfessionalID {
 		return ProfessionalAuthSessionData{}, ErrPhoneAlreadyInUse
+	} else if err != nil && !errors.Is(err, authstore.ErrNotFound) {
+		return ProfessionalAuthSessionData{}, err
 	}
 
 	account.Phone = phone
@@ -278,13 +267,16 @@ func (s *Service) UpdateAccount(ctx context.Context, tokenHash string, input Pro
 	account.DisplayName = displayName
 	account.City = strings.TrimSpace(input.City)
 	account.CredentialNumber = credentialNumber
-	registry.AccountsByProfessionalID[account.ProfessionalID] = account
 
-	if err := s.writeAccountRegistry(ctx, registry, time.Now().UTC()); err != nil {
+	updated, err := s.store.UpdateProfessionalAccount(ctx, account)
+	if err != nil {
+		if errors.Is(err, authstore.ErrConflict) {
+			return ProfessionalAuthSessionData{}, ErrPhoneAlreadyInUse
+		}
 		return ProfessionalAuthSessionData{}, err
 	}
 
-	return sessionDataFrom(session, account), nil
+	return sessionDataFrom(session, updated), nil
 }
 
 func (s *Service) UpdatePassword(ctx context.Context, tokenHash string, input ProfessionalAuthUpdatePasswordRequest) (ProfessionalAuthSessionData, error) {
@@ -304,7 +296,7 @@ func (s *Service) UpdatePassword(ctx context.Context, tokenHash string, input Pr
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	session, account, registry, err := s.readSessionAccountAndRegistry(ctx, tokenHash)
+	session, account, err := s.readSessionAccount(ctx, tokenHash)
 	if err != nil {
 		return ProfessionalAuthSessionData{}, err
 	}
@@ -317,13 +309,13 @@ func (s *Service) UpdatePassword(ctx context.Context, tokenHash string, input Pr
 		return ProfessionalAuthSessionData{}, err
 	}
 	account.PasswordHash = string(passwordHash)
-	registry.AccountsByProfessionalID[account.ProfessionalID] = account
 
-	if err := s.writeAccountRegistry(ctx, registry, time.Now().UTC()); err != nil {
+	updated, err := s.store.UpdateProfessionalAccount(ctx, account)
+	if err != nil {
 		return ProfessionalAuthSessionData{}, err
 	}
 
-	return sessionDataFrom(session, account), nil
+	return sessionDataFrom(session, updated), nil
 }
 
 func (s *Service) RequestPasswordRecovery(
@@ -352,14 +344,13 @@ func (s *Service) RequestPasswordRecovery(
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	registry, err := s.readAccountRegistry(ctx)
-	if err != nil {
+	account, err := s.store.ProfessionalAccountByProfessionalID(ctx, professionalID)
+	if err != nil && !errors.Is(err, authstore.ErrNotFound) {
 		return ProfessionalAuthPasswordRecoveryData{}, err
 	}
-	if account, ok := registry.AccountsByProfessionalID[professionalID]; ok && account.PhoneNormalized == phone {
-		account.RecoveryRequestedAt = now.Format(time.RFC3339)
-		registry.AccountsByProfessionalID[professionalID] = account
-		if err := s.writeAccountRegistry(ctx, registry, now); err != nil {
+	if err == nil && account.PhoneNormalized == phone {
+		account.RecoveryRequestedAt = &now
+		if _, err := s.store.UpdateProfessionalAccount(ctx, account); err != nil {
 			return ProfessionalAuthPasswordRecoveryData{}, err
 		}
 	}
@@ -382,8 +373,11 @@ func (s *Service) Logout(ctx context.Context, tokenHash string) (ProfessionalAut
 	if err != nil {
 		return ProfessionalAuthSessionData{}, err
 	}
-	session.RevokedAt = time.Now().UTC().Format(time.RFC3339)
-	if err := s.writeSessionRecord(ctx, tokenHash, session, time.Now().UTC()); err != nil {
+
+	now := time.Now().UTC()
+	session.RevokedAt = &now
+	session.SavedAt = now
+	if _, err := s.store.SaveSession(ctx, session); err != nil {
 		return ProfessionalAuthSessionData{}, err
 	}
 
@@ -405,18 +399,22 @@ func (s *Service) authenticateToken(ctx context.Context, rawToken string) (Authe
 	}, nil
 }
 
-func (s *Service) createSession(ctx context.Context, account accountRecord, now time.Time) (issuedSession, error) {
+func (s *Service) createSession(ctx context.Context, account authstore.ProfessionalAccount, now time.Time) (issuedSession, error) {
 	rawToken, err := generateToken()
 	if err != nil {
 		return issuedSession{}, err
 	}
 
-	session := sessionRecord{
-		ExpiresAt:      now.Add(s.sessionTTL).Format(time.RFC3339),
-		LastLoginAt:    now.Format(time.RFC3339),
-		ProfessionalID: account.ProfessionalID,
+	session := authstore.Session{
+		ExpiresAt:   now.Add(s.sessionTTL),
+		LastLoginAt: now,
+		Role:        sessionRole,
+		SavedAt:     now,
+		SubjectID:   account.ProfessionalID,
+		TokenHash:   hashToken(rawToken),
+		UserID:      account.UserID,
 	}
-	if err := s.writeSessionRecord(ctx, hashToken(rawToken), session, now); err != nil {
+	if _, err := s.store.SaveSession(ctx, session); err != nil {
 		return issuedSession{}, err
 	}
 
@@ -426,119 +424,65 @@ func (s *Service) createSession(ctx context.Context, account accountRecord, now 
 	}, nil
 }
 
-func (s *Service) readSessionAccountAndRegistry(
-	ctx context.Context,
-	tokenHash string,
-) (sessionRecord, accountRecord, accountRegistry, error) {
+func (s *Service) readSessionAccount(ctx context.Context, tokenHash string) (authstore.Session, authstore.ProfessionalAccount, error) {
 	session, err := s.readSessionRecord(ctx, tokenHash)
 	if err != nil {
-		return sessionRecord{}, accountRecord{}, accountRegistry{}, err
+		return authstore.Session{}, authstore.ProfessionalAccount{}, err
 	}
-	registry, err := s.readAccountRegistry(ctx)
-	if err != nil {
-		return sessionRecord{}, accountRecord{}, accountRegistry{}, err
-	}
-	account, ok := registry.AccountsByProfessionalID[session.ProfessionalID]
-	if !ok {
-		return sessionRecord{}, accountRecord{}, accountRegistry{}, ErrAccountNotFound
-	}
-	return session, account, registry, nil
-}
 
-func (s *Service) readSessionAccount(ctx context.Context, tokenHash string) (sessionRecord, accountRecord, error) {
-	session, err := s.readSessionRecord(ctx, tokenHash)
+	account, err := s.store.ProfessionalAccountByProfessionalID(ctx, session.SubjectID)
 	if err != nil {
-		return sessionRecord{}, accountRecord{}, err
+		if errors.Is(err, authstore.ErrNotFound) {
+			return authstore.Session{}, authstore.ProfessionalAccount{}, ErrAccountNotFound
+		}
+		return authstore.Session{}, authstore.ProfessionalAccount{}, err
 	}
-	registry, err := s.readAccountRegistry(ctx)
-	if err != nil {
-		return sessionRecord{}, accountRecord{}, err
-	}
-	account, ok := registry.AccountsByProfessionalID[session.ProfessionalID]
-	if !ok {
-		return sessionRecord{}, accountRecord{}, ErrAccountNotFound
-	}
+
 	return session, account, nil
 }
 
-func (s *Service) readSessionRecord(ctx context.Context, tokenHash string) (sessionRecord, error) {
+func (s *Service) readSessionRecord(ctx context.Context, tokenHash string) (authstore.Session, error) {
 	if s.store == nil {
-		return sessionRecord{}, ErrSessionNotFound
+		return authstore.Session{}, ErrSessionNotFound
 	}
 
-	record, err := s.store.Read(ctx, sessionNamespace, tokenHash)
+	session, err := s.store.SessionByTokenHash(ctx, sessionRole, tokenHash)
 	if err != nil {
-		if errors.Is(err, documentstore.ErrNotFound) {
-			return sessionRecord{}, ErrSessionNotFound
+		if errors.Is(err, authstore.ErrNotFound) {
+			return authstore.Session{}, ErrSessionNotFound
 		}
-		return sessionRecord{}, err
+		return authstore.Session{}, err
 	}
 
-	payload, err := decodeSessionRecord(record.Snapshot)
-	if err != nil {
-		return sessionRecord{}, err
+	if session.UserID == "" || session.SubjectID == "" || session.ExpiresAt.IsZero() || session.LastLoginAt.IsZero() {
+		return authstore.Session{}, ErrInvalidSessionPayload
 	}
-	if strings.TrimSpace(payload.RevokedAt) != "" {
-		return sessionRecord{}, ErrSessionRevoked
+	if session.RevokedAt != nil && !session.RevokedAt.IsZero() {
+		return authstore.Session{}, ErrSessionRevoked
 	}
-
-	expiresAt, err := time.Parse(time.RFC3339, payload.ExpiresAt)
-	if err != nil {
-		return sessionRecord{}, ErrInvalidSessionPayload
-	}
-	if time.Now().UTC().After(expiresAt) {
-		return sessionRecord{}, ErrSessionExpired
+	if time.Now().UTC().After(session.ExpiresAt.UTC()) {
+		return authstore.Session{}, ErrSessionExpired
 	}
 
-	return payload, nil
+	return session, nil
 }
 
-func (s *Service) writeSessionRecord(ctx context.Context, tokenHash string, payload sessionRecord, now time.Time) error {
-	if s.store == nil {
-		return ErrSessionNotFound
-	}
-
-	_, err := s.store.Upsert(ctx, documentstore.Record{
-		Namespace: sessionNamespace,
-		Key:       tokenHash,
-		SavedAt:   now,
-		Snapshot:  marshalSessionRecord(payload),
-	})
-	return err
-}
-
-func (s *Service) readAccountRegistry(ctx context.Context) (accountRegistry, error) {
-	if s.store == nil {
-		return accountRegistry{AccountsByProfessionalID: map[string]accountRecord{}}, nil
-	}
-
-	record, err := s.store.Read(ctx, accountRegistryNamespace, accountRegistryKey)
-	if err != nil {
-		if errors.Is(err, documentstore.ErrNotFound) {
-			return accountRegistry{AccountsByProfessionalID: map[string]accountRecord{}}, nil
+func (s *Service) newProfessionalID(ctx context.Context) (string, error) {
+	for attempt := 0; attempt < 8; attempt++ {
+		buffer := make([]byte, 5)
+		if _, err := rand.Read(buffer); err != nil {
+			return "", err
 		}
-		return accountRegistry{}, err
+
+		professionalID := "pro_" + hex.EncodeToString(buffer)
+		if _, err := s.store.ProfessionalAccountByProfessionalID(ctx, professionalID); errors.Is(err, authstore.ErrNotFound) {
+			return professionalID, nil
+		} else if err != nil && !errors.Is(err, authstore.ErrNotFound) {
+			return "", err
+		}
 	}
 
-	payload, err := decodeAccountRegistry(record.Snapshot)
-	if err != nil {
-		return accountRegistry{}, err
-	}
-	return payload, nil
-}
-
-func (s *Service) writeAccountRegistry(ctx context.Context, registry accountRegistry, now time.Time) error {
-	if s.store == nil {
-		return ErrAccountNotFound
-	}
-
-	_, err := s.store.Upsert(ctx, documentstore.Record{
-		Namespace: accountRegistryNamespace,
-		Key:       accountRegistryKey,
-		SavedAt:   now,
-		Snapshot:  marshalAccountRegistry(registry),
-	})
-	return err
+	return "", ErrInvalidProfessionalID
 }
 
 func (s *Service) ensureProfessionalExists(ctx context.Context, professionalID string) error {
@@ -558,86 +502,17 @@ func (s *Service) ensureProfessionalExists(ctx context.Context, professionalID s
 	return ErrProfessionalNotFound
 }
 
-func sessionDataFrom(session sessionRecord, account accountRecord) ProfessionalAuthSessionData {
+func sessionDataFrom(session authstore.Session, account authstore.ProfessionalAccount) ProfessionalAuthSessionData {
 	return ProfessionalAuthSessionData{
 		City:             account.City,
 		CredentialNumber: account.CredentialNumber,
 		DisplayName:      account.DisplayName,
-		ExpiresAt:        session.ExpiresAt,
+		ExpiresAt:        session.ExpiresAt.UTC().Format(time.RFC3339),
 		IsAuthenticated:  true,
-		LastLoginAt:      session.LastLoginAt,
+		LastLoginAt:      session.LastLoginAt.UTC().Format(time.RFC3339),
 		Phone:            account.Phone,
 		ProfessionalID:   account.ProfessionalID,
-		RegisteredAt:     account.RegisteredAt,
-	}
-}
-
-func decodeSessionRecord(snapshot map[string]any) (sessionRecord, error) {
-	if snapshot == nil {
-		return sessionRecord{}, ErrInvalidSessionPayload
-	}
-
-	payloadBytes, err := json.Marshal(snapshot)
-	if err != nil {
-		return sessionRecord{}, err
-	}
-
-	var payload sessionRecord
-	if err := json.Unmarshal(payloadBytes, &payload); err != nil {
-		return sessionRecord{}, err
-	}
-	if payload.ProfessionalID == "" || payload.ExpiresAt == "" || payload.LastLoginAt == "" {
-		return sessionRecord{}, ErrInvalidSessionPayload
-	}
-
-	return payload, nil
-}
-
-func marshalSessionRecord(record sessionRecord) map[string]any {
-	payload := map[string]any{
-		"expiresAt":      record.ExpiresAt,
-		"lastLoginAt":    record.LastLoginAt,
-		"professionalId": record.ProfessionalID,
-	}
-	if record.RevokedAt != "" {
-		payload["revokedAt"] = record.RevokedAt
-	}
-	return payload
-}
-
-func decodeAccountRegistry(snapshot map[string]any) (accountRegistry, error) {
-	if snapshot == nil {
-		return accountRegistry{AccountsByProfessionalID: map[string]accountRecord{}}, nil
-	}
-
-	payloadBytes, err := json.Marshal(snapshot)
-	if err != nil {
-		return accountRegistry{}, err
-	}
-
-	var payload accountRegistry
-	if err := json.Unmarshal(payloadBytes, &payload); err != nil {
-		return accountRegistry{}, err
-	}
-	if payload.AccountsByProfessionalID == nil {
-		payload.AccountsByProfessionalID = map[string]accountRecord{}
-	}
-	for professionalID, account := range payload.AccountsByProfessionalID {
-		if professionalID == "" || account.ProfessionalID == "" || account.PhoneNormalized == "" || account.PasswordHash == "" {
-			return accountRegistry{}, ErrInvalidAccountPayload
-		}
-	}
-
-	return payload, nil
-}
-
-func marshalAccountRegistry(registry accountRegistry) map[string]any {
-	accountsByProfessionalID := map[string]accountRecord{}
-	for professionalID, account := range registry.AccountsByProfessionalID {
-		accountsByProfessionalID[professionalID] = account
-	}
-	return map[string]any{
-		"accountsByProfessionalId": accountsByProfessionalID,
+		RegisteredAt:     account.RegisteredAt.UTC().Format(time.RFC3339),
 	}
 }
 
@@ -668,18 +543,6 @@ func resolveRawSessionToken(cookieValue string, authorizationHeader string) (str
 	}
 
 	return parseBearerToken(authorizationHeader)
-}
-
-func phoneInUse(registry accountRegistry, normalizedPhone string, excludedProfessionalID string) bool {
-	for professionalID, account := range registry.AccountsByProfessionalID {
-		if professionalID == excludedProfessionalID {
-			continue
-		}
-		if account.PhoneNormalized == normalizedPhone {
-			return true
-		}
-	}
-	return false
 }
 
 func normalizePhone(value string) (string, error) {

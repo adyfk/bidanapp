@@ -9,8 +9,8 @@ const VALID_APP_ENVS = new Set(['development', 'staging', 'production', 'test'])
 const VALID_LOG_LEVELS = new Set(['debug', 'info', 'warn', 'error']);
 const VALID_LOG_FORMATS = new Set(['text', 'json']);
 const VALID_SAME_SITE = new Set(['lax', 'strict', 'none']);
-const VALID_DATA_SOURCES = new Set(['api', 'local']);
 const VALID_FOCUS_AREAS = new Set(['catalog', 'ops', 'reviews', 'support']);
+const VALID_PAYMENT_PROVIDERS = new Set(['manual_test', 'xendit']);
 
 main();
 
@@ -44,9 +44,16 @@ function main() {
   const authCookieSameSite = readEnum(env, 'AUTH_COOKIE_SAME_SITE', VALID_SAME_SITE, issues);
   const logLevel = readEnum(env, 'LOG_LEVEL', VALID_LOG_LEVELS, issues);
   const logFormat = readEnum(env, 'LOG_FORMAT', VALID_LOG_FORMATS, issues);
-  const portalDataSource = readEnum(env, 'NEXT_PUBLIC_PROFESSIONAL_PORTAL_DATA_SOURCE', VALID_DATA_SOURCES, issues);
-  const appStateDataSource = readEnum(env, 'NEXT_PUBLIC_APP_STATE_DATA_SOURCE', VALID_DATA_SOURCES, issues);
   const adminConsoleEnabled = readBoolean(env, 'NEXT_PUBLIC_ADMIN_CONSOLE_ENABLED', issues);
+  const adminStudioEnabled = readOptionalBoolean(env, 'NEXT_PUBLIC_ADMIN_STUDIO_ENABLED', issues);
+  const paymentProvider = readEnum(env, 'PAYMENT_PROVIDER', VALID_PAYMENT_PROVIDERS, issues);
+  const paymentCurrency = requireValue(env, 'PAYMENT_CURRENCY', issues);
+  const xenditSecretKey = readOptionalText(env, 'XENDIT_SECRET_KEY');
+  const xenditWebhookToken = readOptionalText(env, 'XENDIT_WEBHOOK_TOKEN');
+  const publicWebPushKey = readOptionalText(env, 'NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY');
+  const webPushSubject = readOptionalText(env, 'WEB_PUSH_SUBJECT');
+  const webPushPublicKey = readOptionalText(env, 'WEB_PUSH_PUBLIC_KEY');
+  const webPushPrivateKey = readOptionalText(env, 'WEB_PUSH_PRIVATE_KEY');
 
   requireValue(env, 'POSTGRES_DB', issues);
   readPort(env, 'POSTGRES_PORT', issues);
@@ -87,14 +94,6 @@ function main() {
     issues.push('AUTH_COOKIE_SECURE must be true when AUTH_COOKIE_SAME_SITE=none');
   }
 
-  if (portalDataSource === 'local') {
-    issues.push('NEXT_PUBLIC_PROFESSIONAL_PORTAL_DATA_SOURCE must be api for deploy environments');
-  }
-
-  if (appStateDataSource === 'local') {
-    issues.push('NEXT_PUBLIC_APP_STATE_DATA_SOURCE must be api for deploy environments');
-  }
-
   if (PRODUCTION_LIKE_ENVS.has(appEnv)) {
     assertHTTPS(publicSiteUrl, 'PUBLIC_SITE_URL', issues);
     assertHTTPS(publicApiBaseUrl, 'PUBLIC_API_BASE_URL', issues);
@@ -112,12 +111,20 @@ function main() {
     if (!authCookieDomain) {
       issues.push(`AUTH_COOKIE_DOMAIN must not be empty in ${appEnv}`);
     }
+    if (paymentProvider !== 'xendit') {
+      issues.push(`PAYMENT_PROVIDER must be xendit in ${appEnv}`);
+    }
 
     const sensitiveValues = [
       ['PUBLIC_SITE_URL', env.PUBLIC_SITE_URL],
       ['PUBLIC_API_BASE_URL', env.PUBLIC_API_BASE_URL],
       ['POSTGRES_PASSWORD', env.POSTGRES_PASSWORD],
       ['AUTH_COOKIE_DOMAIN', env.AUTH_COOKIE_DOMAIN],
+      ['XENDIT_SECRET_KEY', env.XENDIT_SECRET_KEY],
+      ['XENDIT_WEBHOOK_TOKEN', env.XENDIT_WEBHOOK_TOKEN],
+      ['NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY', env.NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY],
+      ['WEB_PUSH_PUBLIC_KEY', env.WEB_PUSH_PUBLIC_KEY],
+      ['WEB_PUSH_PRIVATE_KEY', env.WEB_PUSH_PRIVATE_KEY],
     ];
     for (const [name, value] of sensitiveValues) {
       if (looksLikePlaceholder(value)) {
@@ -134,6 +141,18 @@ function main() {
     issues.push(`REDIS_URL must use redis:// or rediss:// (got ${quote(redisUrl.protocol)})`);
   }
 
+  if (paymentCurrency.trim() === '') {
+    issues.push('PAYMENT_CURRENCY must not be empty');
+  }
+  if (paymentProvider === 'xendit') {
+    if (xenditSecretKey === '') {
+      issues.push('XENDIT_SECRET_KEY must not be empty when PAYMENT_PROVIDER=xendit');
+    }
+    if (xenditWebhookToken === '') {
+      issues.push('XENDIT_WEBHOOK_TOKEN must not be empty when PAYMENT_PROVIDER=xendit');
+    }
+  }
+
   const credentialsRaw = env.ADMIN_CONSOLE_CREDENTIALS_JSON?.trim() ?? '';
   if (PRODUCTION_LIKE_ENVS.has(appEnv) && credentialsRaw === '') {
     issues.push(`ADMIN_CONSOLE_CREDENTIALS_JSON is required in ${appEnv}`);
@@ -144,6 +163,18 @@ function main() {
   } else if (appEnv === 'development') {
     warnings.push('ADMIN_CONSOLE_CREDENTIALS_JSON is empty; backend development defaults will be used');
   }
+
+  validateWebPushConfig(
+    {
+      appEnv,
+      publicWebPushKey,
+      webPushPrivateKey,
+      webPushPublicKey,
+      webPushSubject,
+    },
+    issues,
+    warnings,
+  );
 
   if (!projectName || !appVersion || !backendImage || !frontendImage || !logLevel || !logFormat) {
     // The specific missing-key errors are already recorded above.
@@ -162,6 +193,8 @@ function main() {
   process.stdout.write(`- PUBLIC_SITE_URL=${env.PUBLIC_SITE_URL}\n`);
   process.stdout.write(`- PUBLIC_API_BASE_URL=${env.PUBLIC_API_BASE_URL}\n`);
   process.stdout.write(`- admin console enabled=${String(adminConsoleEnabled)}\n`);
+  process.stdout.write(`- admin studio enabled=${String(adminStudioEnabled ?? false)}\n`);
+  process.stdout.write(`- payment provider=${paymentProvider}\n`);
   if (warnings.length > 0) {
     for (const warning of warnings) {
       process.stdout.write(`warning: ${warning}\n`);
@@ -185,6 +218,58 @@ function requireValue(env, key, issues) {
 
 function readOptionalText(env, key) {
   return env[key]?.trim() ?? '';
+}
+
+function readOptionalBoolean(env, key, issues) {
+  const value = env[key]?.trim();
+  if (!value) {
+    return undefined;
+  }
+
+  if (value === 'true') {
+    return true;
+  }
+  if (value === 'false') {
+    return false;
+  }
+
+  issues.push(`${key} must be either true or false`);
+  return undefined;
+}
+
+function validateWebPushConfig(config, issues, warnings) {
+  const { appEnv, publicWebPushKey, webPushPrivateKey, webPushPublicKey, webPushSubject } = config;
+  const hasAnyWebPushValue = [publicWebPushKey, webPushPrivateKey, webPushPublicKey, webPushSubject].some(
+    (value) => value !== '',
+  );
+
+  if (PRODUCTION_LIKE_ENVS.has(appEnv) && !hasAnyWebPushValue) {
+    issues.push(`Web push env vars must be configured in ${appEnv}`);
+    return;
+  }
+
+  if (!hasAnyWebPushValue) {
+    if (appEnv === 'development') {
+      warnings.push('Web push is disabled; customer OTW notifications will not be delivered.');
+    }
+    return;
+  }
+
+  if (webPushSubject === '') {
+    issues.push('WEB_PUSH_SUBJECT must not be empty when web push is configured');
+  }
+  if (webPushPublicKey === '') {
+    issues.push('WEB_PUSH_PUBLIC_KEY must not be empty when web push is configured');
+  }
+  if (webPushPrivateKey === '') {
+    issues.push('WEB_PUSH_PRIVATE_KEY must not be empty when web push is configured');
+  }
+  if (publicWebPushKey === '') {
+    issues.push('NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY must not be empty when web push is configured');
+  }
+  if (publicWebPushKey !== '' && webPushPublicKey !== '' && publicWebPushKey !== webPushPublicKey) {
+    issues.push('NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY must match WEB_PUSH_PUBLIC_KEY');
+  }
 }
 
 function readPort(env, key, issues) {

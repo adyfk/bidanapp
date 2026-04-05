@@ -3,7 +3,10 @@ package portalstore
 import (
 	"context"
 	"encoding/json"
+	"errors"
 )
+
+var ErrNotFound = errors.New("portalstore record not found")
 
 type Record struct {
 	ProfessionalID string         `json:"professionalId"`
@@ -14,6 +17,18 @@ type Record struct {
 type State struct {
 	LastActiveProfessionalID string            `json:"lastActiveProfessionalId,omitempty"`
 	Sessions                 map[string]Record `json:"sessions,omitempty"`
+}
+
+type RecordReader interface {
+	ReadRecord(ctx context.Context, professionalID string) (Record, error)
+}
+
+type LastActiveReader interface {
+	ReadLastActiveProfessionalID(ctx context.Context) (string, error)
+}
+
+type RecordWriter interface {
+	UpsertRecord(ctx context.Context, record Record, lastActiveProfessionalID string) (Record, error)
 }
 
 type Reader interface {

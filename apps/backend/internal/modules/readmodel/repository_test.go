@@ -37,3 +37,32 @@ func TestRepositoryBootstrapsStoreAndServiceReadsFromStoredContent(t *testing.T)
 		t.Fatalf("unexpected professional payload: %#v", professional)
 	}
 }
+
+func TestRepositoryReadManyReturnsBootstrappedPayloads(t *testing.T) {
+	t.Parallel()
+
+	dataDir := t.TempDir()
+	writeCatalogFixture(t, dataDir)
+
+	store := contentstore.NewMemoryStore()
+	repository := NewRepository(dataDir, store)
+	if err := repository.EnsureBootstrapped(context.Background()); err != nil {
+		t.Fatalf("EnsureBootstrapped() error = %v", err)
+	}
+
+	if err := os.Remove(filepath.Join(dataDir, "professionals.json")); err != nil {
+		t.Fatalf("remove professionals fixture: %v", err)
+	}
+
+	payloads, err := repository.ReadMany(context.Background(), []string{"professionals.json"})
+	if err != nil {
+		t.Fatalf("ReadMany() error = %v", err)
+	}
+
+	if len(payloads) != 1 {
+		t.Fatalf("ReadMany() payload count = %d", len(payloads))
+	}
+	if len(payloads["professionals.json"]) == 0 {
+		t.Fatalf("ReadMany() returned empty payloads: %#v", payloads)
+	}
+}

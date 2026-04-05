@@ -7,6 +7,7 @@ import type { AdminStaffMember } from '@/types/admin';
 import type { AdminStaffRow } from '@/types/seed-data';
 
 const adminDirectoryChangeEventName = 'bidanapp:admin-directory-change';
+const adminConsoleChangeEventName = 'bidanapp:admin-console-change';
 let cachedAdminStaff: AdminStaffMember[] = [];
 let hydrateAdminDirectoryPromise: Promise<AdminStaffMember[] | null> | null = null;
 
@@ -107,8 +108,19 @@ export const useAdminDirectory = () => {
       });
     };
 
+    const handleAdminConsoleChange = () => {
+      if (!hasAdminAuthSessionHint()) {
+        return;
+      }
+
+      void hydrateAdminDirectoryFromApi().finally(() => {
+        setHasHydrated(true);
+      });
+    };
+
     syncAdminStaff();
     window.addEventListener(adminDirectoryChangeEventName, syncAdminStaff);
+    window.addEventListener(adminConsoleChangeEventName, handleAdminConsoleChange);
     const unsubscribeAuth = subscribeAdminAuthSessionHint(handleAuthChange);
 
     if (hasAdminAuthSessionHint()) {
@@ -121,6 +133,7 @@ export const useAdminDirectory = () => {
 
     return () => {
       window.removeEventListener(adminDirectoryChangeEventName, syncAdminStaff);
+      window.removeEventListener(adminConsoleChangeEventName, handleAdminConsoleChange);
       unsubscribeAuth();
     };
   }, []);

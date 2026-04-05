@@ -46,7 +46,17 @@ func requiresProfessionalAuth(r *http.Request) bool {
 		return true
 	}
 
+	if r.URL.Path == "/api/v1/professionals/appointments" ||
+		strings.HasPrefix(r.URL.Path, "/api/v1/professionals/appointments/") {
+		return true
+	}
+
 	if r.URL.Path == "/api/v1/notifications/professional" {
+		return true
+	}
+
+	if strings.HasPrefix(r.URL.Path, "/api/v1/appointments/") &&
+		(strings.HasSuffix(r.URL.Path, "/depart") || r.Method == http.MethodPut) {
 		return true
 	}
 

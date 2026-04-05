@@ -1,5 +1,6 @@
 'use client';
 
+import type { AppointmentHomeVisitStatus } from '@bidanapp/sdk';
 import { ClipboardList } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { surfaceCardPaddedClass } from '@/components/ui/tokens';
@@ -15,9 +16,12 @@ interface ProfessionalDashboardRequestsTabProps {
   getAreaLabel: (areaId: string) => string;
   getModeLabel: (mode: ServiceDeliveryMode) => string;
   getServiceLabel: (serviceId: string) => string;
+  homeVisitStatusesByAppointmentId: Record<string, AppointmentHomeVisitStatus | undefined>;
   isPublishedProfessional: boolean;
+  departingAppointmentId?: string;
   onCloseRequest: (requestId: string) => void;
   onChangeStatus: (requestId: string, status: ProfessionalRequestStatus) => void;
+  onDepartHomeVisit: (request: ProfessionalManagedRequest) => void;
   requestFilter: RequestFilter;
   requestStatusCounts: Record<ProfessionalRequestStatus, number>;
   selectedRequestId?: string;
@@ -29,9 +33,12 @@ export const ProfessionalDashboardRequestsTab = ({
   getAreaLabel,
   getModeLabel,
   getServiceLabel,
+  homeVisitStatusesByAppointmentId,
   isPublishedProfessional,
+  departingAppointmentId,
   onCloseRequest,
   onChangeStatus,
+  onDepartHomeVisit,
   requestFilter,
   requestStatusCounts,
   selectedRequestId,
@@ -97,57 +104,87 @@ export const ProfessionalDashboardRequestsTab = ({
 
       <div className="space-y-3">
         {filteredRequests.length > 0 ? (
-          filteredRequests.map((request) => (
-            <RequestCard
-              key={request.id}
-              evidenceLabels={{
-                customerSummary: t('requests.evidence.customerSummary'),
-                empty: t('requests.evidence.empty'),
-                historyEmpty: t('requests.evidence.historyEmpty'),
-                internalNote: t('requests.evidence.internalNote'),
-                link: t('requests.evidence.openLink'),
-                timeline: t('requests.timelineTitle'),
-                title: t('requests.evidence.title'),
-                updatedAt: t('requests.evidence.updatedAt'),
-              }}
-              fieldLabels={{
-                area: t('requests.fields.area'),
-                budget: t('requests.fields.budget'),
-                bookingFlow: t('services.fields.bookingFlow'),
-                currentStatus: t('requests.fields.currentStatus'),
-                customerStatus: t('requests.fields.customerStatus'),
-                note: t('requests.fields.note'),
-                requestedMode: t('requests.fields.requestedMode'),
-                service: t('requests.fields.service'),
-              }}
-              closeActionLabel={
-                isProfessionalCloseAllowed(request.customerStatus)
-                  ? request.customerStatus === 'requested'
-                    ? t('requests.declineAction')
-                    : t('requests.cancelAction')
-                  : undefined
-              }
-              customerStatusLabel={(status) => appointmentsT(`status.${status}`)}
-              getAreaLabel={getAreaLabel}
-              getBookingFlowLabel={(flow) =>
-                flow === 'instant' ? professionalT('bookingFlowInstant') : professionalT('bookingFlowRequest')
-              }
-              getModeLabel={getModeLabel}
-              getServiceLabel={getServiceLabel}
-              htmlId={`professional-request-card-${request.id}`}
-              isHighlighted={selectedRequestId === request.id}
-              moveToLabel={t('requests.moveTo')}
-              priorityLabel={t(`requests.priority.${request.priority}`)}
-              request={request}
-              requestStatuses={requestStatuses}
-              statusLabel={(status) => t(`requests.status.${status}`)}
-              updateActionLabel={(status) => t('requests.updateAction', { status: t(`requests.status.${status}`) })}
-              onCloseRequest={
-                isProfessionalCloseAllowed(request.customerStatus) ? () => onCloseRequest(request.id) : undefined
-              }
-              onChangeStatus={(status) => onChangeStatus(request.id, status)}
-            />
-          ))
+          filteredRequests.map((request) =>
+            (() => {
+              const homeVisitStatus = homeVisitStatusesByAppointmentId[request.appointmentId];
+              const canStartTravel =
+                request.requestedMode === 'home_visit' &&
+                request.customerStatus === 'confirmed' &&
+                !homeVisitStatus?.hasDeparted;
+              const travelDescription =
+                request.requestedMode !== 'home_visit'
+                  ? undefined
+                  : homeVisitStatus?.hasDeparted
+                    ? homeVisitStatus.showEtaHint && homeVisitStatus.etaMinutesHint
+                      ? t('requests.travel.departedWithEta', { minutes: homeVisitStatus.etaMinutesHint })
+                      : t('requests.travel.departed')
+                    : t('requests.travel.pending');
+
+              return (
+                <RequestCard
+                  key={request.id}
+                  evidenceLabels={{
+                    customerSummary: t('requests.evidence.customerSummary'),
+                    empty: t('requests.evidence.empty'),
+                    historyEmpty: t('requests.evidence.historyEmpty'),
+                    internalNote: t('requests.evidence.internalNote'),
+                    link: t('requests.evidence.openLink'),
+                    timeline: t('requests.timelineTitle'),
+                    title: t('requests.evidence.title'),
+                    updatedAt: t('requests.evidence.updatedAt'),
+                  }}
+                  fieldLabels={{
+                    area: t('requests.fields.area'),
+                    budget: t('requests.fields.budget'),
+                    bookingFlow: t('services.fields.bookingFlow'),
+                    currentStatus: t('requests.fields.currentStatus'),
+                    customerStatus: t('requests.fields.customerStatus'),
+                    note: t('requests.fields.note'),
+                    requestedMode: t('requests.fields.requestedMode'),
+                    service: t('requests.fields.service'),
+                  }}
+                  closeActionLabel={
+                    isProfessionalCloseAllowed(request.customerStatus)
+                      ? request.customerStatus === 'requested'
+                        ? t('requests.declineAction')
+                        : t('requests.cancelAction')
+                      : undefined
+                  }
+                  customerStatusLabel={(status) => appointmentsT(`status.${status}`)}
+                  getAreaLabel={getAreaLabel}
+                  getBookingFlowLabel={(flow) =>
+                    flow === 'instant' ? professionalT('bookingFlowInstant') : professionalT('bookingFlowRequest')
+                  }
+                  getModeLabel={getModeLabel}
+                  getServiceLabel={getServiceLabel}
+                  homeVisitTravel={
+                    travelDescription
+                      ? {
+                          actionLabel: t('requests.travel.startAction'),
+                          description: travelDescription,
+                          isDeparting: departingAppointmentId === request.appointmentId,
+                          pendingLabel: t('requests.travel.startPending'),
+                          title: t('requests.travel.title'),
+                        }
+                      : undefined
+                  }
+                  htmlId={`professional-request-card-${request.id}`}
+                  isHighlighted={selectedRequestId === request.id}
+                  moveToLabel={t('requests.moveTo')}
+                  priorityLabel={t(`requests.priority.${request.priority}`)}
+                  request={request}
+                  requestStatuses={requestStatuses}
+                  statusLabel={(status) => t(`requests.status.${status}`)}
+                  updateActionLabel={(status) => t('requests.updateAction', { status: t(`requests.status.${status}`) })}
+                  onCloseRequest={
+                    isProfessionalCloseAllowed(request.customerStatus) ? () => onCloseRequest(request.id) : undefined
+                  }
+                  onChangeStatus={(status) => onChangeStatus(request.id, status)}
+                  onDepartRequest={canStartTravel ? () => onDepartHomeVisit(request) : undefined}
+                />
+              );
+            })(),
+          )
         ) : (
           <div className={surfaceCardPaddedClass}>
             <SectionHeading

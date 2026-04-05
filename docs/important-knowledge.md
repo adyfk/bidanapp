@@ -6,7 +6,7 @@ This document collects the non-obvious facts and rules that are easy to miss whe
 
 The codebase is intentionally between two phases:
 
-- current product development serves public read-model surfaces from PostgreSQL-backed content documents that are bootstrapped from backend-owned seed data
+- current product development serves public read-model surfaces from PostgreSQL-backed published read-model documents that are bootstrapped from backend-owned seed data
 - future product development is moving toward richer relational/content modeling on top of backend-owned contracts and real persistence
 
 Do not document or design features as if the migration is already complete.
@@ -18,7 +18,7 @@ This is one of the most important facts in the repo.
 Today:
 
 - frontend now reads backend APIs first and only tests use the seed dataset directly
-- backend owns the normalized seed dataset as bootstrap input, while request-time public read-model content now comes from PostgreSQL-backed content documents
+- backend owns the normalized seed dataset as bootstrap input, while request-time public read-model content now comes from PostgreSQL-backed published read-model documents
 
 This is useful because:
 
@@ -27,7 +27,7 @@ This is useful because:
 
 This is dangerous if misunderstood because:
 
-- a bootstrapped content-document layer is better than direct file reads, but it is still distinct from richer relational modeling or editorial tooling
+- a bootstrapped published read-model document layer is better than direct file reads, but it is still distinct from richer relational modeling or editorial tooling
 
 ## 3. Backend Owns REST Contract Truth
 
@@ -119,12 +119,12 @@ Current status:
 - connection, history, and message events work
 - history is persisted in PostgreSQL
 - professional portal runtime state is persisted in PostgreSQL
-- viewer/admin/support and notification state is persisted through backend app-state documents
+- viewer/admin/support and notification state is persisted through dedicated backend runtime tables
 
 Current non-status:
 
 - Redis is not yet being used for distributed realtime fanout
-- public catalog/read-model content is served from PostgreSQL-backed content documents, but not yet modeled through richer relational or editorial pipelines
+- public catalog/read-model content is served from PostgreSQL-backed published read-model documents, but not yet modeled through richer relational or editorial pipelines
 
 ## 10. Release Versioning Has Two Different Roles
 

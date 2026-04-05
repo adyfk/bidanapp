@@ -267,7 +267,6 @@ test(
       '/admin/services',
       '/admin/appointments',
       '/admin/support',
-      '/admin/studio',
     ];
 
     for (const route of routes) {

@@ -230,7 +230,7 @@
       "success": "Tautan reset password sudah dikirim ke nomor WhatsApp tersebut.",
       "error": "Masukkan nomor WhatsApp terlebih dahulu sebelum mengirim tautan reset."
     },
-    "registerHelper": "Setelah daftar, Anda langsung masuk ke profil profesional untuk mulai mengelola portal. Fokus profil publik yang sedang terhubung: {category}.",
+    "registerHelper": "Setelah daftar, Anda langsung masuk ke profil profesional dengan draft onboarding yang bersih agar portal diisi dari data Anda sendiri.",
     "fallbackCategory": "Profesional",
     "separationTitle": "Jalur pelanggan dan profesional dipisahkan",
     "separationDescription": "Pelanggan fokus mencari layanan dan booking. Profesional fokus pada kesiapan profil, layanan, jangkauan, dan operasional."
@@ -408,6 +408,7 @@
       "closeOutcomeTitle": "Dampak finansial ke pelanggan",
       "closeStatusPreview": {
         "requested": "Request masih dalam tahap review, jadi penolakan menutup alur tanpa refund.",
+        "awaiting_payment": "Appointment masih menunggu pembayaran, jadi pembatalan seharusnya membatalkan permintaan pembayaran yang belum selesai.",
         "approved_waiting_payment": "Pembayaran belum settle, jadi pembatalan seharusnya membatalkan pembayaran yang belum selesai.",
         "paid": "Order sudah dibayar, jadi pelanggan seharusnya mendapat refund penuh.",
         "confirmed": "Order sudah dikonfirmasi, jadi pelanggan seharusnya mendapat refund penuh."
@@ -464,6 +465,16 @@
         "invalidTransition": "Permintaan ini hanya boleh dipindahkan ke tahap valid berikutnya.",
         "paymentPending": "Jadwal tidak bisa dikunci sebelum pembayaran pelanggan selesai.",
         "closeReasonRequired": "Tulis alasan singkat sebelum menutup request ini."
+      },
+      "travel": {
+        "title": "Keberangkatan home visit",
+        "pending": "Home visit ini sudah terkonfirmasi. Mulai perjalanan saat Anda siap menuju pelanggan.",
+        "departed": "Keberangkatan sudah dicatat. Pelanggan sudah diberi tahu bahwa Anda sedang menuju lokasi.",
+        "departedWithEta": "Keberangkatan sudah dicatat. Estimasi saat ini sekitar {minutes, number} menit.",
+        "startAction": "Mulai perjalanan",
+        "startPending": "Menyimpan keberangkatan...",
+        "departSuccess": "Keberangkatan untuk {client} berhasil dicatat dan dibagikan ke pelanggan.",
+        "departError": "Keberangkatan belum bisa disimpan sekarang. Coba lagi."
       },
       "saveSuccess": "Permintaan dari {client} dipindahkan ke {status}.",
       "closeSuccess": {
@@ -1092,8 +1103,27 @@
     "allStatuses": "Semua Status",
     "noAppointments": "Tidak ada jadwal aktif",
     "trySearching": "Coba cari atau pesan layanan baru.",
+    "homeVisit": {
+      "eyebrow": "Perjalanan kunjungan rumah",
+      "title": "Profesional sedang menuju lokasi Anda",
+      "serviceStarted": "Layanan sudah dimulai",
+      "serviceStartedDescription": "Profesional sudah memulai appointment di lokasi Anda.",
+      "departedDescription": "Profesional sudah berangkat dan sedang menuju lokasi Anda.",
+      "loadingDescription": "Sedang memeriksa status keberangkatan terbaru dari backend.",
+      "pendingDescription": "Profesional belum memulai perjalanan ke lokasi Anda.",
+      "departedBadge": "OTW",
+      "pendingBadge": "Menunggu",
+      "eta": "Estimasi tiba",
+      "etaMinutes": "Sekitar {minutes, number} menit",
+      "etaUnavailable": "Perjalanan sedang berlangsung. Estimasi tiba akan diperbarui setelah hitungan terbaru tersedia.",
+      "waitingEta": "Estimasi akan muncul setelah profesional memulai perjalanan.",
+      "distanceKm": "Perkiraan sisa jarak {distance} km",
+      "departedAt": "Berangkat pada {time}",
+      "updatedAt": "Terakhir diperbarui {time}"
+    },
     "status": {
       "requested": "Menunggu Persetujuan",
+      "awaiting_payment": "Menunggu Pembayaran",
       "approved_waiting_payment": "Menunggu Pembayaran",
       "paid": "Dibayar",
       "confirmed": "Dikonfirmasi",
@@ -1445,6 +1475,7 @@
       },
       "statusBanners": {
         "requested": "Profesional sedang meninjau permintaan Anda. Kami akan memberi tahu Anda segera setelah disetujui.",
+        "approved_waiting_payment": "Appointment Anda sedang menunggu pembayaran. Selesaikan pembayaran untuk mengunci jadwal.",
         "paid": "Pembayaran berhasil. Profesional akan segera berangkat ke lokasi Anda sesuai jadwal.",
         "confirmed": "Jadwal Anda sudah dikonfirmasi. Mohon siapkan lokasi dan kebutuhan yang relevan sebelum sesi dimulai.",
         "inService": "Sesi sedang berjalan. Anda tetap bisa mengirim pesan bila ada kebutuhan tambahan.",

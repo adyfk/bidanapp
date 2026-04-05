@@ -8,47 +8,62 @@ func (s Service) Bootstrap(ctx context.Context) (BootstrapData, error) {
 		return BootstrapData{}, err
 	}
 
-	consumerRows, err := readJSON[[]seedDataConsumerRow](ctx, s.repository, "consumers.json")
+	bundle, err := readJSONBundle(ctx, s.repository, []string{
+		"app_runtime_selections.json",
+		"app_section_configs.json",
+		"appointments.json",
+		"consumers.json",
+		"home_feed_featured_appointments.json",
+		"home_feed_nearby_professionals.json",
+		"home_feed_popular_services.json",
+		"home_feed_snapshots.json",
+		"user_contexts.json",
+	})
 	if err != nil {
 		return BootstrapData{}, err
 	}
 
-	userContextRows, err := readJSON[[]seedDataUserContextRow](ctx, s.repository, "user_contexts.json")
+	consumerRows, err := decodeBundleJSON[[]seedDataConsumerRow](bundle, "consumers.json")
 	if err != nil {
 		return BootstrapData{}, err
 	}
 
-	runtimeSelectionRows, err := readJSON[[]seedDataRuntimeSelectionRow](ctx, s.repository, "app_runtime_selections.json")
+	userContextRows, err := decodeBundleJSON[[]seedDataUserContextRow](bundle, "user_contexts.json")
 	if err != nil {
 		return BootstrapData{}, err
 	}
 
-	homeFeedRows, err := readJSON[[]seedDataHomeFeedRow](ctx, s.repository, "home_feed_snapshots.json")
+	runtimeSelectionRows, err := decodeBundleJSON[[]seedDataRuntimeSelectionRow](bundle, "app_runtime_selections.json")
 	if err != nil {
 		return BootstrapData{}, err
 	}
 
-	featuredAppointmentRows, err := readOptionalJSON[[]seedDataHomeFeedFeaturedAppointmentRow](ctx, s.repository, "home_feed_featured_appointments.json", []seedDataHomeFeedFeaturedAppointmentRow{})
+	homeFeedRows, err := decodeBundleJSON[[]seedDataHomeFeedRow](bundle, "home_feed_snapshots.json")
 	if err != nil {
 		return BootstrapData{}, err
 	}
 
-	popularServiceRows, err := readOptionalJSON[[]seedDataHomeFeedPopularServiceRow](ctx, s.repository, "home_feed_popular_services.json", []seedDataHomeFeedPopularServiceRow{})
+	featuredAppointmentRows, err := decodeOptionalBundleJSON[[]seedDataHomeFeedFeaturedAppointmentRow](bundle, "home_feed_featured_appointments.json", []seedDataHomeFeedFeaturedAppointmentRow{})
 	if err != nil {
 		return BootstrapData{}, err
 	}
 
-	nearbyProfessionalRows, err := readOptionalJSON[[]seedDataHomeFeedNearbyProfessionalRow](ctx, s.repository, "home_feed_nearby_professionals.json", []seedDataHomeFeedNearbyProfessionalRow{})
+	popularServiceRows, err := decodeOptionalBundleJSON[[]seedDataHomeFeedPopularServiceRow](bundle, "home_feed_popular_services.json", []seedDataHomeFeedPopularServiceRow{})
 	if err != nil {
 		return BootstrapData{}, err
 	}
 
-	appSectionConfigRows, err := readOptionalJSON[[]seedDataAppSectionConfigRow](ctx, s.repository, "app_section_configs.json", []seedDataAppSectionConfigRow{})
+	nearbyProfessionalRows, err := decodeOptionalBundleJSON[[]seedDataHomeFeedNearbyProfessionalRow](bundle, "home_feed_nearby_professionals.json", []seedDataHomeFeedNearbyProfessionalRow{})
 	if err != nil {
 		return BootstrapData{}, err
 	}
 
-	appointmentRows, err := readOptionalJSON[[]seedDataAppointmentRow](ctx, s.repository, "appointments.json", []seedDataAppointmentRow{})
+	appSectionConfigRows, err := decodeOptionalBundleJSON[[]seedDataAppSectionConfigRow](bundle, "app_section_configs.json", []seedDataAppSectionConfigRow{})
+	if err != nil {
+		return BootstrapData{}, err
+	}
+
+	appointmentRows, err := decodeOptionalBundleJSON[[]seedDataAppointmentRow](bundle, "appointments.json", []seedDataAppointmentRow{})
 	if err != nil {
 		return BootstrapData{}, err
 	}

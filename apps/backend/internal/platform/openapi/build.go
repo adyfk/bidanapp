@@ -16,9 +16,14 @@ import (
 	"bidanapp/apps/backend/internal/modules/professionalauth"
 	"bidanapp/apps/backend/internal/modules/professionalportal"
 	"bidanapp/apps/backend/internal/modules/readmodel"
+	"bidanapp/apps/backend/internal/platform/appointmentstore"
+	"bidanapp/apps/backend/internal/platform/authstore"
+	"bidanapp/apps/backend/internal/platform/contentstore"
 	"bidanapp/apps/backend/internal/platform/documentstore"
 	"bidanapp/apps/backend/internal/platform/portalstore"
+	"bidanapp/apps/backend/internal/platform/pushstore"
 	"bidanapp/apps/backend/internal/platform/web"
+	internalwebpush "bidanapp/apps/backend/internal/platform/webpush"
 )
 
 var configureErrorsOnce sync.Once
@@ -35,13 +40,21 @@ type RuntimeServices struct {
 
 func Build(mux *http.ServeMux, cfg config.Config) huma.API {
 	return build(mux, cfg, RuntimeServices{
-		AdminAuth:          adminauth.NewService(cfg.AdminAuth, documentstore.NewMemoryStore()),
-		CustomerAuth:       customerauth.NewService(cfg.CustomerAuth, documentstore.NewMemoryStore()),
+		AdminAuth:          adminauth.NewService(cfg.AdminAuth, authstore.NewMemoryStore()),
+		CustomerAuth:       customerauth.NewService(cfg.CustomerAuth, authstore.NewMemoryStore()),
 		ProfessionalAuth:   nil,
 		AppointmentWrites:  nil,
 		ProfessionalPortal: professionalportal.NewService(portalstore.NewMemoryStore()),
-		ReadModel:          readmodel.NewService(cfg.SeedData.DataDir, portalstore.NewMemoryStore()),
-		ClientState:        clientstate.NewService(documentstore.NewMemoryStore()),
+		ReadModel: readmodel.NewService(
+			cfg.SeedData.DataDir,
+			portalstore.NewMemoryStore(),
+			appointmentstore.NewMemoryStore(),
+		),
+		ClientState: clientstate.NewService(
+			documentstore.NewMemoryStore(),
+			pushstore.NewMemoryStore(),
+			contentstore.NewMemoryStore(),
+		),
 	})
 }
 
@@ -65,27 +78,44 @@ func build(mux *http.ServeMux, cfg config.Config, services RuntimeServices) huma
 		services.ProfessionalPortal = professionalportal.NewService(portalstore.NewMemoryStore())
 	}
 	if services.AdminAuth == nil {
-		services.AdminAuth = adminauth.NewService(cfg.AdminAuth, documentstore.NewMemoryStore())
+		services.AdminAuth = adminauth.NewService(cfg.AdminAuth, authstore.NewMemoryStore())
 	}
 	if services.CustomerAuth == nil {
-		services.CustomerAuth = customerauth.NewService(cfg.CustomerAuth, documentstore.NewMemoryStore())
+		services.CustomerAuth = customerauth.NewService(cfg.CustomerAuth, authstore.NewMemoryStore())
 	}
 	var zeroReadModel readmodel.Service
 	if services.ReadModel == zeroReadModel {
-		services.ReadModel = readmodel.NewService(cfg.SeedData.DataDir, portalstore.NewMemoryStore())
+		services.ReadModel = readmodel.NewService(
+			cfg.SeedData.DataDir,
+			portalstore.NewMemoryStore(),
+			appointmentstore.NewMemoryStore(),
+		)
 	}
 	if services.ProfessionalAuth == nil {
 		services.ProfessionalAuth = professionalauth.NewService(
 			cfg.ProfessionalAuth,
 			services.ReadModel,
-			documentstore.NewMemoryStore(),
+			authstore.NewMemoryStore(),
 		)
 	}
 	if services.AppointmentWrites == nil {
-		services.AppointmentWrites = appointments.NewService(services.ProfessionalPortal)
+		services.AppointmentWrites = appointments.NewService(
+			services.ProfessionalPortal,
+			services.ReadModel,
+			services.ReadModel,
+			appointmentstore.NewMemoryStore(),
+			pushstore.NewMemoryStore(),
+			internalwebpush.NewNoopSender(),
+			appointments.WithPaymentConfig(cfg.Payment),
+			appointments.WithFrontendOrigin(cfg.CORS.PrimaryOrigin()),
+		)
 	}
 	if services.ClientState == nil {
-		services.ClientState = clientstate.NewService(documentstore.NewMemoryStore())
+		services.ClientState = clientstate.NewService(
+			documentstore.NewMemoryStore(),
+			pushstore.NewMemoryStore(),
+			contentstore.NewMemoryStore(),
+		)
 	}
 
 	api := humago.NewWithPrefix(mux, "/api/v1", humaConfig)

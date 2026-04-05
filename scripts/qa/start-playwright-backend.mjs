@@ -2,6 +2,11 @@ import { spawn, spawnSync } from 'node:child_process';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
+import {
+  PLAYWRIGHT_WEB_PUSH_PRIVATE_KEY,
+  PLAYWRIGHT_WEB_PUSH_PUBLIC_KEY,
+  PLAYWRIGHT_WEB_PUSH_SUBJECT,
+} from './web-push-test-keys.mjs';
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDir, '..', '..');
@@ -77,6 +82,9 @@ async function main() {
     HTTP_PORT: String(backendPort),
     LOG_LEVEL: process.env.LOG_LEVEL ?? 'warn',
     REDIS_URL: process.env.REDIS_URL ?? 'redis://127.0.0.1:6379',
+    WEB_PUSH_PRIVATE_KEY: process.env.WEB_PUSH_PRIVATE_KEY ?? PLAYWRIGHT_WEB_PUSH_PRIVATE_KEY,
+    WEB_PUSH_PUBLIC_KEY: process.env.WEB_PUSH_PUBLIC_KEY ?? PLAYWRIGHT_WEB_PUSH_PUBLIC_KEY,
+    WEB_PUSH_SUBJECT: process.env.WEB_PUSH_SUBJECT ?? PLAYWRIGHT_WEB_PUSH_SUBJECT,
   };
 
   run('npm', ['run', 'atlas:apply', '--workspace', '@bidanapp/backend'], {

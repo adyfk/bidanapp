@@ -2,10 +2,11 @@ package adminauth
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"time"
 
-	"bidanapp/apps/backend/internal/platform/documentstore"
+	"bidanapp/apps/backend/internal/platform/authstore"
 )
 
 type SeedSessionInput struct {
@@ -41,23 +42,28 @@ func (s *Service) SeedSession(ctx context.Context, input SeedSessionInput) (Admi
 		expiresAt = lastLoginAt.Add(s.sessionTTL)
 	}
 
-	record := sessionRecord{
-		AdminID:          adminID,
-		Email:            email,
-		FocusArea:        focusArea,
-		LastLoginAt:      lastLoginAt.Format(time.RFC3339),
-		LastVisitedRoute: strings.TrimSpace(input.LastVisitedRoute),
-		ExpiresAt:        expiresAt.Format(time.RFC3339),
-	}
-
-	if _, err := s.store.Upsert(ctx, documentstore.Record{
-		Namespace: sessionNamespace,
-		Key:       hashToken(rawToken),
-		SavedAt:   lastLoginAt,
-		Snapshot:  marshalRecord(record),
-	}); err != nil {
+	account, err := s.store.AdminAccountByAdminID(ctx, adminID)
+	if err != nil {
+		if errors.Is(err, authstore.ErrNotFound) {
+			return AdminAuthSessionData{}, ErrSessionNotFound
+		}
 		return AdminAuthSessionData{}, err
 	}
 
-	return sessionDataFromRecord(record), nil
+	session := authstore.Session{
+		ExpiresAt:        expiresAt,
+		LastLoginAt:      lastLoginAt,
+		LastVisitedRoute: strings.TrimSpace(input.LastVisitedRoute),
+		Role:             sessionRole,
+		SavedAt:          lastLoginAt,
+		SubjectID:        adminID,
+		TokenHash:        hashToken(rawToken),
+		UserID:           account.UserID,
+	}
+
+	if _, err := s.store.SaveSession(ctx, session); err != nil {
+		return AdminAuthSessionData{}, err
+	}
+
+	return sessionDataFrom(session, account), nil
 }

@@ -96,13 +96,10 @@ func (s *Service) Profile(ctx context.Context, professionalID string) (Professio
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	store, err := s.readStore(ctx)
+	selectedProfessionalID, record, err := s.readResolvedRecord(ctx, professionalID)
 	if err != nil {
 		return ProfessionalPortalProfileData{}, err
 	}
-
-	selectedProfessionalID := resolveProfessionalID(professionalID, store.LastActiveProfessionalID)
-	record := store.Sessions[selectedProfessionalID]
 
 	return profileFromRecord(selectedProfessionalID, record), nil
 }
@@ -120,16 +117,14 @@ func (s *Service) UpsertProfile(ctx context.Context, input ProfessionalPortalPro
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	store, err := s.readStore(ctx)
+	record, err := s.readRecord(ctx, professionalID)
 	if err != nil {
 		return ProfessionalPortalProfileData{}, err
 	}
-
-	record := store.Sessions[professionalID]
 	record = applyRecordMutation(record, professionalID, func(snapshot map[string]any) {
 		applyProfileToSnapshot(snapshot, input)
 	})
-	if _, err := s.writeStore(ctx, record, professionalID); err != nil {
+	if err := s.persistRecord(ctx, record, professionalID); err != nil {
 		return ProfessionalPortalProfileData{}, err
 	}
 
@@ -152,16 +147,14 @@ func (s *Service) UpsertAdminReviewState(
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	store, err := s.readStore(ctx)
+	record, err := s.readRecord(ctx, professionalID)
 	if err != nil {
 		return ProfessionalPortalProfileData{}, err
 	}
-
-	record := store.Sessions[professionalID]
 	record = applyRecordMutation(record, professionalID, func(snapshot map[string]any) {
 		applyAdminReviewStateToSnapshot(snapshot, input)
 	})
-	if _, err := s.writeStore(ctx, record, professionalID); err != nil {
+	if err := s.persistRecord(ctx, record, professionalID); err != nil {
 		return ProfessionalPortalProfileData{}, err
 	}
 
@@ -181,12 +174,16 @@ func (s *Service) AdminReviewStates(ctx context.Context) (ProfessionalPortalAdmi
 		return ProfessionalPortalAdminReviewStatesData{}, err
 	}
 
+	profilesByProfessionalID := make(map[string]ProfessionalPortalProfileData, len(store.Sessions))
 	reviewStatesByProfessionalID := make(map[string]ProfessionalPortalReviewState, len(store.Sessions))
 	for professionalID, record := range store.Sessions {
-		reviewStatesByProfessionalID[professionalID] = profileFromRecord(professionalID, record).ReviewState
+		profile := profileFromRecord(professionalID, record)
+		profilesByProfessionalID[professionalID] = profile
+		reviewStatesByProfessionalID[professionalID] = profile.ReviewState
 	}
 
 	return ProfessionalPortalAdminReviewStatesData{
+		ProfilesByProfessionalID:     profilesByProfessionalID,
 		ReviewStatesByProfessionalID: reviewStatesByProfessionalID,
 	}, nil
 }
@@ -199,13 +196,10 @@ func (s *Service) Coverage(ctx context.Context, professionalID string) (Professi
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	store, err := s.readStore(ctx)
+	selectedProfessionalID, record, err := s.readResolvedRecord(ctx, professionalID)
 	if err != nil {
 		return ProfessionalPortalCoverageData{}, err
 	}
-
-	selectedProfessionalID := resolveProfessionalID(professionalID, store.LastActiveProfessionalID)
-	record := store.Sessions[selectedProfessionalID]
 
 	return coverageFromRecord(selectedProfessionalID, record), nil
 }
@@ -223,16 +217,14 @@ func (s *Service) UpsertCoverage(ctx context.Context, input ProfessionalPortalCo
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	store, err := s.readStore(ctx)
+	record, err := s.readRecord(ctx, professionalID)
 	if err != nil {
 		return ProfessionalPortalCoverageData{}, err
 	}
-
-	record := store.Sessions[professionalID]
 	record = applyRecordMutation(record, professionalID, func(snapshot map[string]any) {
 		applyCoverageToSnapshot(snapshot, input)
 	})
-	if _, err := s.writeStore(ctx, record, professionalID); err != nil {
+	if err := s.persistRecord(ctx, record, professionalID); err != nil {
 		return ProfessionalPortalCoverageData{}, err
 	}
 
@@ -247,13 +239,10 @@ func (s *Service) Services(ctx context.Context, professionalID string) (Professi
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	store, err := s.readStore(ctx)
+	selectedProfessionalID, record, err := s.readResolvedRecord(ctx, professionalID)
 	if err != nil {
 		return ProfessionalPortalServicesData{}, err
 	}
-
-	selectedProfessionalID := resolveProfessionalID(professionalID, store.LastActiveProfessionalID)
-	record := store.Sessions[selectedProfessionalID]
 
 	return servicesFromRecord(selectedProfessionalID, record), nil
 }
@@ -271,16 +260,14 @@ func (s *Service) UpsertServices(ctx context.Context, input ProfessionalPortalSe
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	store, err := s.readStore(ctx)
+	record, err := s.readRecord(ctx, professionalID)
 	if err != nil {
 		return ProfessionalPortalServicesData{}, err
 	}
-
-	record := store.Sessions[professionalID]
 	record = applyRecordMutation(record, professionalID, func(snapshot map[string]any) {
 		applyServicesToSnapshot(snapshot, input)
 	})
-	if _, err := s.writeStore(ctx, record, professionalID); err != nil {
+	if err := s.persistRecord(ctx, record, professionalID); err != nil {
 		return ProfessionalPortalServicesData{}, err
 	}
 
@@ -295,13 +282,10 @@ func (s *Service) Requests(ctx context.Context, professionalID string) (Professi
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	store, err := s.readStore(ctx)
+	selectedProfessionalID, record, err := s.readResolvedRecord(ctx, professionalID)
 	if err != nil {
 		return ProfessionalPortalRequestsData{}, err
 	}
-
-	selectedProfessionalID := resolveProfessionalID(professionalID, store.LastActiveProfessionalID)
-	record := store.Sessions[selectedProfessionalID]
 
 	return requestsFromRecord(selectedProfessionalID, record), nil
 }
@@ -319,16 +303,14 @@ func (s *Service) UpsertRequests(ctx context.Context, input ProfessionalPortalRe
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	store, err := s.readStore(ctx)
+	record, err := s.readRecord(ctx, professionalID)
 	if err != nil {
 		return ProfessionalPortalRequestsData{}, err
 	}
-
-	record := store.Sessions[professionalID]
 	record = applyRecordMutation(record, professionalID, func(snapshot map[string]any) {
 		applyRequestsToSnapshot(snapshot, input)
 	})
-	if _, err := s.writeStore(ctx, record, professionalID); err != nil {
+	if err := s.persistRecord(ctx, record, professionalID); err != nil {
 		return ProfessionalPortalRequestsData{}, err
 	}
 
@@ -355,12 +337,10 @@ func (s *Service) UpsertAppointmentRecord(
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	store, err := s.readStore(ctx)
+	session, err := s.readRecord(ctx, professionalID)
 	if err != nil {
 		return ProfessionalPortalRequestsData{}, err
 	}
-
-	session := store.Sessions[professionalID]
 	requests := requestsFromRecord(professionalID, session)
 	nextRecords := make([]ProfessionalPortalManagedAppointmentRecord, 0, len(requests.AppointmentRecords)+1)
 	replaced := false
@@ -382,7 +362,7 @@ func (s *Service) UpsertAppointmentRecord(
 			ProfessionalID:     professionalID,
 		})
 	})
-	if _, err := s.writeStore(ctx, session, professionalID); err != nil {
+	if err := s.persistRecord(ctx, session, professionalID); err != nil {
 		return ProfessionalPortalRequestsData{}, err
 	}
 
@@ -397,13 +377,10 @@ func (s *Service) Portfolio(ctx context.Context, professionalID string) (Profess
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	store, err := s.readStore(ctx)
+	selectedProfessionalID, record, err := s.readResolvedRecord(ctx, professionalID)
 	if err != nil {
 		return ProfessionalPortalPortfolioData{}, err
 	}
-
-	selectedProfessionalID := resolveProfessionalID(professionalID, store.LastActiveProfessionalID)
-	record := store.Sessions[selectedProfessionalID]
 
 	return portfolioFromRecord(selectedProfessionalID, record), nil
 }
@@ -421,16 +398,14 @@ func (s *Service) UpsertPortfolio(ctx context.Context, input ProfessionalPortalP
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	store, err := s.readStore(ctx)
+	record, err := s.readRecord(ctx, professionalID)
 	if err != nil {
 		return ProfessionalPortalPortfolioData{}, err
 	}
-
-	record := store.Sessions[professionalID]
 	record = applyRecordMutation(record, professionalID, func(snapshot map[string]any) {
 		applyPortfolioToSnapshot(snapshot, input)
 	})
-	if _, err := s.writeStore(ctx, record, professionalID); err != nil {
+	if err := s.persistRecord(ctx, record, professionalID); err != nil {
 		return ProfessionalPortalPortfolioData{}, err
 	}
 
@@ -445,13 +420,10 @@ func (s *Service) Gallery(ctx context.Context, professionalID string) (Professio
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	store, err := s.readStore(ctx)
+	selectedProfessionalID, record, err := s.readResolvedRecord(ctx, professionalID)
 	if err != nil {
 		return ProfessionalPortalGalleryData{}, err
 	}
-
-	selectedProfessionalID := resolveProfessionalID(professionalID, store.LastActiveProfessionalID)
-	record := store.Sessions[selectedProfessionalID]
 
 	return galleryFromRecord(selectedProfessionalID, record), nil
 }
@@ -469,16 +441,14 @@ func (s *Service) UpsertGallery(ctx context.Context, input ProfessionalPortalGal
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	store, err := s.readStore(ctx)
+	record, err := s.readRecord(ctx, professionalID)
 	if err != nil {
 		return ProfessionalPortalGalleryData{}, err
 	}
-
-	record := store.Sessions[professionalID]
 	record = applyRecordMutation(record, professionalID, func(snapshot map[string]any) {
 		applyGalleryToSnapshot(snapshot, input)
 	})
-	if _, err := s.writeStore(ctx, record, professionalID); err != nil {
+	if err := s.persistRecord(ctx, record, professionalID); err != nil {
 		return ProfessionalPortalGalleryData{}, err
 	}
 
@@ -493,13 +463,10 @@ func (s *Service) Trust(ctx context.Context, professionalID string) (Professiona
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	store, err := s.readStore(ctx)
+	selectedProfessionalID, record, err := s.readResolvedRecord(ctx, professionalID)
 	if err != nil {
 		return ProfessionalPortalTrustData{}, err
 	}
-
-	selectedProfessionalID := resolveProfessionalID(professionalID, store.LastActiveProfessionalID)
-	record := store.Sessions[selectedProfessionalID]
 
 	return trustFromRecord(selectedProfessionalID, record), nil
 }
@@ -517,16 +484,14 @@ func (s *Service) UpsertTrust(ctx context.Context, input ProfessionalPortalTrust
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	store, err := s.readStore(ctx)
+	record, err := s.readRecord(ctx, professionalID)
 	if err != nil {
 		return ProfessionalPortalTrustData{}, err
 	}
-
-	record := store.Sessions[professionalID]
 	record = applyRecordMutation(record, professionalID, func(snapshot map[string]any) {
 		applyTrustToSnapshot(snapshot, input)
 	})
-	if _, err := s.writeStore(ctx, record, professionalID); err != nil {
+	if err := s.persistRecord(ctx, record, professionalID); err != nil {
 		return ProfessionalPortalTrustData{}, err
 	}
 
@@ -562,6 +527,76 @@ func (s *Service) readStore(ctx context.Context) (sessionStore, error) {
 	return store, nil
 }
 
+func (s *Service) readResolvedRecord(ctx context.Context, professionalID string) (string, sessionRecord, error) {
+	if s.store == nil {
+		return resolveProfessionalID(professionalID, ""), sessionRecord{}, nil
+	}
+
+	recordReader, ok := s.store.(portalstore.RecordReader)
+	if !ok {
+		store, err := s.readStore(ctx)
+		if err != nil {
+			return "", sessionRecord{}, err
+		}
+		resolvedProfessionalID := resolveProfessionalID(professionalID, store.LastActiveProfessionalID)
+		return resolvedProfessionalID, store.Sessions[resolvedProfessionalID], nil
+	}
+
+	lastActiveProfessionalID := ""
+	if lastActiveReader, ok := s.store.(portalstore.LastActiveReader); ok {
+		value, err := lastActiveReader.ReadLastActiveProfessionalID(ctx)
+		if err != nil {
+			return "", sessionRecord{}, err
+		}
+		lastActiveProfessionalID = value
+	}
+	resolvedProfessionalID := resolveProfessionalID(professionalID, lastActiveProfessionalID)
+	if resolvedProfessionalID == "" {
+		return "", sessionRecord{}, nil
+	}
+
+	record, err := recordReader.ReadRecord(ctx, resolvedProfessionalID)
+	if err != nil {
+		if errors.Is(err, portalstore.ErrNotFound) {
+			return resolvedProfessionalID, sessionRecord{}, nil
+		}
+		return "", sessionRecord{}, err
+	}
+
+	return resolvedProfessionalID, sessionRecord{
+		ProfessionalID: record.ProfessionalID,
+		SavedAt:        record.SavedAt,
+		Snapshot:       cloneSnapshot(record.Snapshot),
+	}, nil
+}
+
+func (s *Service) readRecord(ctx context.Context, professionalID string) (sessionRecord, error) {
+	if s.store == nil {
+		return sessionRecord{}, nil
+	}
+
+	if recordReader, ok := s.store.(portalstore.RecordReader); ok {
+		record, err := recordReader.ReadRecord(ctx, professionalID)
+		if err != nil {
+			if errors.Is(err, portalstore.ErrNotFound) {
+				return sessionRecord{}, nil
+			}
+			return sessionRecord{}, err
+		}
+		return sessionRecord{
+			ProfessionalID: record.ProfessionalID,
+			SavedAt:        record.SavedAt,
+			Snapshot:       cloneSnapshot(record.Snapshot),
+		}, nil
+	}
+
+	store, err := s.readStore(ctx)
+	if err != nil {
+		return sessionRecord{}, err
+	}
+	return store.Sessions[professionalID], nil
+}
+
 func (s *Service) writeStore(ctx context.Context, record sessionRecord, lastActiveProfessionalID string) (sessionStore, error) {
 	if s.store == nil {
 		return sessionStore{}, errors.New("professional portal store is not configured")
@@ -593,6 +628,28 @@ func (s *Service) writeStore(ctx context.Context, record sessionRecord, lastActi
 	}
 
 	return store, nil
+}
+
+func (s *Service) persistRecord(ctx context.Context, record sessionRecord, lastActiveProfessionalID string) error {
+	if s.store == nil {
+		return errors.New("professional portal store is not configured")
+	}
+
+	if recordWriter, ok := s.store.(portalstore.RecordWriter); ok {
+		_, err := recordWriter.UpsertRecord(ctx, portalstore.Record{
+			ProfessionalID: record.ProfessionalID,
+			SavedAt:        record.SavedAt,
+			Snapshot:       cloneSnapshot(record.Snapshot),
+		}, lastActiveProfessionalID)
+		return err
+	}
+
+	_, err := s.store.Upsert(ctx, portalstore.Record{
+		ProfessionalID: record.ProfessionalID,
+		SavedAt:        record.SavedAt,
+		Snapshot:       cloneSnapshot(record.Snapshot),
+	}, lastActiveProfessionalID)
+	return err
 }
 
 func (s sessionStore) toSessionData(requestedProfessionalID string) ProfessionalPortalSessionData {

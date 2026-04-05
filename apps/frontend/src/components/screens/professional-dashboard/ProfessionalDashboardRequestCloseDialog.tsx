@@ -36,6 +36,7 @@ export const ProfessionalDashboardRequestCloseDialog = ({
   const outcome = preview.financialOutcome || 'none';
   const previewStatusKey =
     request.customerStatus === 'requested' ||
+    request.customerStatus === 'awaiting_payment' ||
     request.customerStatus === 'approved_waiting_payment' ||
     request.customerStatus === 'paid' ||
     request.customerStatus === 'confirmed'

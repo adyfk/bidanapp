@@ -8,6 +8,18 @@ type CustomerNotificationStateData struct {
 	ReadIDs []string `json:"readIds"`
 }
 
+type CustomerPushSubscriptionKeysData struct {
+	Auth   string `json:"auth"`
+	P256DH string `json:"p256dh"`
+}
+
+type CustomerPushSubscriptionData struct {
+	Endpoint  string                            `json:"endpoint"`
+	Keys      CustomerPushSubscriptionKeysData  `json:"keys"`
+	Locale    string                            `json:"locale,omitempty"`
+	UserAgent string                            `json:"userAgent,omitempty"`
+}
+
 type ProfessionalNotificationStateData struct {
 	ReadIDsByProfessional map[string][]string `json:"readIdsByProfessional"`
 }

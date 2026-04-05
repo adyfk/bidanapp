@@ -32,7 +32,6 @@ export const PROFESSIONAL_PORTAL_API_ENDPOINTS = {
   trust: '/professionals/me/trust',
 } as const;
 
-export type ProfessionalPortalDataSource = 'api' | 'local';
 export type ProfessionalRequestStatus = 'new' | 'quoted' | 'scheduled' | 'completed';
 export type ProfessionalRequestPriority = 'high' | 'medium' | 'low';
 export type ProfessionalLifecycleStatus =
@@ -50,6 +49,20 @@ export interface ProfessionalLifecycleReviewState {
   reviewerName?: string;
   status: ProfessionalLifecycleStatus;
   submittedAt?: string;
+}
+
+export interface ProfessionalPortalAdminProfile {
+  acceptingNewClients: boolean;
+  autoApproveInstantBookings: boolean;
+  city: string;
+  credentialNumber: string;
+  displayName: string;
+  phone: string;
+  professionalId: string;
+  publicBio: string;
+  responseTimeGoal: string;
+  reviewState: ProfessionalLifecycleReviewState;
+  yearsExperience: string;
 }
 
 export interface ProfessionalRequestStatusEvidence {

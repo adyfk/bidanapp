@@ -66,7 +66,7 @@ export const validateProfessionalRequestStatusUpdate = (
   if (
     request.status === 'quoted' &&
     nextStatus === 'scheduled' &&
-    request.customerStatus === 'approved_waiting_payment'
+    (request.customerStatus === 'awaiting_payment' || request.customerStatus === 'approved_waiting_payment')
   ) {
     return 'paymentPending';
   }

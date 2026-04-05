@@ -1,13 +1,10 @@
 import { cache } from 'react';
 import type { PublicBootstrapData } from '@/lib/public-bootstrap-source';
-import { buildFallbackPublicBootstrapData, fetchPublicBootstrapData } from '@/lib/public-bootstrap-source';
+import { fetchPublicBootstrapData } from '@/lib/public-bootstrap-source';
 
-export type { PublicBootstrapData, PublicHomeFeedData } from '@/lib/public-bootstrap-source';
+export type {
+  PublicBootstrapData,
+  PublicHomeFeedData,
+} from '@/lib/public-bootstrap-source';
 
-export const getPublicBootstrapData = cache(async (): Promise<PublicBootstrapData> => {
-  try {
-    return await fetchPublicBootstrapData();
-  } catch {
-    return buildFallbackPublicBootstrapData();
-  }
-});
+export const getPublicBootstrapData = cache(async (): Promise<PublicBootstrapData> => await fetchPublicBootstrapData());

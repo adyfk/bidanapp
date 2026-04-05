@@ -8,6 +8,7 @@ import type {
 
 export type AppointmentStatus =
   | 'requested'
+  | 'awaiting_payment'
   | 'approved_waiting_payment'
   | 'paid'
   | 'confirmed'

@@ -18,7 +18,7 @@ The codebase is designed around a few deliberate boundaries:
 
 The current implementation is transitional by design:
 
-- public catalog/feed read-models now hydrate from PostgreSQL-backed content documents, with seed data retained as bootstrap input
+- public catalog/feed read-models now hydrate from PostgreSQL-backed published read-model documents, with seed data retained as bootstrap input
 - mutable product flows now persist in PostgreSQL behind backend-owned contracts
 - chat websocket integration is live and persists history in PostgreSQL
 
@@ -67,7 +67,7 @@ Browser
   -> Next.js frontend
   -> @bidanapp/sdk
   -> Go backend
-  -> PostgreSQL for mutable state and public content documents
+  -> PostgreSQL for mutable state and published read-model documents
   -> backend seed data only for bootstrap import and tests
 ```
 
@@ -124,7 +124,7 @@ The backend currently exposes:
 - professionals list and detail
 - appointments
 - app shell/bootstrap data
-- admin/support/viewer state documents
+- admin/support/viewer runtime state
 - websocket chat handshake
 
 The backend is implemented using:
@@ -133,7 +133,7 @@ The backend is implemented using:
 - Huma for route registration and OpenAPI
 - middleware chain around `http.ServeMux`
 - PostgreSQL-backed stores for mutable state
-- PostgreSQL-backed content documents for public read-model/bootstrap content
+- PostgreSQL-backed published read-model documents for public read-model/bootstrap content
 
 ## 6. Contract And SDK Flow
 
@@ -188,12 +188,12 @@ The system currently mixes two realities:
 
 - frontend reads backend APIs first for customer, professional, chat, and admin flows
 - backend persists mutable state in PostgreSQL
-- backend serves public catalog/feed/bootstrap content from PostgreSQL-backed content documents
+- backend serves public catalog/feed/bootstrap content from PostgreSQL-backed published read-model documents
 - websocket chat is live and persisted
 
 ### Remaining migration boundary
 
-- Atlas config and migrations continue to evolve as content documents are retired in favor of more granular relational or editorial pipelines
+- Atlas config and migrations continue to evolve as published read-model documents are retired in favor of more granular relational or editorial pipelines
 - deployment stack includes PostgreSQL and Redis
 - environment contracts already expose DB and Redis URLs
 - seed data still exists as bootstrap material until richer relational/content flows replace it
@@ -208,7 +208,7 @@ For a professionals page backed by the backend:
 2. frontend creates a typed client from `@bidanapp/sdk`
 3. frontend calls a generated path method such as `GET /professionals`
 4. backend route registered through Huma serves the request
-5. backend read-model hydrates the relevant PostgreSQL content documents and persisted overlays
+5. backend read-model hydrates the relevant PostgreSQL published read-model documents and persisted overlays
 6. response is returned inside a stable `{ data: ... }` envelope
 7. frontend adapter or screen renders the normalized result
 
@@ -253,7 +253,7 @@ Supporting pieces:
 
 ## 11. Current Limitations
 
-- public catalog/read-model composition is not yet fully relational or editorially managed
+- public catalog/read-model composition still depends on bootstrapped published read-model documents instead of a richer editorial pipeline
 - the app deploy stack is ready, but real production operations still require secret management and an external CI or release runner
 - `@changesets/changelog-github` still depends on GitHub mirror metadata for richer changelog links
 

@@ -7,6 +7,7 @@ import (
 
 	"github.com/danielgtaylor/huma/v2"
 
+	"bidanapp/apps/backend/internal/modules/adminauth"
 	"bidanapp/apps/backend/internal/platform/web"
 )
 
@@ -117,14 +118,14 @@ func RegisterRoutes(api huma.API, service Service) {
 		return response, nil
 	})
 
-	huma.Register(api, huma.Operation{
+	huma.Register(api, withAdminSecurity(huma.Operation{
 		OperationID: "get-appointments",
 		Method:      http.MethodGet,
 		Path:        "/appointments",
-		Summary:     "Get appointment read model payload",
+		Summary:     "Get appointment read model payload for admin operations",
 		Tags:        []string{"Appointments"},
-		Errors:      []int{http.StatusInternalServerError},
-	}, func(ctx context.Context, input *struct{}) (*appointmentsResponse, error) {
+		Errors:      []int{http.StatusUnauthorized, http.StatusInternalServerError},
+	}), func(ctx context.Context, input *struct{}) (*appointmentsResponse, error) {
 		payload, err := service.Appointments(ctx)
 		if err != nil {
 			return nil, toAPIError(err)
@@ -170,6 +171,13 @@ func RegisterRoutes(api huma.API, service Service) {
 		response.Body.Data = payload
 		return response, nil
 	})
+}
+
+func withAdminSecurity(operation huma.Operation) huma.Operation {
+	operation.Security = []map[string][]string{
+		{adminauth.SecuritySchemeName: {}},
+	}
+	return operation
 }
 
 func toAPIError(err error) error {

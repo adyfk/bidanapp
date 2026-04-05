@@ -5,12 +5,14 @@ import type {
   AdminConsoleTableInput,
   ConsumerPreferencesState,
   CustomerNotificationState,
+  CustomerPushSubscriptionState,
   ProfessionalNotificationState,
   SupportDeskState,
   ViewerSessionState,
 } from '@bidanapp/sdk';
 import {
   createBidanappApiClient,
+  deleteCustomerPushSubscriptionState,
   fetchAdminConsoleState,
   fetchAdminConsoleTableState,
   fetchConsumerPreferencesState,
@@ -22,6 +24,7 @@ import {
   saveAdminConsoleTableState,
   saveConsumerPreferencesState,
   saveCustomerNotificationState,
+  saveCustomerPushSubscriptionState,
   saveProfessionalNotificationState,
   saveSupportDeskState,
   saveViewerSessionState,
@@ -29,14 +32,13 @@ import {
 import { hasAdminAuthSessionHint } from '@/lib/admin-auth-storage';
 import { getBackendApiBaseUrl } from '@/lib/backend';
 import { hasCustomerAuthSessionHint } from '@/lib/customer-auth-storage';
-import { PUBLIC_ENV } from '@/lib/env';
 import { hasProfessionalAuthSessionHint } from '@/lib/professional-auth-storage';
 
 const requestTimeoutMs = 1500;
 const syncWarnings = new Set<string>();
 const client = createBidanappApiClient(getBackendApiBaseUrl());
 
-const isAppStateApiEnabled = () => PUBLIC_ENV.appStateDataSource === 'api' && typeof window !== 'undefined';
+const isAppStateApiEnabled = () => typeof window !== 'undefined';
 
 const withTimeout = <T>(promise: Promise<T>, timeoutMs: number) =>
   new Promise<T>((resolve, reject) => {
@@ -173,6 +175,24 @@ export const syncCustomerNotificationStateToApi = (state: CustomerNotificationSt
     () => saveCustomerNotificationState(client, state),
     '[AppState] Failed to sync customer notification state to the backend.',
   );
+};
+
+export const saveCustomerPushSubscriptionToApi = async (state: CustomerPushSubscriptionState) =>
+  loadCustomerFromApi(
+    () => saveCustomerPushSubscriptionState(client, state),
+    '[AppState] Failed to sync customer push subscription to the backend.',
+  );
+
+export const deleteCustomerPushSubscriptionFromApi = async (state: CustomerPushSubscriptionState) => {
+  if (!hasCustomerAuthSessionHint() || !isAppStateApiEnabled()) {
+    return;
+  }
+
+  try {
+    await withTimeout(deleteCustomerPushSubscriptionState(client, state), requestTimeoutMs);
+  } catch {
+    warnSyncFailure('[AppState] Failed to delete customer push subscription from the backend.');
+  }
 };
 
 export const hydrateProfessionalNotificationStateFromApi = (professionalId?: string) =>

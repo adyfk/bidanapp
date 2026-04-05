@@ -34,6 +34,26 @@ func (s *MemoryStore) Read(ctx context.Context, namespace string, key string) (R
 	return cloneRecord(record), nil
 }
 
+func (s *MemoryStore) ReadMany(ctx context.Context, namespace string, keys []string) (map[string]Record, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	records := make(map[string]Record, len(keys))
+	for _, key := range keys {
+		record, ok := s.records[buildRecordKey(namespace, key)]
+		if !ok {
+			continue
+		}
+		records[key] = cloneRecord(record)
+	}
+
+	return records, nil
+}
+
 func (s *MemoryStore) Upsert(ctx context.Context, record Record) (Record, error) {
 	if err := ctx.Err(); err != nil {
 		return Record{}, err

@@ -37,7 +37,17 @@ func requiresCustomerAuth(r *http.Request) bool {
 			r.URL.Path == "/api/v1/customers/auth/register" && r.Method == http.MethodPost)
 	}
 
-	return r.URL.Path == "/api/v1/notifications/customer" || r.URL.Path == "/api/v1/consumers/preferences"
+	if r.URL.Path == "/api/v1/customers/appointments" || strings.HasPrefix(r.URL.Path, "/api/v1/customers/appointments/") {
+		return true
+	}
+
+	if strings.HasPrefix(r.URL.Path, "/api/v1/customers/payments/requests/") {
+		return true
+	}
+
+	return r.URL.Path == "/api/v1/notifications/customer" ||
+		r.URL.Path == "/api/v1/notifications/customer/push-subscription" ||
+		r.URL.Path == "/api/v1/consumers/preferences"
 }
 
 func writeCustomerAuthError(w http.ResponseWriter, err error) {

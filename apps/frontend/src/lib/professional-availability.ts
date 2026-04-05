@@ -28,7 +28,12 @@ interface AppointmentSlotOccupancySource {
 }
 
 const activeSlotBlockingStatuses: AppointmentStatus[] = ['confirmed', 'in_service'];
-const tentativeSlotBlockingStatuses: AppointmentStatus[] = ['requested', 'approved_waiting_payment', 'paid'];
+const tentativeSlotBlockingStatuses: AppointmentStatus[] = [
+  'requested',
+  'awaiting_payment',
+  'approved_waiting_payment',
+  'paid',
+];
 
 const isOfflineServiceMode = (mode: ServiceDeliveryMode): mode is OfflineServiceDeliveryMode => mode !== 'online';
 

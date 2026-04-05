@@ -12,13 +12,17 @@ import (
 
 	"bidanapp/apps/backend/internal/config"
 	apphttp "bidanapp/apps/backend/internal/http"
+	"bidanapp/apps/backend/internal/modules/adminauth"
 	"bidanapp/apps/backend/internal/modules/chat"
 	"bidanapp/apps/backend/internal/modules/readmodel"
+	"bidanapp/apps/backend/internal/platform/appointmentstore"
+	"bidanapp/apps/backend/internal/platform/authstore"
 	"bidanapp/apps/backend/internal/platform/contentstore"
 	"bidanapp/apps/backend/internal/platform/database"
 	"bidanapp/apps/backend/internal/platform/documentstore"
 	applog "bidanapp/apps/backend/internal/platform/log"
 	"bidanapp/apps/backend/internal/platform/portalstore"
+	"bidanapp/apps/backend/internal/platform/pushstore"
 	"bidanapp/apps/backend/internal/platform/ratelimit"
 	"bidanapp/apps/backend/internal/server"
 )
@@ -39,9 +43,16 @@ func main() {
 	defer db.Close()
 
 	contentStore := contentstore.NewPostgresStore(db)
+	authStore := authstore.NewPostgresStore(db)
 	repository := readmodel.NewRepository(cfg.SeedData.DataDir, contentStore)
 	if err := repository.EnsureBootstrapped(context.Background()); err != nil {
 		logger.Error("read model bootstrap failed", slog.String("error", err.Error()))
+		os.Exit(1)
+	}
+
+	adminAuthService := adminauth.NewService(cfg.AdminAuth, authStore)
+	if err := adminAuthService.Bootstrap(context.Background()); err != nil {
+		logger.Error("admin auth bootstrap failed", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
 
@@ -66,11 +77,14 @@ func main() {
 	}
 
 	router := apphttp.NewRouter(cfg, logger, apphttp.Dependencies{
-		AuthRateLimiter: authRateLimiter,
-		ChatStore:       chat.NewPostgresStore(db),
-		PortalStore:     portalstore.NewPostgresStore(db),
-		ContentStore:    contentStore,
-		DocumentStore:   documentstore.NewPostgresStore(db),
+		AppointmentStore: appointmentstore.NewPostgresStore(db),
+		AuthRateLimiter:  authRateLimiter,
+		AuthStore:        authStore,
+		ChatStore:        chat.NewPostgresStore(db),
+		PortalStore:      portalstore.NewPostgresStore(db),
+		ContentStore:     contentStore,
+		DocumentStore:    documentstore.NewPostgresStore(db),
+		PushStore:        pushstore.NewPostgresStore(db),
 	})
 	httpServer := server.New(cfg, router)
 

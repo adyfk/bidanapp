@@ -126,7 +126,7 @@ const buildAppointmentNotification = ({
     timeLabel: formatTimeLabel(notificationTimestamp),
   };
 
-  if (appointment.status === 'approved_waiting_payment') {
+  if (appointment.status === 'awaiting_payment' || appointment.status === 'approved_waiting_payment') {
     return {
       ...sharedFields,
       actionKey: 'completePayment',

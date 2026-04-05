@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { BottomNavBar } from '@/components/layout/BottomNavBar';
+import { CustomerPushBootstrap } from '@/components/runtime/CustomerPushBootstrap';
 import { routing } from '@/i18n/routing';
 import { APP_CONFIG } from '@/lib/config';
 import '../../globals.css';
@@ -81,6 +82,7 @@ export default async function LocaleLayout({
     <html lang={locale}>
       <body>
         <NextIntlClientProvider messages={messages}>
+          <CustomerPushBootstrap />
           <div className="min-h-screen bg-gray-100 flex justify-center font-sans">
             <div className="w-full max-w-md min-h-[100dvh] bg-white shadow-xl overflow-hidden relative flex flex-col">
               <main className="flex-1 flex flex-col overflow-y-auto">{children}</main>

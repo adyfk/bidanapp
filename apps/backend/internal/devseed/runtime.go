@@ -41,6 +41,9 @@ func SeedAuthRuntime(ctx context.Context, cfg config.Config, services RuntimeSer
 	if services.CustomerAuth == nil || services.ProfessionalAuth == nil || services.AdminAuth == nil {
 		return fmt.Errorf("all runtime auth services are required")
 	}
+	if err := services.AdminAuth.Bootstrap(ctx); err != nil {
+		return fmt.Errorf("bootstrap admin auth runtime: %w", err)
+	}
 
 	consumers, err := readSeedConsumers(filepath.Join(cfg.SeedData.DataDir, "consumers.json"))
 	if err != nil {

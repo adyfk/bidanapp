@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import type { Route } from 'next';
 import Link from 'next/link';
-import { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { StandardCurrencyInput, StandardPhoneInput, StandardSearchInput } from '@/components/ui/form-controls';
 import {
   buildStandardInputClass,
@@ -30,9 +30,11 @@ import {
 import { useAdminSession } from '@/features/admin/hooks/useAdminSession';
 import { useSupportDesk } from '@/features/admin/hooks/useSupportDesk';
 import { ADMIN_ROUTES } from '@/features/admin/lib/routes';
+import { PUBLIC_ENV } from '@/lib/env';
 import { useProfessionalPortal } from '@/lib/use-professional-portal';
 import type { SupportCategoryId } from '@/types/admin';
 import type { AppointmentStatus } from '@/types/appointments';
+import type { ProfessionalRow } from '@/types/seed-data';
 
 const panelClass = 'rounded-[30px] border border-slate-200 bg-white p-5 shadow-[0_22px_50px_-38px_rgba(15,23,42,0.35)]';
 const inputClass = buildStandardInputClass({
@@ -120,6 +122,47 @@ const formatQueueAge = (value?: string) => {
   const diffDays = Math.floor(diffHours / 24);
   return `${diffDays} hari`;
 };
+
+const toPortalOnlyProfessionalRow = ({
+  index,
+  professionalId,
+  profile,
+}: {
+  index: number;
+  professionalId: string;
+  profile: {
+    acceptingNewClients: boolean;
+    city: string;
+    displayName: string;
+    professionalId: string;
+    publicBio: string;
+    responseTimeGoal: string;
+    yearsExperience: string;
+  };
+}): ProfessionalRow => ({
+  about: profile.publicBio || 'Professional profile is managed from the portal onboarding flow.',
+  badgeLabel: 'Portal managed',
+  clientsServed: '0',
+  coverImage: null,
+  experience: profile.yearsExperience || '',
+  gender: 'female',
+  id: professionalId,
+  image: '',
+  index,
+  isAvailable: profile.acceptingNewClients,
+  location: profile.city || 'Belum diatur',
+  name: profile.displayName || professionalId,
+  rating: 0,
+  responseTime: profile.responseTimeGoal || '',
+  reviews: '0',
+  slug:
+    (profile.displayName || professionalId)
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || professionalId.toLowerCase(),
+  title: 'Portal onboarding',
+});
 
 const parsePriceAmount = (value: string) => Number.parseInt(value.replace(/[^\d]/g, ''), 10) || 0;
 
@@ -939,7 +982,9 @@ export const AdminOverviewScreen = () => {
             <CompactInsightCard
               label="Support sesuai filter"
               value={formatInteger(filteredActiveTickets.length)}
-              detail={`${formatInteger(filteredUrgentTickets.length)} high/urgent dari ${formatInteger(filteredTickets.length)} total ticket.`}
+              detail={`${formatInteger(filteredUrgentTickets.length)} high/urgent dari ${formatInteger(
+                filteredTickets.length,
+              )} total ticket.`}
             />
             <CompactInsightCard
               label="Review queue"
@@ -1027,19 +1072,25 @@ export const AdminOverviewScreen = () => {
           icon={<Stethoscope className="h-5 w-5" />}
           title="Professionals"
           value={formatInteger(filteredReviewQueue.length)}
-          detail={`${formatInteger(professionals.length)} roster aktif, ${formatInteger(reviewQueueEntries.length)} profil masih perlu perhatian admin.`}
+          detail={`${formatInteger(professionals.length)} roster aktif, ${formatInteger(
+            reviewQueueEntries.length,
+          )} profil masih perlu perhatian admin.`}
         />
         <StatCard
           icon={<Activity className="h-5 w-5" />}
           title="Appointments"
           value={formatInteger(filteredAppointments.length)}
-          detail={`${formatInteger(filteredOpenAppointments.length)} masih terbuka, nilai ${formatCurrency(filteredAppointmentValue)}.`}
+          detail={`${formatInteger(
+            filteredOpenAppointments.length,
+          )} masih terbuka, nilai ${formatCurrency(filteredAppointmentValue)}.`}
         />
         <StatCard
           icon={<ShieldCheck className="h-5 w-5" />}
           title="Support"
           value={formatInteger(filteredUrgentTickets.length)}
-          detail={`${formatInteger(activeTickets.length)} aktif total, ${formatInteger(filteredTickets.length)} terlihat pada filter saat ini.`}
+          detail={`${formatInteger(activeTickets.length)} aktif total, ${formatInteger(
+            filteredTickets.length,
+          )} terlihat pada filter saat ini.`}
         />
       </section>
 
@@ -1193,11 +1244,13 @@ export const AdminOverviewScreen = () => {
                 title="Appointment ops"
                 body="Perbaiki status booking, waktu sesi, dan ringkasan operasional."
               />
-              <QuickLinkCard
-                href={ADMIN_ROUTES.studio}
-                title="Data studio"
-                body="Inspect raw tables, import/export snapshot, atau reset ke baseline operasional."
-              />
+              {PUBLIC_ENV.adminStudioEnabled ? (
+                <QuickLinkCard
+                  href={ADMIN_ROUTES.studio}
+                  title="Data studio"
+                  body="Inspect raw tables, import/export snapshot, atau reset kembali ke baseline backend yang sedang aktif."
+                />
+              ) : null}
             </div>
           </div>
 
@@ -1226,14 +1279,17 @@ export const AdminOverviewScreen = () => {
                 ))
               ) : (
                 <span className="text-sm text-slate-500">
-                  Belum ada perubahan dari seed. Data studio masih identik dengan data awal.
+                  Belum ada perubahan dari baseline backend. State admin console masih identik dengan kondisi
+                  operasional awal.
                 </span>
               )}
             </div>
             <div className="mt-5 grid gap-3 md:grid-cols-2">
               <CompactInsightCard
                 label="Ticket aging"
-                value={`${formatInteger(filteredActiveTickets.filter((ticket) => getTicketAgeHours(ticket.createdAt) >= 6).length)}`}
+                value={`${formatInteger(
+                  filteredActiveTickets.filter((ticket) => getTicketAgeHours(ticket.createdAt) >= 6).length,
+                )}`}
                 detail="Ticket aktif dengan umur minimal 6 jam, berguna untuk mengawasi backlog triage."
               />
               <CompactInsightCard
@@ -1458,7 +1514,9 @@ export const AdminCustomersScreen = () => {
                 key={consumer.id}
                 active={consumer.id === selectedConsumerId}
                 title={consumer.name}
-                subtitle={`${consumer.phone} · ${appointments.filter((appointment) => appointment.consumerId === consumer.id).length} appointment`}
+                subtitle={`${consumer.phone} · ${
+                  appointments.filter((appointment) => appointment.consumerId === consumer.id).length
+                } appointment`}
                 onClick={() => setSelectedConsumerId(consumer.id)}
               />
             ))}
@@ -1519,7 +1577,12 @@ export const AdminCustomersScreen = () => {
                   <input
                     className={inputClass}
                     value={customerDraft.name}
-                    onChange={(event) => setCustomerDraft({ ...customerDraft, name: event.target.value })}
+                    onChange={(event) =>
+                      setCustomerDraft({
+                        ...customerDraft,
+                        name: event.target.value,
+                      })
+                    }
                   />
                 </Field>
                 <Field label="Nomor telepon">
@@ -1535,7 +1598,12 @@ export const AdminCustomersScreen = () => {
                   <input
                     className={inputClass}
                     value={customerDraft.avatar}
-                    onChange={(event) => setCustomerDraft({ ...customerDraft, avatar: event.target.value })}
+                    onChange={(event) =>
+                      setCustomerDraft({
+                        ...customerDraft,
+                        avatar: event.target.value,
+                      })
+                    }
                   />
                 </Field>
                 <div className="flex flex-wrap gap-3">
@@ -1567,7 +1635,12 @@ export const AdminCustomersScreen = () => {
                   <select
                     className={inputClass}
                     value={runtimeDraft.currentConsumerId}
-                    onChange={(event) => setRuntimeDraft({ ...runtimeDraft, currentConsumerId: event.target.value })}
+                    onChange={(event) =>
+                      setRuntimeDraft({
+                        ...runtimeDraft,
+                        currentConsumerId: event.target.value,
+                      })
+                    }
                   >
                     {consumers.map((consumer) => (
                       <option key={consumer.id} value={consumer.id}>
@@ -1580,7 +1653,12 @@ export const AdminCustomersScreen = () => {
                   <select
                     className={inputClass}
                     value={runtimeDraft.currentUserContextId}
-                    onChange={(event) => setRuntimeDraft({ ...runtimeDraft, currentUserContextId: event.target.value })}
+                    onChange={(event) =>
+                      setRuntimeDraft({
+                        ...runtimeDraft,
+                        currentUserContextId: event.target.value,
+                      })
+                    }
                   >
                     {userContexts.map((context) => (
                       <option key={context.id} value={context.id}>
@@ -1593,7 +1671,12 @@ export const AdminCustomersScreen = () => {
                   <select
                     className={inputClass}
                     value={runtimeDraft.activeHomeFeedId}
-                    onChange={(event) => setRuntimeDraft({ ...runtimeDraft, activeHomeFeedId: event.target.value })}
+                    onChange={(event) =>
+                      setRuntimeDraft({
+                        ...runtimeDraft,
+                        activeHomeFeedId: event.target.value,
+                      })
+                    }
                   >
                     {homeFeeds.map((homeFeed) => (
                       <option key={homeFeed.id} value={homeFeed.id}>
@@ -1606,7 +1689,12 @@ export const AdminCustomersScreen = () => {
                   <input
                     className={inputClass}
                     value={runtimeDraft.currentDateTimeIso}
-                    onChange={(event) => setRuntimeDraft({ ...runtimeDraft, currentDateTimeIso: event.target.value })}
+                    onChange={(event) =>
+                      setRuntimeDraft({
+                        ...runtimeDraft,
+                        currentDateTimeIso: event.target.value,
+                      })
+                    }
                   />
                 </Field>
                 <button
@@ -1659,7 +1747,12 @@ export const AdminCustomersScreen = () => {
                   <input
                     className={inputClass}
                     value={contextDraft.selectedAreaId}
-                    onChange={(event) => setContextDraft({ ...contextDraft, selectedAreaId: event.target.value })}
+                    onChange={(event) =>
+                      setContextDraft({
+                        ...contextDraft,
+                        selectedAreaId: event.target.value,
+                      })
+                    }
                   />
                 </Field>
                 <Field label="Latitude">
@@ -1667,7 +1760,10 @@ export const AdminCustomersScreen = () => {
                     className={inputClass}
                     value={String(contextDraft.userLatitude)}
                     onChange={(event) =>
-                      setContextDraft({ ...contextDraft, userLatitude: Number.parseFloat(event.target.value) || 0 })
+                      setContextDraft({
+                        ...contextDraft,
+                        userLatitude: Number.parseFloat(event.target.value) || 0,
+                      })
                     }
                   />
                 </Field>
@@ -1676,7 +1772,10 @@ export const AdminCustomersScreen = () => {
                     className={inputClass}
                     value={String(contextDraft.userLongitude)}
                     onChange={(event) =>
-                      setContextDraft({ ...contextDraft, userLongitude: Number.parseFloat(event.target.value) || 0 })
+                      setContextDraft({
+                        ...contextDraft,
+                        userLongitude: Number.parseFloat(event.target.value) || 0,
+                      })
                     }
                   />
                 </Field>
@@ -1684,7 +1783,12 @@ export const AdminCustomersScreen = () => {
                   <input
                     className={inputClass}
                     value={contextDraft.onlineStatusLabel}
-                    onChange={(event) => setContextDraft({ ...contextDraft, onlineStatusLabel: event.target.value })}
+                    onChange={(event) =>
+                      setContextDraft({
+                        ...contextDraft,
+                        onlineStatusLabel: event.target.value,
+                      })
+                    }
                   />
                 </Field>
                 <button
@@ -1704,7 +1808,7 @@ export const AdminCustomersScreen = () => {
               <PanelHeader
                 eyebrow="Catatan"
                 title="Pattern operasional tetap sederhana"
-                description="Runtime selection di admin console sekarang dipersist ke backend snapshot operasional. Jadi tim bisa menyiapkan data tanpa mengubah seed publik yang ada."
+                description="Runtime selection di admin console sekarang dipersist ke backend dan menjadi bagian dari baseline operasional yang sama dengan read-model aktif."
               />
             </div>
           </div>
@@ -1792,11 +1896,12 @@ export const AdminProfessionalsScreen = () => {
     createProfessional,
     deleteProfessional,
     getServicesForProfessional,
-    professionals,
+    professionals: adminConsoleProfessionals,
     updateProfessional,
   } = useAdminConsoleData();
   const {
     activeProfessional,
+    adminProfilesByProfessionalId,
     applyProfessionalAdminReviewBatch,
     publishProfessionalProfile,
     publishProfessionalProfiles,
@@ -1817,8 +1922,10 @@ export const AdminProfessionalsScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [message, setMessage] = useState('');
   const [selectedQueueIds, setSelectedQueueIds] = useState<string[]>([]);
-  const [selectedProfessionalId, setSelectedProfessionalId] = useState(professionals[0]?.id || '');
-  const [professionalDraft, setProfessionalDraft] = useState(professionals[0]);
+  const [selectedProfessionalId, setSelectedProfessionalId] = useState(
+    adminConsoleProfessionals[0]?.id || Object.keys(adminProfilesByProfessionalId)[0] || '',
+  );
+  const [professionalDraft, setProfessionalDraft] = useState(adminConsoleProfessionals[0]);
   const [savedQueueView, setSavedQueueView] = useStoredView('bidanapp:admin-view:professional-queue', {
     queueFilter: 'all' as 'all' | 'changes_requested' | 'ready_for_review' | 'submitted' | 'verified',
     queueSearchQuery: '',
@@ -1839,6 +1946,25 @@ export const AdminProfessionalsScreen = () => {
     savedAt: '',
     searchQuery: '',
   });
+  const portalOnlyProfessionals = useMemo(
+    () =>
+      Object.entries(adminProfilesByProfessionalId)
+        .filter(
+          ([professionalId]) => !adminConsoleProfessionals.some((professional) => professional.id === professionalId),
+        )
+        .map(([professionalId, profile], index) =>
+          toPortalOnlyProfessionalRow({
+            index: adminConsoleProfessionals.length + index + 1,
+            professionalId,
+            profile,
+          }),
+        ),
+    [adminConsoleProfessionals, adminProfilesByProfessionalId],
+  );
+  const professionals = useMemo(
+    () => [...adminConsoleProfessionals, ...portalOnlyProfessionals],
+    [adminConsoleProfessionals, portalOnlyProfessionals],
+  );
   const rosterLocationOptions = Array.from(
     new Set(professionals.map((professional) => professional.location).filter(Boolean)),
   ).sort((leftLocation, rightLocation) => leftLocation.localeCompare(rightLocation));
@@ -1907,6 +2033,9 @@ export const AdminProfessionalsScreen = () => {
 
   const selectedProfessional =
     professionals.find((professional) => professional.id === selectedProfessionalId) || professionals[0];
+  const isConsoleBackedProfessional = adminConsoleProfessionals.some(
+    (professional) => professional.id === selectedProfessionalId,
+  );
 
   useEffect(() => {
     if (
@@ -2002,6 +2131,11 @@ export const AdminProfessionalsScreen = () => {
   };
 
   const handleDeleteProfessional = () => {
+    if (!isConsoleBackedProfessional) {
+      setMessage('Professional portal signup tidak bisa dihapus dari admin console. Kelola dari portal/auth store.');
+      return;
+    }
+
     const result = deleteProfessional(selectedProfessional.id);
     setMessage(result.message);
   };
@@ -2150,7 +2284,9 @@ export const AdminProfessionalsScreen = () => {
                 key={entry.professional.id}
                 active={entry.professional.id === selectedProfessionalId}
                 checked={selectedQueueIds.includes(entry.professional.id)}
-                detail={`Submitted ${formatDateTime(entry.reviewState.submittedAt)} · Reviewer ${entry.reviewState.reviewerName || '-'}`}
+                detail={`Submitted ${formatDateTime(
+                  entry.reviewState.submittedAt,
+                )} · Reviewer ${entry.reviewState.reviewerName || '-'}`}
                 onToggle={() =>
                   setSelectedQueueIds((currentIds) =>
                     currentIds.includes(entry.professional.id)
@@ -2432,122 +2568,187 @@ export const AdminProfessionalsScreen = () => {
                 title="Edit profil profesional"
                 description="Perbarui metadata publik, availability, dan trust signal dasar untuk profesional terpilih."
               />
-              <Field label="Nama">
-                <input
-                  className={inputClass}
-                  value={professionalDraft.name}
-                  onChange={(event) => setProfessionalDraft({ ...professionalDraft, name: event.target.value })}
-                />
-              </Field>
-              <Field label="Slug">
-                <input
-                  className={inputClass}
-                  value={professionalDraft.slug}
-                  onChange={(event) => setProfessionalDraft({ ...professionalDraft, slug: event.target.value })}
-                />
-              </Field>
-              <Field label="Title">
-                <input
-                  className={inputClass}
-                  value={professionalDraft.title}
-                  onChange={(event) => setProfessionalDraft({ ...professionalDraft, title: event.target.value })}
-                />
-              </Field>
-              <Field label="Location">
-                <input
-                  className={inputClass}
-                  value={professionalDraft.location}
-                  onChange={(event) => setProfessionalDraft({ ...professionalDraft, location: event.target.value })}
-                />
-              </Field>
-              <Field label="Response time">
-                <input
-                  className={inputClass}
-                  value={professionalDraft.responseTime}
-                  onChange={(event) => setProfessionalDraft({ ...professionalDraft, responseTime: event.target.value })}
-                />
-              </Field>
-              <Field label="Badge label">
-                <input
-                  className={inputClass}
-                  value={professionalDraft.badgeLabel}
-                  onChange={(event) => setProfessionalDraft({ ...professionalDraft, badgeLabel: event.target.value })}
-                />
-              </Field>
-              <Field label="Experience">
-                <input
-                  className={inputClass}
-                  value={professionalDraft.experience}
-                  onChange={(event) => setProfessionalDraft({ ...professionalDraft, experience: event.target.value })}
-                />
-              </Field>
-              <Field label="Clients served">
-                <input
-                  className={inputClass}
-                  value={professionalDraft.clientsServed}
-                  onChange={(event) =>
-                    setProfessionalDraft({ ...professionalDraft, clientsServed: event.target.value })
-                  }
-                />
-              </Field>
-              <Field label="Rating">
-                <input
-                  className={inputClass}
-                  value={String(professionalDraft.rating)}
-                  onChange={(event) =>
-                    setProfessionalDraft({ ...professionalDraft, rating: Number.parseFloat(event.target.value) || 0 })
-                  }
-                />
-              </Field>
-              <Field label="Profile image">
-                <input
-                  className={inputClass}
-                  value={professionalDraft.image}
-                  onChange={(event) => setProfessionalDraft({ ...professionalDraft, image: event.target.value })}
-                />
-              </Field>
-              <Field label="Cover image">
-                <input
-                  className={inputClass}
-                  value={professionalDraft.coverImage || ''}
-                  onChange={(event) =>
-                    setProfessionalDraft({ ...professionalDraft, coverImage: event.target.value || null })
-                  }
-                />
-              </Field>
-              <Field label="About">
-                <textarea
-                  className={textareaClass}
-                  value={professionalDraft.about}
-                  onChange={(event) => setProfessionalDraft({ ...professionalDraft, about: event.target.value })}
-                />
-              </Field>
-              <label className="inline-flex items-center gap-3 text-sm font-medium text-slate-700">
-                <input
-                  type="checkbox"
-                  checked={professionalDraft.isAvailable}
-                  onChange={(event) =>
-                    setProfessionalDraft({ ...professionalDraft, isAvailable: event.target.checked })
-                  }
-                />
-                Terima klien baru
-              </label>
-              <div className="flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  className={buttonPrimaryClass}
-                  onClick={() => {
-                    updateProfessional(selectedProfessional.id, professionalDraft);
-                    setMessage(`Profil profesional ${selectedProfessional.id} berhasil disimpan.`);
-                  }}
-                >
-                  Simpan profil profesional
-                </button>
-                <button type="button" className={buttonSecondaryClass} onClick={handleDeleteProfessional}>
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Hapus profesional
-                </button>
-              </div>
+              {!isConsoleBackedProfessional ? (
+                <p className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+                  Profil ini berasal dari professional portal self-signup. Metadata publik diedit dari dashboard
+                  professional, bukan dari admin console table.
+                </p>
+              ) : null}
+              <fieldset disabled={!isConsoleBackedProfessional} className="contents">
+                <Field label="Nama">
+                  <input
+                    className={inputClass}
+                    value={professionalDraft.name}
+                    onChange={(event) =>
+                      setProfessionalDraft({
+                        ...professionalDraft,
+                        name: event.target.value,
+                      })
+                    }
+                  />
+                </Field>
+                <Field label="Slug">
+                  <input
+                    className={inputClass}
+                    value={professionalDraft.slug}
+                    onChange={(event) =>
+                      setProfessionalDraft({
+                        ...professionalDraft,
+                        slug: event.target.value,
+                      })
+                    }
+                  />
+                </Field>
+                <Field label="Title">
+                  <input
+                    className={inputClass}
+                    value={professionalDraft.title}
+                    onChange={(event) =>
+                      setProfessionalDraft({
+                        ...professionalDraft,
+                        title: event.target.value,
+                      })
+                    }
+                  />
+                </Field>
+                <Field label="Location">
+                  <input
+                    className={inputClass}
+                    value={professionalDraft.location}
+                    onChange={(event) =>
+                      setProfessionalDraft({
+                        ...professionalDraft,
+                        location: event.target.value,
+                      })
+                    }
+                  />
+                </Field>
+                <Field label="Response time">
+                  <input
+                    className={inputClass}
+                    value={professionalDraft.responseTime}
+                    onChange={(event) =>
+                      setProfessionalDraft({
+                        ...professionalDraft,
+                        responseTime: event.target.value,
+                      })
+                    }
+                  />
+                </Field>
+                <Field label="Badge label">
+                  <input
+                    className={inputClass}
+                    value={professionalDraft.badgeLabel}
+                    onChange={(event) =>
+                      setProfessionalDraft({
+                        ...professionalDraft,
+                        badgeLabel: event.target.value,
+                      })
+                    }
+                  />
+                </Field>
+                <Field label="Experience">
+                  <input
+                    className={inputClass}
+                    value={professionalDraft.experience}
+                    onChange={(event) =>
+                      setProfessionalDraft({
+                        ...professionalDraft,
+                        experience: event.target.value,
+                      })
+                    }
+                  />
+                </Field>
+                <Field label="Clients served">
+                  <input
+                    className={inputClass}
+                    value={professionalDraft.clientsServed}
+                    onChange={(event) =>
+                      setProfessionalDraft({
+                        ...professionalDraft,
+                        clientsServed: event.target.value,
+                      })
+                    }
+                  />
+                </Field>
+                <Field label="Rating">
+                  <input
+                    className={inputClass}
+                    value={String(professionalDraft.rating)}
+                    onChange={(event) =>
+                      setProfessionalDraft({
+                        ...professionalDraft,
+                        rating: Number.parseFloat(event.target.value) || 0,
+                      })
+                    }
+                  />
+                </Field>
+                <Field label="Profile image">
+                  <input
+                    className={inputClass}
+                    value={professionalDraft.image}
+                    onChange={(event) =>
+                      setProfessionalDraft({
+                        ...professionalDraft,
+                        image: event.target.value,
+                      })
+                    }
+                  />
+                </Field>
+                <Field label="Cover image">
+                  <input
+                    className={inputClass}
+                    value={professionalDraft.coverImage || ''}
+                    onChange={(event) =>
+                      setProfessionalDraft({
+                        ...professionalDraft,
+                        coverImage: event.target.value || null,
+                      })
+                    }
+                  />
+                </Field>
+                <Field label="About">
+                  <textarea
+                    className={textareaClass}
+                    value={professionalDraft.about}
+                    onChange={(event) =>
+                      setProfessionalDraft({
+                        ...professionalDraft,
+                        about: event.target.value,
+                      })
+                    }
+                  />
+                </Field>
+                <label className="inline-flex items-center gap-3 text-sm font-medium text-slate-700">
+                  <input
+                    type="checkbox"
+                    checked={professionalDraft.isAvailable}
+                    onChange={(event) =>
+                      setProfessionalDraft({
+                        ...professionalDraft,
+                        isAvailable: event.target.checked,
+                      })
+                    }
+                  />
+                  Terima klien baru
+                </label>
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    className={buttonPrimaryClass}
+                    onClick={() => {
+                      updateProfessional(selectedProfessional.id, professionalDraft);
+                      setMessage(`Profil profesional ${selectedProfessional.id} berhasil disimpan.`);
+                    }}
+                  >
+                    Simpan profil profesional
+                  </button>
+                  <button type="button" className={buttonSecondaryClass} onClick={handleDeleteProfessional}>
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Hapus profesional
+                  </button>
+                </div>
+              </fieldset>
             </div>
 
             <div className="space-y-4">
@@ -3005,21 +3206,36 @@ export const AdminServicesScreen = () => {
                 <input
                   className={inputClass}
                   value={serviceDraft.name}
-                  onChange={(event) => setServiceDraft({ ...serviceDraft, name: event.target.value })}
+                  onChange={(event) =>
+                    setServiceDraft({
+                      ...serviceDraft,
+                      name: event.target.value,
+                    })
+                  }
                 />
               </Field>
               <Field label="Slug">
                 <input
                   className={inputClass}
                   value={serviceDraft.slug}
-                  onChange={(event) => setServiceDraft({ ...serviceDraft, slug: event.target.value })}
+                  onChange={(event) =>
+                    setServiceDraft({
+                      ...serviceDraft,
+                      slug: event.target.value,
+                    })
+                  }
                 />
               </Field>
               <Field label="Category">
                 <select
                   className={inputClass}
                   value={serviceDraft.categoryId}
-                  onChange={(event) => setServiceDraft({ ...serviceDraft, categoryId: event.target.value })}
+                  onChange={(event) =>
+                    setServiceDraft({
+                      ...serviceDraft,
+                      categoryId: event.target.value,
+                    })
+                  }
                 >
                   {categories.map((category) => (
                     <option key={category.id} value={category.id}>
@@ -3048,14 +3264,24 @@ export const AdminServicesScreen = () => {
                 <textarea
                   className={textareaClass}
                   value={serviceDraft.shortDescription}
-                  onChange={(event) => setServiceDraft({ ...serviceDraft, shortDescription: event.target.value })}
+                  onChange={(event) =>
+                    setServiceDraft({
+                      ...serviceDraft,
+                      shortDescription: event.target.value,
+                    })
+                  }
                 />
               </Field>
               <Field label="Description">
                 <textarea
                   className={textareaClass}
                   value={serviceDraft.description}
-                  onChange={(event) => setServiceDraft({ ...serviceDraft, description: event.target.value })}
+                  onChange={(event) =>
+                    setServiceDraft({
+                      ...serviceDraft,
+                      description: event.target.value,
+                    })
+                  }
                 />
               </Field>
               <Field label="Tags (comma separated)">
@@ -3092,14 +3318,24 @@ export const AdminServicesScreen = () => {
                 <input
                   className={inputClass}
                   value={serviceDraft.image}
-                  onChange={(event) => setServiceDraft({ ...serviceDraft, image: event.target.value })}
+                  onChange={(event) =>
+                    setServiceDraft({
+                      ...serviceDraft,
+                      image: event.target.value,
+                    })
+                  }
                 />
               </Field>
               <Field label="Cover image URL">
                 <input
                   className={inputClass}
                   value={serviceDraft.coverImage}
-                  onChange={(event) => setServiceDraft({ ...serviceDraft, coverImage: event.target.value })}
+                  onChange={(event) =>
+                    setServiceDraft({
+                      ...serviceDraft,
+                      coverImage: event.target.value,
+                    })
+                  }
                 />
               </Field>
               <div className="grid gap-3 md:grid-cols-3">
@@ -3110,7 +3346,10 @@ export const AdminServicesScreen = () => {
                     onChange={(event) =>
                       setServiceDraft({
                         ...serviceDraft,
-                        serviceModes: { ...serviceDraft.serviceModes, online: event.target.checked },
+                        serviceModes: {
+                          ...serviceDraft.serviceModes,
+                          online: event.target.checked,
+                        },
                       })
                     }
                   />
@@ -3123,7 +3362,10 @@ export const AdminServicesScreen = () => {
                     onChange={(event) =>
                       setServiceDraft({
                         ...serviceDraft,
-                        serviceModes: { ...serviceDraft.serviceModes, homeVisit: event.target.checked },
+                        serviceModes: {
+                          ...serviceDraft.serviceModes,
+                          homeVisit: event.target.checked,
+                        },
                       })
                     }
                   />
@@ -3136,7 +3378,10 @@ export const AdminServicesScreen = () => {
                     onChange={(event) =>
                       setServiceDraft({
                         ...serviceDraft,
-                        serviceModes: { ...serviceDraft.serviceModes, onsite: event.target.checked },
+                        serviceModes: {
+                          ...serviceDraft.serviceModes,
+                          onsite: event.target.checked,
+                        },
                       })
                     }
                   />
@@ -3185,21 +3430,36 @@ export const AdminServicesScreen = () => {
                     <input
                       className={inputClass}
                       value={categoryDraft.name}
-                      onChange={(event) => setCategoryDraft({ ...categoryDraft, name: event.target.value })}
+                      onChange={(event) =>
+                        setCategoryDraft({
+                          ...categoryDraft,
+                          name: event.target.value,
+                        })
+                      }
                     />
                   </Field>
                   <Field label="Short label">
                     <input
                       className={inputClass}
                       value={categoryDraft.shortLabel}
-                      onChange={(event) => setCategoryDraft({ ...categoryDraft, shortLabel: event.target.value })}
+                      onChange={(event) =>
+                        setCategoryDraft({
+                          ...categoryDraft,
+                          shortLabel: event.target.value,
+                        })
+                      }
                     />
                   </Field>
                   <Field label="Description">
                     <textarea
                       className={textareaClass}
                       value={categoryDraft.description || ''}
-                      onChange={(event) => setCategoryDraft({ ...categoryDraft, description: event.target.value })}
+                      onChange={(event) =>
+                        setCategoryDraft({
+                          ...categoryDraft,
+                          description: event.target.value,
+                        })
+                      }
                     />
                   </Field>
                   <button
@@ -3266,7 +3526,10 @@ export const AdminServicesScreen = () => {
                           className={inputClass}
                           value={offeringDraft.professionalId}
                           onChange={(event) =>
-                            setOfferingDraft({ ...offeringDraft, professionalId: event.target.value })
+                            setOfferingDraft({
+                              ...offeringDraft,
+                              professionalId: event.target.value,
+                            })
                           }
                         >
                           {professionals.map((professional) => (
@@ -3280,14 +3543,24 @@ export const AdminServicesScreen = () => {
                         <input
                           className={inputClass}
                           value={offeringDraft.price}
-                          onChange={(event) => setOfferingDraft({ ...offeringDraft, price: event.target.value })}
+                          onChange={(event) =>
+                            setOfferingDraft({
+                              ...offeringDraft,
+                              price: event.target.value,
+                            })
+                          }
                         />
                       </Field>
                       <Field label="Duration">
                         <input
                           className={inputClass}
                           value={offeringDraft.duration}
-                          onChange={(event) => setOfferingDraft({ ...offeringDraft, duration: event.target.value })}
+                          onChange={(event) =>
+                            setOfferingDraft({
+                              ...offeringDraft,
+                              duration: event.target.value,
+                            })
+                          }
                         />
                       </Field>
                       <Field label="Default mode">
@@ -3326,7 +3599,10 @@ export const AdminServicesScreen = () => {
                           className={textareaClass}
                           value={offeringDraft.summary || ''}
                           onChange={(event) =>
-                            setOfferingDraft({ ...offeringDraft, summary: event.target.value || null })
+                            setOfferingDraft({
+                              ...offeringDraft,
+                              summary: event.target.value || null,
+                            })
                           }
                         />
                       </Field>
@@ -3336,7 +3612,10 @@ export const AdminServicesScreen = () => {
                             type="checkbox"
                             checked={offeringDraft.supportsOnline}
                             onChange={(event) =>
-                              setOfferingDraft({ ...offeringDraft, supportsOnline: event.target.checked })
+                              setOfferingDraft({
+                                ...offeringDraft,
+                                supportsOnline: event.target.checked,
+                              })
                             }
                           />
                           Online
@@ -3346,7 +3625,10 @@ export const AdminServicesScreen = () => {
                             type="checkbox"
                             checked={offeringDraft.supportsHomeVisit}
                             onChange={(event) =>
-                              setOfferingDraft({ ...offeringDraft, supportsHomeVisit: event.target.checked })
+                              setOfferingDraft({
+                                ...offeringDraft,
+                                supportsHomeVisit: event.target.checked,
+                              })
                             }
                           />
                           Home visit
@@ -3356,7 +3638,10 @@ export const AdminServicesScreen = () => {
                             type="checkbox"
                             checked={offeringDraft.supportsOnsite}
                             onChange={(event) =>
-                              setOfferingDraft({ ...offeringDraft, supportsOnsite: event.target.checked })
+                              setOfferingDraft({
+                                ...offeringDraft,
+                                supportsOnsite: event.target.checked,
+                              })
                             }
                           />
                           Onsite
@@ -3752,7 +4037,9 @@ export const AdminAppointmentsScreen = () => {
                 }
                 onClick={() => setSelectedAppointmentId(appointment.id)}
                 title={appointment.serviceSnapshot.name}
-                subtitle={`${consumerNameById[appointment.consumerId] || appointment.consumerId} · ${appointment.status}`}
+                subtitle={`${
+                  consumerNameById[appointment.consumerId] || appointment.consumerId
+                } · ${appointment.status}`}
               />
             ))}
             {filteredAppointments.length === 0 ? (
@@ -3784,7 +4071,9 @@ export const AdminAppointmentsScreen = () => {
               value={oldestFilteredAppointment?.id || 'Tidak ada'}
               detail={
                 oldestFilteredAppointment
-                  ? `${oldestFilteredAppointment.serviceSnapshot.name} · requested ${formatDateTime(oldestFilteredAppointment.requestedAt)}`
+                  ? `${oldestFilteredAppointment.serviceSnapshot.name} · requested ${formatDateTime(
+                      oldestFilteredAppointment.requestedAt,
+                    )}`
                   : 'Belum ada appointment yang masuk pada kombinasi filter saat ini.'
               }
             />
@@ -3909,7 +4198,12 @@ export const AdminAppointmentsScreen = () => {
               <textarea
                 className={textareaClass}
                 value={appointmentDraft.requestNote}
-                onChange={(event) => setAppointmentDraft({ ...appointmentDraft, requestNote: event.target.value })}
+                onChange={(event) =>
+                  setAppointmentDraft({
+                    ...appointmentDraft,
+                    requestNote: event.target.value,
+                  })
+                }
               />
             </Field>
             <div className="flex flex-wrap gap-3 lg:col-span-2">
@@ -4256,7 +4550,9 @@ export const AdminSupportScreen = () => {
       });
     });
     setMessage(
-      `${formatInteger(selectedTicketIds.length)} ticket berhasil diassign/update ke status ${bulkTicketStatus} dengan urgency ${bulkTicketUrgency}.`,
+      `${formatInteger(
+        selectedTicketIds.length,
+      )} ticket berhasil diassign/update ke status ${bulkTicketStatus} dengan urgency ${bulkTicketUrgency}.`,
     );
     setSelectedTicketIds([]);
   };
@@ -4274,7 +4570,9 @@ export const AdminSupportScreen = () => {
           icon={<ShieldCheck className="h-5 w-5" />}
           title="Open queue"
           value={formatInteger(filteredActiveTickets.length)}
-          detail={`${formatInteger(activeTickets.length)} ticket aktif total, ${formatInteger(filteredTickets.length)} terlihat pada filter saat ini.`}
+          detail={`${formatInteger(activeTickets.length)} ticket aktif total, ${formatInteger(
+            filteredTickets.length,
+          )} terlihat pada filter saat ini.`}
         />
         <StatCard
           icon={<CircleAlert className="h-5 w-5" />}
@@ -4292,7 +4590,9 @@ export const AdminSupportScreen = () => {
           icon={<UsersRound className="h-5 w-5" />}
           title="Focus area"
           value={session.focusArea}
-          detail={`Admin aktif ${commandCenter.activeAdminId || '-'} · ${formatInteger(unassignedFilteredTickets.length)} belum diassign.`}
+          detail={`Admin aktif ${commandCenter.activeAdminId || '-'} · ${formatInteger(
+            unassignedFilteredTickets.length,
+          )} belum diassign.`}
         />
       </section>
 
@@ -4306,14 +4606,24 @@ export const AdminSupportScreen = () => {
             <textarea
               className={textareaClass}
               value={commandDraft.commandNote}
-              onChange={(event) => setCommandDraft({ ...commandDraft, commandNote: event.target.value })}
+              onChange={(event) =>
+                setCommandDraft({
+                  ...commandDraft,
+                  commandNote: event.target.value,
+                })
+              }
             />
           </Field>
           <Field label="Runtime narrative">
             <textarea
               className={textareaClass}
               value={commandDraft.runtimeNarrative}
-              onChange={(event) => setCommandDraft({ ...commandDraft, runtimeNarrative: event.target.value })}
+              onChange={(event) =>
+                setCommandDraft({
+                  ...commandDraft,
+                  runtimeNarrative: event.target.value,
+                })
+              }
             />
           </Field>
           <Field label="Focus area">
@@ -4321,7 +4631,10 @@ export const AdminSupportScreen = () => {
               className={inputClass}
               value={commandDraft.focusArea}
               onChange={(event) =>
-                setCommandDraft({ ...commandDraft, focusArea: event.target.value as typeof commandDraft.focusArea })
+                setCommandDraft({
+                  ...commandDraft,
+                  focusArea: event.target.value as typeof commandDraft.focusArea,
+                })
               }
             >
               <option value="support">support</option>
@@ -4658,7 +4971,12 @@ export const AdminSupportScreen = () => {
             <select
               className={inputClass}
               value={ticketDraft.assignedAdminId || ''}
-              onChange={(event) => setTicketDraft({ ...ticketDraft, assignedAdminId: event.target.value || undefined })}
+              onChange={(event) =>
+                setTicketDraft({
+                  ...ticketDraft,
+                  assignedAdminId: event.target.value || undefined,
+                })
+              }
             >
               <option value="">Belum diassign</option>
               {adminStaff.map((admin) => (
@@ -4673,7 +4991,10 @@ export const AdminSupportScreen = () => {
               className={inputClass}
               value={ticketDraft.status}
               onChange={(event) =>
-                setTicketDraft({ ...ticketDraft, status: event.target.value as typeof ticketDraft.status })
+                setTicketDraft({
+                  ...ticketDraft,
+                  status: event.target.value as typeof ticketDraft.status,
+                })
               }
             >
               <option value="new">new</option>
@@ -4705,7 +5026,10 @@ export const AdminSupportScreen = () => {
               className={inputClass}
               value={ticketDraft.etaKey}
               onChange={(event) =>
-                setTicketDraft({ ...ticketDraft, etaKey: event.target.value as typeof ticketDraft.etaKey })
+                setTicketDraft({
+                  ...ticketDraft,
+                  etaKey: event.target.value as typeof ticketDraft.etaKey,
+                })
               }
             >
               <option value="normal">normal</option>
@@ -4796,21 +5120,36 @@ export const AdminSupportScreen = () => {
               <input
                 className={inputClass}
                 value={manualTicketDraft.reporterName}
-                onChange={(event) => setManualTicketDraft({ ...manualTicketDraft, reporterName: event.target.value })}
+                onChange={(event) =>
+                  setManualTicketDraft({
+                    ...manualTicketDraft,
+                    reporterName: event.target.value,
+                  })
+                }
               />
             </Field>
             <Field label="Nomor telepon">
               <input
                 className={inputClass}
                 value={manualTicketDraft.reporterPhone}
-                onChange={(event) => setManualTicketDraft({ ...manualTicketDraft, reporterPhone: event.target.value })}
+                onChange={(event) =>
+                  setManualTicketDraft({
+                    ...manualTicketDraft,
+                    reporterPhone: event.target.value,
+                  })
+                }
               />
             </Field>
             <Field label="Contact value">
               <input
                 className={inputClass}
                 value={manualTicketDraft.contactValue}
-                onChange={(event) => setManualTicketDraft({ ...manualTicketDraft, contactValue: event.target.value })}
+                onChange={(event) =>
+                  setManualTicketDraft({
+                    ...manualTicketDraft,
+                    contactValue: event.target.value,
+                  })
+                }
               />
             </Field>
             <Field label="Preferred channel">
@@ -4834,7 +5173,10 @@ export const AdminSupportScreen = () => {
                 className={inputClass}
                 value={manualTicketDraft.categoryId}
                 onChange={(event) =>
-                  setManualTicketDraft({ ...manualTicketDraft, categoryId: event.target.value as SupportCategoryId })
+                  setManualTicketDraft({
+                    ...manualTicketDraft,
+                    categoryId: event.target.value as SupportCategoryId,
+                  })
                 }
               >
                 {manualCategoryOptions.map((categoryId) => (
@@ -4848,7 +5190,12 @@ export const AdminSupportScreen = () => {
               <input
                 className={inputClass}
                 value={manualTicketDraft.referenceCode}
-                onChange={(event) => setManualTicketDraft({ ...manualTicketDraft, referenceCode: event.target.value })}
+                onChange={(event) =>
+                  setManualTicketDraft({
+                    ...manualTicketDraft,
+                    referenceCode: event.target.value,
+                  })
+                }
               />
             </Field>
             <Field label="Appointment id terkait">
@@ -4856,7 +5203,10 @@ export const AdminSupportScreen = () => {
                 className={inputClass}
                 value={manualTicketDraft.relatedAppointmentId}
                 onChange={(event) =>
-                  setManualTicketDraft({ ...manualTicketDraft, relatedAppointmentId: event.target.value })
+                  setManualTicketDraft({
+                    ...manualTicketDraft,
+                    relatedAppointmentId: event.target.value,
+                  })
                 }
               />
             </Field>
@@ -4865,7 +5215,10 @@ export const AdminSupportScreen = () => {
                 className={inputClass}
                 value={manualTicketDraft.relatedProfessionalId}
                 onChange={(event) =>
-                  setManualTicketDraft({ ...manualTicketDraft, relatedProfessionalId: event.target.value })
+                  setManualTicketDraft({
+                    ...manualTicketDraft,
+                    relatedProfessionalId: event.target.value,
+                  })
                 }
               />
             </Field>
@@ -4873,14 +5226,24 @@ export const AdminSupportScreen = () => {
               <textarea
                 className={textareaClass}
                 value={manualTicketDraft.summary}
-                onChange={(event) => setManualTicketDraft({ ...manualTicketDraft, summary: event.target.value })}
+                onChange={(event) =>
+                  setManualTicketDraft({
+                    ...manualTicketDraft,
+                    summary: event.target.value,
+                  })
+                }
               />
             </Field>
             <Field label="Detail">
               <textarea
                 className={textareaClass}
                 value={manualTicketDraft.details}
-                onChange={(event) => setManualTicketDraft({ ...manualTicketDraft, details: event.target.value })}
+                onChange={(event) =>
+                  setManualTicketDraft({
+                    ...manualTicketDraft,
+                    details: event.target.value,
+                  })
+                }
               />
             </Field>
           </div>
@@ -4901,7 +5264,7 @@ export const AdminSupportScreen = () => {
               className={buttonSecondaryClass}
               onClick={() => {
                 resetSupportDesk();
-                setMessage('Support desk direset ke baseline default dan disinkronkan ulang ke backend.');
+                setMessage('Support desk dikembalikan ke baseline backend terakhir dan disinkronkan ulang ke backend.');
               }}
             >
               <RefreshCcw className="mr-2 h-4 w-4" />
@@ -5071,7 +5434,9 @@ export const AdminDataStudioScreen = () => {
                 key={tableName}
                 active={tableName === selectedTable}
                 title={tableName}
-                subtitle={`${Array.isArray(allTables[tableName]) ? allTables[tableName].length : 0} rows · ${getTableMeta(tableName).isModified ? 'modified' : 'seed'}`}
+                subtitle={`${Array.isArray(allTables[tableName]) ? allTables[tableName].length : 0} rows · ${
+                  getTableMeta(tableName).isModified ? 'modified' : 'baseline'
+                }`}
                 onClick={() => setSelectedTable(tableName)}
               />
             ))}
@@ -5100,7 +5465,9 @@ export const AdminDataStudioScreen = () => {
             <PanelHeader
               eyebrow="Selected table"
               title={selectedTable}
-              description={`${selectedTableMeta.currentCount} row saat ini · seed ${selectedTableMeta.seedCount} · terakhir disimpan ${formatDateTime(snapshotSavedAt)}`}
+              description={`${selectedTableMeta.currentCount} row saat ini · baseline ${
+                selectedTableMeta.baselineCount
+              } · terakhir disimpan ${formatDateTime(snapshotSavedAt)}`}
               action={
                 <>
                   <button type="button" className={buttonSecondaryClass} onClick={() => resetTable(selectedTable)}>
@@ -5141,7 +5508,7 @@ export const AdminDataStudioScreen = () => {
                   </span>
                 ))
               ) : (
-                <span className="text-sm text-slate-500">Belum ada table yang berbeda dari seed.</span>
+                <span className="text-sm text-slate-500">Belum ada table yang berbeda dari baseline backend.</span>
               )}
             </div>
           </div>
@@ -5189,7 +5556,9 @@ export const AdminDataStudioScreen = () => {
                     className={inputClass}
                     value={runtimeSelection.currentConsumerId}
                     onChange={(event) =>
-                      updateRuntimeSelection(runtimeSelection.id, { currentConsumerId: event.target.value })
+                      updateRuntimeSelection(runtimeSelection.id, {
+                        currentConsumerId: event.target.value,
+                      })
                     }
                   />
                 </Field>
@@ -5198,7 +5567,9 @@ export const AdminDataStudioScreen = () => {
                     className={inputClass}
                     value={runtimeSelection.currentUserContextId}
                     onChange={(event) =>
-                      updateRuntimeSelection(runtimeSelection.id, { currentUserContextId: event.target.value })
+                      updateRuntimeSelection(runtimeSelection.id, {
+                        currentUserContextId: event.target.value,
+                      })
                     }
                   />
                 </Field>
@@ -5207,7 +5578,9 @@ export const AdminDataStudioScreen = () => {
                     className={inputClass}
                     value={runtimeSelection.activeHomeFeedId}
                     onChange={(event) =>
-                      updateRuntimeSelection(runtimeSelection.id, { activeHomeFeedId: event.target.value })
+                      updateRuntimeSelection(runtimeSelection.id, {
+                        activeHomeFeedId: event.target.value,
+                      })
                     }
                   />
                 </Field>
@@ -5216,7 +5589,9 @@ export const AdminDataStudioScreen = () => {
                     className={inputClass}
                     value={runtimeSelection.currentDateTimeIso}
                     onChange={(event) =>
-                      updateRuntimeSelection(runtimeSelection.id, { currentDateTimeIso: event.target.value })
+                      updateRuntimeSelection(runtimeSelection.id, {
+                        currentDateTimeIso: event.target.value,
+                      })
                     }
                   />
                 </Field>

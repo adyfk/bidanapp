@@ -233,7 +233,7 @@ declare const messages: {
       "success": "A password reset link was sent to that WhatsApp number.",
       "error": "Enter a WhatsApp number before sending the reset link."
     },
-    "registerHelper": "After registering, you will go straight to the professional profile to start managing the portal. The connected public profile focus is: {category}.",
+    "registerHelper": "After registering, you will go straight to the professional profile with a clean onboarding draft so you can complete the portal from your own data.",
     "fallbackCategory": "Professional",
     "separationTitle": "Customer and professional paths stay separate",
     "separationDescription": "Customers focus on discovery and booking. Professionals focus on readiness, services, coverage, and operations."
@@ -411,6 +411,7 @@ declare const messages: {
       "closeOutcomeTitle": "Customer financial outcome",
       "closeStatusPreview": {
         "requested": "The request is still under review, so declining it closes the flow without a refund.",
+        "awaiting_payment": "The appointment is waiting for payment, so cancelling it should void the unfinished payment request.",
         "approved_waiting_payment": "Payment has not settled yet, so cancelling should void the unfinished payment.",
         "paid": "The order is already paid, so the customer should receive a full refund.",
         "confirmed": "The order is already confirmed, so the customer should receive a full refund."
@@ -467,6 +468,16 @@ declare const messages: {
         "invalidTransition": "This request can only move to the next valid stage.",
         "paymentPending": "The schedule cannot be locked before the customer payment is completed.",
         "closeReasonRequired": "Write a short reason before closing this request."
+      },
+      "travel": {
+        "title": "Home visit departure",
+        "pending": "This home visit is confirmed. Start the trip when you are ready to head to the customer.",
+        "departed": "Departure has been recorded. The customer has been notified that you are on the way.",
+        "departedWithEta": "Departure has been recorded. Current estimate is about {minutes, number} minutes.",
+        "startAction": "Start trip",
+        "startPending": "Saving departure...",
+        "departSuccess": "Departure for {client} has been recorded and shared to the customer.",
+        "departError": "Departure could not be saved right now. Please try again."
       },
       "saveSuccess": "Request for {client} was updated to {status}.",
       "closeSuccess": {
@@ -1095,8 +1106,27 @@ declare const messages: {
     "allStatuses": "All Statuses",
     "noAppointments": "No active appointments",
     "trySearching": "Try searching or book a new service.",
+    "homeVisit": {
+      "eyebrow": "Home visit progress",
+      "title": "Professional is on the way",
+      "serviceStarted": "Service has started",
+      "serviceStartedDescription": "The professional has started the appointment at your location.",
+      "departedDescription": "The professional has departed and is heading to your location.",
+      "loadingDescription": "Checking the latest departure status from the backend.",
+      "pendingDescription": "The professional has not started the trip yet.",
+      "departedBadge": "OTW",
+      "pendingBadge": "Waiting",
+      "eta": "Estimated arrival",
+      "etaMinutes": "About {minutes, number} minutes",
+      "etaUnavailable": "Travel is in progress. Arrival time will be shared once the latest estimate is ready.",
+      "waitingEta": "The estimate will appear after the professional starts the trip.",
+      "distanceKm": "Approx. {distance} km remaining",
+      "departedAt": "Departed at {time}",
+      "updatedAt": "Last updated {time}"
+    },
     "status": {
       "requested": "Waiting for Approval",
+      "awaiting_payment": "Waiting for Payment",
       "approved_waiting_payment": "Waiting for Payment",
       "paid": "Paid",
       "confirmed": "Confirmed",
@@ -1448,6 +1478,7 @@ declare const messages: {
       },
       "statusBanners": {
         "requested": "The provider is reviewing your request. We will notify you as soon as it is approved.",
+        "approved_waiting_payment": "Your appointment is waiting for payment. Complete the payment to lock the schedule.",
         "paid": "Payment received. The provider will follow the selected schedule.",
         "confirmed": "Your schedule is confirmed. Please prepare the location and anything relevant before the session starts.",
         "inService": "The session is in progress. You can still send a message if anything else is needed.",

@@ -3,6 +3,7 @@ package readmodel
 import (
 	"context"
 	"encoding/json"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -17,6 +18,7 @@ type portalSnapshotState struct {
 	AcceptingNewClients     bool                                     `json:"acceptingNewClients"`
 	ActivityStories         []portalActivityStory                    `json:"activityStories"`
 	AvailabilityRulesByMode map[string]ProfessionalAvailabilityRules `json:"availabilityRulesByMode,omitempty"`
+	City                    string                                   `json:"city"`
 	CoverageAreaIDs         []string                                 `json:"coverageAreaIds"`
 	CoverageCenter          GeoPoint                                 `json:"coverageCenter"`
 	Credentials             []portalCredential                       `json:"credentials"`
@@ -84,6 +86,8 @@ type portalActivityStory struct {
 	Title      string `json:"title"`
 }
 
+var portalSlugSanitizer = regexp.MustCompile(`[^a-z0-9]+`)
+
 func applyPublishedPortalOverlays(
 	ctx context.Context,
 	store portalstore.Reader,
@@ -100,7 +104,9 @@ func applyPublishedPortalOverlays(
 	}
 
 	nextProfessionals := append([]Professional(nil), professionals...)
+	existingProfessionalIDs := make(map[string]struct{}, len(nextProfessionals))
 	for index, professional := range nextProfessionals {
+		existingProfessionalIDs[professional.ID] = struct{}{}
 		record, ok := state.Sessions[professional.ID]
 		if !ok {
 			continue
@@ -112,6 +118,24 @@ func applyPublishedPortalOverlays(
 		}
 
 		nextProfessionals[index] = mergeProfessionalWithPortalState(professional, state, servicesByID)
+	}
+
+	for professionalID, record := range state.Sessions {
+		if _, exists := existingProfessionalIDs[professionalID]; exists {
+			continue
+		}
+
+		portalState, ok := decodePublishedPortalState(record.Snapshot, professionalID)
+		if !ok {
+			continue
+		}
+
+		nextProfessionals = append(nextProfessionals, synthesizeProfessionalFromPortalState(
+			professionalID,
+			portalState,
+			servicesByID,
+			len(nextProfessionals)+1,
+		))
 	}
 
 	return nextProfessionals
@@ -203,6 +227,85 @@ func mergeProfessionalWithPortalState(
 	}
 
 	return nextProfessional
+}
+
+func synthesizeProfessionalFromPortalState(
+	professionalID string,
+	state portalSnapshotState,
+	servicesByID map[string]seedDataServiceRow,
+	index int,
+) Professional {
+	services := toPortalProfessionalServices(state.ServiceConfigurations, professionalID)
+	categoryID := primaryPortalCategoryID(services, servicesByID, "")
+	displayName := fallbackString(state.DisplayName, professionalID)
+	location := fallbackString(state.PracticeLabel, state.City)
+	if strings.TrimSpace(location) == "" {
+		location = "Remote"
+	}
+
+	title := "Professional"
+	if categoryID != "" {
+		title = categoryID
+	} else if len(services) > 0 {
+		if serviceRow, ok := servicesByID[services[0].ServiceID]; ok && strings.TrimSpace(serviceRow.Name) != "" {
+			title = serviceRow.Name
+		}
+	}
+
+	professional := Professional{
+		About:             strings.TrimSpace(state.PublicBio),
+		ActivityStories:   toPortalActivityStories(state.ActivityStories),
+		Availability:      ProfessionalAvailability{IsAvailable: state.AcceptingNewClients},
+		AvailabilityLabel: deriveAvailabilityLabel(state.AcceptingNewClients),
+		BadgeLabel:        title,
+		CategoryID:        categoryID,
+		ClientsServed:     "0",
+		CoverImage:        "",
+		Coverage: ProfessionalCoverage{
+			AreaIDs:           append([]string(nil), state.CoverageAreaIDs...),
+			Center:            state.CoverageCenter,
+			HomeVisitRadiusKm: state.HomeVisitRadiusKm,
+		},
+		Credentials:             toPortalCredentials(state.Credentials),
+		Experience:              strings.TrimSpace(state.YearsExperience),
+		FeedbackBreakdown:       []ProfessionalFeedbackBreakdown{},
+		FeedbackMetrics:         []ProfessionalFeedbackMetric{},
+		FeedbackSummary:         ProfessionalFeedbackSummary{},
+		Gallery:                 toPortalGalleryItems(state.GalleryItems),
+		Gender:                  "",
+		ID:                      professionalID,
+		Image:                   "",
+		Index:                   index,
+		Languages:               []string{},
+		Location:                location,
+		Name:                    displayName,
+		PortfolioEntries:        toPortalPortfolioEntries(state.PortfolioEntries),
+		Rating:                  0,
+		RecentActivities:        []ProfessionalRecentActivity{},
+		ResponseTime:            strings.TrimSpace(state.ResponseTimeGoal),
+		Reviews:                 "0",
+		Services:                services,
+		Slug:                    buildPortalProfessionalSlug(displayName, professionalID),
+		Specialties:             []string{},
+		Testimonials:            []ProfessionalTestimonial{},
+		Title:                   title,
+		AvailabilityRulesByMode: state.AvailabilityRulesByMode,
+	}
+
+	if hasPortalPracticeLocation(state) {
+		professional.AddressLines = toPortalAddressLines(state)
+		professional.PracticeLocation = &ProfessionalPracticeLocation{
+			Address: fallbackString(state.PracticeAddress, state.PublicBio),
+			AreaID:  firstString(state.CoverageAreaIDs),
+			Coordinates: GeoPoint{
+				Latitude:  state.CoverageCenter.Latitude,
+				Longitude: state.CoverageCenter.Longitude,
+			},
+			Label: fallbackString(state.PracticeLabel, location),
+		}
+	}
+
+	return professional
 }
 
 func toPortalCredentials(credentials []portalCredential) []ProfessionalCredential {
@@ -385,6 +488,21 @@ func firstString(values []string) string {
 	}
 
 	return values[0]
+}
+
+func buildPortalProfessionalSlug(displayName string, professionalID string) string {
+	base := strings.ToLower(strings.TrimSpace(displayName))
+	base = portalSlugSanitizer.ReplaceAllString(base, "-")
+	base = strings.Trim(base, "-")
+	if base == "" {
+		base = strings.ToLower(strings.TrimSpace(professionalID))
+		base = portalSlugSanitizer.ReplaceAllString(base, "-")
+		base = strings.Trim(base, "-")
+	}
+	if base == "" {
+		return "professional"
+	}
+	return base
 }
 
 func normalizeIndex(candidate int, fallbackIndex int) int {

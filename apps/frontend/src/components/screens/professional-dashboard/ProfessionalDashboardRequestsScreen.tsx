@@ -1,5 +1,6 @@
 'use client';
 
+import type { AppointmentHomeVisitStatus } from '@bidanapp/sdk';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import { ProfessionalAccessScreen } from '@/components/screens/ProfessionalAccessScreen';
@@ -10,6 +11,10 @@ import {
   isProfessionalCloseAllowed,
 } from '@/features/appointments/lib/cancellation';
 import { validateProfessionalRequestStatusUpdate } from '@/features/professional-portal/lib/request-status';
+import {
+  departHomeVisitAppointmentWithApi,
+  loadProfessionalHomeVisitStatusFromApi,
+} from '@/lib/appointment-travel-api';
 import { requestStatuses } from './helpers';
 import { ProfessionalDashboardRequestCloseDialog } from './ProfessionalDashboardRequestCloseDialog';
 import { ProfessionalDashboardRequestStatusDialog } from './ProfessionalDashboardRequestStatusDialog';
@@ -50,6 +55,10 @@ const ProfessionalDashboardRequestsScreenContent = () => {
     updateRequestStatus,
   } = useProfessionalDashboardPageData();
   const [notice, setNotice] = useState<string | null>(null);
+  const [departingAppointmentId, setDepartingAppointmentId] = useState('');
+  const [homeVisitStatusesByAppointmentId, setHomeVisitStatusesByAppointmentId] = useState<
+    Record<string, AppointmentHomeVisitStatus | undefined>
+  >({});
   const [requestFilter, setRequestFilter] = useState<RequestFilter>(requestedFilter);
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
   const [isCloseDialogOpen, setIsCloseDialogOpen] = useState(false);
@@ -154,6 +163,50 @@ const ProfessionalDashboardRequestsScreenContent = () => {
     });
   }, [requestedRequestId]);
 
+  useEffect(() => {
+    const homeVisitAppointmentIds = [
+      ...new Set(
+        portalState.requestBoard
+          .filter((request) => request.requestedMode === 'home_visit')
+          .map((request) => request.appointmentId),
+      ),
+    ];
+
+    if (homeVisitAppointmentIds.length === 0) {
+      setHomeVisitStatusesByAppointmentId({});
+      return;
+    }
+
+    let isDisposed = false;
+
+    void Promise.all(
+      homeVisitAppointmentIds.map(
+        async (appointmentId): Promise<[string, AppointmentHomeVisitStatus | undefined]> => [
+          appointmentId,
+          await loadProfessionalHomeVisitStatusFromApi(appointmentId),
+        ],
+      ),
+    ).then((entries) => {
+      if (isDisposed) {
+        return;
+      }
+
+      setHomeVisitStatusesByAppointmentId((currentValue) => {
+        const nextValue = { ...currentValue };
+
+        for (const [appointmentId, status] of entries) {
+          nextValue[appointmentId] = status;
+        }
+
+        return nextValue;
+      });
+    });
+
+    return () => {
+      isDisposed = true;
+    };
+  }, [portalState.requestBoard]);
+
   if (!hasMounted) {
     return <ProfessionalPageSkeleton />;
   }
@@ -201,7 +254,9 @@ const ProfessionalDashboardRequestsScreenContent = () => {
         getAreaLabel={getAreaLabel}
         getModeLabel={getModeLabel}
         getServiceLabel={getServiceLabel}
+        homeVisitStatusesByAppointmentId={homeVisitStatusesByAppointmentId}
         isPublishedProfessional={isPublishedProfessional}
+        departingAppointmentId={departingAppointmentId}
         onCloseRequest={(requestId) => {
           const request = portalState.requestBoard.find((currentRequest) => currentRequest.id === requestId);
 
@@ -234,6 +289,26 @@ const ProfessionalDashboardRequestsScreenContent = () => {
           });
           setIsStatusDialogOpen(true);
         }}
+        onDepartHomeVisit={async (request) => {
+          setDepartingAppointmentId(request.appointmentId);
+
+          try {
+            const currentLocation = await readCurrentLocation();
+            const nextStatus = await departHomeVisitAppointmentWithApi(request.appointmentId, {
+              ...(currentLocation ? { currentLocation } : {}),
+            });
+
+            setHomeVisitStatusesByAppointmentId((currentValue) => ({
+              ...currentValue,
+              [request.appointmentId]: nextStatus,
+            }));
+            setNotice(t('requests.travel.departSuccess', { client: request.clientName }));
+          } catch {
+            setNotice(t('requests.travel.departError'));
+          } finally {
+            setDepartingAppointmentId('');
+          }
+        }}
       />
 
       {isStatusDialogOpen && selectedRequest && statusDraft
@@ -254,8 +329,8 @@ const ProfessionalDashboardRequestsScreenContent = () => {
                   setStatusDraft(draft);
                 }}
                 onClose={closeStatusDialog}
-                onSave={() => {
-                  const result = updateRequestStatus(selectedRequest.id, statusDraft.nextStatus, {
+                onSave={async () => {
+                  const result = await updateRequestStatus(selectedRequest.id, statusDraft.nextStatus, {
                     customerSummary: statusDraft.customerSummary,
                     evidenceNote: statusDraft.evidenceNote,
                     evidenceUrl: statusDraft.evidenceUrl,
@@ -293,13 +368,13 @@ const ProfessionalDashboardRequestsScreenContent = () => {
             setCloseDraft(draft);
           }}
           onClose={closeRequestDialog}
-          onSave={() => {
+          onSave={async () => {
             if (!closeDraft.reason.trim()) {
               setCloseError(t('requests.errors.closeReasonRequired'));
               return;
             }
 
-            const result = closeProfessionalRequest(selectedRequest.id, closeDraft.reason);
+            const result = await closeProfessionalRequest(selectedRequest.id, closeDraft.reason);
 
             if (!result.ok) {
               setCloseError(t('requests.errors.invalidTransition'));
@@ -320,6 +395,29 @@ const ProfessionalDashboardRequestsScreenContent = () => {
       ) : null}
     </ProfessionalDashboardShell>
   );
+};
+
+const readCurrentLocation = async () => {
+  if (typeof navigator === 'undefined' || !('geolocation' in navigator)) {
+    return undefined;
+  }
+
+  return new Promise<{ latitude: number; longitude: number } | undefined>((resolve) => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        resolve({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
+      },
+      () => resolve(undefined),
+      {
+        enableHighAccuracy: false,
+        maximumAge: 60_000,
+        timeout: 7_000,
+      },
+    );
+  });
 };
 
 export const ProfessionalDashboardRequestsScreen = () => (

@@ -34,17 +34,26 @@ npm run seed:backend:json
 
 The comprehensive scenario truncates and repopulates:
 
-- `content_documents`
-- `app_state_documents`
-- `professional_portal_sessions`
+- `published_readmodel_documents`
+- `professional_portal_states`
+- `viewer_session_states`
+- `customer_notification_states`
+- `professional_notification_states`
+- `consumer_preference_states`
+- `admin_session_states`
+- `admin_support_desk_states`
+- `support_tickets`
+- `admin_console_states`
+- `admin_console_tables`
+- `admin_console_table_rows`
 - `chat_threads`
 - `chat_messages`
 
 After reset, the seeder rebuilds:
 
 - public catalog and bootstrap content
-- customer and professional auth registries
-- admin, customer, and professional API bearer sessions
+- database-backed customer and professional auth accounts
+- database-backed admin, customer, and professional API bearer sessions
 - professional portal resource slices
 - customer preferences and notification read state
 - professional notification read state
@@ -56,7 +65,7 @@ Unless overridden through flags:
 
 - all customer accounts use password `Customer2026A`
 - all professional accounts use password `Professional2026A`
-- admin UI login still uses the password defined in `ADMIN_CONSOLE_CREDENTIALS_JSON`
+- admin UI login uses credentials bootstrapped into the database from `ADMIN_CONSOLE_CREDENTIALS_JSON`
 
 The CLI report prints the seeded customer phones, professional phones, and seeded bearer tokens.
 
@@ -225,7 +234,7 @@ Current professional portal review-state counts from the comprehensive seed:
 2. Open `/admin/support` and verify urgent, high, and normal tickets are present together with seeded command-center context.
 3. Open `/admin/studio` and verify admin console tables hydrate from backend state without browser-only fallback data.
 4. Open customers, professionals, services, and appointments modules to confirm the console and support desk stay in sync after refresh.
-5. Make a safe admin mutation on a table row and verify granular table sync persists to backend state.
+5. Make a safe admin mutation on a table row and verify granular table sync persists to backend state and is reflected by the matching runtime surface after refresh.
 
 ## 7. How To Use The JSON Report
 

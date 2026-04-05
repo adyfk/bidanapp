@@ -247,14 +247,6 @@ async function runSmokeChecks(summary, baseUrl) {
   await requestJSON('professional detail', baseUrl, `/professionals/${sampleSlug}`);
   recordSuccess('professional detail read');
 
-  const { payload: appointmentsPayload } = await requestJSON('appointments', baseUrl, '/appointments');
-  assert(
-    Array.isArray(appointmentsPayload?.data?.appointments) &&
-      appointmentsPayload.data.appointments.length >= totalAppointmentCount(summary),
-    'appointments payload missing seeded rows',
-  );
-  recordSuccess('appointments read model');
-
   const { payload: chatPayload } = await requestJSON('chat', baseUrl, '/chat');
   const chatThreadCount =
     (chatPayload?.data?.directThreads?.length ?? 0) + (chatPayload?.data?.appointmentThreads?.length ?? 0);
@@ -280,6 +272,16 @@ async function runSmokeChecks(summary, baseUrl) {
   assert(adminAuthPayload?.data?.isAuthenticated === true, 'admin session not authenticated');
   recordSuccess('admin bearer auth session');
 
+  const { payload: appointmentsPayload } = await requestJSON('admin appointments', baseUrl, '/appointments', {
+    headers: adminHeaders,
+  });
+  assert(
+    Array.isArray(appointmentsPayload?.data?.appointments) &&
+      appointmentsPayload.data.appointments.length >= totalAppointmentCount(summary),
+    'appointments payload missing seeded rows',
+  );
+  recordSuccess('admin appointments read model');
+
   const { payload: adminSupportPayload } = await requestJSON('admin support desk', baseUrl, '/admin/support-desk', {
     headers: adminHeaders,
   });
@@ -304,12 +306,60 @@ async function runSmokeChecks(summary, baseUrl) {
   });
   recordSuccess('admin console granular table read');
 
+  const { payload: adminServicesTablePayload } = await requestJSON(
+    'admin console services table',
+    baseUrl,
+    '/admin/console/tables/services',
+    {
+      headers: adminHeaders,
+    },
+  );
+  const adminServiceRows = Array.isArray(adminServicesTablePayload?.data?.rows)
+    ? adminServicesTablePayload.data.rows
+    : [];
+  const serviceRow = adminServiceRows[0];
+  assert(serviceRow?.id, 'admin services table is missing a seed service row');
+  const updatedServiceName = `${serviceRow.name} Synced`;
+  await requestJSON('admin console services mutation', baseUrl, '/admin/console/tables/services', {
+    method: 'PUT',
+    headers: adminHeaders,
+    body: {
+      rows: adminServiceRows.map((row, index) =>
+        row.id === serviceRow.id
+          ? {
+              ...row,
+              index: index + 1,
+              name: updatedServiceName,
+            }
+          : {
+              ...row,
+              index: index + 1,
+            },
+      ),
+      savedAt: adminServicesTablePayload?.data?.savedAt,
+      schemaVersion: adminServicesTablePayload?.data?.schemaVersion ?? 1,
+    },
+  });
+  const { payload: catalogAfterAdminMutationPayload } = await requestJSON(
+    'catalog after admin console service mutation',
+    baseUrl,
+    '/catalog',
+  );
+  const updatedCatalogService = catalogAfterAdminMutationPayload?.data?.services?.find(
+    (service) => service.id === serviceRow.id,
+  );
+  assert(
+    updatedCatalogService?.name === updatedServiceName,
+    'admin console service mutation did not update the public catalog read model',
+  );
+  recordSuccess('admin console mutation updates public catalog');
+
   const { payload: adminUpdatePayload } = await requestJSON('admin session update', baseUrl, '/admin/auth/session', {
     method: 'PUT',
     headers: adminHeaders,
-    body: { lastVisitedRoute: '/admin/studio' },
+    body: { lastVisitedRoute: '/admin/support' },
   });
-  assert(adminUpdatePayload?.data?.lastVisitedRoute === '/admin/studio', 'admin session update did not persist');
+  assert(adminUpdatePayload?.data?.lastVisitedRoute === '/admin/support', 'admin session update did not persist');
   recordSuccess('admin session mutation');
 
   const { payload: viewerSessionPayload } = await requestJSON('viewer session', baseUrl, '/viewer/session');

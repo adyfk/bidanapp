@@ -395,3 +395,75 @@ func TestProfessionalBySlugAppliesPublishedPortalOverlay(t *testing.T) {
 		t.Fatalf("expected story overlay, got %#v", payload.ActivityStories)
 	}
 }
+
+func TestProfessionalBySlugReturnsPublishedPortalOnlyProfessional(t *testing.T) {
+	dataDir := t.TempDir()
+	writeCatalogFixture(t, dataDir)
+
+	portalStateStore := portalstore.NewMemoryStore()
+	if _, err := portalStateStore.Upsert(context.Background(), portalstore.Record{
+		ProfessionalID: "pro_live_publish",
+		SavedAt:        "2026-03-22T10:00:00Z",
+		Snapshot: map[string]any{
+			"reviewStatesByProfessionalId": map[string]any{
+				"pro_live_publish": map[string]any{
+					"status": "published",
+				},
+			},
+			"state": map[string]any{
+				"acceptingNewClients": true,
+				"city":                "Bandung",
+				"displayName":         "Bidan Rani Live",
+				"practiceAddress":     "Jl. Mawar 12",
+				"practiceLabel":       "Bandung Timur",
+				"publicBio":           "Pendampingan homecare untuk ibu dan bayi.",
+				"responseTimeGoal":    "< 15 menit",
+				"serviceConfigurations": []map[string]any{
+					{
+						"bookingFlow": "request",
+						"defaultMode": "home_visit",
+						"duration":    "75 min",
+						"featured":    true,
+						"id":          "pro-live-service-1",
+						"index":       1,
+						"isActive":    true,
+						"price":       "Rp 300.000",
+						"serviceId":   "svc-1",
+						"serviceModes": map[string]any{
+							"online":    false,
+							"homeVisit": true,
+							"onsite":    false,
+						},
+						"summary": "Home visit pasca persalinan.",
+					},
+				},
+				"yearsExperience": "7 years",
+			},
+		},
+	}, "pro_live_publish"); err != nil {
+		t.Fatalf("seed portal-only overlay store: %v", err)
+	}
+
+	service := NewService(dataDir, portalStateStore)
+
+	payload, err := service.ProfessionalBySlug(context.Background(), "bidan-rani-live")
+	if err != nil {
+		t.Fatalf("lookup portal-only professional by slug: %v", err)
+	}
+
+	if payload.ID != "pro_live_publish" {
+		t.Fatalf("expected portal-only professional id, got %s", payload.ID)
+	}
+
+	if payload.Name != "Bidan Rani Live" {
+		t.Fatalf("expected portal-only display name, got %s", payload.Name)
+	}
+
+	if payload.Location != "Bandung Timur" {
+		t.Fatalf("expected portal-only location, got %s", payload.Location)
+	}
+
+	if len(payload.Services) != 1 || payload.Services[0].ID != "pro-live-service-1" {
+		t.Fatalf("expected portal-only active service, got %#v", payload.Services)
+	}
+}

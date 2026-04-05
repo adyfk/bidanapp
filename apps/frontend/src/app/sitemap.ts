@@ -3,6 +3,8 @@ import { routing } from '@/i18n/routing';
 import { APP_CONFIG } from '@/lib/config';
 import { getPublicBootstrapData } from '@/lib/public-bootstrap';
 
+export const dynamic = 'force-dynamic';
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = APP_CONFIG.baseUrl;
   const locales = routing.locales;

@@ -44,7 +44,7 @@ export const registerProfessionalWithApi = async (input: {
   displayName: string;
   password: string;
   phone: string;
-  professionalId: string;
+  professionalId?: string;
 }) => {
   const response = await withTimeout(
     registerProfessionalAuthAccount(client, {
@@ -53,7 +53,7 @@ export const registerProfessionalWithApi = async (input: {
       displayName: input.displayName,
       password: input.password,
       phone: input.phone,
-      professionalId: input.professionalId,
+      ...(input.professionalId?.trim() ? { professionalId: input.professionalId.trim() } : {}),
     }),
     requestTimeoutMs,
   );

@@ -33,10 +33,10 @@ const surfacePanelClass =
 const railPanelClass =
   'rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.08)_0%,rgba(255,255,255,0.03)_100%)] shadow-[0_24px_70px_-46px_rgba(15,23,42,0.7)] backdrop-blur-xl';
 const focusAreaLabels = {
-  catalog: 'Catalog control',
-  ops: 'Operational desk',
-  reviews: 'Review queue',
-  support: 'Support command',
+  catalog: 'Kontrol katalog',
+  ops: 'Desk operasional',
+  reviews: 'Antrean review',
+  support: 'Desk support',
 } as const;
 
 const focusAreaDescriptions = {
@@ -69,37 +69,37 @@ const navVisuals: Record<
   [ADMIN_ROUTES.overview]: {
     badgeClassName: 'border-sky-300/30 bg-sky-400/12 text-sky-100',
     icon: LayoutDashboard,
-    kicker: 'Cross-module view',
+    kicker: 'Ikhtisar lintas modul',
   },
   [ADMIN_ROUTES.customers]: {
     badgeClassName: 'border-cyan-300/30 bg-cyan-400/12 text-cyan-100',
     icon: UsersRound,
-    kicker: 'Customer context',
+    kicker: 'Konteks customer',
   },
   [ADMIN_ROUTES.professionals]: {
     badgeClassName: 'border-amber-300/30 bg-amber-400/12 text-amber-100',
     icon: ShieldCheck,
-    kicker: 'Trust workflow',
+    kicker: 'Workflow verifikasi',
   },
   [ADMIN_ROUTES.services]: {
     badgeClassName: 'border-emerald-300/30 bg-emerald-400/12 text-emerald-100',
     icon: Building2,
-    kicker: 'Catalog map',
+    kicker: 'Peta katalog',
   },
   [ADMIN_ROUTES.appointments]: {
     badgeClassName: 'border-indigo-300/30 bg-indigo-400/12 text-indigo-100',
     icon: CalendarRange,
-    kicker: 'Delivery ops',
+    kicker: 'Operasional layanan',
   },
   [ADMIN_ROUTES.support]: {
     badgeClassName: 'border-rose-300/30 bg-rose-400/12 text-rose-100',
     icon: LifeBuoy,
-    kicker: 'Triage desk',
+    kicker: 'Desk triage',
   },
   [ADMIN_ROUTES.studio]: {
     badgeClassName: 'border-slate-300/30 bg-slate-100/10 text-slate-100',
     icon: Database,
-    kicker: 'Seed controls',
+    kicker: 'Kontrol data',
   },
 };
 
@@ -298,6 +298,7 @@ export const AdminConsoleShell = ({ children }: AdminConsoleShellProps) => {
   const { appointments, consumers, modifiedTableNames, professionals, services, snapshotSavedAt } =
     useAdminConsoleData();
   const { savedAt: supportSavedAt, tickets } = useSupportDesk();
+  const isStudioEnabled = ADMIN_NAV_ITEMS.some((item) => item.href === ADMIN_ROUTES.studio);
 
   const currentNavItem = getAdminNavItem(pathname) || ADMIN_NAV_ITEMS[0];
   const lastVisitedNavItem = getAdminNavItem(session.lastVisitedRoute);
@@ -336,10 +337,14 @@ export const AdminConsoleShell = ({ children }: AdminConsoleShellProps) => {
     {
       description:
         modifiedTableCount > 0
-          ? 'Ada perubahan lokal yang belum di-reset. Audit tabel operasional sebelum berganti skenario.'
-          : 'Seed masih bersih. Gunakan studio untuk import, export, atau reset dataset admin.',
-      href: modifiedTableCount > 0 ? ADMIN_ROUTES.studio : ADMIN_ROUTES.appointments,
-      label: modifiedTableCount > 0 ? 'Data Changes' : 'Appointment Ops',
+          ? isStudioEnabled
+            ? 'Ada perubahan lokal yang belum di-reset. Audit tabel operasional sebelum berganti skenario.'
+            : 'Ada perubahan lokal yang belum di-reset. Tinjau modul operasional sebelum berganti skenario.'
+          : isStudioEnabled
+            ? 'Baseline data masih selaras. Gunakan studio untuk import, export, atau reset data admin bila diperlukan.'
+            : 'Baseline data masih selaras. Lanjutkan review operasional dari modul appointment dan support.',
+      href: modifiedTableCount > 0 && isStudioEnabled ? ADMIN_ROUTES.studio : ADMIN_ROUTES.appointments,
+      label: modifiedTableCount > 0 && isStudioEnabled ? 'Perubahan Data' : 'Operasional Booking',
       tone: 'amber' as const,
       value: modifiedTableCount > 0 ? `${modifiedTableCount} tabel` : `${appointments.length} booking`,
     },
@@ -397,7 +402,7 @@ export const AdminConsoleShell = ({ children }: AdminConsoleShellProps) => {
     }
 
     if (href === ADMIN_ROUTES.studio) {
-      return modifiedTableCount > 0 ? `${modifiedTableCount} berubah` : 'Seed bersih';
+      return modifiedTableCount > 0 ? `${modifiedTableCount} berubah` : 'Data sinkron';
     }
 
     return `${openTickets + modifiedTableCount} sinyal`;
@@ -433,7 +438,7 @@ export const AdminConsoleShell = ({ children }: AdminConsoleShellProps) => {
                 <div>
                   <SectionEyebrow label="Persona aktif" />
                   <p className="mt-2 text-[18px] font-bold text-white">{activeAdmin?.name || 'Admin'}</p>
-                  <p className="mt-1 text-sm text-slate-300">{activeAdmin?.title || 'Console operator'}</p>
+                  <p className="mt-1 text-sm text-slate-300">{activeAdmin?.title || 'Operator console'}</p>
                 </div>
                 {activeAdmin ? (
                   <span
@@ -449,20 +454,20 @@ export const AdminConsoleShell = ({ children }: AdminConsoleShellProps) => {
             </div>
 
             <div className="mt-4 rounded-[26px] border border-white/10 bg-slate-950/20 p-4">
-              <SectionEyebrow label="Current module" />
+              <SectionEyebrow label="Modul aktif" />
               <p className="mt-2 text-lg font-bold text-white">{currentNavItem.label}</p>
               <p className="mt-2 text-[13px] leading-6 text-slate-300">{currentNavItem.description}</p>
               <p className="mt-3 text-[12px] leading-5 text-slate-400">{focusAreaDescription}</p>
             </div>
 
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <SidebarStat label="Support open" value={`${openTickets} ticket aktif`} />
+              <SidebarStat label="Support aktif" value={`${openTickets} ticket aktif`} />
               <SidebarStat
-                label="Data pulse"
-                value={modifiedTableCount > 0 ? `${modifiedTableCount} tabel berubah` : 'Seed bersih'}
+                label="Status data"
+                value={modifiedTableCount > 0 ? `${modifiedTableCount} tabel berubah` : 'Data sinkron'}
               />
-              <SidebarStat label="Resume" value={lastVisitedNavItem ? lastVisitedNavItem.label : 'Overview'} />
-              <SidebarStat label="Last login" value={formatRelativeDateLabel(session.lastLoginAt)} />
+              <SidebarStat label="Ringkasan" value={lastVisitedNavItem ? lastVisitedNavItem.label : 'Overview'} />
+              <SidebarStat label="Login terakhir" value={formatRelativeDateLabel(session.lastLoginAt)} />
             </div>
           </div>
 
@@ -511,11 +516,11 @@ export const AdminConsoleShell = ({ children }: AdminConsoleShellProps) => {
               Backend-authenticated admin access
             </div>
             <p className="mt-3 text-[13px] leading-6 text-slate-300">
-              Session admin, sync support desk, dan snapshot operasional tetap dibatasi oleh akses backend aktif.
+              Session admin, sync support desk, dan mutasi operasional tetap dibatasi oleh akses backend aktif.
             </p>
             <div className="mt-4 grid gap-3">
               <SidebarStat label="Support sync" value={formatDateLabel(supportSavedAt)} />
-              <SidebarStat label="Data snapshot" value={formatDateLabel(snapshotSavedAt)} />
+              <SidebarStat label="Data console" value={formatDateLabel(snapshotSavedAt)} />
             </div>
           </div>
         </aside>
@@ -540,7 +545,7 @@ export const AdminConsoleShell = ({ children }: AdminConsoleShellProps) => {
                 <div>
                   <SectionEyebrow label="Persona aktif" />
                   <p className="mt-2 text-base font-bold text-white">{activeAdmin?.name || 'Admin'}</p>
-                  <p className="mt-1 text-sm text-slate-300">{activeAdmin?.title || 'Console operator'}</p>
+                  <p className="mt-1 text-sm text-slate-300">{activeAdmin?.title || 'Operator console'}</p>
                 </div>
                 {activeAdmin ? (
                   <span
@@ -558,7 +563,7 @@ export const AdminConsoleShell = ({ children }: AdminConsoleShellProps) => {
             <div className="mt-4 grid grid-cols-2 gap-2">
               <SidebarStat label="Support" value={`${openTickets} aktif`} />
               <SidebarStat label="Data" value={modifiedTableCount > 0 ? `${modifiedTableCount} berubah` : 'Bersih'} />
-              <SidebarStat label="Resume" value={lastVisitedNavItem ? lastVisitedNavItem.label : 'Overview'} />
+              <SidebarStat label="Ringkasan" value={lastVisitedNavItem ? lastVisitedNavItem.label : 'Overview'} />
               <SidebarStat label="Login" value={formatRelativeDateLabel(session.lastLoginAt)} />
             </div>
 
