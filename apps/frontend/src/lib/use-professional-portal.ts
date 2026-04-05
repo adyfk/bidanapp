@@ -50,6 +50,7 @@ import {
   fetchProfessionalAppointmentsWithApi,
   rejectAppointmentWithApi,
   startAppointmentServiceWithApi,
+  submitAppointmentFeedbackWithApi,
 } from '@/lib/appointment-actions-api';
 import { type AppointmentSeed as AppointmentReadModelSeed, createHydratedAppointment } from '@/lib/appointment-utils';
 import { normalizeAvailabilityRulesByMode } from '@/lib/availability-rules';
@@ -57,7 +58,7 @@ import { getProfessionalCoverageAreaIds, normalizeProfessional } from '@/lib/cat
 import { getAreaById, getProfessionalCategoryLabel, getServiceById } from '@/lib/catalog-selectors';
 import { getProfessionalAvailabilityScheduleDays } from '@/lib/professional-availability';
 import { useAppShell } from '@/lib/use-app-shell';
-import { useCatalogReadModel } from '@/lib/use-catalog-read-model';
+import { refreshCatalogReadModelFromApi, useCatalogReadModel } from '@/lib/use-catalog-read-model';
 import { useCustomerAuthSession } from '@/lib/use-customer-auth-session';
 import type {
   Appointment,
@@ -84,6 +85,7 @@ import type {
 } from '@/types/catalog';
 import {
   hydrateProfessionalPortalAdminReviewStatesFromApi,
+  submitProfessionalPortalProfileForReviewWithApi,
   syncProfessionalPortalAdminReviewStateResource,
   syncProfessionalPortalCoverageResource,
   syncProfessionalPortalGalleryResource,
@@ -825,6 +827,7 @@ const toManagedAppointmentRecordFromReadModel = (
     appointment.cancellationPolicySnapshot || createDefaultCancellationPolicySnapshot(appointment.requestedMode),
   cancellationResolution: appointment.cancellationResolution,
   consumerId: appointment.consumerId,
+  feedback: appointment.feedback || appointment.customerFeedback,
   id: appointment.id,
   index: new Date(appointment.requestedAt).getTime() || 0,
   professionalId: appointment.professionalId,
@@ -1439,7 +1442,7 @@ const sanitizeRequestBoard = (
 
 const sanitizeReviewState = (
   value: Partial<ProfessionalLifecycleReviewState> | null | undefined,
-  fallback: ProfessionalLifecycleReviewState = createPublishedReviewState(),
+  fallback: ProfessionalLifecycleReviewState = createDraftReviewState(),
 ): ProfessionalLifecycleReviewState => ({
   adminNote: value?.adminNote?.trim() || fallback.adminNote,
   publishedAt: value?.publishedAt?.trim() || fallback.publishedAt,
@@ -1451,7 +1454,7 @@ const sanitizeReviewState = (
 
 const buildDefaultReviewStates = (professionals: Professional[]) =>
   professionals.reduce<Record<string, ProfessionalLifecycleReviewState>>((states, professional) => {
-    states[professional.id] = createPublishedReviewState();
+    states[professional.id] = createDraftReviewState();
     return states;
   }, {});
 
@@ -1464,7 +1467,7 @@ const sanitizeReviewStatesByProfessionalId = (value: unknown): Record<string, Pr
     (states, [professionalId, state]) => {
       states[professionalId] = sanitizeReviewState(
         state as Partial<ProfessionalLifecycleReviewState>,
-        createPublishedReviewState(),
+        createDraftReviewState(),
       );
       return states;
     },
@@ -1640,7 +1643,7 @@ const readProfessionalPortalData = (
       reviewStatesByProfessionalId: {
         ...sanitizedReviewStates,
         [portalState.activeProfessionalId]:
-          sanitizedReviewStates[portalState.activeProfessionalId] || createPublishedReviewState(),
+          sanitizedReviewStates[portalState.activeProfessionalId] || createDraftReviewState(),
       },
     };
   } catch {
@@ -1700,6 +1703,7 @@ const buildCustomerAppointmentsFromAppointmentRecords = (
           cancellationPolicySnapshot: record.cancellationPolicySnapshot,
           cancellationResolution: record.cancellationResolution,
           consumerId: record.consumerId,
+          feedback: record.feedback,
           id: record.id,
           professionalId: record.professionalId,
           requestNote: record.requestNote,
@@ -1928,7 +1932,6 @@ export const useProfessionalPortal = () => {
       );
 
       setAppointmentRecordsByProfessionalId(nextAppointmentRecords);
-      persistProfessionalPortalState(portalState, nextAppointmentRecords, reviewStatesByProfessionalId);
     } catch {
       // Keep local state as a fallback when the backend read-model is unavailable.
     }
@@ -1981,7 +1984,7 @@ export const useProfessionalPortal = () => {
       [portalState.activeProfessionalId]:
         nextReviewStates[portalState.activeProfessionalId] ||
         reviewStatesByProfessionalId[portalState.activeProfessionalId] ||
-        createPublishedReviewState(),
+        createDraftReviewState(),
     };
 
     setReviewStatesByProfessionalId(mergedReviewStates);
@@ -2042,7 +2045,7 @@ export const useProfessionalPortal = () => {
       [candidateState.activeProfessionalId]: sanitizeReviewState(
         nextReviewStatesInput?.[candidateState.activeProfessionalId] ||
           reviewStatesByProfessionalId[candidateState.activeProfessionalId],
-        createPublishedReviewState(),
+        createDraftReviewState(),
       ),
     };
     const sanitizedState = sanitizePortalState(
@@ -2084,7 +2087,7 @@ export const useProfessionalPortal = () => {
       undefined,
       {
         ...reviewStatesByProfessionalId,
-        [professionalId]: reviewStatesByProfessionalId[professionalId] || createPublishedReviewState(),
+        [professionalId]: reviewStatesByProfessionalId[professionalId] || createDraftReviewState(),
       },
     );
   };
@@ -2172,7 +2175,7 @@ export const useProfessionalPortal = () => {
         {
           ...reviewStatesByProfessionalId,
           [authenticatedProfessionalID]:
-            reviewStatesByProfessionalId[authenticatedProfessionalID] || createPublishedReviewState(),
+            reviewStatesByProfessionalId[authenticatedProfessionalID] || createDraftReviewState(),
         },
       );
     }
@@ -2409,11 +2412,7 @@ export const useProfessionalPortal = () => {
       ...input,
     }));
 
-    syncProfessionalPortalProfileResource(
-      nextPortalData.portalState,
-      nextPortalData.reviewStatesByProfessionalId[nextPortalData.portalState.activeProfessionalId] ||
-        createPublishedReviewState(),
-    );
+    syncProfessionalPortalProfileResource(nextPortalData.portalState);
     syncProfessionalPortalCoverageResource(nextPortalData.portalState);
   };
 
@@ -2431,39 +2430,26 @@ export const useProfessionalPortal = () => {
     syncProfessionalPortalCoverageResource(nextPortalData.portalState);
   };
 
-  const submitProfessionalProfileForReview = () => {
+  const submitProfessionalProfileForReview = async () => {
     const readinessState = deriveProfessionalOnboardingState(portalState, null);
 
     if (readinessState.blockingTaskCount > 0) {
       return false;
     }
 
-    const submittedAt = new Date().toISOString();
-
-    const nextPortalData = updatePortalState(portalState, undefined, {
-      ...reviewStatesByProfessionalId,
-      [portalState.activeProfessionalId]: {
-        status: 'submitted',
-        submittedAt,
-      },
-    });
-
-    syncProfessionalPortalProfileResource(
-      nextPortalData.portalState,
-      nextPortalData.reviewStatesByProfessionalId[portalState.activeProfessionalId] || {
-        status: 'submitted',
-        submittedAt,
-      },
-    );
-    syncProfessionalPortalAdminReviewStateResource(
-      portalState.activeProfessionalId,
-      nextPortalData.reviewStatesByProfessionalId[portalState.activeProfessionalId] || {
-        status: 'submitted',
-        submittedAt,
-      },
-    );
-
-    return true;
+    try {
+      const persistedProfile = await submitProfessionalPortalProfileForReviewWithApi(portalState);
+      updatePortalState(portalState, undefined, {
+        ...reviewStatesByProfessionalId,
+        [portalState.activeProfessionalId]: sanitizeReviewState(
+          persistedProfile.reviewState as Partial<ProfessionalLifecycleReviewState>,
+          reviewStatesByProfessionalId[portalState.activeProfessionalId] || createDraftReviewState(),
+        ),
+      });
+      return true;
+    } catch {
+      return false;
+    }
   };
 
   const reviewProfessionalProfile = (status: 'changes_requested' | 'verified') => {
@@ -2497,10 +2483,7 @@ export const useProfessionalPortal = () => {
             },
     });
 
-    syncProfessionalPortalProfileResource(
-      nextPortalData.portalState,
-      nextPortalData.reviewStatesByProfessionalId[portalState.activeProfessionalId] || createDraftReviewState(),
-    );
+    syncProfessionalPortalProfileResource(nextPortalData.portalState);
     syncProfessionalPortalAdminReviewStateResource(
       portalState.activeProfessionalId,
       nextPortalData.reviewStatesByProfessionalId[portalState.activeProfessionalId] || createDraftReviewState(),
@@ -2587,10 +2570,7 @@ export const useProfessionalPortal = () => {
       },
     );
 
-    syncProfessionalPortalProfileResource(
-      nextPortalData.portalState,
-      nextPortalData.reviewStatesByProfessionalId[portalState.activeProfessionalId] || createPublishedReviewState(),
-    );
+    syncProfessionalPortalProfileResource(nextPortalData.portalState);
     syncProfessionalPortalAdminReviewStateResource(
       portalState.activeProfessionalId,
       nextPortalData.reviewStatesByProfessionalId[portalState.activeProfessionalId] || createPublishedReviewState(),
@@ -2757,6 +2737,23 @@ export const useProfessionalPortal = () => {
     }
   };
 
+  const submitCustomerAppointmentFeedback = async (appointmentId: string, input: { rating: number; text: string }) => {
+    if (input.rating <= 0 || !input.text.trim()) {
+      return false;
+    }
+
+    try {
+      await submitAppointmentFeedbackWithApi(appointmentId, {
+        rating: input.rating,
+        text: input.text.trim(),
+      });
+      await Promise.all([syncAppointmentRecordsFromApi(), refreshCatalogReadModelFromApi()]);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   const cancelCustomerAppointment = async (appointmentId: string, cancellationReason: string) => {
     const trimmedReason = cancellationReason.trim();
 
@@ -2904,8 +2901,7 @@ export const useProfessionalPortal = () => {
   };
 
   const baseProfessional = resolveCatalogProfessional(catalogLookupData, portalState.activeProfessionalId);
-  const activeReviewState =
-    reviewStatesByProfessionalId[portalState.activeProfessionalId] || createPublishedReviewState();
+  const activeReviewState = reviewStatesByProfessionalId[portalState.activeProfessionalId] || createDraftReviewState();
   const onboardingState = deriveProfessionalOnboardingState(portalState, activeReviewState);
   const previewProfessional = baseProfessional
     ? mergeProfessionalWithPortalState(baseProfessional, portalState)
@@ -3031,6 +3027,7 @@ export const useProfessionalPortal = () => {
     },
     closeProfessionalRequest,
     markCustomerAppointmentPaid,
+    submitCustomerAppointmentFeedback,
     saveAvailabilityRulesByMode,
     saveBusinessSettings,
     saveGalleryItem,

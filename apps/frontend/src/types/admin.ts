@@ -46,6 +46,7 @@ export interface SupportTicket {
   referenceCode?: string;
   relatedAppointmentId?: string;
   relatedProfessionalId?: string;
+  reporterId?: string;
   reporterName: string;
   reporterPhone: string;
   reporterRole: SupportRole;

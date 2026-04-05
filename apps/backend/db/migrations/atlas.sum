@@ -1,4 +1,4 @@
-h1:DTrEzOi6CAyg/7SOF62v4NOcXy1DXn6qzVESpqmtDDw=
+h1:okVFjveEOQE2+l4B+xJRB9Vn1duHCkDwmSa7hQAb+Gg=
 20260315230000_init_chat_schema.sql h1:YqV6xmNhJV/N8eO1JBnotLzrILH3/ML8smSm2AFOASw=
 20260322235000_add_professional_portal_sessions.sql h1:x/96/0bvUKWNOchWrVfjqK+X2gLyZHsgIlG54qvXY9M=
 20260323001500_add_app_state_documents.sql h1:fo7vkbaNkCbod21e3cJMeccK819IUkjvzjXuG9AJy08=
@@ -12,3 +12,4 @@ h1:DTrEzOi6CAyg/7SOF62v4NOcXy1DXn6qzVESpqmtDDw=
 20260404152000_harden_runtime_domain_constraints.sql h1:IEhA9a+vzn88kDIYMxVT709I7QZhqMJluMeXtiOOj8I=
 20260404163000_add_home_visit_execution_and_push_subscriptions.sql h1:VsNGeHN9u5uAlSc8feBiWWhwy0Du2m7TK383ANhmQZM=
 20260405090000_add_transactional_core_and_ops_tables.sql h1:Yy42vSqU9+6z+3wC3vY2Oxsf7oxcIhFJdUP2x7YNw6A=
+20260405101500_add_support_ticket_reporter_ids.sql h1:tFjAA9gmSBWQEFHy0PuB7cAmtgICyaBoY1tPveendgE=

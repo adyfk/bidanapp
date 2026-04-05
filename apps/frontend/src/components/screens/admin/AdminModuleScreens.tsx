@@ -2763,9 +2763,9 @@ export const AdminProfessionalsScreen = () => {
                     type="button"
                     className={buttonSecondaryClass}
                     disabled={!isSynced}
-                    onClick={() =>
+                    onClick={async () =>
                       setMessage(
-                        submitProfessionalProfileForReview()
+                        (await submitProfessionalProfileForReview())
                           ? 'Profil berhasil diajukan ke review admin.'
                           : 'Profil belum siap diajukan. Lengkapi requirement onboarding dulu.',
                       )

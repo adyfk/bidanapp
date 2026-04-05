@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sort"
 	"strings"
 	"time"
 
@@ -20,10 +21,12 @@ const (
 	consumerPreferencesNamespace       = "consumer_preferences"
 	adminSessionNamespace              = "admin_session"
 	adminSupportDeskNamespace          = "admin_support_desk"
+	supportTicketsNamespace            = "support_tickets"
 	adminConsoleNamespace              = "admin_console"
 	adminConsoleTableNamespace         = "admin_console_table"
 	defaultDocumentKey                 = "default"
 	adminConsoleSchemaVersion          = 1
+	supportDeskSchemaVersion           = 1
 	adminConsolePublishedNamespace     = "published_readmodel"
 )
 
@@ -31,6 +34,7 @@ var (
 	errInvalidAdminConsoleTable = errors.New("invalid admin console table")
 	errInvalidCustomerPushSubscription = errors.New("invalid customer push subscription")
 	errInvalidSupportDesk       = errors.New("invalid support desk payload")
+	errInvalidSupportTicket     = errors.New("invalid support ticket payload")
 	adminConsoleTableNames      = []string{
 		"admin_staff",
 		"app_runtime_selections",
@@ -248,9 +252,40 @@ func (s *Service) UpsertAdminSession(ctx context.Context, input AdminSessionData
 }
 
 func (s *Service) SupportDesk(ctx context.Context) (SupportDeskData, error) {
-	return readSnapshot(ctx, s.store, adminSupportDeskNamespace, defaultDocumentKey, SupportDeskData{
-		Tickets: []SupportTicketData{},
-	})
+	commandCenterState, err := readSnapshot(
+		ctx,
+		s.store,
+		adminSupportDeskNamespace,
+		defaultDocumentKey,
+		SupportDeskData{
+			CommandCenter: defaultSupportCommandCenterState(),
+			SchemaVersion: supportDeskSchemaVersion,
+			Tickets:       []SupportTicketData{},
+		},
+	)
+	if err != nil {
+		return SupportDeskData{}, err
+	}
+
+	ticketState, err := s.readSupportTickets(ctx)
+	if err != nil {
+		return SupportDeskData{}, err
+	}
+
+	savedAt := ticketState.SavedAt
+	if parseRFC3339OrZero(commandCenterState.SavedAt).After(parseRFC3339OrZero(savedAt)) {
+		savedAt = commandCenterState.SavedAt
+	}
+	if savedAt == "" {
+		savedAt = time.Now().UTC().Format(time.RFC3339)
+	}
+
+	return SupportDeskData{
+		CommandCenter: normalizeSupportCommandCenter(commandCenterState.CommandCenter),
+		SavedAt:       savedAt,
+		SchemaVersion: supportDeskSchemaVersion,
+		Tickets:       sortSupportTickets(ticketState.Tickets),
+	}, nil
 }
 
 func (s *Service) UpsertSupportDesk(ctx context.Context, input SupportDeskData) (SupportDeskData, error) {
@@ -264,7 +299,102 @@ func (s *Service) UpsertSupportDesk(ctx context.Context, input SupportDeskData) 
 	if err != nil {
 		return SupportDeskData{}, err
 	}
-	return upsertSnapshot(ctx, s.store, adminSupportDeskNamespace, defaultDocumentKey, normalized)
+
+	adminSnapshot := SupportDeskData{
+		CommandCenter: normalized.CommandCenter,
+		SavedAt:       normalized.SavedAt,
+		SchemaVersion: normalized.SchemaVersion,
+		Tickets:       []SupportTicketData{},
+	}
+	if _, err := upsertSnapshot(ctx, s.store, adminSupportDeskNamespace, defaultDocumentKey, adminSnapshot); err != nil {
+		return SupportDeskData{}, err
+	}
+
+	if _, err := s.upsertSupportTickets(ctx, SupportTicketsData{
+		SavedAt:       normalized.SavedAt,
+		SchemaVersion: normalized.SchemaVersion,
+		Tickets:       normalized.Tickets,
+	}); err != nil {
+		return SupportDeskData{}, err
+	}
+
+	return normalized, nil
+}
+
+func (s *Service) SupportTicketsByReporter(
+	ctx context.Context,
+	reporterRole string,
+	reporterID string,
+) (SupportTicketsData, error) {
+	payload, err := s.readSupportTickets(ctx)
+	if err != nil {
+		return SupportTicketsData{}, err
+	}
+
+	filtered := make([]SupportTicketData, 0, len(payload.Tickets))
+	for _, ticket := range payload.Tickets {
+		if ticket.ReporterRole == reporterRole && ticket.ReporterID == reporterID {
+			filtered = append(filtered, ticket)
+		}
+	}
+	payload.Tickets = sortSupportTickets(filtered)
+
+	return payload, nil
+}
+
+func (s *Service) CreateSupportTicket(
+	ctx context.Context,
+	reporterRole string,
+	reporterID string,
+	input CreateSupportTicketData,
+) (SupportTicketData, error) {
+	if _, ok := supportAllowedReporterRoles[reporterRole]; !ok {
+		return SupportTicketData{}, errInvalidSupportTicket
+	}
+	if strings.TrimSpace(reporterID) == "" {
+		return SupportTicketData{}, errInvalidSupportTicket
+	}
+
+	payload, err := s.readSupportTickets(ctx)
+	if err != nil {
+		return SupportTicketData{}, err
+	}
+
+	now := time.Now().UTC()
+	timestamp := now.Format(time.RFC3339)
+	ticket, err := normalizeSupportTicket(SupportTicketData{
+		CategoryID:            input.CategoryID,
+		ContactValue:          input.ContactValue,
+		CreatedAt:             timestamp,
+		Details:               input.Details,
+		EtaKey:                input.Urgency,
+		ID:                    nextSupportTicketID(reporterRole, now),
+		PreferredChannel:      input.PreferredChannel,
+		ReferenceCode:         input.ReferenceCode,
+		RelatedAppointmentID:  input.RelatedAppointmentID,
+		RelatedProfessionalID: input.RelatedProfessionalID,
+		ReporterID:            reporterID,
+		ReporterName:          input.ReporterName,
+		ReporterPhone:         input.ReporterPhone,
+		ReporterRole:          reporterRole,
+		SourceSurface:         input.SourceSurface,
+		Status:                "new",
+		Summary:               input.Summary,
+		UpdatedAt:             timestamp,
+		Urgency:               input.Urgency,
+	}, timestamp)
+	if err != nil {
+		return SupportTicketData{}, err
+	}
+
+	payload.SavedAt = timestamp
+	payload.SchemaVersion = supportDeskSchemaVersion
+	payload.Tickets = sortSupportTickets(append(payload.Tickets, ticket))
+	if _, err := s.upsertSupportTickets(ctx, payload); err != nil {
+		return SupportTicketData{}, err
+	}
+
+	return ticket, nil
 }
 
 func (s *Service) AdminConsole(ctx context.Context) (AdminConsoleData, error) {
@@ -443,6 +573,70 @@ func professionalDocumentKey(professionalID string) string {
 		return defaultDocumentKey
 	}
 	return professionalID
+}
+
+func defaultSupportCommandCenterState() AdminCommandCenterStateData {
+	return AdminCommandCenterStateData{
+		FocusArea: "support",
+	}
+}
+
+func defaultSupportTicketsData() SupportTicketsData {
+	return SupportTicketsData{
+		SchemaVersion: supportDeskSchemaVersion,
+		Tickets:       []SupportTicketData{},
+	}
+}
+
+func normalizeSupportCommandCenter(input AdminCommandCenterStateData) AdminCommandCenterStateData {
+	if input.FocusArea == "" {
+		input.FocusArea = "support"
+	}
+	return input
+}
+
+func sortSupportTickets(tickets []SupportTicketData) []SupportTicketData {
+	nextTickets := append([]SupportTicketData(nil), tickets...)
+	sort.SliceStable(nextTickets, func(leftIndex int, rightIndex int) bool {
+		leftTicket := nextTickets[leftIndex]
+		rightTicket := nextTickets[rightIndex]
+
+		leftCreatedAt := parseRFC3339OrZero(leftTicket.CreatedAt)
+		rightCreatedAt := parseRFC3339OrZero(rightTicket.CreatedAt)
+		if !leftCreatedAt.Equal(rightCreatedAt) {
+			return rightCreatedAt.Before(leftCreatedAt)
+		}
+
+		return rightTicket.ID < leftTicket.ID
+	})
+	return nextTickets
+}
+
+func nextSupportTicketID(reporterRole string, createdAt time.Time) string {
+	prefix := "SUP-PRO"
+	if reporterRole == "customer" {
+		prefix = "SUP-CUS"
+	}
+
+	return fmt.Sprintf("%s-%d", prefix, createdAt.UnixNano())
+}
+
+func (s *Service) readSupportTickets(ctx context.Context) (SupportTicketsData, error) {
+	payload, err := readSnapshot(ctx, s.store, supportTicketsNamespace, defaultDocumentKey, defaultSupportTicketsData())
+	if err != nil {
+		return SupportTicketsData{}, err
+	}
+
+	return normalizeSupportTicketsData(payload)
+}
+
+func (s *Service) upsertSupportTickets(ctx context.Context, input SupportTicketsData) (SupportTicketsData, error) {
+	normalized, err := normalizeSupportTicketsData(input)
+	if err != nil {
+		return SupportTicketsData{}, err
+	}
+
+	return upsertSnapshot(ctx, s.store, supportTicketsNamespace, defaultDocumentKey, normalized)
 }
 
 func validateAdminConsoleTableName(tableName string) error {
@@ -751,19 +945,66 @@ func parseRFC3339OrZero(value string) time.Time {
 	return parsed.UTC()
 }
 
-func normalizeSupportDeskData(input SupportDeskData) (SupportDeskData, error) {
+func normalizeSupportTicketsData(input SupportTicketsData) (SupportTicketsData, error) {
+	if input.Tickets == nil {
+		input.Tickets = []SupportTicketData{}
+	}
+	if input.SavedAt == "" {
+		input.SavedAt = time.Now().UTC().Format(time.RFC3339)
+	}
+	if input.SchemaVersion == 0 {
+		input.SchemaVersion = supportDeskSchemaVersion
+	}
+
 	input.SavedAt = normalizeRFC3339OrNow(input.SavedAt, time.Now().UTC())
 	for index := range input.Tickets {
 		normalizedTicket, err := normalizeSupportTicket(input.Tickets[index], input.SavedAt)
 		if err != nil {
-			return SupportDeskData{}, err
+			return SupportTicketsData{}, err
 		}
 		input.Tickets[index] = normalizedTicket
 	}
+	input.Tickets = sortSupportTickets(input.Tickets)
 	return input, nil
 }
 
+func normalizeSupportDeskData(input SupportDeskData) (SupportDeskData, error) {
+	normalizedTickets, err := normalizeSupportTicketsData(SupportTicketsData{
+		SavedAt:       input.SavedAt,
+		SchemaVersion: input.SchemaVersion,
+		Tickets:       input.Tickets,
+	})
+	if err != nil {
+		return SupportDeskData{}, err
+	}
+
+	return SupportDeskData{
+		CommandCenter: normalizeSupportCommandCenter(input.CommandCenter),
+		SavedAt:       normalizedTickets.SavedAt,
+		SchemaVersion: normalizedTickets.SchemaVersion,
+		Tickets:       normalizedTickets.Tickets,
+	}, nil
+}
+
 func normalizeSupportTicket(ticket SupportTicketData, fallbackTimestamp string) (SupportTicketData, error) {
+	ticket.ID = strings.TrimSpace(ticket.ID)
+	ticket.CategoryID = strings.TrimSpace(ticket.CategoryID)
+	ticket.ContactValue = strings.TrimSpace(ticket.ContactValue)
+	ticket.Details = strings.TrimSpace(ticket.Details)
+	ticket.EtaKey = strings.TrimSpace(ticket.EtaKey)
+	ticket.PreferredChannel = strings.TrimSpace(ticket.PreferredChannel)
+	ticket.ReferenceCode = strings.TrimSpace(ticket.ReferenceCode)
+	ticket.RelatedAppointmentID = strings.TrimSpace(ticket.RelatedAppointmentID)
+	ticket.RelatedProfessionalID = strings.TrimSpace(ticket.RelatedProfessionalID)
+	ticket.ReporterID = strings.TrimSpace(ticket.ReporterID)
+	ticket.ReporterName = strings.TrimSpace(ticket.ReporterName)
+	ticket.ReporterPhone = strings.TrimSpace(ticket.ReporterPhone)
+	ticket.ReporterRole = strings.TrimSpace(ticket.ReporterRole)
+	ticket.SourceSurface = strings.TrimSpace(ticket.SourceSurface)
+	ticket.Status = strings.TrimSpace(ticket.Status)
+	ticket.Summary = strings.TrimSpace(ticket.Summary)
+	ticket.Urgency = strings.TrimSpace(ticket.Urgency)
+
 	if ticket.ID == "" {
 		return SupportTicketData{}, fmt.Errorf("%w: id", errInvalidSupportDesk)
 	}
@@ -787,6 +1028,9 @@ func normalizeSupportTicket(ticket SupportTicketData, fallbackTimestamp string) 
 	}
 	if !isAllowedValue(ticket.SourceSurface, supportAllowedSourceSurfaces) {
 		return SupportTicketData{}, fmt.Errorf("%w: sourceSurface", errInvalidSupportDesk)
+	}
+	if ticket.SourceSurface != "admin_manual" && ticket.ReporterID == "" {
+		return SupportTicketData{}, fmt.Errorf("%w: reporterId", errInvalidSupportTicket)
 	}
 	if !isAllowedSupportCategory(ticket.ReporterRole, ticket.CategoryID) {
 		return SupportTicketData{}, fmt.Errorf("%w: categoryId", errInvalidSupportDesk)

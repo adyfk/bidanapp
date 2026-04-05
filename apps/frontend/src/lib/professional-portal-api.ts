@@ -9,6 +9,7 @@ import {
   saveProfessionalPortalRequests,
   saveProfessionalPortalServices,
   saveProfessionalPortalTrust,
+  submitProfessionalPortalProfileForReview,
   upsertAppointmentRecord,
 } from '@bidanapp/sdk';
 import type {
@@ -84,10 +85,7 @@ const fireAndForgetAdminSync = (promiseFactory: () => Promise<unknown>, warningM
 
 const buildApiUrl = (path: string) => `${getBackendApiBaseUrl()}${path.startsWith('/') ? path : `/${path}`}`;
 
-export const syncProfessionalPortalProfileResource = (
-  portalState: ProfessionalPortalState,
-  reviewState: ProfessionalLifecycleReviewState,
-) => {
+export const syncProfessionalPortalProfileResource = (portalState: ProfessionalPortalState) => {
   fireAndForgetProtectedSync(
     () =>
       saveProfessionalPortalProfile(client, {
@@ -100,10 +98,58 @@ export const syncProfessionalPortalProfileResource = (
         professionalId: portalState.activeProfessionalId,
         publicBio: portalState.publicBio,
         responseTimeGoal: portalState.responseTimeGoal,
-        reviewState,
         yearsExperience: portalState.yearsExperience,
       }),
     '[ProfessionalPortal] Failed to sync profile resource to the backend.',
+  );
+};
+
+export const submitProfessionalPortalProfileForReviewWithApi = async (portalState: ProfessionalPortalState) => {
+  const profilePayload = {
+    acceptingNewClients: portalState.acceptingNewClients,
+    autoApproveInstantBookings: portalState.autoApproveInstantBookings,
+    city: portalState.city,
+    credentialNumber: portalState.credentialNumber,
+    displayName: portalState.displayName,
+    phone: portalState.phone,
+    professionalId: portalState.activeProfessionalId,
+    publicBio: portalState.publicBio,
+    responseTimeGoal: portalState.responseTimeGoal,
+    yearsExperience: portalState.yearsExperience,
+  };
+
+  await withTimeout(
+    Promise.all([
+      saveProfessionalPortalProfile(client, profilePayload),
+      saveProfessionalPortalCoverage(client, {
+        acceptingNewClients: portalState.acceptingNewClients,
+        autoApproveInstantBookings: portalState.autoApproveInstantBookings,
+        availabilityRulesByMode: portalState.availabilityRulesByMode ?? {},
+        city: portalState.city,
+        coverageAreaIds: portalState.coverageAreaIds,
+        coverageCenter: portalState.coverageCenter,
+        homeVisitRadiusKm: portalState.homeVisitRadiusKm,
+        practiceAddress: portalState.practiceAddress,
+        practiceLabel: portalState.practiceLabel,
+        professionalId: portalState.activeProfessionalId,
+        publicBio: portalState.publicBio,
+        responseTimeGoal: portalState.responseTimeGoal,
+      }),
+      saveProfessionalPortalServices(client, {
+        professionalId: portalState.activeProfessionalId,
+        serviceConfigurations: portalState.serviceConfigurations,
+      }),
+      saveProfessionalPortalPortfolio(client, {
+        portfolioEntries: portalState.portfolioEntries,
+        professionalId: portalState.activeProfessionalId,
+      }),
+    ]),
+    requestTimeoutMs,
+  );
+
+  return withTimeout(
+    submitProfessionalPortalProfileForReview(client, portalState.activeProfessionalId),
+    requestTimeoutMs,
   );
 };
 

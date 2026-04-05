@@ -6,7 +6,9 @@ export type CustomerPushSubscriptionState = BidanappComponents['schemas']['Custo
 export type ProfessionalNotificationState = BidanappComponents['schemas']['ProfessionalNotificationStateData'];
 export type ConsumerPreferencesState = BidanappComponents['schemas']['ConsumerPreferencesData'];
 export type AdminSessionState = BidanappComponents['schemas']['AdminSessionData'];
+export type SupportTicketCreateInput = BidanappComponents['schemas']['CreateSupportTicketData'];
 export type SupportDeskState = BidanappComponents['schemas']['SupportDeskData'];
+export type SupportTicketsState = BidanappComponents['schemas']['SupportTicketsData'];
 export type AdminConsoleState = BidanappComponents['schemas']['AdminConsoleData'];
 export type AdminConsoleTableState = BidanappComponents['schemas']['AdminConsoleTableData'];
 export type AdminConsoleTableInput = BidanappComponents['schemas']['AdminConsoleTableUpsertData'];
@@ -195,6 +197,50 @@ export async function saveAdminSessionState(
 
   if (result.error || !result.data?.data) {
     throw new Error('Failed to persist admin session state');
+  }
+
+  return result.data.data;
+}
+
+export async function fetchCustomerSupportTicketsState(client: BidanappApiClient): Promise<SupportTicketsState> {
+  const result = await client.GET('/customers/support/tickets');
+
+  if (result.error || !result.data?.data) {
+    throw new Error('Failed to load customer support tickets');
+  }
+
+  return result.data.data;
+}
+
+export async function createCustomerSupportTicketState(client: BidanappApiClient, input: SupportTicketCreateInput) {
+  const result = await client.POST('/customers/support/tickets', {
+    body: input,
+  });
+
+  if (result.error || !result.data?.data) {
+    throw new Error('Failed to create customer support ticket');
+  }
+
+  return result.data.data;
+}
+
+export async function fetchProfessionalSupportTicketsState(client: BidanappApiClient): Promise<SupportTicketsState> {
+  const result = await client.GET('/professionals/support/tickets');
+
+  if (result.error || !result.data?.data) {
+    throw new Error('Failed to load professional support tickets');
+  }
+
+  return result.data.data;
+}
+
+export async function createProfessionalSupportTicketState(client: BidanappApiClient, input: SupportTicketCreateInput) {
+  const result = await client.POST('/professionals/support/tickets', {
+    body: input,
+  });
+
+  if (result.error || !result.data?.data) {
+    throw new Error('Failed to create professional support ticket');
   }
 
   return result.data.data;

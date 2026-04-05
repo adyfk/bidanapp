@@ -2,6 +2,7 @@
   {
     "index": 1,
     "id": "ADM-CUS-1048",
+    "reporterId": "guest-primary",
     "reporterRole": "customer",
     "reporterName": "Alya Rahma",
     "reporterPhone": "+62 812 8888 1111",
@@ -24,6 +25,7 @@
   {
     "index": 2,
     "id": "ADM-CUS-1036",
+    "reporterId": "guest-primary",
     "reporterRole": "customer",
     "reporterName": "Alya Rahma",
     "reporterPhone": "+62 812 8888 1111",
@@ -46,6 +48,7 @@
   {
     "index": 3,
     "id": "ADM-CUS-1012",
+    "reporterId": "guest-primary",
     "reporterRole": "customer",
     "reporterName": "Alya Rahma",
     "reporterPhone": "+62 812 8888 1111",
@@ -68,6 +71,7 @@
   {
     "index": 4,
     "id": "ADM-PRO-2081",
+    "reporterId": "3",
     "reporterRole": "professional",
     "reporterName": "Martha Teria",
     "reporterPhone": "+62 812 7777 2222",
@@ -90,6 +94,7 @@
   {
     "index": 5,
     "id": "ADM-PRO-2069",
+    "reporterId": "4",
     "reporterRole": "professional",
     "reporterName": "Rani Hartati",
     "reporterPhone": "+62 812 7777 3333",
@@ -112,6 +117,7 @@
   {
     "index": 6,
     "id": "ADM-PRO-2044",
+    "reporterId": "1",
     "reporterRole": "professional",
     "reporterName": "Omeya Sen",
     "reporterPhone": "+62 812 7777 4444",
@@ -134,6 +140,7 @@
   {
     "index": 7,
     "id": "ADM-CUS-1056",
+    "reporterId": "ibu-nadia",
     "reporterRole": "customer",
     "reporterName": "Nadia Prameswari",
     "reporterPhone": "+62 812 5555 5555",
@@ -156,6 +163,7 @@
   {
     "index": 8,
     "id": "ADM-PRO-2094",
+    "reporterId": "6",
     "reporterRole": "professional",
     "reporterName": "Clara Wijaya",
     "reporterPhone": "+62 812 7777 6666",

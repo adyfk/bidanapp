@@ -72,6 +72,7 @@ type SupportTicketData struct {
 	ReferenceCode         string `json:"referenceCode,omitempty"`
 	RelatedAppointmentID  string `json:"relatedAppointmentId,omitempty"`
 	RelatedProfessionalID string `json:"relatedProfessionalId,omitempty"`
+	ReporterID            string `json:"reporterId,omitempty"`
 	ReporterName          string `json:"reporterName"`
 	ReporterPhone         string `json:"reporterPhone"`
 	ReporterRole          string `json:"reporterRole"`
@@ -80,6 +81,27 @@ type SupportTicketData struct {
 	Summary               string `json:"summary"`
 	UpdatedAt             string `json:"updatedAt"`
 	Urgency               string `json:"urgency"`
+}
+
+type CreateSupportTicketData struct {
+	CategoryID            string `json:"categoryId"`
+	ContactValue          string `json:"contactValue"`
+	Details               string `json:"details"`
+	PreferredChannel      string `json:"preferredChannel"`
+	ReferenceCode         string `json:"referenceCode,omitempty"`
+	RelatedAppointmentID  string `json:"relatedAppointmentId,omitempty"`
+	RelatedProfessionalID string `json:"relatedProfessionalId,omitempty"`
+	ReporterName          string `json:"reporterName"`
+	ReporterPhone         string `json:"reporterPhone"`
+	SourceSurface         string `json:"sourceSurface"`
+	Summary               string `json:"summary"`
+	Urgency               string `json:"urgency"`
+}
+
+type SupportTicketsData struct {
+	SavedAt       string              `json:"savedAt,omitempty"`
+	SchemaVersion int                 `json:"schemaVersion"`
+	Tickets       []SupportTicketData `json:"tickets"`
 }
 
 type AdminCommandCenterStateData struct {

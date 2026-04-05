@@ -113,7 +113,6 @@ func NewRouter(cfg config.Config, logger *slog.Logger, deps ...Dependencies) htt
 			cfg.CustomerAuth.Cookie.Name,
 			cfg.ProfessionalAuth.Cookie.Name,
 		}),
-		middleware.AppointmentActorAuth(customerAuthService, professionalAuthService),
 		middleware.AdminAuth(adminAuthService),
 		middleware.CustomerAuth(customerAuthService),
 		middleware.ProfessionalAuth(professionalAuthService),

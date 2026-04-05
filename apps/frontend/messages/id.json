@@ -951,7 +951,8 @@
       "errors": {
         "categoryRequired": "Pilih kategori kendala terlebih dahulu.",
         "contactRequired": "Isi kontak yang bisa dihubungi admin.",
-        "detailsRequired": "Jelaskan detail kendalanya agar admin bisa menindaklanjuti."
+        "detailsRequired": "Jelaskan detail kendalanya agar admin bisa menindaklanjuti.",
+        "submitFailed": "Tiket belum berhasil dikirim. Coba lagi dalam beberapa saat."
       }
     }
   },
@@ -1367,7 +1368,8 @@
       "errors": {
         "categoryRequired": "Pilih kategori kendala terlebih dahulu.",
         "contactRequired": "Isi kontak yang bisa dihubungi admin.",
-        "detailsRequired": "Jelaskan detail kendalanya agar admin bisa menindaklanjuti."
+        "detailsRequired": "Jelaskan detail kendalanya agar admin bisa menindaklanjuti.",
+        "submitFailed": "Tiket belum berhasil dikirim. Coba lagi dalam beberapa saat."
       }
     },
     "modeLabels": {

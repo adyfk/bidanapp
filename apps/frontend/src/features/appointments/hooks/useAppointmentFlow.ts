@@ -59,7 +59,12 @@ export const useAppointmentFlow = ({
 } = {}) => {
   const uiText = useUiText();
   const { currentConsumer } = useAppShell();
-  const { cancelCustomerAppointment, customerAppointments, markCustomerAppointmentPaid } = useProfessionalPortal();
+  const {
+    cancelCustomerAppointment,
+    customerAppointments,
+    markCustomerAppointmentPaid,
+    submitCustomerAppointmentFeedback,
+  } = useProfessionalPortal();
   const catalogSnapshot = useCatalogReadModel();
   const [activeTab, setActiveTab] = useState<AppointmentTab>(initialTab);
   const [searchQuery, setSearchQuery] = useState('');
@@ -315,8 +320,16 @@ export const useAppointmentFlow = ({
     setChatInput('');
   }, [resolvedSelectedAppointment]);
 
-  const submitReview = () => {
-    if (!resolvedSelectedAppointment || rating === 0) {
+  const submitReview = async () => {
+    if (!resolvedSelectedAppointment || rating === 0 || !reviewText.trim()) {
+      return;
+    }
+
+    const isSubmitted = await submitCustomerAppointmentFeedback(resolvedSelectedAppointment.id, {
+      rating,
+      text: reviewText,
+    });
+    if (!isSubmitted) {
       return;
     }
 

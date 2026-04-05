@@ -7,8 +7,8 @@ export type ProfessionalPortalRequestsState = BidanappComponents['schemas']['Pro
 export type AppointmentActionInput = BidanappComponents['schemas']['AppointmentActionInputData'];
 export type AppointmentCommand = BidanappComponents['schemas']['AppointmentCommandData'];
 export type CreateAppointmentInput = BidanappComponents['schemas']['CreateAppointmentInputData'];
-export type CreateAppointmentChangeRequestInput = BidanappComponents['schemas']['CreateChangeRequestInputData'];
 export type CreatePaymentRequestInput = BidanappComponents['schemas']['CreatePaymentRequestInputData'];
+export type SubmitAppointmentFeedbackInput = BidanappComponents['schemas']['SubmitAppointmentFeedbackInputData'];
 
 export async function upsertAppointmentRecord(
   client: BidanappApiClient,
@@ -295,12 +295,12 @@ export async function completeAppointment(
   return result.data.data;
 }
 
-export async function createAppointmentChangeRequest(
+export async function submitAppointmentFeedback(
   client: BidanappApiClient,
   appointmentId: string,
-  input: CreateAppointmentChangeRequestInput,
+  input: SubmitAppointmentFeedbackInput,
 ): Promise<AppointmentCommand> {
-  const result = await client.POST('/appointments/{appointment_id}/change-requests', {
+  const result = await client.POST('/customers/appointments/{appointment_id}/feedback', {
     body: input,
     params: {
       path: {
@@ -310,7 +310,7 @@ export async function createAppointmentChangeRequest(
   });
 
   if (result.error || !result.data?.data) {
-    throw new Error('Failed to create appointment change request');
+    throw new Error('Failed to submit appointment feedback');
   }
 
   return result.data.data;

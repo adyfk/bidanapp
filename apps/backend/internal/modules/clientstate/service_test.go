@@ -289,6 +289,90 @@ func TestUpsertSupportDeskRejectsInvalidTicketPayload(t *testing.T) {
 	}
 }
 
+func TestSupportTicketsPersistPerReporterAndRemainVisibleToAdminDesk(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	store := documentstore.NewMemoryStore()
+	service := NewService(store, pushstore.NewMemoryStore())
+
+	customerTicket, err := service.CreateSupportTicket(ctx, "customer", "consumer-1", CreateSupportTicketData{
+		CategoryID:       "refundRequest",
+		ContactValue:     "+62 812 0000 0000",
+		Details:          "Mohon tindak lanjut refund untuk appointment terakhir.",
+		PreferredChannel: "whatsapp",
+		ReporterName:     "Alya",
+		ReporterPhone:    "+62 812 0000 0000",
+		SourceSurface:    "profile_customer",
+		Summary:          "Refund appointment",
+		Urgency:          "high",
+	})
+	if err != nil {
+		t.Fatalf("CreateSupportTicket(customer-1) error = %v", err)
+	}
+
+	if _, err := service.CreateSupportTicket(ctx, "customer", "consumer-2", CreateSupportTicketData{
+		CategoryID:       "paymentIssue",
+		ContactValue:     "consumer-2@example.com",
+		Details:          "Pembayaran berhasil tapi status belum berubah.",
+		PreferredChannel: "email",
+		ReporterName:     "Dina",
+		ReporterPhone:    "+62 813 0000 0000",
+		SourceSurface:    "profile_customer",
+		Summary:          "Payment sync issue",
+		Urgency:          "normal",
+	}); err != nil {
+		t.Fatalf("CreateSupportTicket(customer-2) error = %v", err)
+	}
+
+	professionalTicket, err := service.CreateSupportTicket(ctx, "professional", "prof-1", CreateSupportTicketData{
+		CategoryID:       "technicalIssue",
+		ContactValue:     "prof-1@example.com",
+		Details:          "Dashboard tidak menampilkan update appointment terbaru.",
+		PreferredChannel: "email",
+		ReporterName:     "Bidan Rani",
+		ReporterPhone:    "+62 814 0000 0000",
+		SourceSurface:    "profile_professional",
+		Summary:          "Dashboard sync issue",
+		Urgency:          "urgent",
+	})
+	if err != nil {
+		t.Fatalf("CreateSupportTicket(prof-1) error = %v", err)
+	}
+
+	reloadedService := NewService(store, pushstore.NewMemoryStore())
+
+	customerScoped, err := reloadedService.SupportTicketsByReporter(ctx, "customer", "consumer-1")
+	if err != nil {
+		t.Fatalf("SupportTicketsByReporter(customer-1) error = %v", err)
+	}
+	if len(customerScoped.Tickets) != 1 {
+		t.Fatalf("SupportTicketsByReporter(customer-1) length = %d, want 1", len(customerScoped.Tickets))
+	}
+	if customerScoped.Tickets[0].ID != customerTicket.ID || customerScoped.Tickets[0].ReporterID != "consumer-1" {
+		t.Fatalf("unexpected customer-scoped ticket payload = %#v", customerScoped.Tickets[0])
+	}
+
+	professionalScoped, err := reloadedService.SupportTicketsByReporter(ctx, "professional", "prof-1")
+	if err != nil {
+		t.Fatalf("SupportTicketsByReporter(prof-1) error = %v", err)
+	}
+	if len(professionalScoped.Tickets) != 1 {
+		t.Fatalf("SupportTicketsByReporter(prof-1) length = %d, want 1", len(professionalScoped.Tickets))
+	}
+	if professionalScoped.Tickets[0].ID != professionalTicket.ID || professionalScoped.Tickets[0].ReporterID != "prof-1" {
+		t.Fatalf("unexpected professional-scoped ticket payload = %#v", professionalScoped.Tickets[0])
+	}
+
+	adminDesk, err := reloadedService.SupportDesk(ctx)
+	if err != nil {
+		t.Fatalf("SupportDesk() error = %v", err)
+	}
+	if len(adminDesk.Tickets) != 3 {
+		t.Fatalf("SupportDesk() tickets length = %d, want 3", len(adminDesk.Tickets))
+	}
+}
+
 func seedJSONFixture(t *testing.T, store contentstore.Store, fileName string, payload any) {
 	t.Helper()
 

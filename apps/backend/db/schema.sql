@@ -93,6 +93,7 @@ CREATE TABLE support_tickets (
   reference_code text NOT NULL DEFAULT '',
   related_appointment_id text NOT NULL DEFAULT '',
   related_professional_id text NULL REFERENCES professional_auth_accounts(professional_id) ON DELETE SET NULL,
+  reporter_id text NOT NULL DEFAULT '',
   reporter_name text NOT NULL DEFAULT '',
   reporter_phone text NOT NULL DEFAULT '',
   reporter_role text NOT NULL DEFAULT '',
@@ -119,6 +120,9 @@ CREATE INDEX support_tickets_status_urgency_updated_at_idx
 
 CREATE INDEX support_tickets_assigned_admin_status_updated_at_idx
   ON support_tickets (assigned_admin_id, status, updated_at DESC);
+
+CREATE INDEX support_tickets_reporter_role_id_updated_at_idx
+  ON support_tickets (reporter_role, reporter_id, updated_at DESC);
 
 CREATE TABLE admin_console_states (
   document_key text PRIMARY KEY,

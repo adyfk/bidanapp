@@ -39,6 +39,19 @@ type ProfessionalPortalProfileData struct {
 	YearsExperience            string                        `json:"yearsExperience"`
 }
 
+type UpsertProfessionalPortalProfileData struct {
+	AcceptingNewClients        bool   `json:"acceptingNewClients"`
+	AutoApproveInstantBookings bool   `json:"autoApproveInstantBookings"`
+	City                       string `json:"city"`
+	CredentialNumber           string `json:"credentialNumber"`
+	DisplayName                string `json:"displayName"`
+	Phone                      string `json:"phone"`
+	ProfessionalID             string `json:"professionalId"`
+	PublicBio                  string `json:"publicBio"`
+	ResponseTimeGoal           string `json:"responseTimeGoal"`
+	YearsExperience            string `json:"yearsExperience"`
+}
+
 type ProfessionalPortalAdminReviewStateData struct {
 	AcceptingNewClients *bool                         `json:"acceptingNewClients,omitempty"`
 	ProfessionalID      string                        `json:"professionalId"`

@@ -1,6 +1,7 @@
 import type {
   AppointmentCancellationPolicySnapshot,
   AppointmentCancellationResolution,
+  AppointmentFeedback,
   AppointmentScheduleSnapshot,
   AppointmentServiceSnapshot,
   AppointmentStatus,
@@ -128,6 +129,7 @@ export interface ProfessionalManagedAppointmentRecord {
   cancellationPolicySnapshot: AppointmentCancellationPolicySnapshot;
   cancellationResolution?: AppointmentCancellationResolution;
   consumerId: string;
+  feedback?: AppointmentFeedback;
   id: string;
   index: number;
   professionalId: string;

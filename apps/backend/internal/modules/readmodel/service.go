@@ -558,7 +558,14 @@ func (s Service) Professionals(ctx context.Context) ([]Professional, error) {
 		})
 	}
 
-	return applyPublishedPortalOverlays(ctx, s.portalStore, professionals, servicesByID), nil
+	professionals = applyPublishedPortalOverlays(ctx, s.portalStore, professionals, servicesByID)
+	if s.appointmentStore != nil {
+		if appointments, err := s.appointmentStore.ListAppointments(ctx); err == nil {
+			professionals = applyAppointmentFeedbackOverlays(professionals, appointments)
+		}
+	}
+
+	return professionals, nil
 }
 
 func (s Service) ProfessionalBySlug(ctx context.Context, slug string) (Professional, error) {

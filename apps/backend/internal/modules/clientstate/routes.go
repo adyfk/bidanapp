@@ -55,6 +55,10 @@ type supportDeskInput struct {
 
 type supportDeskQueryInput struct{}
 
+type createSupportTicketInput struct {
+	Body CreateSupportTicketData
+}
+
 type adminConsoleInput struct {
 	Body AdminConsoleData
 }
@@ -98,6 +102,14 @@ type supportDeskResponseBody struct {
 	Data SupportDeskData `json:"data"`
 }
 
+type supportTicketsResponseBody struct {
+	Data SupportTicketsData `json:"data"`
+}
+
+type supportTicketResponseBody struct {
+	Data SupportTicketData `json:"data"`
+}
+
 type adminConsoleResponseBody struct {
 	Data AdminConsoleData `json:"data"`
 }
@@ -132,6 +144,14 @@ type adminSessionResponse struct {
 
 type supportDeskResponse struct {
 	Body supportDeskResponseBody
+}
+
+type supportTicketsResponse struct {
+	Body supportTicketsResponseBody
+}
+
+type supportTicketResponse struct {
+	Body supportTicketResponseBody
 }
 
 type adminConsoleResponse struct {
@@ -367,6 +387,124 @@ func RegisterRoutes(api huma.API, service *Service) {
 		return response, nil
 	})
 
+	huma.Register(api, withCustomerSecurity(huma.Operation{
+		OperationID: "list-customer-support-tickets",
+		Method:      http.MethodGet,
+		Path:        "/customers/support/tickets",
+		Summary:     "List support tickets for the authenticated customer",
+		Tags:        []string{"Support"},
+		Errors:      []int{http.StatusUnauthorized, http.StatusInternalServerError},
+	}), func(ctx context.Context, input *struct{}) (*supportTicketsResponse, error) {
+		consumerID, err := resolveCustomerScope(ctx, "")
+		if err != nil {
+			return nil, err
+		}
+
+		payload, err := service.SupportTicketsByReporter(ctx, "customer", consumerID)
+		if err != nil {
+			return nil, toAPIError(err)
+		}
+
+		response := &supportTicketsResponse{}
+		response.Body.Data = payload
+		return response, nil
+	})
+
+	huma.Register(api, withCustomerSecurity(huma.Operation{
+		OperationID: "create-customer-support-ticket",
+		Method:      http.MethodPost,
+		Path:        "/customers/support/tickets",
+		Summary:     "Create a support ticket for the authenticated customer",
+		Tags:        []string{"Support"},
+		Errors:      []int{http.StatusBadRequest, http.StatusUnauthorized, http.StatusInternalServerError},
+	}), func(ctx context.Context, input *createSupportTicketInput) (*supportTicketResponse, error) {
+		consumerID, err := resolveCustomerScope(ctx, "")
+		if err != nil {
+			return nil, err
+		}
+
+		payload, err := service.CreateSupportTicket(ctx, "customer", consumerID, CreateSupportTicketData{
+			CategoryID:            input.Body.CategoryID,
+			ContactValue:          input.Body.ContactValue,
+			Details:               input.Body.Details,
+			PreferredChannel:      input.Body.PreferredChannel,
+			ReferenceCode:         input.Body.ReferenceCode,
+			RelatedAppointmentID:  input.Body.RelatedAppointmentID,
+			RelatedProfessionalID: input.Body.RelatedProfessionalID,
+			ReporterName:          input.Body.ReporterName,
+			ReporterPhone:         input.Body.ReporterPhone,
+			SourceSurface:         "profile_customer",
+			Summary:               input.Body.Summary,
+			Urgency:               input.Body.Urgency,
+		})
+		if err != nil {
+			return nil, toAPIError(err)
+		}
+
+		response := &supportTicketResponse{}
+		response.Body.Data = payload
+		return response, nil
+	})
+
+	huma.Register(api, withProfessionalSecurity(huma.Operation{
+		OperationID: "list-professional-support-tickets",
+		Method:      http.MethodGet,
+		Path:        "/professionals/support/tickets",
+		Summary:     "List support tickets for the authenticated professional",
+		Tags:        []string{"Support"},
+		Errors:      []int{http.StatusUnauthorized, http.StatusInternalServerError},
+	}), func(ctx context.Context, input *struct{}) (*supportTicketsResponse, error) {
+		professionalID, err := resolveProfessionalScope(ctx, "")
+		if err != nil {
+			return nil, err
+		}
+
+		payload, err := service.SupportTicketsByReporter(ctx, "professional", professionalID)
+		if err != nil {
+			return nil, toAPIError(err)
+		}
+
+		response := &supportTicketsResponse{}
+		response.Body.Data = payload
+		return response, nil
+	})
+
+	huma.Register(api, withProfessionalSecurity(huma.Operation{
+		OperationID: "create-professional-support-ticket",
+		Method:      http.MethodPost,
+		Path:        "/professionals/support/tickets",
+		Summary:     "Create a support ticket for the authenticated professional",
+		Tags:        []string{"Support"},
+		Errors:      []int{http.StatusBadRequest, http.StatusUnauthorized, http.StatusInternalServerError},
+	}), func(ctx context.Context, input *createSupportTicketInput) (*supportTicketResponse, error) {
+		professionalID, err := resolveProfessionalScope(ctx, "")
+		if err != nil {
+			return nil, err
+		}
+
+		payload, err := service.CreateSupportTicket(ctx, "professional", professionalID, CreateSupportTicketData{
+			CategoryID:            input.Body.CategoryID,
+			ContactValue:          input.Body.ContactValue,
+			Details:               input.Body.Details,
+			PreferredChannel:      input.Body.PreferredChannel,
+			ReferenceCode:         input.Body.ReferenceCode,
+			RelatedAppointmentID:  input.Body.RelatedAppointmentID,
+			RelatedProfessionalID: input.Body.RelatedProfessionalID,
+			ReporterName:          input.Body.ReporterName,
+			ReporterPhone:         input.Body.ReporterPhone,
+			SourceSurface:         "profile_professional",
+			Summary:               input.Body.Summary,
+			Urgency:               input.Body.Urgency,
+		})
+		if err != nil {
+			return nil, toAPIError(err)
+		}
+
+		response := &supportTicketResponse{}
+		response.Body.Data = payload
+		return response, nil
+	})
+
 	huma.Register(api, withAdminSecurity(huma.Operation{
 		OperationID: "get-admin-session",
 		Method:      http.MethodGet,
@@ -561,6 +699,10 @@ func resolveProfessionalNotificationsScope(ctx context.Context, requestedProfess
 	return professionalID, nil
 }
 
+func resolveProfessionalScope(ctx context.Context, requestedProfessionalID string) (string, error) {
+	return resolveProfessionalNotificationsScope(ctx, requestedProfessionalID)
+}
+
 func toAPIError(err error) error {
 	switch {
 	case errors.Is(err, errInvalidAdminConsoleTable):
@@ -569,6 +711,8 @@ func toAPIError(err error) error {
 		return web.NewAPIError(http.StatusBadRequest, "invalid_customer_push_subscription", "invalid customer push subscription")
 	case errors.Is(err, errInvalidSupportDesk):
 		return web.NewAPIError(http.StatusBadRequest, "invalid_support_desk", "invalid support desk payload")
+	case errors.Is(err, errInvalidSupportTicket):
+		return web.NewAPIError(http.StatusBadRequest, "invalid_support_ticket", "invalid support ticket payload")
 	case errors.Is(err, context.DeadlineExceeded), errors.Is(err, http.ErrHandlerTimeout):
 		return web.NewAPIError(http.StatusGatewayTimeout, "timeout", "upstream operation timed out")
 	default:

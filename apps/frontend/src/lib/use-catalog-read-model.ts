@@ -81,7 +81,7 @@ const writeCatalogReadModelSnapshot = (snapshot: CatalogReadModelSnapshot) => {
   window.dispatchEvent(new Event(catalogReadModelEventName));
 };
 
-const hydrateCatalogReadModelFromApi = async (): Promise<CatalogReadModelSnapshot | undefined> => {
+export const refreshCatalogReadModelFromApi = async (): Promise<CatalogReadModelSnapshot | undefined> => {
   if (typeof window === 'undefined') {
     return undefined;
   }
@@ -118,7 +118,7 @@ export const useCatalogReadModel = () => {
     syncSnapshot();
     window.addEventListener(catalogReadModelEventName, syncSnapshot);
 
-    void hydrateCatalogReadModelFromApi().then((nextSnapshot) => {
+    void refreshCatalogReadModelFromApi().then((nextSnapshot) => {
       if (nextSnapshot) {
         setSnapshot(nextSnapshot);
       }

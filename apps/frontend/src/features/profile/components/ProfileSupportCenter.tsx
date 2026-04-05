@@ -24,8 +24,10 @@ import { useLocale, useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 import { StandardPhoneInput } from '@/components/ui/form-controls';
-import { useSupportDesk } from '@/features/admin/hooks/useSupportDesk';
+import { useProfileSupportTickets } from '@/features/profile/hooks/useProfileSupportTickets';
 import { APP_CONFIG } from '@/lib/config';
+import { useAppShell } from '@/lib/use-app-shell';
+import { useProfessionalAuthSession } from '@/lib/use-professional-auth-session';
 import type {
   CustomerSupportCategoryId,
   ProfessionalSupportCategoryId,
@@ -44,7 +46,7 @@ import {
 
 type SupportNamespace = 'Profile' | 'ProfessionalProfile';
 type SupportSubmitState = 'error' | 'idle' | 'success';
-type SupportErrorKey = 'categoryRequired' | 'contactRequired' | 'detailsRequired' | null;
+type SupportErrorKey = 'categoryRequired' | 'contactRequired' | 'detailsRequired' | 'submitFailed' | null;
 
 interface ProfileSupportEntryCardProps {
   namespace: SupportNamespace;
@@ -201,24 +203,22 @@ const CustomerProfileSupportSheet = ({
 }: SharedProfileSupportSheetProps) => {
   const t = useTranslations('Profile');
   const locale = useLocale();
-  const { submitSupportTicket, tickets } = useSupportDesk();
+  const { currentConsumer } = useAppShell();
+  const { submitSupportTicket, tickets } = useProfileSupportTickets('customer', currentConsumer.id || undefined);
   const [draft, setDraft] = useState<SupportDraft<CustomerSupportCategoryId>>(() =>
     createInitialDraft<CustomerSupportCategoryId>(defaultContact),
   );
   const [submitState, setSubmitState] = useState<SupportSubmitState>('idle');
   const [errorKey, setErrorKey] = useState<SupportErrorKey>(null);
   const [submittedTicketId, setSubmittedTicketId] = useState<string | null>(null);
-  const recentCases: SupportCase<CustomerSupportCategoryId>[] = tickets
-    .filter((ticket) => ticket.reporterRole === 'customer')
-    .slice(0, 4)
-    .map((ticket) => ({
-      categoryId: ticket.categoryId as CustomerSupportCategoryId,
-      createdAt: ticket.createdAt,
-      etaKey: ticket.etaKey,
-      id: ticket.id,
-      status: ticket.status,
-      summary: ticket.summary,
-    }));
+  const recentCases: SupportCase<CustomerSupportCategoryId>[] = tickets.slice(0, 4).map((ticket) => ({
+    categoryId: ticket.categoryId as CustomerSupportCategoryId,
+    createdAt: ticket.createdAt,
+    etaKey: ticket.etaKey,
+    id: ticket.id,
+    status: ticket.status,
+    summary: ticket.summary,
+  }));
 
   useEffect(() => {
     setDraft((currentDraft) =>
@@ -259,7 +259,7 @@ const CustomerProfileSupportSheet = ({
     }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!draft.categoryId) {
       setSubmitState('error');
       setErrorKey('categoryRequired');
@@ -278,7 +278,7 @@ const CustomerProfileSupportSheet = ({
       return;
     }
 
-    const createdTicket = submitSupportTicket({
+    const createdTicket = await submitSupportTicket({
       categoryId: draft.categoryId,
       contactValue: draft.contactValue.trim(),
       details: draft.details.trim(),
@@ -287,11 +287,15 @@ const CustomerProfileSupportSheet = ({
       relatedAppointmentId: draft.reference.trim().startsWith('apt-') ? draft.reference.trim() : undefined,
       reporterName,
       reporterPhone,
-      reporterRole: 'customer',
-      sourceSurface: 'profile_customer',
       summary: draft.summary.trim() || t(`support.categories.${draft.categoryId}.title`),
       urgency: draft.urgency,
     });
+
+    if (!createdTicket) {
+      setSubmitState('error');
+      setErrorKey('submitFailed');
+      return;
+    }
 
     setSubmittedTicketId(createdTicket.id);
     setSubmitState('success');
@@ -618,24 +622,25 @@ const ProfessionalProfileSupportSheet = ({
 }: SharedProfileSupportSheetProps) => {
   const t = useTranslations('ProfessionalProfile');
   const locale = useLocale();
-  const { submitSupportTicket, tickets } = useSupportDesk();
+  const { session } = useProfessionalAuthSession();
+  const { submitSupportTicket, tickets } = useProfileSupportTickets(
+    'professional',
+    session.professionalId || undefined,
+  );
   const [draft, setDraft] = useState<SupportDraft<ProfessionalSupportCategoryId>>(() =>
     createInitialDraft<ProfessionalSupportCategoryId>(defaultContact),
   );
   const [submitState, setSubmitState] = useState<SupportSubmitState>('idle');
   const [errorKey, setErrorKey] = useState<SupportErrorKey>(null);
   const [submittedTicketId, setSubmittedTicketId] = useState<string | null>(null);
-  const recentCases: SupportCase<ProfessionalSupportCategoryId>[] = tickets
-    .filter((ticket) => ticket.reporterRole === 'professional')
-    .slice(0, 4)
-    .map((ticket) => ({
-      categoryId: ticket.categoryId as ProfessionalSupportCategoryId,
-      createdAt: ticket.createdAt,
-      etaKey: ticket.etaKey,
-      id: ticket.id,
-      status: ticket.status,
-      summary: ticket.summary,
-    }));
+  const recentCases: SupportCase<ProfessionalSupportCategoryId>[] = tickets.slice(0, 4).map((ticket) => ({
+    categoryId: ticket.categoryId as ProfessionalSupportCategoryId,
+    createdAt: ticket.createdAt,
+    etaKey: ticket.etaKey,
+    id: ticket.id,
+    status: ticket.status,
+    summary: ticket.summary,
+  }));
 
   useEffect(() => {
     setDraft((currentDraft) =>
@@ -676,7 +681,7 @@ const ProfessionalProfileSupportSheet = ({
     }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!draft.categoryId) {
       setSubmitState('error');
       setErrorKey('categoryRequired');
@@ -695,7 +700,7 @@ const ProfessionalProfileSupportSheet = ({
       return;
     }
 
-    const createdTicket = submitSupportTicket({
+    const createdTicket = await submitSupportTicket({
       categoryId: draft.categoryId,
       contactValue: draft.contactValue.trim(),
       details: draft.details.trim(),
@@ -704,11 +709,15 @@ const ProfessionalProfileSupportSheet = ({
       relatedAppointmentId: draft.reference.trim().startsWith('apt-') ? draft.reference.trim() : undefined,
       reporterName,
       reporterPhone,
-      reporterRole: 'professional',
-      sourceSurface: 'profile_professional',
       summary: draft.summary.trim() || t(`support.categories.${draft.categoryId}.title`),
       urgency: draft.urgency,
     });
+
+    if (!createdTicket) {
+      setSubmitState('error');
+      setErrorKey('submitFailed');
+      return;
+    }
 
     setSubmittedTicketId(createdTicket.id);
     setSubmitState('success');

@@ -74,7 +74,7 @@ func TestProfileCoverageServicesAndRequestsRoundTrip(t *testing.T) {
 	service := NewService(portalstore.NewMemoryStore())
 	ctx := context.Background()
 
-	profile, err := service.UpsertProfile(ctx, ProfessionalPortalProfileData{
+	profile, err := service.UpsertProfile(ctx, UpsertProfessionalPortalProfileData{
 		AcceptingNewClients:        true,
 		AutoApproveInstantBookings: false,
 		City:                       "Bandung",
@@ -84,11 +84,7 @@ func TestProfileCoverageServicesAndRequestsRoundTrip(t *testing.T) {
 		ProfessionalID:             "prof-123",
 		PublicBio:                  "Melayani laktasi dan edukasi nifas.",
 		ResponseTimeGoal:           "< 30 menit",
-		ReviewState: ProfessionalPortalReviewState{
-			Status:      "submitted",
-			SubmittedAt: "2026-03-22T10:00:00Z",
-		},
-		YearsExperience: "8 years",
+		YearsExperience:            "8 years",
 	})
 	if err != nil {
 		t.Fatalf("upsert profile: %v", err)
@@ -104,6 +100,17 @@ func TestProfileCoverageServicesAndRequestsRoundTrip(t *testing.T) {
 		AvailabilityRulesByMode: map[string]readmodel.ProfessionalAvailabilityRules{
 			"home_visit": {
 				MinimumNoticeHours: 4,
+				WeeklyHours: []readmodel.ProfessionalWeeklyAvailabilityWindow{
+					{
+						EndTime:             "12:00",
+						ID:                  "window-1",
+						Index:               1,
+						IsEnabled:           true,
+						SlotIntervalMinutes: 60,
+						StartTime:           "09:00",
+						Weekday:             "monday",
+					},
+				},
 			},
 		},
 		City:              "Bandung",
@@ -241,6 +248,10 @@ func TestProfileCoverageServicesAndRequestsRoundTrip(t *testing.T) {
 		t.Fatalf("expected persisted portfolio entries, got %#v", portfolio.PortfolioEntries)
 	}
 
+	if _, err := service.SubmitProfileForReview(ctx, "prof-123"); err != nil {
+		t.Fatalf("submit profile for review: %v", err)
+	}
+
 	gallery, err := service.UpsertGallery(ctx, ProfessionalPortalGalleryData{
 		ProfessionalID: "prof-123",
 		GalleryItems: []ProfessionalPortalGalleryItem{
@@ -365,7 +376,7 @@ func TestUpsertAdminReviewStatePreservesProfileFieldsAndLifecycleState(t *testin
 	service := NewService(portalstore.NewMemoryStore())
 	ctx := context.Background()
 
-	_, err := service.UpsertProfile(ctx, ProfessionalPortalProfileData{
+	_, err := service.UpsertProfile(ctx, UpsertProfessionalPortalProfileData{
 		AcceptingNewClients:        false,
 		AutoApproveInstantBookings: false,
 		City:                       "Jakarta Selatan",
@@ -375,14 +386,21 @@ func TestUpsertAdminReviewStatePreservesProfileFieldsAndLifecycleState(t *testin
 		ProfessionalID:             "prof-admin-review",
 		PublicBio:                  "Pendamping nifas area Jabodetabek.",
 		ResponseTimeGoal:           "< 15 menit",
-		ReviewState: ProfessionalPortalReviewState{
-			Status:      "submitted",
-			SubmittedAt: "2026-03-24T08:00:00Z",
-		},
-		YearsExperience: "11 years",
+		YearsExperience:            "11 years",
 	})
 	if err != nil {
 		t.Fatalf("seed profile: %v", err)
+	}
+	seedReviewReadyResources(t, service, seedReviewReadyResourcesInput{
+		AcceptingNewClients:        false,
+		AutoApproveInstantBookings: false,
+		City:                       "Jakarta Selatan",
+		ProfessionalID:             "prof-admin-review",
+		PublicBio:                  "Pendamping nifas area Jabodetabek.",
+		ResponseTimeGoal:           "< 15 menit",
+	})
+	if _, err := service.SubmitProfileForReview(ctx, "prof-admin-review"); err != nil {
+		t.Fatalf("submit profile: %v", err)
 	}
 
 	verifiedProfile, err := service.UpsertAdminReviewState(ctx, ProfessionalPortalAdminReviewStateData{
@@ -448,5 +466,196 @@ func TestUpsertAdminReviewStatePreservesProfileFieldsAndLifecycleState(t *testin
 	}
 	if adminReviewStates.ReviewStatesByProfessionalID["prof-admin-review"].Status != "published" {
 		t.Fatalf("expected admin review state map to expose published status, got %#v", adminReviewStates)
+	}
+}
+
+func TestSubmitProfileForReviewRejectsIncompleteProfile(t *testing.T) {
+	t.Parallel()
+
+	service := NewService(portalstore.NewMemoryStore())
+	ctx := context.Background()
+
+	if _, err := service.UpsertProfile(ctx, UpsertProfessionalPortalProfileData{
+		City:            "Bandung",
+		DisplayName:     "Bidan Maya",
+		Phone:           "+62 811 0000 2222",
+		ProfessionalID:  "prof-incomplete",
+		PublicBio:       "Profil belum lengkap.",
+		YearsExperience: "4 years",
+	}); err != nil {
+		t.Fatalf("seed incomplete profile: %v", err)
+	}
+
+	_, err := service.SubmitProfileForReview(ctx, "prof-incomplete")
+	if err != ErrProfileNotReadyForReview {
+		t.Fatalf("SubmitProfileForReview() error = %v, want ErrProfileNotReadyForReview", err)
+	}
+}
+
+func TestUpsertProfilePreservesExistingReviewState(t *testing.T) {
+	t.Parallel()
+
+	service := NewService(portalstore.NewMemoryStore())
+	ctx := context.Background()
+
+	seedReviewReadyProfile(t, service, "prof-preserve-review")
+
+	profile, err := service.Profile(ctx, "prof-preserve-review")
+	if err != nil {
+		t.Fatalf("load seeded profile: %v", err)
+	}
+	if profile.ReviewState.Status != "draft" {
+		t.Fatalf("expected draft review state before submission, got %#v", profile.ReviewState)
+	}
+
+	if _, err := service.SubmitProfileForReview(ctx, "prof-preserve-review"); err != nil {
+		t.Fatalf("submit profile: %v", err)
+	}
+
+	updatedProfile, err := service.UpsertProfile(ctx, UpsertProfessionalPortalProfileData{
+		AcceptingNewClients:        true,
+		AutoApproveInstantBookings: true,
+		City:                       "Bandung",
+		CredentialNumber:           "STR-PRESERVE-001",
+		DisplayName:                "Bidan Maya Utama",
+		Phone:                      "+62 811 0000 3333",
+		ProfessionalID:             "prof-preserve-review",
+		PublicBio:                  "Profil diperbarui setelah submit review.",
+		ResponseTimeGoal:           "< 10 menit",
+		YearsExperience:            "6 years",
+	})
+	if err != nil {
+		t.Fatalf("update profile: %v", err)
+	}
+
+	if updatedProfile.DisplayName != "Bidan Maya Utama" {
+		t.Fatalf("expected updated display name, got %q", updatedProfile.DisplayName)
+	}
+	if updatedProfile.ReviewState.Status != "submitted" {
+		t.Fatalf("expected review state to stay submitted, got %#v", updatedProfile.ReviewState)
+	}
+}
+
+func TestUpsertAdminReviewStateRejectsInvalidTransition(t *testing.T) {
+	t.Parallel()
+
+	service := NewService(portalstore.NewMemoryStore())
+	ctx := context.Background()
+
+	seedReviewReadyProfile(t, service, "prof-invalid-transition")
+
+	_, err := service.UpsertAdminReviewState(ctx, ProfessionalPortalAdminReviewStateData{
+		ProfessionalID: "prof-invalid-transition",
+		ReviewState: ProfessionalPortalReviewState{
+			PublishedAt:  "2026-03-24T10:00:00Z",
+			ReviewedAt:   "2026-03-24T09:00:00Z",
+			ReviewerName: "Admin BidanCare",
+			Status:       "published",
+			SubmittedAt:  "2026-03-24T08:00:00Z",
+		},
+	})
+	if err != ErrInvalidReviewTransition {
+		t.Fatalf("UpsertAdminReviewState() error = %v, want ErrInvalidReviewTransition", err)
+	}
+}
+
+func seedReviewReadyProfile(t *testing.T, service *Service, professionalID string) {
+	t.Helper()
+
+	ctx := context.Background()
+
+	if _, err := service.UpsertProfile(ctx, UpsertProfessionalPortalProfileData{
+		AcceptingNewClients:        true,
+		AutoApproveInstantBookings: true,
+		City:                       "Bandung",
+		CredentialNumber:           "STR-PRESERVE-001",
+		DisplayName:                "Bidan Maya",
+		Phone:                      "+62 811 0000 3333",
+		ProfessionalID:             professionalID,
+		PublicBio:                  "Pendamping nifas dan laktasi.",
+		ResponseTimeGoal:           "< 10 menit",
+		YearsExperience:            "6 years",
+	}); err != nil {
+		t.Fatalf("UpsertProfile() error = %v", err)
+	}
+
+	seedReviewReadyResources(t, service, seedReviewReadyResourcesInput{
+		AcceptingNewClients:        true,
+		AutoApproveInstantBookings: true,
+		City:                       "Bandung",
+		ProfessionalID:             professionalID,
+		PublicBio:                  "Pendamping nifas dan laktasi.",
+		ResponseTimeGoal:           "< 10 menit",
+	})
+}
+
+type seedReviewReadyResourcesInput struct {
+	AcceptingNewClients        bool
+	AutoApproveInstantBookings bool
+	City                       string
+	ProfessionalID             string
+	PublicBio                  string
+	ResponseTimeGoal           string
+}
+
+func seedReviewReadyResources(t *testing.T, service *Service, input seedReviewReadyResourcesInput) {
+	t.Helper()
+
+	ctx := context.Background()
+
+	if _, err := service.UpsertCoverage(ctx, ProfessionalPortalCoverageData{
+		AcceptingNewClients:        input.AcceptingNewClients,
+		AutoApproveInstantBookings: input.AutoApproveInstantBookings,
+		AvailabilityRulesByMode:    map[string]readmodel.ProfessionalAvailabilityRules{},
+		City:                       input.City,
+		CoverageAreaIDs:            []string{"area-1"},
+		PracticeAddress:            "Jl. Melati 10",
+		PracticeLabel:              "Klinik Melati",
+		ProfessionalID:             input.ProfessionalID,
+		PublicBio:                  input.PublicBio,
+		ResponseTimeGoal:           input.ResponseTimeGoal,
+	}); err != nil {
+		t.Fatalf("UpsertCoverage() error = %v", err)
+	}
+
+	if _, err := service.UpsertServices(ctx, ProfessionalPortalServicesData{
+		ProfessionalID: input.ProfessionalID,
+		ServiceConfigurations: []ProfessionalPortalManagedService{
+			{
+				BookingFlow:  "instant",
+				DefaultMode:  "online",
+				Duration:     "60 min",
+				Featured:     true,
+				ID:           "svc-config-ready",
+				Index:        1,
+				IsActive:     true,
+				Price:        "Rp 250.000",
+				ServiceID:    "svc-1",
+				ServiceModes: readmodel.ServiceMode{Online: true},
+				Source:       "existing",
+				Summary:      "Konsultasi laktasi online.",
+			},
+		},
+	}); err != nil {
+		t.Fatalf("UpsertServices() error = %v", err)
+	}
+
+	if _, err := service.UpsertPortfolio(ctx, ProfessionalPortalPortfolioData{
+		ProfessionalID: input.ProfessionalID,
+		PortfolioEntries: []ProfessionalPortalPortfolioEntry{
+			{
+				ID:          "portfolio-ready",
+				Index:       1,
+				Image:       "portfolio.jpg",
+				Outcomes:    []string{"ASI eksklusif stabil"},
+				PeriodLabel: "Maret 2026",
+				ServiceID:   "svc-1",
+				Summary:     "Pendampingan laktasi intensif.",
+				Title:       "Kasus laktasi rumah",
+				Visibility:  "public",
+			},
+		},
+	}); err != nil {
+		t.Fatalf("UpsertPortfolio() error = %v", err)
 	}
 }

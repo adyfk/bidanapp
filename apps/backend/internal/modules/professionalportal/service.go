@@ -16,6 +16,8 @@ import (
 var ErrInvalidProfessionalID = errors.New("professional id is required")
 var ErrInvalidSnapshot = errors.New("snapshot is required")
 var ErrInvalidAppointmentRecord = errors.New("appointment record is required")
+var ErrInvalidReviewTransition = errors.New("review state transition is not allowed")
+var ErrProfileNotReadyForReview = errors.New("professional profile is not ready for review")
 
 type Service struct {
 	mu    sync.Mutex
@@ -31,6 +33,23 @@ type sessionRecord struct {
 	ProfessionalID string         `json:"professionalId"`
 	SavedAt        string         `json:"savedAt"`
 	Snapshot       map[string]any `json:"snapshot"`
+}
+
+type reviewSubmissionState struct {
+	AvailabilityRulesByMode map[string]readmodel.ProfessionalAvailabilityRules `json:"availabilityRulesByMode,omitempty"`
+	City                    string                                             `json:"city"`
+	CoverageAreaIDs         []string                                           `json:"coverageAreaIds"`
+	CredentialNumber        string                                             `json:"credentialNumber"`
+	DisplayName             string                                             `json:"displayName"`
+	HomeVisitRadiusKm       int                                                `json:"homeVisitRadiusKm"`
+	Phone                   string                                             `json:"phone"`
+	PortfolioEntries        []ProfessionalPortalPortfolioEntry                 `json:"portfolioEntries"`
+	PracticeAddress         string                                             `json:"practiceAddress"`
+	PracticeLabel           string                                             `json:"practiceLabel"`
+	PublicBio               string                                             `json:"publicBio"`
+	ResponseTimeGoal        string                                             `json:"responseTimeGoal"`
+	ServiceConfigurations   []ProfessionalPortalManagedService                 `json:"serviceConfigurations"`
+	YearsExperience         string                                             `json:"yearsExperience"`
 }
 
 func NewService(store portalstore.Store) *Service {
@@ -104,7 +123,7 @@ func (s *Service) Profile(ctx context.Context, professionalID string) (Professio
 	return profileFromRecord(selectedProfessionalID, record), nil
 }
 
-func (s *Service) UpsertProfile(ctx context.Context, input ProfessionalPortalProfileData) (ProfessionalPortalProfileData, error) {
+func (s *Service) UpsertProfile(ctx context.Context, input UpsertProfessionalPortalProfileData) (ProfessionalPortalProfileData, error) {
 	if err := ctx.Err(); err != nil {
 		return ProfessionalPortalProfileData{}, err
 	}
@@ -131,6 +150,46 @@ func (s *Service) UpsertProfile(ctx context.Context, input ProfessionalPortalPro
 	return profileFromRecord(professionalID, record), nil
 }
 
+func (s *Service) SubmitProfileForReview(ctx context.Context, professionalID string) (ProfessionalPortalProfileData, error) {
+	if err := ctx.Err(); err != nil {
+		return ProfessionalPortalProfileData{}, err
+	}
+
+	professionalID = strings.TrimSpace(professionalID)
+	if professionalID == "" {
+		return ProfessionalPortalProfileData{}, ErrInvalidProfessionalID
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	record, err := s.readRecord(ctx, professionalID)
+	if err != nil {
+		return ProfessionalPortalProfileData{}, err
+	}
+
+	currentProfile := profileFromRecord(professionalID, record)
+	if !canProfessionalSubmitForReview(currentProfile.ReviewState.Status) {
+		return ProfessionalPortalProfileData{}, ErrInvalidReviewTransition
+	}
+	if !isProfileReadyForReview(record.Snapshot) {
+		return ProfessionalPortalProfileData{}, ErrProfileNotReadyForReview
+	}
+
+	submittedAt := time.Now().UTC().Format(time.RFC3339)
+	record = applyRecordMutation(record, professionalID, func(snapshot map[string]any) {
+		applyProfessionalReviewSubmissionToSnapshot(snapshot, professionalID, ProfessionalPortalReviewState{
+			Status:      "submitted",
+			SubmittedAt: submittedAt,
+		})
+	})
+	if err := s.persistRecord(ctx, record, professionalID); err != nil {
+		return ProfessionalPortalProfileData{}, err
+	}
+
+	return profileFromRecord(professionalID, record), nil
+}
+
 func (s *Service) UpsertAdminReviewState(
 	ctx context.Context,
 	input ProfessionalPortalAdminReviewStateData,
@@ -149,6 +208,10 @@ func (s *Service) UpsertAdminReviewState(
 
 	record, err := s.readRecord(ctx, professionalID)
 	if err != nil {
+		return ProfessionalPortalProfileData{}, err
+	}
+	currentReviewState := profileFromRecord(professionalID, record).ReviewState
+	if err := validateAdminReviewTransition(currentReviewState.Status, input.ReviewState.Status); err != nil {
 		return ProfessionalPortalProfileData{}, err
 	}
 	record = applyRecordMutation(record, professionalID, func(snapshot map[string]any) {
@@ -848,7 +911,7 @@ func trustFromRecord(professionalID string, record sessionRecord) ProfessionalPo
 	return data
 }
 
-func applyProfileToSnapshot(snapshot map[string]any, input ProfessionalPortalProfileData) {
+func applyProfileToSnapshot(snapshot map[string]any, input UpsertProfessionalPortalProfileData) {
 	state := ensureMap(snapshot, "state")
 	state["activeProfessionalId"] = input.ProfessionalID
 	state["acceptingNewClients"] = input.AcceptingNewClients
@@ -860,9 +923,15 @@ func applyProfileToSnapshot(snapshot map[string]any, input ProfessionalPortalPro
 	state["publicBio"] = input.PublicBio
 	state["responseTimeGoal"] = input.ResponseTimeGoal
 	state["yearsExperience"] = input.YearsExperience
+}
 
+func applyProfessionalReviewSubmissionToSnapshot(
+	snapshot map[string]any,
+	professionalID string,
+	reviewState ProfessionalPortalReviewState,
+) {
 	reviewStatesByProfessionalID := ensureMap(snapshot, "reviewStatesByProfessionalId")
-	reviewStatesByProfessionalID[input.ProfessionalID] = input.ReviewState
+	reviewStatesByProfessionalID[professionalID] = reviewState
 }
 
 func applyAdminReviewStateToSnapshot(snapshot map[string]any, input ProfessionalPortalAdminReviewStateData) {
@@ -978,8 +1047,190 @@ func decodeSnapshotSection[T any](snapshot map[string]any, path ...string) (T, b
 	return decoded, true
 }
 
+func hasText(value string) bool {
+	return strings.TrimSpace(value) != ""
+}
+
+func canProfessionalSubmitForReview(status string) bool {
+	switch strings.TrimSpace(status) {
+	case "", "changes_requested", "draft", "ready_for_review":
+		return true
+	default:
+		return false
+	}
+}
+
+func validateAdminReviewTransition(currentStatus string, nextStatus string) error {
+	currentStatus = strings.TrimSpace(currentStatus)
+	nextStatus = strings.TrimSpace(nextStatus)
+
+	if currentStatus == nextStatus {
+		switch nextStatus {
+		case "submitted", "changes_requested", "published", "verified":
+			return nil
+		}
+	}
+
+	switch nextStatus {
+	case "changes_requested", "verified":
+		if currentStatus != "submitted" {
+			return ErrInvalidReviewTransition
+		}
+	case "published":
+		if currentStatus != "verified" {
+			return ErrInvalidReviewTransition
+		}
+	default:
+		return ErrInvalidReviewTransition
+	}
+
+	return nil
+}
+
+func isProfileReadyForReview(snapshot map[string]any) bool {
+	state, ok := decodeSnapshotSection[reviewSubmissionState](snapshot, "state")
+	if !ok {
+		return false
+	}
+
+	if !hasText(state.DisplayName) ||
+		!hasText(state.Phone) ||
+		!hasText(state.City) ||
+		!hasText(state.CredentialNumber) ||
+		!hasText(state.YearsExperience) ||
+		!hasText(state.PublicBio) ||
+		!hasText(state.PracticeLabel) ||
+		!hasText(state.PracticeAddress) ||
+		!hasText(state.ResponseTimeGoal) ||
+		len(state.CoverageAreaIDs) == 0 {
+		return false
+	}
+
+	if !hasConfiguredActiveService(state.ServiceConfigurations) {
+		return false
+	}
+
+	activeModes := activeServiceModes(state.ServiceConfigurations)
+	if len(activeModes) == 0 {
+		return false
+	}
+
+	if !hasFeaturedActiveService(state.ServiceConfigurations) {
+		return false
+	}
+
+	if containsString(activeModes, "home_visit") && state.HomeVisitRadiusKm <= 0 {
+		return false
+	}
+
+	if requiresOfflineAvailability(activeModes) &&
+		!hasOfflineAvailabilityConfigured(state.AvailabilityRulesByMode, activeModes) {
+		return false
+	}
+
+	publicPortfolioCount := 0
+	for _, entry := range state.PortfolioEntries {
+		if entry.Visibility == "public" {
+			publicPortfolioCount += 1
+		}
+	}
+
+	return publicPortfolioCount > 0
+}
+
+func hasConfiguredActiveService(serviceConfigurations []ProfessionalPortalManagedService) bool {
+	for _, service := range serviceConfigurations {
+		if service.IsActive && hasText(service.Summary) && hasText(service.Price) && hasText(service.Duration) {
+			return true
+		}
+	}
+	return false
+}
+
+func hasFeaturedActiveService(serviceConfigurations []ProfessionalPortalManagedService) bool {
+	for _, service := range serviceConfigurations {
+		if service.IsActive && service.Featured {
+			return true
+		}
+	}
+	return false
+}
+
+func activeServiceModes(serviceConfigurations []ProfessionalPortalManagedService) []string {
+	seen := map[string]struct{}{}
+	modes := make([]string, 0, 3)
+	for _, service := range serviceConfigurations {
+		if !service.IsActive {
+			continue
+		}
+
+		if service.ServiceModes.Online {
+			if _, ok := seen["online"]; !ok {
+				seen["online"] = struct{}{}
+				modes = append(modes, "online")
+			}
+		}
+		if service.ServiceModes.HomeVisit {
+			if _, ok := seen["home_visit"]; !ok {
+				seen["home_visit"] = struct{}{}
+				modes = append(modes, "home_visit")
+			}
+		}
+		if service.ServiceModes.Onsite {
+			if _, ok := seen["onsite"]; !ok {
+				seen["onsite"] = struct{}{}
+				modes = append(modes, "onsite")
+			}
+		}
+	}
+	return modes
+}
+
+func requiresOfflineAvailability(activeModes []string) bool {
+	for _, mode := range activeModes {
+		if mode == "home_visit" || mode == "onsite" {
+			return true
+		}
+	}
+	return false
+}
+
+func hasOfflineAvailabilityConfigured(
+	availabilityRulesByMode map[string]readmodel.ProfessionalAvailabilityRules,
+	activeModes []string,
+) bool {
+	for _, mode := range activeModes {
+		if mode != "home_visit" && mode != "onsite" {
+			continue
+		}
+
+		rules := availabilityRulesByMode[mode]
+		hasEnabledWindow := false
+		for _, window := range rules.WeeklyHours {
+			if window.IsEnabled {
+				hasEnabledWindow = true
+				break
+			}
+		}
+		if !hasEnabledWindow {
+			return false
+		}
+	}
+
+	return true
+}
+
+func containsString(values []string, target string) bool {
+	for _, value := range values {
+		if value == target {
+			return true
+		}
+	}
+	return false
+}
+
 func defaultReviewState() ProfessionalPortalReviewState {
-	return ProfessionalPortalReviewState{Status: "published"}
+	return ProfessionalPortalReviewState{Status: "draft"}
 }
 
 func deriveProfessionalID(snapshot map[string]any) string {

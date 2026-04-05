@@ -636,6 +636,14 @@ func (s *seeder) seedProfessionalPortal(ctx context.Context) error {
 		if _, err := s.portalService.UpsertRequests(ctx, requests); err != nil {
 			return fmt.Errorf("seed portal requests for professional %s: %w", professional.ID, err)
 		}
+		if err := s.seedProfessionalPortalReviewLifecycle(
+			ctx,
+			professional.ID,
+			professional.Availability.IsAvailable,
+			reviewState,
+		); err != nil {
+			return fmt.Errorf("seed portal review lifecycle for professional %s: %w", professional.ID, err)
+		}
 
 		s.summary.PortalStateCount += 1
 		s.summary.PortalReviewStatusCounts[status] += 1
@@ -1374,8 +1382,8 @@ func buildPortalProfileData(
 	reviewState professionalportal.ProfessionalPortalReviewState,
 	areas map[string]readmodel.Area,
 	index int,
-) professionalportal.ProfessionalPortalProfileData {
-	return professionalportal.ProfessionalPortalProfileData{
+) professionalportal.UpsertProfessionalPortalProfileData {
+	return professionalportal.UpsertProfessionalPortalProfileData{
 		AcceptingNewClients:        reviewState.Status != "draft" && professional.Availability.IsAvailable,
 		AutoApproveInstantBookings: hasInstantBooking(professional.Services),
 		City:                       primaryProfessionalCity(professional, areas),
@@ -1385,8 +1393,62 @@ func buildPortalProfileData(
 		ProfessionalID:             professional.ID,
 		PublicBio:                  professional.About,
 		ResponseTimeGoal:           professional.ResponseTime,
-		ReviewState:                reviewState,
 		YearsExperience:            professional.Experience,
+	}
+}
+
+func (s *seeder) seedProfessionalPortalReviewLifecycle(
+	ctx context.Context,
+	professionalID string,
+	acceptingNewClients bool,
+	reviewState professionalportal.ProfessionalPortalReviewState,
+) error {
+	status := strings.TrimSpace(reviewState.Status)
+	switch status {
+	case "", "draft", "ready_for_review":
+		return nil
+	case "submitted":
+		if _, err := s.portalService.SubmitProfileForReview(ctx, professionalID); err != nil {
+			return err
+		}
+		_, err := s.portalService.UpsertAdminReviewState(ctx, professionalportal.ProfessionalPortalAdminReviewStateData{
+			ProfessionalID: professionalID,
+			ReviewState:    reviewState,
+		})
+		return err
+	case "changes_requested", "verified":
+		if _, err := s.portalService.SubmitProfileForReview(ctx, professionalID); err != nil {
+			return err
+		}
+		_, err := s.portalService.UpsertAdminReviewState(ctx, professionalportal.ProfessionalPortalAdminReviewStateData{
+			ProfessionalID: professionalID,
+			ReviewState:    reviewState,
+		})
+		return err
+	case "published":
+		if _, err := s.portalService.SubmitProfileForReview(ctx, professionalID); err != nil {
+			return err
+		}
+		if _, err := s.portalService.UpsertAdminReviewState(ctx, professionalportal.ProfessionalPortalAdminReviewStateData{
+			ProfessionalID: professionalID,
+			ReviewState: professionalportal.ProfessionalPortalReviewState{
+				AdminNote:    reviewState.AdminNote,
+				ReviewedAt:   reviewState.ReviewedAt,
+				ReviewerName: reviewState.ReviewerName,
+				Status:       "verified",
+				SubmittedAt:  reviewState.SubmittedAt,
+			},
+		}); err != nil {
+			return err
+		}
+		_, err := s.portalService.UpsertAdminReviewState(ctx, professionalportal.ProfessionalPortalAdminReviewStateData{
+			AcceptingNewClients: &acceptingNewClients,
+			ProfessionalID:      professionalID,
+			ReviewState:         reviewState,
+		})
+		return err
+	default:
+		return nil
 	}
 }
 
@@ -1418,13 +1480,21 @@ func buildPortalCoverageData(
 		practiceAddress = professional.PracticeLocation.Address
 		practiceLabel = professional.PracticeLocation.Label
 	}
+	coverageAreaIDs := append([]string(nil), professional.Coverage.AreaIDs...)
+	if len(coverageAreaIDs) == 0 && professional.PracticeLocation != nil {
+		if areaID := strings.TrimSpace(professional.PracticeLocation.AreaID); areaID != "" {
+			if _, ok := areas[areaID]; ok {
+				coverageAreaIDs = append(coverageAreaIDs, areaID)
+			}
+		}
+	}
 
 	return professionalportal.ProfessionalPortalCoverageData{
 		AcceptingNewClients:        professional.Availability.IsAvailable,
 		AutoApproveInstantBookings: hasInstantBooking(professional.Services),
 		AvailabilityRulesByMode:    cloneAvailabilityRules(professional.AvailabilityRulesByMode),
 		City:                       primaryProfessionalCity(professional, areas),
-		CoverageAreaIDs:            append([]string(nil), professional.Coverage.AreaIDs...),
+		CoverageAreaIDs:            coverageAreaIDs,
 		CoverageCenter:             professional.Coverage.Center,
 		HomeVisitRadiusKm:          professional.Coverage.HomeVisitRadiusKm,
 		PracticeAddress:            practiceAddress,

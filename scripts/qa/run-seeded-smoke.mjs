@@ -506,15 +506,47 @@ async function runSmokeChecks(summary, baseUrl) {
     professionalProfilePayload?.data?.professionalId === professionalScenario.professionalId,
     'professional profile mismatch',
   );
+  const professionalProfileMutationBody = {
+    acceptingNewClients: professionalProfilePayload.data.acceptingNewClients,
+    autoApproveInstantBookings: professionalProfilePayload.data.autoApproveInstantBookings,
+    city: professionalProfilePayload.data.city,
+    credentialNumber: professionalProfilePayload.data.credentialNumber,
+    displayName: professionalProfilePayload.data.displayName,
+    phone: professionalProfilePayload.data.phone,
+    professionalId: professionalProfilePayload.data.professionalId,
+    publicBio: professionalProfilePayload.data.publicBio,
+    responseTimeGoal: professionalProfilePayload.data.responseTimeGoal,
+    yearsExperience: professionalProfilePayload.data.yearsExperience,
+  };
   await requestJSON('professional profile mutation', baseUrl, '/professionals/me/profile', {
     method: 'PUT',
     headers: {
       ...professionalCookieHeaders,
       Origin: browserOrigin,
     },
-    body: professionalProfilePayload.data,
+    body: professionalProfileMutationBody,
   });
   recordSuccess('professional profile read and mutation');
+
+  if (professionalProfilePayload?.data?.reviewState?.status === 'changes_requested') {
+    const { payload: professionalSubmitReviewPayload } = await requestJSON(
+      'professional profile submit review',
+      baseUrl,
+      '/professionals/me/profile/submit-review',
+      {
+        method: 'POST',
+        headers: {
+          ...professionalCookieHeaders,
+          Origin: browserOrigin,
+        },
+      },
+    );
+    assert(
+      professionalSubmitReviewPayload?.data?.reviewState?.status === 'submitted',
+      'professional submit review did not transition to submitted',
+    );
+    recordSuccess('professional review submission');
+  }
 
   await requestJSON('professional coverage', baseUrl, '/professionals/me/coverage', {
     headers: professionalCookieHeaders,

@@ -21,6 +21,8 @@ import (
 var (
 	ErrAppointmentConflict          = errors.New("appointment state transition is not allowed")
 	ErrInvalidAppointmentInput      = errors.New("appointment input is invalid")
+	ErrInvalidAppointmentFeedback   = errors.New("appointment feedback is invalid")
+	ErrAppointmentFeedbackConflict  = errors.New("appointment feedback cannot be submitted")
 	ErrPaymentProviderMisconfigured = errors.New("payment provider is not configured")
 )
 
@@ -50,16 +52,14 @@ type AppointmentActionInputData struct {
 	Reason          string `json:"reason,omitempty"`
 }
 
+type SubmitAppointmentFeedbackInputData struct {
+	Rating float64 `json:"rating" required:"true"`
+	Text   string  `json:"text" required:"true"`
+}
+
 type CreatePaymentRequestInputData struct {
 	FailureRedirectURL string `json:"failureRedirectUrl,omitempty"`
 	SuccessRedirectURL string `json:"successRedirectUrl,omitempty"`
-}
-
-type CreateChangeRequestInputData struct {
-	ChangeType       string                        `json:"changeType" required:"true"`
-	Reason           string                        `json:"reason" required:"true"`
-	RequestedMode    string                        `json:"requestedMode,omitempty"`
-	ScheduleSnapshot *AppointmentScheduleInputData `json:"scheduleSnapshot,omitempty"`
 }
 
 type AppointmentCommandData struct {
@@ -92,13 +92,13 @@ type paymentRequestPathInput struct {
 	Body          CreatePaymentRequestInputData
 }
 
-type paymentRequestCheckoutPathInput struct {
-	PaymentRequestID string `path:"payment_request_id"`
+type appointmentFeedbackPathInput struct {
+	AppointmentID string `path:"appointment_id"`
+	Body          SubmitAppointmentFeedbackInputData
 }
 
-type changeRequestPathInput struct {
-	AppointmentID string `path:"appointment_id"`
-	Body          CreateChangeRequestInputData
+type paymentRequestCheckoutPathInput struct {
+	PaymentRequestID string `path:"payment_request_id"`
 }
 
 type appointmentCommandResponse struct {
@@ -327,6 +327,35 @@ func registerTransactionalRoutes(api huma.API, service *Service) {
 	})
 
 	huma.Register(api, withCustomerSecurity(huma.Operation{
+		OperationID: "submit-appointment-feedback",
+		Method:      http.MethodPost,
+		Path:        "/customers/appointments/{appointment_id}/feedback",
+		Summary:     "Submit customer feedback for a completed appointment",
+		Tags:        []string{"Appointments"},
+		Errors:      []int{http.StatusBadRequest, http.StatusConflict, http.StatusForbidden, http.StatusUnauthorized, http.StatusInternalServerError},
+	}), func(ctx context.Context, input *appointmentFeedbackPathInput) (*appointmentCommandResponse, error) {
+		authSession, ok := customerauth.ContextSession(ctx)
+		if !ok {
+			return nil, web.NewAPIError(http.StatusUnauthorized, "customer_session_not_found", "customer session not found")
+		}
+
+		payload, err := service.SubmitAppointmentFeedback(
+			ctx,
+			authSession.Session.ConsumerID,
+			authSession.Session.DisplayName,
+			input.AppointmentID,
+			input.Body,
+		)
+		if err != nil {
+			return nil, toAPIError(err)
+		}
+
+		response := &appointmentCommandResponse{}
+		response.Body.Data = payload
+		return response, nil
+	})
+
+	huma.Register(api, withCustomerSecurity(huma.Operation{
 		OperationID: "create-appointment-payment-request",
 		Method:      http.MethodPost,
 		Path:        "/customers/appointments/{appointment_id}/payment-requests",
@@ -386,41 +415,6 @@ func registerTransactionalRoutes(api huma.API, service *Service) {
 		return &struct{}{}, nil
 	})
 
-	huma.Register(api, huma.Operation{
-		OperationID: "create-appointment-change-request",
-		Method:      http.MethodPost,
-		Path:        "/appointments/{appointment_id}/change-requests",
-		Summary:     "Create an appointment change request",
-		Tags:        []string{"Appointments"},
-		Security: []map[string][]string{
-			{customerauth.SecuritySchemeName: {}},
-			{professionalauth.SecuritySchemeName: {}},
-		},
-		Errors: []int{http.StatusBadRequest, http.StatusConflict, http.StatusForbidden, http.StatusUnauthorized, http.StatusInternalServerError},
-	}, func(ctx context.Context, input *changeRequestPathInput) (*appointmentCommandResponse, error) {
-		actorKind := ""
-		actorID := ""
-		if authSession, ok := customerauth.ContextSession(ctx); ok {
-			actorKind = "customer"
-			actorID = authSession.Session.ConsumerID
-		}
-		if authSession, ok := professionalauth.ContextSession(ctx); ok {
-			actorKind = "professional"
-			actorID = authSession.Session.ProfessionalID
-		}
-		if actorKind == "" || actorID == "" {
-			return nil, web.NewAPIError(http.StatusUnauthorized, "appointment_actor_missing", "appointment actor not found")
-		}
-
-		payload, err := service.CreateChangeRequest(ctx, actorKind, actorID, input.AppointmentID, input.Body)
-		if err != nil {
-			return nil, toAPIError(err)
-		}
-
-		response := &appointmentCommandResponse{}
-		response.Body.Data = payload
-		return response, nil
-	})
 }
 
 func (s *Service) CreateAppointment(
@@ -720,6 +714,58 @@ func (s *Service) CompleteAppointment(
 	}, nil
 }
 
+func (s *Service) SubmitAppointmentFeedback(
+	ctx context.Context,
+	consumerID string,
+	consumerName string,
+	appointmentID string,
+	input SubmitAppointmentFeedbackInputData,
+) (AppointmentCommandData, error) {
+	appointment, err := s.executionStore.AppointmentByID(ctx, appointmentID)
+	if err != nil {
+		return AppointmentCommandData{}, mapAppointmentStoreError(err)
+	}
+	if appointment.ConsumerID != strings.TrimSpace(consumerID) {
+		return AppointmentCommandData{}, ErrAppointmentScopeMismatch
+	}
+	if appointment.Status != appointmentstore.StatusCompleted {
+		return AppointmentCommandData{}, ErrAppointmentFeedbackConflict
+	}
+	if len(appointment.CustomerFeedback) != 0 {
+		return AppointmentCommandData{}, ErrAppointmentFeedbackConflict
+	}
+
+	feedback, err := normalizeAppointmentFeedback(input, consumerName, consumerID, time.Now().UTC())
+	if err != nil {
+		return AppointmentCommandData{}, err
+	}
+
+	appointment.CustomerFeedback = feedback
+	appointment.UpdatedAt = time.Now().UTC()
+	if _, err := s.executionStore.UpsertAppointment(ctx, appointment); err != nil {
+		return AppointmentCommandData{}, err
+	}
+	if _, err := s.executionStore.AppendAppointmentOperationalEvent(ctx, appointmentstore.AppointmentOperationalEvent{
+		ID:            nextID("opev"),
+		AppointmentID: appointment.ID,
+		EventType:     "appointment.feedback_submitted",
+		ActorKind:     "customer",
+		ActorID:       consumerID,
+		Payload: map[string]any{
+			"rating": input.Rating,
+		},
+		CreatedAt: appointment.UpdatedAt,
+	}); err != nil {
+		return AppointmentCommandData{}, err
+	}
+
+	return AppointmentCommandData{
+		AppointmentID: appointment.ID,
+		Message:       "Appointment feedback submitted.",
+		Status:        appointment.Status,
+	}, nil
+}
+
 func (s *Service) CreatePaymentRequest(
 	ctx context.Context,
 	consumerID string,
@@ -805,65 +851,6 @@ func (s *Service) CompleteTestPaymentRequest(
 		PaymentRequestID: paymentRequest.ID,
 		PaymentStatus:    "paid",
 		Status:           appointmentstore.StatusConfirmed,
-	}, nil
-}
-
-func (s *Service) CreateChangeRequest(
-	ctx context.Context,
-	actorKind string,
-	actorID string,
-	appointmentID string,
-	input CreateChangeRequestInputData,
-) (AppointmentCommandData, error) {
-	appointment, err := s.executionStore.AppointmentByID(ctx, appointmentID)
-	if err != nil {
-		return AppointmentCommandData{}, mapAppointmentStoreError(err)
-	}
-	switch actorKind {
-	case "customer":
-		if appointment.ConsumerID != strings.TrimSpace(actorID) {
-			return AppointmentCommandData{}, ErrAppointmentScopeMismatch
-		}
-	case "professional":
-		if appointment.ProfessionalID != strings.TrimSpace(actorID) {
-			return AppointmentCommandData{}, ErrAppointmentScopeMismatch
-		}
-	default:
-		return AppointmentCommandData{}, ErrInvalidAppointmentInput
-	}
-
-	requestedSchedule := map[string]any{}
-	if input.ScheduleSnapshot != nil {
-		requestedSchedule = map[string]any{
-			"dateIso":            input.ScheduleSnapshot.DateISO,
-			"requiresSchedule":   input.ScheduleSnapshot.RequiresSchedule,
-			"scheduleDayId":      input.ScheduleSnapshot.ScheduleDayID,
-			"scheduleDayLabel":   input.ScheduleSnapshot.ScheduleDayLabel,
-			"scheduledTimeLabel": input.ScheduleSnapshot.ScheduledTimeLabel,
-			"timeSlotId":         input.ScheduleSnapshot.TimeSlotID,
-			"timeSlotLabel":      input.ScheduleSnapshot.TimeSlotLabel,
-		}
-	}
-
-	if _, err := s.executionStore.CreateAppointmentChangeRequest(ctx, appointmentstore.AppointmentChangeRequest{
-		ID:                        nextID("chg"),
-		AppointmentID:             appointment.ID,
-		RequestedByKind:           actorKind,
-		RequestedByID:             actorID,
-		ChangeType:                strings.TrimSpace(input.ChangeType),
-		Status:                    "open",
-		RequestedMode:             strings.TrimSpace(input.RequestedMode),
-		RequestedScheduleSnapshot: requestedSchedule,
-		Reason:                    strings.TrimSpace(input.Reason),
-		CreatedAt:                 time.Now().UTC(),
-	}); err != nil {
-		return AppointmentCommandData{}, err
-	}
-
-	return AppointmentCommandData{
-		AppointmentID: appointment.ID,
-		Message:       "Change request submitted.",
-		Status:        appointment.Status,
 	}, nil
 }
 
@@ -1123,6 +1110,35 @@ func (s *Service) appendStatusTransition(
 		CreatedAtLabel:  appointment.UpdatedAt.Format(time.RFC3339),
 	}
 	return s.executionStore.AppendAppointmentStatusEvent(ctx, event)
+}
+
+func normalizeAppointmentFeedback(
+	input SubmitAppointmentFeedbackInputData,
+	consumerName string,
+	consumerID string,
+	submittedAt time.Time,
+) (map[string]any, error) {
+	text := strings.TrimSpace(input.Text)
+	if input.Rating <= 0 || input.Rating > 5 || text == "" {
+		return nil, ErrInvalidAppointmentFeedback
+	}
+
+	author := strings.TrimSpace(consumerName)
+	if author == "" {
+		author = strings.TrimSpace(consumerID)
+	}
+	if author == "" {
+		author = "Pelanggan BidanApp"
+	}
+
+	return map[string]any{
+		"author":    author,
+		"dateLabel": submittedAt.Format("02 Jan 2006"),
+		"image":     "",
+		"quote":     text,
+		"rating":    input.Rating,
+		"role":      "Klien terverifikasi",
+	}, nil
 }
 
 func canCustomerCancelStatus(status string) bool {

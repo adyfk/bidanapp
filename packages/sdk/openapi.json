@@ -1552,37 +1552,6 @@
         ],
         "type": "object"
       },
-      "CreateChangeRequestInputData": {
-        "additionalProperties": false,
-        "properties": {
-          "$schema": {
-            "description": "A URL to the JSON Schema for this object.",
-            "examples": [
-              "https://example.com/schemas/CreateChangeRequestInputData.json"
-            ],
-            "format": "uri",
-            "readOnly": true,
-            "type": "string"
-          },
-          "changeType": {
-            "type": "string"
-          },
-          "reason": {
-            "type": "string"
-          },
-          "requestedMode": {
-            "type": "string"
-          },
-          "scheduleSnapshot": {
-            "$ref": "#/components/schemas/AppointmentScheduleInputData"
-          }
-        },
-        "required": [
-          "changeType",
-          "reason"
-        ],
-        "type": "object"
-      },
       "CreatePaymentRequestInputData": {
         "additionalProperties": false,
         "properties": {
@@ -1602,6 +1571,68 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "CreateSupportTicketData": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/CreateSupportTicketData.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "string"
+          },
+          "contactValue": {
+            "type": "string"
+          },
+          "details": {
+            "type": "string"
+          },
+          "preferredChannel": {
+            "type": "string"
+          },
+          "referenceCode": {
+            "type": "string"
+          },
+          "relatedAppointmentId": {
+            "type": "string"
+          },
+          "relatedProfessionalId": {
+            "type": "string"
+          },
+          "reporterName": {
+            "type": "string"
+          },
+          "reporterPhone": {
+            "type": "string"
+          },
+          "sourceSurface": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "urgency": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "categoryId",
+          "contactValue",
+          "details",
+          "preferredChannel",
+          "reporterName",
+          "reporterPhone",
+          "sourceSurface",
+          "summary",
+          "urgency"
+        ],
         "type": "object"
       },
       "CustomerAuthCreateSessionRequest": {
@@ -3643,15 +3674,6 @@
       "ProfessionalPortalProfileData": {
         "additionalProperties": false,
         "properties": {
-          "$schema": {
-            "description": "A URL to the JSON Schema for this object.",
-            "examples": [
-              "https://example.com/schemas/ProfessionalPortalProfileData.json"
-            ],
-            "format": "uri",
-            "readOnly": true,
-            "type": "string"
-          },
           "acceptingNewClients": {
             "type": "boolean"
           },
@@ -4366,6 +4388,32 @@
         ],
         "type": "object"
       },
+      "SubmitAppointmentFeedbackInputData": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/SubmitAppointmentFeedbackInputData.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "rating": {
+            "format": "double",
+            "type": "number"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "rating",
+          "text"
+        ],
+        "type": "object"
+      },
       "SupportDeskData": {
         "additionalProperties": false,
         "properties": {
@@ -4462,6 +4510,9 @@
           "relatedProfessionalId": {
             "type": "string"
           },
+          "reporterId": {
+            "type": "string"
+          },
           "reporterName": {
             "type": "string"
           },
@@ -4506,6 +4557,74 @@
         ],
         "type": "object"
       },
+      "SupportTicketResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/SupportTicketResponseBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/SupportTicketData"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "SupportTicketsData": {
+        "additionalProperties": false,
+        "properties": {
+          "savedAt": {
+            "type": "string"
+          },
+          "schemaVersion": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "tickets": {
+            "items": {
+              "$ref": "#/components/schemas/SupportTicketData"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "tickets"
+        ],
+        "type": "object"
+      },
+      "SupportTicketsResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/SupportTicketsResponseBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/SupportTicketsData"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
       "TrustResponseBody": {
         "additionalProperties": false,
         "properties": {
@@ -4524,6 +4643,63 @@
         },
         "required": [
           "data"
+        ],
+        "type": "object"
+      },
+      "UpsertProfessionalPortalProfileData": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/UpsertProfessionalPortalProfileData.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "acceptingNewClients": {
+            "type": "boolean"
+          },
+          "autoApproveInstantBookings": {
+            "type": "boolean"
+          },
+          "city": {
+            "type": "string"
+          },
+          "credentialNumber": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "professionalId": {
+            "type": "string"
+          },
+          "publicBio": {
+            "type": "string"
+          },
+          "responseTimeGoal": {
+            "type": "string"
+          },
+          "yearsExperience": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "acceptingNewClients",
+          "autoApproveInstantBookings",
+          "city",
+          "credentialNumber",
+          "displayName",
+          "phone",
+          "professionalId",
+          "publicBio",
+          "responseTimeGoal",
+          "yearsExperience"
         ],
         "type": "object"
       },
@@ -5696,115 +5872,6 @@
         ]
       }
     },
-    "/appointments/{appointment_id}/change-requests": {
-      "post": {
-        "operationId": "create-appointment-change-request",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "appointment_id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateChangeRequestInputData"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AppointmentCommandResponseBody"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/APIError"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/APIError"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/APIError"
-                }
-              }
-            },
-            "description": "Forbidden"
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/APIError"
-                }
-              }
-            },
-            "description": "Conflict"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/APIError"
-                }
-              }
-            },
-            "description": "Unprocessable Entity"
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/APIError"
-                }
-              }
-            },
-            "description": "Internal Server Error"
-          }
-        },
-        "security": [
-          {
-            "CustomerSessionAuth": []
-          },
-          {
-            "ProfessionalSessionAuth": []
-          }
-        ],
-        "summary": "Create an appointment change request",
-        "tags": [
-          "Appointments"
-        ]
-      }
-    },
     "/appointments/{appointment_id}/depart": {
       "post": {
         "operationId": "depart-home-visit-appointment",
@@ -6421,6 +6488,112 @@
           }
         ],
         "summary": "Cancel a customer appointment",
+        "tags": [
+          "Appointments"
+        ]
+      }
+    },
+    "/customers/appointments/{appointment_id}/feedback": {
+      "post": {
+        "operationId": "submit-appointment-feedback",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "appointment_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitAppointmentFeedbackInputData"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppointmentCommandResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "CustomerSessionAuth": []
+          }
+        ],
+        "summary": "Submit customer feedback for a completed appointment",
         "tags": [
           "Appointments"
         ]
@@ -7166,6 +7339,126 @@
         "summary": "Complete a manual test payment request",
         "tags": [
           "Payments"
+        ]
+      }
+    },
+    "/customers/support/tickets": {
+      "get": {
+        "operationId": "list-customer-support-tickets",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportTicketsResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "CustomerSessionAuth": []
+          }
+        ],
+        "summary": "List support tickets for the authenticated customer",
+        "tags": [
+          "Support"
+        ]
+      },
+      "post": {
+        "operationId": "create-customer-support-ticket",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSupportTicketData"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportTicketResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "CustomerSessionAuth": []
+          }
+        ],
+        "summary": "Create a support ticket for the authenticated customer",
+        "tags": [
+          "Support"
         ]
       }
     },
@@ -9459,7 +9752,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ProfessionalPortalProfileData"
+                "$ref": "#/components/schemas/UpsertProfessionalPortalProfileData"
               }
             }
           },
@@ -9523,6 +9816,94 @@
           }
         ],
         "summary": "Persist professional profile resource",
+        "tags": [
+          "Professional Portal"
+        ]
+      }
+    },
+    "/professionals/me/profile/submit-review": {
+      "post": {
+        "operationId": "submit-professional-portal-profile-for-review",
+        "parameters": [
+          {
+            "description": "Optional professional id to load a specific profile resource",
+            "explode": false,
+            "in": "query",
+            "name": "professional_id",
+            "schema": {
+              "description": "Optional professional id to load a specific profile resource",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ProfessionalSessionAuth": []
+          }
+        ],
+        "summary": "Submit the authenticated professional profile for admin review",
         "tags": [
           "Professional Portal"
         ]
@@ -10143,6 +10524,126 @@
         "summary": "Persist professional portal session",
         "tags": [
           "Professional Portal"
+        ]
+      }
+    },
+    "/professionals/support/tickets": {
+      "get": {
+        "operationId": "list-professional-support-tickets",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportTicketsResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ProfessionalSessionAuth": []
+          }
+        ],
+        "summary": "List support tickets for the authenticated professional",
+        "tags": [
+          "Support"
+        ]
+      },
+      "post": {
+        "operationId": "create-professional-support-ticket",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSupportTicketData"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportTicketResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ProfessionalSessionAuth": []
+          }
+        ],
+        "summary": "Create a support ticket for the authenticated professional",
+        "tags": [
+          "Support"
         ]
       }
     },

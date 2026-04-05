@@ -16,6 +16,7 @@ export interface AppointmentSeed {
   cancellationPolicySnapshot?: AppointmentCancellationPolicySnapshot;
   cancellationResolution?: AppointmentCancellationResolution;
   consumerId: string;
+  customerFeedback?: AppointmentFeedback;
   feedback?: AppointmentFeedback;
   id: string;
   professionalId: string;
@@ -42,7 +43,7 @@ export const createHydratedAppointment = (
     createDefaultCancellationPolicySnapshot(appointmentSeed.requestedMode),
   cancellationResolution: appointmentSeed.cancellationResolution,
   consumerId: appointmentSeed.consumerId,
-  feedback: appointmentSeed.feedback,
+  feedback: appointmentSeed.feedback || appointmentSeed.customerFeedback,
   id: appointmentSeed.id,
   professional: professional || {
     about: '',

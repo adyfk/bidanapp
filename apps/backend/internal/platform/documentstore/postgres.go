@@ -17,6 +17,7 @@ const (
 	consumerPreferencesNamespace       = "consumer_preferences"
 	adminSessionNamespace              = "admin_session"
 	adminSupportDeskNamespace          = "admin_support_desk"
+	supportTicketsNamespace            = "support_tickets"
 	adminConsoleNamespace              = "admin_console"
 	adminConsoleTableNamespace         = "admin_console_table"
 )
@@ -50,6 +51,8 @@ func (s *PostgresStore) Read(ctx context.Context, namespace string, key string) 
 		return s.readJSONState(ctx, namespace, key, "admin_session_states", "document_key")
 	case adminSupportDeskNamespace:
 		return s.readSupportDesk(ctx, key)
+	case supportTicketsNamespace:
+		return s.readSupportTickets(ctx, key)
 	case adminConsoleNamespace:
 		return s.readAdminConsole(ctx, key)
 	case adminConsoleTableNamespace:
@@ -86,6 +89,8 @@ func (s *PostgresStore) Upsert(ctx context.Context, record Record) (Record, erro
 		return s.upsertJSONState(ctx, record, "admin_session_states", "document_key")
 	case adminSupportDeskNamespace:
 		return s.upsertSupportDesk(ctx, record)
+	case supportTicketsNamespace:
+		return s.upsertSupportTickets(ctx, record)
 	case adminConsoleNamespace:
 		return s.upsertAdminConsole(ctx, record)
 	case adminConsoleTableNamespace:
@@ -174,124 +179,14 @@ func (s *PostgresStore) readSupportDesk(ctx context.Context, key string) (Record
 		Key:       key,
 	}
 
-	var schemaVersion int
-	var commandCenterBytes []byte
-	err := s.db.QueryRowContext(ctx, `
-		SELECT saved_at, schema_version, command_center
-		FROM admin_support_desk_states
-		WHERE document_key = $1
-	`, key).Scan(&record.SavedAt, &schemaVersion, &commandCenterBytes)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return Record{}, ErrNotFound
-		}
-		return Record{}, err
-	}
-
-	commandCenter, err := decodeMap(commandCenterBytes)
+	savedAt, schemaVersion, commandCenter, err := s.readSupportDeskState(ctx, key)
 	if err != nil {
 		return Record{}, err
 	}
+	record.SavedAt = savedAt
 
-	rows, err := s.db.QueryContext(ctx, `
-		SELECT
-			id,
-			assigned_admin_id,
-			category_id,
-			contact_value,
-			created_at,
-			details,
-			eta_key,
-			preferred_channel,
-			reference_code,
-			related_appointment_id,
-			related_professional_id,
-			reporter_name,
-			reporter_phone,
-			reporter_role,
-			source_surface,
-			status,
-			summary,
-			updated_at,
-			urgency
-		FROM support_tickets
-		ORDER BY sort_index ASC, id ASC
-	`)
+	tickets, _, err := s.readSupportTicketRows(ctx)
 	if err != nil {
-		return Record{}, err
-	}
-	defer rows.Close()
-
-	tickets := make([]map[string]any, 0)
-	for rows.Next() {
-		var (
-			id                    string
-			assignedAdminID       sql.NullString
-			categoryID            string
-			contactValue          string
-			createdAt             time.Time
-			details               string
-			etaKey                string
-			preferredChannel      string
-			referenceCode         string
-			relatedAppointmentID  string
-			relatedProfessionalID sql.NullString
-			reporterName          string
-			reporterPhone         string
-			reporterRole          string
-			sourceSurface         string
-			status                string
-			summary               string
-			updatedAt             time.Time
-			urgency               string
-		)
-		if err := rows.Scan(
-			&id,
-			&assignedAdminID,
-			&categoryID,
-			&contactValue,
-			&createdAt,
-			&details,
-			&etaKey,
-			&preferredChannel,
-			&referenceCode,
-			&relatedAppointmentID,
-			&relatedProfessionalID,
-			&reporterName,
-			&reporterPhone,
-			&reporterRole,
-			&sourceSurface,
-			&status,
-			&summary,
-			&updatedAt,
-			&urgency,
-		); err != nil {
-			return Record{}, err
-		}
-
-		tickets = append(tickets, map[string]any{
-			"id":                    id,
-			"assignedAdminId":       nullStringValue(assignedAdminID),
-			"categoryId":            categoryID,
-			"contactValue":          contactValue,
-			"createdAt":             createdAt.UTC().Format(time.RFC3339),
-			"details":               details,
-			"etaKey":                etaKey,
-			"preferredChannel":      preferredChannel,
-			"referenceCode":         referenceCode,
-			"relatedAppointmentId":  relatedAppointmentID,
-			"relatedProfessionalId": nullStringValue(relatedProfessionalID),
-			"reporterName":          reporterName,
-			"reporterPhone":         reporterPhone,
-			"reporterRole":          reporterRole,
-			"sourceSurface":         sourceSurface,
-			"status":                status,
-			"summary":               summary,
-			"updatedAt":             updatedAt.UTC().Format(time.RFC3339),
-			"urgency":               urgency,
-		})
-	}
-	if err := rows.Err(); err != nil {
 		return Record{}, err
 	}
 
@@ -299,6 +194,41 @@ func (s *PostgresStore) readSupportDesk(ctx context.Context, key string) (Record
 		"savedAt":       record.SavedAt.UTC().Format(time.RFC3339),
 		"schemaVersion": schemaVersion,
 		"commandCenter": commandCenter,
+		"tickets":       tickets,
+	}
+	return record, nil
+}
+
+func (s *PostgresStore) readSupportTickets(ctx context.Context, key string) (Record, error) {
+	record := Record{
+		Namespace: supportTicketsNamespace,
+		Key:       key,
+	}
+
+	savedAt, schemaVersion, _, err := s.readSupportDeskState(ctx, key)
+	if err != nil && !errors.Is(err, ErrNotFound) {
+		return Record{}, err
+	}
+
+	tickets, latestUpdatedAt, err := s.readSupportTicketRows(ctx)
+	if err != nil {
+		return Record{}, err
+	}
+
+	if latestUpdatedAt.After(savedAt) {
+		savedAt = latestUpdatedAt
+	}
+	if savedAt.IsZero() {
+		savedAt = time.Now().UTC()
+	}
+	if schemaVersion == 0 {
+		schemaVersion = 1
+	}
+	record.SavedAt = savedAt
+
+	record.Snapshot = map[string]any{
+		"savedAt":       record.SavedAt.UTC().Format(time.RFC3339),
+		"schemaVersion": schemaVersion,
 		"tickets":       tickets,
 	}
 	return record, nil
@@ -333,97 +263,8 @@ func (s *PostgresStore) upsertSupportDesk(ctx context.Context, record Record) (R
 		return Record{}, err
 	}
 
-	ticketIDs := make([]string, 0, len(tickets))
-	for index, ticket := range tickets {
-		ticketID := stringValue(ticket["id"])
-		if ticketID == "" {
-			ticketID = fmt.Sprintf("support-ticket-%d", index+1)
-		}
-		ticketIDs = append(ticketIDs, ticketID)
-	}
-	if err := deleteMissingRows(ctx, tx, "support_tickets", "id", ticketIDs); err != nil {
+	if err := upsertSupportTicketRows(ctx, tx, tickets, record.SavedAt); err != nil {
 		return Record{}, err
-	}
-
-	for index, ticket := range tickets {
-		ticketID := stringValue(ticket["id"])
-		if ticketID == "" {
-			ticketID = fmt.Sprintf("support-ticket-%d", index+1)
-		}
-
-		createdAt := parseTimestampOrNow(stringValue(ticket["createdAt"]), record.SavedAt)
-		updatedAt := parseTimestampOrNow(stringValue(ticket["updatedAt"]), createdAt)
-
-		if _, err := tx.ExecContext(ctx, `
-				INSERT INTO support_tickets (
-					id,
-					sort_index,
-					assigned_admin_id,
-				category_id,
-				contact_value,
-				created_at,
-				details,
-				eta_key,
-				preferred_channel,
-				reference_code,
-				related_appointment_id,
-				related_professional_id,
-				reporter_name,
-				reporter_phone,
-				reporter_role,
-				source_surface,
-				status,
-				summary,
-				updated_at,
-				urgency
-				) VALUES (
-					$1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
-					$11, $12, $13, $14, $15, $16, $17, $18, $19, $20
-				)
-				ON CONFLICT (id) DO UPDATE
-				SET sort_index = EXCLUDED.sort_index,
-				    assigned_admin_id = EXCLUDED.assigned_admin_id,
-				    category_id = EXCLUDED.category_id,
-				    contact_value = EXCLUDED.contact_value,
-				    created_at = EXCLUDED.created_at,
-				    details = EXCLUDED.details,
-				    eta_key = EXCLUDED.eta_key,
-				    preferred_channel = EXCLUDED.preferred_channel,
-				    reference_code = EXCLUDED.reference_code,
-				    related_appointment_id = EXCLUDED.related_appointment_id,
-				    related_professional_id = EXCLUDED.related_professional_id,
-				    reporter_name = EXCLUDED.reporter_name,
-				    reporter_phone = EXCLUDED.reporter_phone,
-				    reporter_role = EXCLUDED.reporter_role,
-				    source_surface = EXCLUDED.source_surface,
-				    status = EXCLUDED.status,
-				    summary = EXCLUDED.summary,
-				    updated_at = EXCLUDED.updated_at,
-				    urgency = EXCLUDED.urgency
-			`,
-			ticketID,
-			index,
-			nilIfEmpty(stringValue(ticket["assignedAdminId"])),
-			stringValue(ticket["categoryId"]),
-			stringValue(ticket["contactValue"]),
-			createdAt,
-			stringValue(ticket["details"]),
-			stringValue(ticket["etaKey"]),
-			stringValue(ticket["preferredChannel"]),
-			stringValue(ticket["referenceCode"]),
-			stringValue(ticket["relatedAppointmentId"]),
-			nilIfEmpty(stringValue(ticket["relatedProfessionalId"])),
-			stringValue(ticket["reporterName"]),
-			stringValue(ticket["reporterPhone"]),
-			stringValue(ticket["reporterRole"]),
-			stringValue(ticket["sourceSurface"]),
-			stringValue(ticket["status"]),
-			stringValue(ticket["summary"]),
-			updatedAt,
-			stringValue(ticket["urgency"]),
-		); err != nil {
-			return Record{}, err
-		}
 	}
 
 	if err := tx.Commit(); err != nil {
@@ -431,6 +272,28 @@ func (s *PostgresStore) upsertSupportDesk(ctx context.Context, record Record) (R
 	}
 
 	return s.readSupportDesk(ctx, record.Key)
+}
+
+func (s *PostgresStore) upsertSupportTickets(ctx context.Context, record Record) (Record, error) {
+	tickets := rowsValue(record.Snapshot["tickets"])
+
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return Record{}, err
+	}
+	defer func() {
+		_ = tx.Rollback()
+	}()
+
+	if err := upsertSupportTicketRows(ctx, tx, tickets, record.SavedAt); err != nil {
+		return Record{}, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return Record{}, err
+	}
+
+	return s.readSupportTickets(ctx, record.Key)
 }
 
 func (s *PostgresStore) readAdminConsole(ctx context.Context, key string) (Record, error) {
@@ -711,6 +574,249 @@ func upsertAdminConsoleRows(ctx context.Context, tx *sql.Tx, tableName string, r
 	}
 
 	return nil
+}
+
+func upsertSupportTicketRows(ctx context.Context, tx *sql.Tx, tickets []map[string]any, fallbackSavedAt time.Time) error {
+	ticketIDs := make([]string, 0, len(tickets))
+	for index, ticket := range tickets {
+		ticketID := stringValue(ticket["id"])
+		if ticketID == "" {
+			ticketID = fmt.Sprintf("support-ticket-%d", index+1)
+		}
+		ticketIDs = append(ticketIDs, ticketID)
+	}
+	if err := deleteMissingRows(ctx, tx, "support_tickets", "id", ticketIDs); err != nil {
+		return err
+	}
+
+	for index, ticket := range tickets {
+		ticketID := stringValue(ticket["id"])
+		if ticketID == "" {
+			ticketID = fmt.Sprintf("support-ticket-%d", index+1)
+		}
+
+		createdAt := parseTimestampOrNow(stringValue(ticket["createdAt"]), fallbackSavedAt)
+		updatedAt := parseTimestampOrNow(stringValue(ticket["updatedAt"]), createdAt)
+
+		if _, err := tx.ExecContext(ctx, `
+				INSERT INTO support_tickets (
+					id,
+					sort_index,
+					assigned_admin_id,
+					category_id,
+					contact_value,
+					created_at,
+					details,
+					eta_key,
+					preferred_channel,
+					reference_code,
+					related_appointment_id,
+					related_professional_id,
+					reporter_id,
+					reporter_name,
+					reporter_phone,
+					reporter_role,
+					source_surface,
+					status,
+					summary,
+					updated_at,
+					urgency
+				) VALUES (
+					$1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
+					$11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21
+				)
+				ON CONFLICT (id) DO UPDATE
+				SET sort_index = EXCLUDED.sort_index,
+				    assigned_admin_id = EXCLUDED.assigned_admin_id,
+				    category_id = EXCLUDED.category_id,
+				    contact_value = EXCLUDED.contact_value,
+				    created_at = EXCLUDED.created_at,
+				    details = EXCLUDED.details,
+				    eta_key = EXCLUDED.eta_key,
+				    preferred_channel = EXCLUDED.preferred_channel,
+				    reference_code = EXCLUDED.reference_code,
+				    related_appointment_id = EXCLUDED.related_appointment_id,
+				    related_professional_id = EXCLUDED.related_professional_id,
+				    reporter_id = EXCLUDED.reporter_id,
+				    reporter_name = EXCLUDED.reporter_name,
+				    reporter_phone = EXCLUDED.reporter_phone,
+				    reporter_role = EXCLUDED.reporter_role,
+				    source_surface = EXCLUDED.source_surface,
+				    status = EXCLUDED.status,
+				    summary = EXCLUDED.summary,
+				    updated_at = EXCLUDED.updated_at,
+				    urgency = EXCLUDED.urgency
+			`,
+			ticketID,
+			index,
+			nilIfEmpty(stringValue(ticket["assignedAdminId"])),
+			stringValue(ticket["categoryId"]),
+			stringValue(ticket["contactValue"]),
+			createdAt,
+			stringValue(ticket["details"]),
+			stringValue(ticket["etaKey"]),
+			stringValue(ticket["preferredChannel"]),
+			stringValue(ticket["referenceCode"]),
+			stringValue(ticket["relatedAppointmentId"]),
+			nilIfEmpty(stringValue(ticket["relatedProfessionalId"])),
+			stringValue(ticket["reporterId"]),
+			stringValue(ticket["reporterName"]),
+			stringValue(ticket["reporterPhone"]),
+			stringValue(ticket["reporterRole"]),
+			stringValue(ticket["sourceSurface"]),
+			stringValue(ticket["status"]),
+			stringValue(ticket["summary"]),
+			updatedAt,
+			stringValue(ticket["urgency"]),
+		); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (s *PostgresStore) readSupportDeskState(
+	ctx context.Context,
+	key string,
+) (time.Time, int, map[string]any, error) {
+	var (
+		savedAt            time.Time
+		schemaVersion      int
+		commandCenterBytes []byte
+	)
+	err := s.db.QueryRowContext(ctx, `
+		SELECT saved_at, schema_version, command_center
+		FROM admin_support_desk_states
+		WHERE document_key = $1
+	`, key).Scan(&savedAt, &schemaVersion, &commandCenterBytes)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return time.Time{}, 0, nil, ErrNotFound
+		}
+		return time.Time{}, 0, nil, err
+	}
+
+	commandCenter, err := decodeMap(commandCenterBytes)
+	if err != nil {
+		return time.Time{}, 0, nil, err
+	}
+
+	return savedAt, schemaVersion, commandCenter, nil
+}
+
+func (s *PostgresStore) readSupportTicketRows(ctx context.Context) ([]map[string]any, time.Time, error) {
+	rows, err := s.db.QueryContext(ctx, `
+		SELECT
+			id,
+			assigned_admin_id,
+			category_id,
+			contact_value,
+			created_at,
+			details,
+			eta_key,
+			preferred_channel,
+			reference_code,
+			related_appointment_id,
+			related_professional_id,
+			reporter_id,
+			reporter_name,
+			reporter_phone,
+			reporter_role,
+			source_surface,
+			status,
+			summary,
+			updated_at,
+			urgency
+		FROM support_tickets
+		ORDER BY sort_index ASC, id ASC
+	`)
+	if err != nil {
+		return nil, time.Time{}, err
+	}
+	defer rows.Close()
+
+	tickets := make([]map[string]any, 0)
+	var latestUpdatedAt time.Time
+	for rows.Next() {
+		var (
+			id                    string
+			assignedAdminID       sql.NullString
+			categoryID            string
+			contactValue          string
+			createdAt             time.Time
+			details               string
+			etaKey                string
+			preferredChannel      string
+			referenceCode         string
+			relatedAppointmentID  string
+			relatedProfessionalID sql.NullString
+			reporterID            string
+			reporterName          string
+			reporterPhone         string
+			reporterRole          string
+			sourceSurface         string
+			status                string
+			summary               string
+			updatedAt             time.Time
+			urgency               string
+		)
+		if err := rows.Scan(
+			&id,
+			&assignedAdminID,
+			&categoryID,
+			&contactValue,
+			&createdAt,
+			&details,
+			&etaKey,
+			&preferredChannel,
+			&referenceCode,
+			&relatedAppointmentID,
+			&relatedProfessionalID,
+			&reporterID,
+			&reporterName,
+			&reporterPhone,
+			&reporterRole,
+			&sourceSurface,
+			&status,
+			&summary,
+			&updatedAt,
+			&urgency,
+		); err != nil {
+			return nil, time.Time{}, err
+		}
+
+		if updatedAt.After(latestUpdatedAt) {
+			latestUpdatedAt = updatedAt
+		}
+		tickets = append(tickets, map[string]any{
+			"id":                    id,
+			"assignedAdminId":       nullStringValue(assignedAdminID),
+			"categoryId":            categoryID,
+			"contactValue":          contactValue,
+			"createdAt":             createdAt.UTC().Format(time.RFC3339),
+			"details":               details,
+			"etaKey":                etaKey,
+			"preferredChannel":      preferredChannel,
+			"referenceCode":         referenceCode,
+			"relatedAppointmentId":  relatedAppointmentID,
+			"relatedProfessionalId": nullStringValue(relatedProfessionalID),
+			"reporterId":            reporterID,
+			"reporterName":          reporterName,
+			"reporterPhone":         reporterPhone,
+			"reporterRole":          reporterRole,
+			"sourceSurface":         sourceSurface,
+			"status":                status,
+			"summary":               summary,
+			"updatedAt":             updatedAt.UTC().Format(time.RFC3339),
+			"urgency":               urgency,
+		})
+	}
+	if err := rows.Err(); err != nil {
+		return nil, time.Time{}, err
+	}
+
+	return tickets, latestUpdatedAt, nil
 }
 
 func deleteMissingRows(ctx context.Context, tx *sql.Tx, tableName string, keyColumn string, values []string) error {

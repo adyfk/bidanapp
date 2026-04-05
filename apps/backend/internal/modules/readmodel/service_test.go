@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"bidanapp/apps/backend/internal/platform/appointmentstore"
 	"bidanapp/apps/backend/internal/platform/portalstore"
 )
 
@@ -465,5 +466,79 @@ func TestProfessionalBySlugReturnsPublishedPortalOnlyProfessional(t *testing.T) 
 
 	if len(payload.Services) != 1 || payload.Services[0].ID != "pro-live-service-1" {
 		t.Fatalf("expected portal-only active service, got %#v", payload.Services)
+	}
+}
+
+func TestProfessionalsApplyPersistedAppointmentFeedbackOverlay(t *testing.T) {
+	dataDir := t.TempDir()
+
+	professionalsJSON := `[
+  {
+    "index": 1,
+    "id": "prof-feedback",
+    "slug": "bidan-feedback",
+    "name": "Bidan Feedback",
+    "title": "Midwife",
+    "location": "Bandung",
+    "rating": 0,
+    "reviews": "0",
+    "experience": "5 years",
+    "clientsServed": "12",
+    "image": "professional.jpg",
+    "coverImage": "cover.jpg",
+    "availability": {
+      "isAvailable": true
+    },
+    "responseTime": "5 min"
+  }
+]`
+	if err := os.WriteFile(filepath.Join(dataDir, "professionals.json"), []byte(professionalsJSON), 0o644); err != nil {
+		t.Fatalf("write professionals fixture: %v", err)
+	}
+
+	appointmentStore := appointmentstore.NewMemoryStore()
+	if _, err := appointmentStore.UpsertAppointment(context.Background(), appointmentstore.AppointmentRecord{
+		ID:             "apt-feedback-overlay",
+		ConsumerID:     "consumer-1",
+		ProfessionalID: "prof-feedback",
+		ServiceID:      "svc-1",
+		Status:         appointmentstore.StatusCompleted,
+		CustomerFeedback: map[string]any{
+			"author":    "Alya",
+			"dateLabel": "05 Apr 2026",
+			"image":     "",
+			"quote":     "Pelayanannya hangat dan sangat membantu.",
+			"rating":    5,
+			"role":      "Klien terverifikasi",
+		},
+	}); err != nil {
+		t.Fatalf("seed appointment feedback: %v", err)
+	}
+
+	service := NewService(dataDir, portalstore.NewMemoryStore(), appointmentStore)
+
+	payload, err := service.Professionals(context.Background())
+	if err != nil {
+		t.Fatalf("Professionals() error = %v", err)
+	}
+	if len(payload) != 1 {
+		t.Fatalf("Professionals() length = %d, want 1", len(payload))
+	}
+
+	professional := payload[0]
+	if professional.Rating != 5 {
+		t.Fatalf("professional rating = %v, want 5", professional.Rating)
+	}
+	if professional.Reviews != "1" {
+		t.Fatalf("professional reviews = %q, want 1", professional.Reviews)
+	}
+	if professional.FeedbackSummary.RecommendationRate != "100%" {
+		t.Fatalf(
+			"professional recommendation rate = %q, want 100%%",
+			professional.FeedbackSummary.RecommendationRate,
+		)
+	}
+	if len(professional.Testimonials) != 1 || professional.Testimonials[0].Quote != "Pelayanannya hangat dan sangat membantu." {
+		t.Fatalf("professional testimonials = %#v", professional.Testimonials)
 	}
 }

@@ -68,8 +68,8 @@ export const ProfessionalDashboardTrustScreen = () => {
 
         setNotice(t('onboarding.publishSuccess'));
       }}
-      onSubmitForReview={() => {
-        if (!submitProfessionalProfileForReview()) {
+      onSubmitForReview={async () => {
+        if (!(await submitProfessionalProfileForReview())) {
           setNotice(t('onboarding.validationNotice'));
           return;
         }

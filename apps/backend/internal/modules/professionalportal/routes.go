@@ -60,7 +60,7 @@ type trustInput struct {
 }
 
 type upsertProfileInput struct {
-	Body ProfessionalPortalProfileData
+	Body UpsertProfessionalPortalProfileData
 }
 
 type upsertAdminReviewStateInput struct {
@@ -159,6 +159,7 @@ func RegisterRoutes(api huma.API, service *Service) {
 	registerGetRoute(api, service)
 	registerUpsertSessionRoute(api, service)
 	registerProfileRoutes(api, service)
+	registerProfileSubmissionRoute(api, service)
 	registerAdminReviewStateRoutes(api, service)
 	registerCoverageRoutes(api, service)
 	registerServicesRoutes(api, service)
@@ -260,6 +261,31 @@ func registerProfileRoutes(api huma.API, service *Service) {
 		input.Body.ProfessionalID = professionalID
 
 		payload, err := service.UpsertProfile(ctx, input.Body)
+		if err != nil {
+			return nil, toAPIError(err)
+		}
+
+		response := &profileResponse{}
+		response.Body.Data = payload
+		return response, nil
+	})
+}
+
+func registerProfileSubmissionRoute(api huma.API, service *Service) {
+	huma.Register(api, withProfessionalSecurity(huma.Operation{
+		OperationID: "submit-professional-portal-profile-for-review",
+		Method:      http.MethodPost,
+		Path:        "/professionals/me/profile/submit-review",
+		Summary:     "Submit the authenticated professional profile for admin review",
+		Tags:        []string{"Professional Portal"},
+		Errors:      []int{http.StatusConflict, http.StatusForbidden, http.StatusUnauthorized, http.StatusInternalServerError},
+	}), func(ctx context.Context, input *profileInput) (*profileResponse, error) {
+		professionalID, err := authorizedProfessionalID(ctx, input.ProfessionalID)
+		if err != nil {
+			return nil, toAPIError(err)
+		}
+
+		payload, err := service.SubmitProfileForReview(ctx, professionalID)
 		if err != nil {
 			return nil, toAPIError(err)
 		}
@@ -614,6 +640,10 @@ func toAPIError(err error) error {
 		return web.NewAPIError(http.StatusUnauthorized, "professional_session_not_found", "professional session not found")
 	case errors.Is(err, ErrInvalidProfessionalID), errors.Is(err, ErrInvalidSnapshot):
 		return web.NewAPIError(http.StatusBadRequest, "invalid_professional_portal_session", err.Error())
+	case errors.Is(err, ErrInvalidReviewTransition):
+		return web.NewAPIError(http.StatusConflict, "invalid_professional_review_transition", err.Error())
+	case errors.Is(err, ErrProfileNotReadyForReview):
+		return web.NewAPIError(http.StatusConflict, "professional_profile_not_ready_for_review", err.Error())
 	case errors.Is(err, context.DeadlineExceeded), errors.Is(err, http.ErrHandlerTimeout):
 		return web.NewAPIError(http.StatusGatewayTimeout, "timeout", "upstream operation timed out")
 	default:

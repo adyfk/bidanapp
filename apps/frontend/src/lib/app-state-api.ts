@@ -8,16 +8,21 @@ import type {
   CustomerPushSubscriptionState,
   ProfessionalNotificationState,
   SupportDeskState,
+  SupportTicketCreateInput,
   ViewerSessionState,
 } from '@bidanapp/sdk';
 import {
   createBidanappApiClient,
+  createCustomerSupportTicketState,
+  createProfessionalSupportTicketState,
   deleteCustomerPushSubscriptionState,
   fetchAdminConsoleState,
   fetchAdminConsoleTableState,
   fetchConsumerPreferencesState,
   fetchCustomerNotificationState,
+  fetchCustomerSupportTicketsState,
   fetchProfessionalNotificationState,
+  fetchProfessionalSupportTicketsState,
   fetchSupportDeskState,
   fetchViewerSessionState,
   saveAdminConsoleState,
@@ -223,6 +228,34 @@ export const syncConsumerPreferencesToApi = (state: ConsumerPreferencesState, co
     '[AppState] Failed to sync consumer preferences to the backend.',
   );
 };
+
+export const hydrateCustomerSupportTicketsFromApi = () =>
+  loadCustomerFromApi(
+    () => fetchCustomerSupportTicketsState(client),
+    '[AppState] Failed to hydrate customer support tickets from the backend.',
+  );
+
+export const createCustomerSupportTicketToApi = async (
+  input: SupportTicketCreateInput,
+): Promise<Awaited<ReturnType<typeof createCustomerSupportTicketState>> | undefined> =>
+  loadCustomerFromApi(
+    () => createCustomerSupportTicketState(client, input),
+    '[AppState] Failed to create customer support ticket in the backend.',
+  );
+
+export const hydrateProfessionalSupportTicketsFromApi = () =>
+  loadProfessionalFromApi(
+    () => fetchProfessionalSupportTicketsState(client),
+    '[AppState] Failed to hydrate professional support tickets from the backend.',
+  );
+
+export const createProfessionalSupportTicketToApi = async (
+  input: SupportTicketCreateInput,
+): Promise<Awaited<ReturnType<typeof createProfessionalSupportTicketState>> | undefined> =>
+  loadProfessionalFromApi(
+    () => createProfessionalSupportTicketState(client, input),
+    '[AppState] Failed to create professional support ticket in the backend.',
+  );
 
 export const hydrateSupportDeskFromApi = () =>
   loadAdminFromApi(() => fetchSupportDeskState(client), '[AppState] Failed to hydrate support desk from the backend.');

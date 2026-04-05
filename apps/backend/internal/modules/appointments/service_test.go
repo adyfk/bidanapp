@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"bidanapp/apps/backend/internal/modules/readmodel"
 	"bidanapp/apps/backend/internal/platform/appointmentstore"
@@ -222,5 +223,78 @@ func TestDepartHomeVisitRejectsOutOfScopeProfessional(t *testing.T) {
 	_, err := service.DepartHomeVisit(context.Background(), "professional-2", "apt-3", AppointmentDepartInputData{})
 	if !errors.Is(err, ErrAppointmentScopeMismatch) {
 		t.Fatalf("DepartHomeVisit() error = %v, want ErrAppointmentScopeMismatch", err)
+	}
+}
+
+func TestSubmitAppointmentFeedbackPersistsCustomerReview(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	executionStore := appointmentstore.NewMemoryStore()
+	now := time.Date(2026, time.April, 5, 9, 30, 0, 0, time.UTC)
+
+	if _, err := executionStore.UpsertAppointment(ctx, appointmentstore.AppointmentRecord{
+		ID:             "apt-feedback",
+		ConsumerID:     "consumer-1",
+		ProfessionalID: "professional-1",
+		ServiceID:      "svc-1",
+		Status:         appointmentstore.StatusCompleted,
+		CreatedAt:      now,
+		UpdatedAt:      now,
+	}); err != nil {
+		t.Fatalf("UpsertAppointment() error = %v", err)
+	}
+
+	service := NewService(nil, nil, nil, executionStore, nil, nil)
+
+	payload, err := service.SubmitAppointmentFeedback(ctx, "consumer-1", "Alya", "apt-feedback", SubmitAppointmentFeedbackInputData{
+		Rating: 5,
+		Text:   "Profesional sangat membantu dan penjelasannya jelas.",
+	})
+	if err != nil {
+		t.Fatalf("SubmitAppointmentFeedback() error = %v", err)
+	}
+
+	if payload.Status != appointmentstore.StatusCompleted {
+		t.Fatalf("SubmitAppointmentFeedback() status = %q, want completed", payload.Status)
+	}
+
+	storedAppointment, err := executionStore.AppointmentByID(ctx, "apt-feedback")
+	if err != nil {
+		t.Fatalf("AppointmentByID() error = %v", err)
+	}
+	if storedAppointment.CustomerFeedback["author"] != "Alya" {
+		t.Fatalf("stored feedback author = %#v, want Alya", storedAppointment.CustomerFeedback["author"])
+	}
+	if storedAppointment.CustomerFeedback["quote"] != "Profesional sangat membantu dan penjelasannya jelas." {
+		t.Fatalf("stored feedback quote = %#v", storedAppointment.CustomerFeedback["quote"])
+	}
+}
+
+func TestSubmitAppointmentFeedbackRejectsConflicts(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	executionStore := appointmentstore.NewMemoryStore()
+
+	if _, err := executionStore.UpsertAppointment(ctx, appointmentstore.AppointmentRecord{
+		ID:               "apt-feedback-conflict",
+		ConsumerID:       "consumer-1",
+		ProfessionalID:   "professional-1",
+		ServiceID:        "svc-1",
+		Status:           appointmentstore.StatusCompleted,
+		CustomerFeedback: map[string]any{"author": "Alya", "quote": "Sudah pernah kirim"},
+	}); err != nil {
+		t.Fatalf("UpsertAppointment() error = %v", err)
+	}
+
+	service := NewService(nil, nil, nil, executionStore, nil, nil)
+
+	_, err := service.SubmitAppointmentFeedback(ctx, "consumer-1", "Alya", "apt-feedback-conflict", SubmitAppointmentFeedbackInputData{
+		Rating: 5,
+		Text:   "Tidak boleh masuk dua kali.",
+	})
+	if !errors.Is(err, ErrAppointmentFeedbackConflict) {
+		t.Fatalf("SubmitAppointmentFeedback() error = %v, want ErrAppointmentFeedbackConflict", err)
 	}
 }

@@ -4,9 +4,9 @@ import type {
   AppointmentActionInput,
   AppointmentCommand,
   AppointmentReadModel,
-  CreateAppointmentChangeRequestInput,
   CreateAppointmentInput,
   CreatePaymentRequestInput,
+  SubmitAppointmentFeedbackInput,
 } from '@bidanapp/sdk';
 import {
   approveAppointment,
@@ -14,7 +14,6 @@ import {
   cancelProfessionalAppointment,
   completeAppointment,
   completeTestPaymentRequest,
-  createAppointmentChangeRequest,
   createAppointmentPaymentRequest,
   createBidanappApiClient,
   createCustomerAppointment,
@@ -22,6 +21,7 @@ import {
   fetchProfessionalAppointments,
   rejectAppointment,
   startAppointmentService,
+  submitAppointmentFeedback,
 } from '@bidanapp/sdk';
 import { getBackendApiBaseUrl } from '@/lib/backend';
 
@@ -126,10 +126,10 @@ export const completeAppointmentWithApi = async (
   return withTimeout(completeAppointment(client, appointmentId, input), requestTimeoutMs);
 };
 
-export const createAppointmentChangeRequestWithApi = async (
+export const submitAppointmentFeedbackWithApi = async (
   appointmentId: string,
-  input: CreateAppointmentChangeRequestInput,
+  input: SubmitAppointmentFeedbackInput,
 ): Promise<AppointmentCommand> => {
   ensureBrowser();
-  return withTimeout(createAppointmentChangeRequest(client, appointmentId, input), requestTimeoutMs);
+  return withTimeout(submitAppointmentFeedback(client, appointmentId, input), requestTimeoutMs);
 };

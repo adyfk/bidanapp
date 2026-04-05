@@ -954,7 +954,8 @@ declare const messages: {
       "errors": {
         "categoryRequired": "Choose the issue category first.",
         "contactRequired": "Enter a contact that admin can use for follow-up.",
-        "detailsRequired": "Describe the issue so admin can continue the investigation."
+        "detailsRequired": "Describe the issue so admin can continue the investigation.",
+        "submitFailed": "The ticket could not be sent yet. Please try again in a moment."
       }
     }
   },
@@ -1370,7 +1371,8 @@ declare const messages: {
       "errors": {
         "categoryRequired": "Choose the issue category first.",
         "contactRequired": "Enter a contact that admin can use for follow-up.",
-        "detailsRequired": "Describe the issue so admin can continue the investigation."
+        "detailsRequired": "Describe the issue so admin can continue the investigation.",
+        "submitFailed": "The ticket could not be sent yet. Please try again in a moment."
       }
     },
     "modeLabels": {

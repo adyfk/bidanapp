@@ -37,14 +37,21 @@ func TestRouterServesGeneratedOpenAPI(t *testing.T) {
 		!strings.Contains(body, `"/professionals/auth/session"`) ||
 		!strings.Contains(body, `"/professionals/portal/session"`) ||
 		!strings.Contains(body, `"/professionals/me/profile"`) ||
+		!strings.Contains(body, `"/professionals/me/profile/submit-review"`) ||
 		!strings.Contains(body, `"/professionals/me/coverage"`) ||
 		!strings.Contains(body, `"/professionals/me/services"`) ||
 		!strings.Contains(body, `"/professionals/me/requests"`) ||
 		!strings.Contains(body, `"/professionals/me/portfolio"`) ||
 		!strings.Contains(body, `"/professionals/me/gallery"`) ||
 		!strings.Contains(body, `"/professionals/me/trust"`) ||
+		!strings.Contains(body, `"/customers/support/tickets"`) ||
+		!strings.Contains(body, `"/professionals/support/tickets"`) ||
+		!strings.Contains(body, `"/customers/appointments/{appointment_id}/feedback"`) ||
 		!strings.Contains(body, `"/appointments/{appointment_id}"`) {
 		t.Fatalf("openapi output missing expected routes: %s", body)
+	}
+	if strings.Contains(body, `"/appointments/{appointment_id}/change-requests"`) {
+		t.Fatalf("openapi output unexpectedly exposes deprecated change-request route: %s", body)
 	}
 }
 
@@ -186,10 +193,14 @@ func TestRouterRejectsUnauthorizedProfessionalAppointmentRequests(t *testing.T) 
 	}
 }
 
-func TestRouterRejectsUnauthorizedAppointmentChangeRequestActor(t *testing.T) {
+func TestRouterRejectsUnauthorizedCustomerAppointmentFeedbackRequests(t *testing.T) {
 	cfg := testConfig(t)
 	router := NewRouter(cfg, slog.New(slog.NewTextHandler(io.Discard, nil)))
-	request := httptest.NewRequest(http.MethodPost, "/api/v1/appointments/apt-001/change-requests", strings.NewReader(`{}`))
+	request := httptest.NewRequest(
+		http.MethodPost,
+		"/api/v1/customers/appointments/apt-001/feedback",
+		strings.NewReader(`{"rating":5,"text":"helpful"}`),
+	)
 	request.Header.Set("Content-Type", "application/json")
 	recorder := httptest.NewRecorder()
 
@@ -199,7 +210,7 @@ func TestRouterRejectsUnauthorizedAppointmentChangeRequestActor(t *testing.T) {
 		t.Fatalf("unexpected status: got %d want %d", recorder.Code, http.StatusUnauthorized)
 	}
 
-	if !strings.Contains(recorder.Body.String(), `"code":"appointment_actor_not_found"`) {
+	if !strings.Contains(recorder.Body.String(), `"code":"missing_customer_session"`) {
 		t.Fatalf("unexpected response: %s", recorder.Body.String())
 	}
 }

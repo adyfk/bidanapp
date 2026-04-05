@@ -3,6 +3,7 @@ import type { BidanappApiClient, BidanappComponents } from '../client';
 export type ProfessionalPortalSession = BidanappComponents['schemas']['ProfessionalPortalSessionData'];
 export type ProfessionalPortalSessionSnapshot = Record<string, unknown>;
 export type ProfessionalPortalProfile = BidanappComponents['schemas']['ProfessionalPortalProfileData'];
+export type ProfessionalPortalProfileUpsertInput = BidanappComponents['schemas']['UpsertProfessionalPortalProfileData'];
 export type ProfessionalPortalCoverage = BidanappComponents['schemas']['ProfessionalPortalCoverageData'];
 export type ProfessionalPortalServices = BidanappComponents['schemas']['ProfessionalPortalServicesData'];
 export type ProfessionalPortalRequests = BidanappComponents['schemas']['ProfessionalPortalRequestsData'];
@@ -44,7 +45,7 @@ export async function fetchProfessionalPortalProfile(
 
 export async function saveProfessionalPortalProfile(
   client: BidanappApiClient,
-  input: ProfessionalPortalProfile,
+  input: ProfessionalPortalProfileUpsertInput,
 ): Promise<ProfessionalPortalProfile> {
   const result = await client.PUT('/professionals/me/profile', {
     body: input,
@@ -52,6 +53,19 @@ export async function saveProfessionalPortalProfile(
 
   if (result.error || !result.data?.data) {
     throw new Error('Failed to persist professional portal profile');
+  }
+
+  return result.data.data;
+}
+
+export async function submitProfessionalPortalProfileForReview(
+  client: BidanappApiClient,
+  professionalId?: string,
+): Promise<ProfessionalPortalProfile> {
+  const result = await client.POST('/professionals/me/profile/submit-review', professionalQueryParams(professionalId));
+
+  if (result.error || !result.data?.data) {
+    throw new Error('Failed to submit professional portal profile for review');
   }
 
   return result.data.data;

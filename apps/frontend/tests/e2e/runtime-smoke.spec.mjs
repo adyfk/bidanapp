@@ -65,6 +65,7 @@ const seededProfessionalSessions = professionals.map((professional, index) => {
     bearerToken: `seed-professional-session-${professional.id}`,
     displayName: professional.name,
     phone: buildSeedProfessionalPhone(index),
+    persistedReviewStatus: reviewStatus === 'ready_for_review' ? 'draft' : reviewStatus,
     professionalId: professional.id,
     reviewStatus,
     reviewTitle: reviewStatusTitles[reviewStatus],
@@ -654,9 +655,6 @@ test('professional self-signup can complete onboarding, submit, get published by
       professionalId,
       publicBio: 'Home, clinic, and virtual postpartum support for newborn and lactation care.',
       responseTimeGoal: 'Responds within 15 minutes during clinic hours',
-      reviewState: {
-        status: 'draft',
-      },
       yearsExperience: '7 years',
     },
     method: 'PUT',
@@ -756,27 +754,26 @@ test('professional self-signup can complete onboarding, submit, get published by
   await assertHealthyPage(page, runtimeErrors, '/en/for-professionals/dashboard before submission');
   await expect(page.locator('body')).toContainText('Ready to submit for admin review');
 
-  const submitResponsePromise = page.waitForResponse(
-    (response) =>
-      response.url().includes('/api/v1/professionals/me/profile') &&
-      response.request().method() === 'PUT' &&
-      response.ok(),
-  );
   await page.getByRole('button', { name: 'Submit to admin' }).click();
-  await submitResponsePromise;
+  await expect
+    .poll(
+      async () => {
+        const submittedPortalSessionBody = expectPageJsonOk(
+          await fetchJsonFromPage(
+            page,
+            `${backendApiBaseUrl}/professionals/portal/session?professional_id=${professionalId}`,
+          ),
+          'Expected professional portal session to remain readable after submission',
+        );
 
-  const submittedPortalSessionBody = expectPageJsonOk(
-    await fetchJsonFromPage(
-      page,
-      `${backendApiBaseUrl}/professionals/portal/session?professional_id=${professionalId}`,
-    ),
-    'Expected professional portal session to remain readable after submission',
-  );
-  assert.equal(
-    submittedPortalSessionBody?.data?.snapshot?.reviewStatesByProfessionalId?.[professionalId]?.status,
-    'submitted',
-    `Expected ${professionalId} to be submitted after the onboarding handoff.`,
-  );
+        return submittedPortalSessionBody?.data?.snapshot?.reviewStatesByProfessionalId?.[professionalId]?.status;
+      },
+      {
+        message: `Expected ${professionalId} to be submitted after the onboarding handoff.`,
+        timeout: 15_000,
+      },
+    )
+    .toBe('submitted');
 
   const adminContext = await browser.newContext({
     baseURL: 'http://127.0.0.1:3301',
@@ -806,52 +803,50 @@ test('professional self-signup can complete onboarding, submit, get published by
   await searchInput.fill(professionalId);
   await queueEntryCheckbox().check();
 
-  const verifySyncResponsePromise = adminPage.waitForResponse(
-    (response) =>
-      response.url().includes('/api/v1/admin/professionals/review-state') &&
-      response.request().method() === 'PUT' &&
-      response.ok(),
-  );
   await adminPage.getByRole('button', { name: 'Bulk verified' }).click();
-  await verifySyncResponsePromise;
+  await expect
+    .poll(
+      async () => {
+        const verifiedPortalSessionBody = expectPageJsonOk(
+          await fetchJsonFromPage(
+            page,
+            `${backendApiBaseUrl}/professionals/portal/session?professional_id=${professionalId}`,
+          ),
+          'Expected professional portal session to remain readable after admin verification',
+        );
 
-  const verifiedPortalSessionBody = expectPageJsonOk(
-    await fetchJsonFromPage(
-      page,
-      `${backendApiBaseUrl}/professionals/portal/session?professional_id=${professionalId}`,
-    ),
-    'Expected professional portal session to remain readable after admin verification',
-  );
-  assert.equal(
-    verifiedPortalSessionBody?.data?.snapshot?.reviewStatesByProfessionalId?.[professionalId]?.status,
-    'verified',
-    `Expected ${professionalId} to be verified after the admin review action.`,
-  );
+        return verifiedPortalSessionBody?.data?.snapshot?.reviewStatesByProfessionalId?.[professionalId]?.status;
+      },
+      {
+        message: `Expected ${professionalId} to be verified after the admin review action.`,
+        timeout: 15_000,
+      },
+    )
+    .toBe('verified');
 
   await searchInput.fill(professionalId);
   await queueEntryCheckbox().check();
 
-  const publishSyncResponsePromise = adminPage.waitForResponse(
-    (response) =>
-      response.url().includes('/api/v1/admin/professionals/review-state') &&
-      response.request().method() === 'PUT' &&
-      response.ok(),
-  );
   await adminPage.getByRole('button', { name: 'Bulk publish' }).click();
-  await publishSyncResponsePromise;
+  await expect
+    .poll(
+      async () => {
+        const publishedPortalSessionBody = expectPageJsonOk(
+          await fetchJsonFromPage(
+            page,
+            `${backendApiBaseUrl}/professionals/portal/session?professional_id=${professionalId}`,
+          ),
+          'Expected professional portal session to remain readable after publish',
+        );
 
-  const publishedPortalSessionBody = expectPageJsonOk(
-    await fetchJsonFromPage(
-      page,
-      `${backendApiBaseUrl}/professionals/portal/session?professional_id=${professionalId}`,
-    ),
-    'Expected professional portal session to remain readable after publish',
-  );
-  assert.equal(
-    publishedPortalSessionBody?.data?.snapshot?.reviewStatesByProfessionalId?.[professionalId]?.status,
-    'published',
-    `Expected ${professionalId} to be published after the admin publish action.`,
-  );
+        return publishedPortalSessionBody?.data?.snapshot?.reviewStatesByProfessionalId?.[professionalId]?.status;
+      },
+      {
+        message: `Expected ${professionalId} to be published after the admin publish action.`,
+        timeout: 15_000,
+      },
+    )
+    .toBe('published');
 
   const catalogBody = await readJson(
     await context.request.get(`${backendApiBaseUrl}/catalog`),
@@ -996,10 +991,13 @@ test('all seeded professional review states render the expected onboarding statu
       }, got ${portalSessionResponse.status()} from ${portalSessionResponse.url()}.`,
     );
     const portalSessionBody = await portalSessionResponse.json();
+    const hydratedReviewStatus =
+      portalSessionBody?.data?.snapshot?.reviewStatesByProfessionalId?.[professionalSession.professionalId]?.status ||
+      'draft';
     assert.equal(
-      portalSessionBody?.data?.snapshot?.reviewStatesByProfessionalId?.[professionalSession.professionalId]?.status,
-      professionalSession.reviewStatus,
-      `Expected hydrated professional review status for ${professionalSession.professionalId} to be ${professionalSession.reviewStatus}.`,
+      hydratedReviewStatus,
+      professionalSession.persistedReviewStatus,
+      `Expected hydrated professional review status for ${professionalSession.professionalId} to be ${professionalSession.persistedReviewStatus}.`,
     );
 
     await context.close();

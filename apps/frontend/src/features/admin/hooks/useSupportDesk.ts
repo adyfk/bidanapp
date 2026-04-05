@@ -102,6 +102,7 @@ const normalizeSupportDeskSnapshot = (value: unknown, adminStaff: AdminStaffMemb
         referenceCode: ticket.referenceCode || undefined,
         relatedAppointmentId: ticket.relatedAppointmentId || undefined,
         relatedProfessionalId: ticket.relatedProfessionalId || undefined,
+        reporterId: ticket.reporterId || undefined,
         reporterName: ticket.reporterName,
         reporterPhone: ticket.reporterPhone,
         reporterRole: ticket.reporterRole,

@@ -718,6 +718,8 @@ func toAPIError(err error) error {
 		return web.NewAPIError(http.StatusBadRequest, "invalid_appointment_record", err.Error())
 	case errors.Is(err, ErrInvalidAppointmentInput):
 		return web.NewAPIError(http.StatusBadRequest, "invalid_appointment_input", "appointment input is invalid")
+	case errors.Is(err, ErrInvalidAppointmentFeedback):
+		return web.NewAPIError(http.StatusBadRequest, "invalid_appointment_feedback", "appointment feedback is invalid")
 	case errors.Is(err, ErrInvalidCurrentLocation):
 		return web.NewAPIError(http.StatusBadRequest, "invalid_current_location", "current location must contain a valid latitude and longitude")
 	case errors.Is(err, ErrAppointmentScopeMismatch):
@@ -726,6 +728,8 @@ func toAPIError(err error) error {
 		return web.NewAPIError(http.StatusNotFound, "appointment_not_found", "appointment was not found")
 	case errors.Is(err, ErrAppointmentConflict):
 		return web.NewAPIError(http.StatusConflict, "appointment_conflict", "appointment state transition is not allowed")
+	case errors.Is(err, ErrAppointmentFeedbackConflict):
+		return web.NewAPIError(http.StatusConflict, "appointment_feedback_conflict", err.Error())
 	case errors.Is(err, ErrHomeVisitUnavailable):
 		return web.NewAPIError(http.StatusConflict, "home_visit_departure_unavailable", err.Error())
 	case errors.Is(err, ErrPaymentProviderMisconfigured):

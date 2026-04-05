@@ -164,23 +164,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/appointments/{appointment_id}/change-requests": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Create an appointment change request */
-        post: operations["create-appointment-change-request"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/appointments/{appointment_id}/depart": {
         parameters: {
             query?: never;
@@ -302,6 +285,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/customers/appointments/{appointment_id}/feedback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit customer feedback for a completed appointment */
+        post: operations["submit-appointment-feedback"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/customers/appointments/{appointment_id}/home-visit-status": {
         parameters: {
             query?: never;
@@ -417,6 +417,24 @@ export interface paths {
         put?: never;
         /** Complete a manual test payment request */
         post: operations["complete-test-payment-request"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/customers/support/tickets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List support tickets for the authenticated customer */
+        get: operations["list-customer-support-tickets"];
+        put?: never;
+        /** Create a support ticket for the authenticated customer */
+        post: operations["create-customer-support-ticket"];
         delete?: never;
         options?: never;
         head?: never;
@@ -806,6 +824,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/professionals/me/profile/submit-review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit the authenticated professional profile for admin review */
+        post: operations["submit-professional-portal-profile-for-review"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/professionals/me/requests": {
         parameters: {
             query?: never;
@@ -872,6 +907,24 @@ export interface paths {
         /** Persist professional portal session */
         put: operations["upsert-professional-portal-session"];
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/professionals/support/tickets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List support tickets for the authenticated professional */
+        get: operations["list-professional-support-tickets"];
+        put?: never;
+        /** Create a support ticket for the authenticated professional */
+        post: operations["create-professional-support-ticket"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1428,18 +1481,6 @@ export interface components {
             readonly $schema?: string;
             data: components["schemas"]["AppointmentCommandData"];
         };
-        CreateChangeRequestInputData: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/CreateChangeRequestInputData.json
-             */
-            readonly $schema?: string;
-            changeType: string;
-            reason: string;
-            requestedMode?: string;
-            scheduleSnapshot?: components["schemas"]["AppointmentScheduleInputData"];
-        };
         CreatePaymentRequestInputData: {
             /**
              * Format: uri
@@ -1449,6 +1490,26 @@ export interface components {
             readonly $schema?: string;
             failureRedirectUrl?: string;
             successRedirectUrl?: string;
+        };
+        CreateSupportTicketData: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/CreateSupportTicketData.json
+             */
+            readonly $schema?: string;
+            categoryId: string;
+            contactValue: string;
+            details: string;
+            preferredChannel: string;
+            referenceCode?: string;
+            relatedAppointmentId?: string;
+            relatedProfessionalId?: string;
+            reporterName: string;
+            reporterPhone: string;
+            sourceSurface: string;
+            summary: string;
+            urgency: string;
         };
         CustomerAuthCreateSessionRequest: {
             /**
@@ -2046,12 +2107,6 @@ export interface components {
             visibility: string;
         };
         ProfessionalPortalProfileData: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ProfessionalPortalProfileData.json
-             */
-            readonly $schema?: string;
             acceptingNewClients: boolean;
             autoApproveInstantBookings: boolean;
             city: string;
@@ -2272,6 +2327,17 @@ export interface components {
             readonly $schema?: string;
             data: components["schemas"]["ProfessionalPortalSessionData"];
         };
+        SubmitAppointmentFeedbackInputData: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/SubmitAppointmentFeedbackInputData.json
+             */
+            readonly $schema?: string;
+            /** Format: double */
+            rating: number;
+            text: string;
+        };
         SupportDeskData: {
             /**
              * Format: uri
@@ -2306,6 +2372,7 @@ export interface components {
             referenceCode?: string;
             relatedAppointmentId?: string;
             relatedProfessionalId?: string;
+            reporterId?: string;
             reporterName: string;
             reporterPhone: string;
             reporterRole: string;
@@ -2315,6 +2382,30 @@ export interface components {
             updatedAt: string;
             urgency: string;
         };
+        SupportTicketResponseBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/SupportTicketResponseBody.json
+             */
+            readonly $schema?: string;
+            data: components["schemas"]["SupportTicketData"];
+        };
+        SupportTicketsData: {
+            savedAt?: string;
+            /** Format: int64 */
+            schemaVersion: number;
+            tickets: components["schemas"]["SupportTicketData"][] | null;
+        };
+        SupportTicketsResponseBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/SupportTicketsResponseBody.json
+             */
+            readonly $schema?: string;
+            data: components["schemas"]["SupportTicketsData"];
+        };
         TrustResponseBody: {
             /**
              * Format: uri
@@ -2323,6 +2414,24 @@ export interface components {
              */
             readonly $schema?: string;
             data: components["schemas"]["ProfessionalPortalTrustData"];
+        };
+        UpsertProfessionalPortalProfileData: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/UpsertProfessionalPortalProfileData.json
+             */
+            readonly $schema?: string;
+            acceptingNewClients: boolean;
+            autoApproveInstantBookings: boolean;
+            city: string;
+            credentialNumber: string;
+            displayName: string;
+            phone: string;
+            professionalId: string;
+            publicBio: string;
+            responseTimeGoal: string;
+            yearsExperience: string;
         };
         UpsertProfessionalPortalSessionRequest: {
             /**
@@ -3195,86 +3304,6 @@ export interface operations {
             };
         };
     };
-    "create-appointment-change-request": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                appointment_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateChangeRequestInputData"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AppointmentCommandResponseBody"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
     "depart-home-visit-appointment": {
         parameters: {
             query?: never;
@@ -3702,6 +3731,86 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["AppointmentActionInputData"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AppointmentCommandResponseBody"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "submit-appointment-feedback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                appointment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubmitAppointmentFeedbackInputData"];
             };
         };
         responses: {
@@ -4331,6 +4440,104 @@ export interface operations {
             };
             /** @description Conflict */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "list-customer-support-tickets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SupportTicketsResponseBody"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "create-customer-support-ticket": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSupportTicketData"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SupportTicketResponseBody"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6171,7 +6378,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ProfessionalPortalProfileData"];
+                "application/json": components["schemas"]["UpsertProfessionalPortalProfileData"];
             };
         };
         responses: {
@@ -6195,6 +6402,74 @@ export interface operations {
             };
             /** @description Unauthorized */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "submit-professional-portal-profile-for-review": {
+        parameters: {
+            query?: {
+                /** @description Optional professional id to load a specific profile resource */
+                professional_id?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileResponseBody"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Conflict */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6680,6 +6955,104 @@ export interface operations {
             };
             /** @description Forbidden */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "list-professional-support-tickets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SupportTicketsResponseBody"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "create-professional-support-ticket": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSupportTicketData"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SupportTicketResponseBody"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };

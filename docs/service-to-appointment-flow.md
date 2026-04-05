@@ -186,6 +186,7 @@ Saat tombol booking dikirim:
 ### Cancel-centric change policy
 
 - Sistem tidak menyediakan workflow reschedule formal.
+- API transaksi juga tidak mengekspos endpoint `change-request`; perubahan formal tetap ditangani sebagai cancel lalu booking baru.
 - Jika customer atau profesional ingin mengganti jadwal/mode/layanan, mereka berdiskusi di chat.
 - Bila sepakat order lama tidak dilanjutkan:
   - order lama ditutup dengan `cancelled` atau `rejected`
