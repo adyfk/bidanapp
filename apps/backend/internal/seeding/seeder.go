@@ -106,6 +106,7 @@ type Summary struct {
 	ChatMessageCount                   int                    `json:"chatMessageCount"`
 	ChatThreadCount                    int                    `json:"chatThreadCount"`
 	CoveredCities                      []string               `json:"coveredCities"`
+	ManualQACases                      []ManualQACase         `json:"manualQaCases"`
 	PublishedReadModelDocumentCount    int                    `json:"publishedReadModelDocumentCount"`
 	CustomerAccounts                   []AccountLogin         `json:"customerAccounts"`
 	CustomerNotificationStateCount     int                    `json:"customerNotificationStateCount"`
@@ -118,6 +119,7 @@ type Summary struct {
 	ProfessionalNotificationStateCount int                    `json:"professionalNotificationStateCount"`
 	ProfessionalPassword               string                 `json:"professionalPassword"`
 	ProfessionalScenarios              []ProfessionalScenario `json:"professionalScenarios"`
+	SampleEntityRefs                   []SampleEntityRef      `json:"sampleEntityRefs"`
 	Scenario                           string                 `json:"scenario"`
 	SupportedAppointmentModes          []string               `json:"supportedAppointmentModes"`
 	SupportedBookingFlows              []string               `json:"supportedBookingFlows"`
@@ -171,10 +173,12 @@ func Run(ctx context.Context, cfg config.Config, db *sql.DB, writer io.Writer, o
 			CustomerAccounts:          []AccountLogin{},
 			CustomerPassword:          appliedOptions.CustomerPassword,
 			CustomerScenarios:         []CustomerScenario{},
+			ManualQACases:             []ManualQACase{},
 			PortalReviewStatusCounts:  map[string]int{},
 			ProfessionalAccounts:      []AccountLogin{},
 			ProfessionalPassword:      appliedOptions.ProfessionalPassword,
 			ProfessionalScenarios:     []ProfessionalScenario{},
+			SampleEntityRefs:          []SampleEntityRef{},
 			Scenario:                  datasetScenarioName(appliedOptions.Scenario),
 			SupportedAppointmentModes: []string{},
 			SupportedBookingFlows:     []string{},
@@ -787,18 +791,21 @@ func (s *seeder) buildVerificationScenarios() {
 		})
 	}
 
-	for _, admin := range s.summary.AdminAccesses {
+	for _, admin := range adminAccessesForQAMetadata(s.summary.AdminAccesses, s.dataset.AdminStaff) {
 		s.summary.AdminScenarios = append(s.summary.AdminScenarios, AdminScenario{
-			AdminID:   admin.AdminID,
-			Email:     admin.Email,
-			FocusArea: admin.FocusArea,
-			SuggestedChecks: []string{
-				"Open /admin/studio and verify seeded admin console tables hydrate without browser-owned fallback data.",
-				"Open /admin/support and verify urgent, high, and normal support tickets render with seeded command-center context.",
-				"Use admin mutations on staff or service tables and verify granular table sync persists to backend state.",
-			},
+			AdminID:         admin.AdminID,
+			Email:           admin.Email,
+			FocusArea:       admin.FocusArea,
+			SuggestedChecks: suggestedAdminChecks(admin.FocusArea),
 		})
 	}
+
+	s.summary.ManualQACases = buildManualQACases(s.dataset, s.appointments, manualQAConfig{
+		AdminAccesses:        s.summary.AdminAccesses,
+		CustomerPassword:     s.summary.CustomerPassword,
+		ProfessionalPassword: s.summary.ProfessionalPassword,
+	})
+	s.summary.SampleEntityRefs = collectSummarySampleEntityRefs(s.summary.ManualQACases)
 }
 
 func buildSeedAppointments(data dataset) []readmodel.AppointmentSeed {

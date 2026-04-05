@@ -73,6 +73,15 @@ func (s Summary) WriteReport(writer io.Writer) error {
 		lines = append(lines, "appointment_modes: "+strings.Join(s.SupportedAppointmentModes, ", "))
 	}
 
+	if len(s.ManualQACases) > 0 {
+		lines = append(lines, fmt.Sprintf("manual_qa_cases: %d", len(s.ManualQACases)))
+		lines = append(lines, "manual_qa_case_ids: "+strings.Join(manualQACaseIDs(s.ManualQACases), ", "))
+	}
+
+	if len(s.SampleEntityRefs) > 0 {
+		lines = append(lines, fmt.Sprintf("sample_entity_refs: %d", len(s.SampleEntityRefs)))
+	}
+
 	if len(s.CustomerAccounts) > 0 {
 		lines = append(lines, "")
 		lines = append(lines, "customer logins")

@@ -215,6 +215,38 @@ function totalAppointmentCount(summary) {
   return Object.values(summary.appointmentStatusCounts ?? {}).reduce((total, count) => total + Number(count ?? 0), 0);
 }
 
+function assertManualQaSummary(summary) {
+  const manualQaCases = Array.isArray(summary.manualQaCases) ? summary.manualQaCases : [];
+  const sampleEntityRefs = Array.isArray(summary.sampleEntityRefs) ? summary.sampleEntityRefs : [];
+  const requiredCaseIds = [
+    'PUB-01',
+    'PUB-02',
+    'PUB-03',
+    'PUB-04',
+    'CUS-01',
+    'CUS-02',
+    'CUS-03',
+    'PRO-01',
+    'PRO-02',
+    'PRO-03',
+    'PRO-04',
+    'PRO-05',
+    'PRO-06',
+    'ADM-01',
+    'ADM-02',
+    'ADM-03',
+    'ADM-04',
+  ];
+
+  assert(manualQaCases.length === requiredCaseIds.length, 'manual QA case pack is incomplete');
+  const caseIds = new Set(manualQaCases.map((qaCase) => qaCase.id));
+  for (const caseId of requiredCaseIds) {
+    assert(caseIds.has(caseId), `manual QA summary is missing case ${caseId}`);
+  }
+
+  assert(sampleEntityRefs.length >= 12, 'sample entity refs summary is unexpectedly small');
+}
+
 async function runSmokeChecks(summary, baseUrl) {
   const completedChecks = [];
 
@@ -222,6 +254,9 @@ async function runSmokeChecks(summary, baseUrl) {
     completedChecks.push(label);
     process.stdout.write(`✓ ${label}\n`);
   };
+
+  assertManualQaSummary(summary);
+  recordSuccess('manual QA summary metadata');
 
   const { payload: healthPayload } = await requestJSON('health', baseUrl, '/health');
   assert(healthPayload?.data?.service, 'health payload missing service name');

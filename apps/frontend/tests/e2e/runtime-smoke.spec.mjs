@@ -37,6 +37,151 @@ const reviewStatusTitles = {
   submitted: 'Waiting for admin review',
   verified: 'Verified and ready to publish',
 };
+const manualQaCaseIds = [
+  'PUB-01',
+  'PUB-02',
+  'PUB-03',
+  'PUB-04',
+  'CUS-01',
+  'CUS-02',
+  'CUS-03',
+  'PRO-01',
+  'PRO-02',
+  'PRO-03',
+  'PRO-04',
+  'PRO-05',
+  'PRO-06',
+  'ADM-01',
+  'ADM-02',
+  'ADM-03',
+  'ADM-04',
+];
+const publishedProfessional = professionals.find((professional) => professional.id === '6') ?? professionals[0];
+const publishedService = services.find((service) => service.id === 's5') ?? services[0];
+const requestedCustomerAppointmentId = 'seed-qa-ibu-nadia-requested';
+const historyCompletedAppointmentId = 'seed-qa-mr-hendra-completed';
+const historyCancelledAppointmentId = 'seed-qa-mr-hendra-cancelled';
+const manualQaPublicCases = [
+  {
+    id: 'PUB-01',
+    routes: ['/id', '/en'],
+  },
+  {
+    id: 'PUB-02',
+    routes: ['/id/home', '/id/explore', '/id/services'],
+  },
+  {
+    id: 'PUB-03',
+    routes: [`/id/p/${publishedProfessional?.slug ?? ''}`],
+  },
+  {
+    id: 'PUB-04',
+    routes: [`/id/s/${publishedService?.slug ?? ''}`],
+  },
+];
+const manualQaCustomerCases = [
+  {
+    consumerId: 'guest-primary',
+    id: 'CUS-01',
+    routes: [
+      '/id/profile',
+      '/id/notifications',
+      '/id/appointments',
+      '/id/appointments/apt-005',
+      '/id/activity/apt-005',
+      '/id/appointments/apt-004',
+    ],
+  },
+  {
+    consumerId: 'ibu-nadia',
+    id: 'CUS-02',
+    routes: [
+      '/id/profile',
+      '/id/notifications',
+      '/id/appointments',
+      `/id/appointments/${requestedCustomerAppointmentId}`,
+    ],
+  },
+  {
+    consumerId: 'mr-hendra',
+    id: 'CUS-03',
+    routes: [
+      '/id/appointments',
+      `/id/appointments/${historyCompletedAppointmentId}`,
+      `/id/appointments/${historyCancelledAppointmentId}`,
+      '/id/services',
+      `/id/p/${publishedProfessional?.slug ?? ''}`,
+    ],
+  },
+];
+const manualQaProfessionalCases = [
+  {
+    id: 'PRO-01',
+    reviewStatus: 'published',
+    routes: [
+      '/id/for-professionals/dashboard',
+      '/id/for-professionals/dashboard/requests',
+      '/id/for-professionals/dashboard/services',
+      '/id/for-professionals/dashboard/coverage',
+      '/id/for-professionals/dashboard/trust',
+    ],
+  },
+  {
+    id: 'PRO-02',
+    reviewStatus: 'submitted',
+    routes: ['/id/for-professionals/dashboard', '/id/for-professionals/dashboard/overview'],
+  },
+  {
+    id: 'PRO-03',
+    reviewStatus: 'changes_requested',
+    routes: [
+      '/id/for-professionals/dashboard',
+      '/id/for-professionals/dashboard/portfolio',
+      '/id/for-professionals/dashboard/coverage',
+    ],
+  },
+  {
+    id: 'PRO-04',
+    reviewStatus: 'verified',
+    routes: ['/id/for-professionals/dashboard', '/id/for-professionals/dashboard/trust'],
+  },
+  {
+    id: 'PRO-05',
+    reviewStatus: 'draft',
+    routes: [
+      '/id/for-professionals/dashboard',
+      '/id/for-professionals/dashboard/services',
+      '/id/for-professionals/dashboard/coverage',
+    ],
+  },
+  {
+    id: 'PRO-06',
+    reviewStatus: 'ready_for_review',
+    routes: [
+      '/id/for-professionals/dashboard',
+      '/id/for-professionals/dashboard/services',
+      '/id/for-professionals/dashboard/overview',
+    ],
+  },
+];
+const manualQaAdminCases = [
+  {
+    id: 'ADM-01',
+    routes: ['/admin/support'],
+  },
+  {
+    id: 'ADM-02',
+    routes: ['/admin/professionals'],
+  },
+  {
+    id: 'ADM-03',
+    routes: ['/admin/customers', '/admin/appointments'],
+  },
+  {
+    id: 'ADM-04',
+    routes: ['/admin/services', '/admin/studio'],
+  },
+];
 
 const professionalSlug = professionals[0]?.slug;
 const serviceSlug = services[0]?.slug;
@@ -170,6 +315,29 @@ const assertHealthyPage = async (page, errors, route) => {
   await assertNoDevelopmentWording(page, route);
 };
 
+const manualQaCoverageIds = [
+  ...manualQaPublicCases.map((qaCase) => qaCase.id),
+  ...manualQaCustomerCases.map((qaCase) => qaCase.id),
+  ...manualQaProfessionalCases.map((qaCase) => qaCase.id),
+  ...manualQaAdminCases.map((qaCase) => qaCase.id),
+];
+
+const createAuthedPage = async (browser, bearerToken) => {
+  const context = await browser.newContext({
+    baseURL: 'http://127.0.0.1:3301',
+    extraHTTPHeaders: {
+      Authorization: `Bearer ${bearerToken}`,
+    },
+  });
+  const page = await context.newPage();
+  const runtimeErrors = trackRuntimeErrors(page);
+  return {
+    context,
+    page,
+    runtimeErrors,
+  };
+};
+
 const readProfessionalPortalReviewStatus = async (browser, professionalSession) => {
   const context = await browser.newContext({
     extraHTTPHeaders: {
@@ -196,7 +364,7 @@ const readProfessionalPortalReviewStatus = async (browser, professionalSession) 
     );
 
     const body = await response.json();
-    return body?.data?.snapshot?.reviewStatesByProfessionalId?.[professionalSession.professionalId]?.status;
+    return body?.data?.snapshot?.reviewStatesByProfessionalId?.[professionalSession.professionalId]?.status || 'draft';
   } finally {
     await context.close();
   }
@@ -302,6 +470,24 @@ test('public and access routes render cleanly without browser runtime crashes', 
   ];
 
   await visitRoutes(page, runtimeErrors, routes);
+});
+
+test('manual QA case coverage pack stays aligned with the seeded route matrix', async () => {
+  assert.deepEqual(
+    manualQaCoverageIds,
+    manualQaCaseIds,
+    `Expected Playwright manual QA coverage IDs to stay aligned with the seeded QA case pack.`,
+  );
+});
+
+test('manual QA public cases render all seeded routes in Indonesian locale', async ({ page }) => {
+  const runtimeErrors = trackRuntimeErrors(page);
+
+  for (const manualQaCase of manualQaPublicCases) {
+    await test.step(manualQaCase.id, async () => {
+      await visitRoutes(page, runtimeErrors, manualQaCase.routes);
+    });
+  }
 });
 
 test('customer can sign in through the UI and reuse the restored session on protected routes', async ({ page }) => {
@@ -803,7 +989,14 @@ test('professional self-signup can complete onboarding, submit, get published by
   await searchInput.fill(professionalId);
   await queueEntryCheckbox().check();
 
+  const verifySyncResponsePromise = adminPage.waitForResponse(
+    (response) =>
+      response.url().includes('/api/v1/admin/professionals/review-state') &&
+      response.request().method() === 'PUT' &&
+      response.ok(),
+  );
   await adminPage.getByRole('button', { name: 'Bulk verified' }).click();
+  await verifySyncResponsePromise;
   await expect
     .poll(
       async () => {
@@ -824,10 +1017,25 @@ test('professional self-signup can complete onboarding, submit, get published by
     )
     .toBe('verified');
 
+  adminRuntimeErrors.length = 0;
+  await adminPage.reload();
+  await assertHealthyPage(
+    adminPage,
+    adminRuntimeErrors,
+    '/admin/professionals after verify during new professional publish flow',
+  );
+
   await searchInput.fill(professionalId);
   await queueEntryCheckbox().check();
 
+  const publishSyncResponsePromise = adminPage.waitForResponse(
+    (response) =>
+      response.url().includes('/api/v1/admin/professionals/review-state') &&
+      response.request().method() === 'PUT' &&
+      response.ok(),
+  );
   await adminPage.getByRole('button', { name: 'Bulk publish' }).click();
+  await publishSyncResponsePromise;
   await expect
     .poll(
       async () => {
@@ -922,6 +1130,28 @@ test('all seeded customer personas can reuse bearer sessions on core protected r
   }
 });
 
+test('manual QA customer cases keep seeded appointment journeys reachable', async ({ browser }) => {
+  for (const manualQaCase of manualQaCustomerCases) {
+    const session = seededCustomerSessions.find((candidate) => candidate.consumerId === manualQaCase.consumerId);
+    assert.ok(session?.bearerToken, `Expected a seeded customer bearer token for ${manualQaCase.id}.`);
+
+    const { context, page, runtimeErrors } = await createAuthedPage(browser, session.bearerToken);
+
+    try {
+      await test.step(manualQaCase.id, async () => {
+        for (const route of manualQaCase.routes) {
+          runtimeErrors.length = 0;
+          await page.goto(route);
+          await assertHealthyPage(page, runtimeErrors, `${manualQaCase.id} ${route}`);
+          await expect(page).not.toHaveURL(/\/auth\/customer/);
+        }
+      });
+    } finally {
+      await context.close();
+    }
+  }
+});
+
 test('professional dashboard routes render with the seeded professional session bearer token', async ({ browser }) => {
   const context = await browser.newContext({
     baseURL: 'http://127.0.0.1:3301',
@@ -1004,6 +1234,37 @@ test('all seeded professional review states render the expected onboarding statu
   }
 });
 
+test('manual QA professional cases keep seeded review-state route packs reachable', async ({ browser }) => {
+  for (const manualQaCase of manualQaProfessionalCases) {
+    const session = seededProfessionalSessions.find(
+      (candidate) => candidate.reviewStatus === manualQaCase.reviewStatus,
+    );
+    assert.ok(session?.bearerToken, `Expected a seeded professional bearer token for ${manualQaCase.id}.`);
+
+    const { context, page, runtimeErrors } = await createAuthedPage(browser, session.bearerToken);
+
+    try {
+      await test.step(manualQaCase.id, async () => {
+        for (const route of manualQaCase.routes) {
+          runtimeErrors.length = 0;
+          await page.goto(route);
+          await assertHealthyPage(page, runtimeErrors, `${manualQaCase.id} ${route}`);
+          await expect(page).not.toHaveURL(/\/for-professionals(\?|$)/);
+        }
+
+        const persistedReviewStatus = await readProfessionalPortalReviewStatus(browser, session);
+        assert.equal(
+          persistedReviewStatus,
+          session.persistedReviewStatus,
+          `Expected ${manualQaCase.id} to keep persisted review status ${session.persistedReviewStatus}.`,
+        );
+      });
+    } finally {
+      await context.close();
+    }
+  }
+});
+
 test('admin console routes render with the seeded admin session bearer token', async ({ browser }) => {
   const context = await browser.newContext({
     baseURL: 'http://127.0.0.1:3301',
@@ -1020,6 +1281,7 @@ test('admin console routes render with the seeded admin session bearer token', a
     '/admin/customers',
     '/admin/professionals',
     '/admin/services',
+    '/admin/studio',
     '/admin/appointments',
     '/admin/support',
   ];
@@ -1032,6 +1294,25 @@ test('admin console routes render with the seeded admin session bearer token', a
   }
 
   await context.close();
+});
+
+test('manual QA admin cases keep seeded support, ops, and studio routes reachable', async ({ browser }) => {
+  const { context, page, runtimeErrors } = await createAuthedPage(browser, adminBearerToken);
+
+  try {
+    for (const manualQaCase of manualQaAdminCases) {
+      await test.step(manualQaCase.id, async () => {
+        for (const route of manualQaCase.routes) {
+          runtimeErrors.length = 0;
+          await page.goto(route);
+          await assertHealthyPage(page, runtimeErrors, `${manualQaCase.id} ${route}`);
+          await expect(page).not.toHaveURL(/\/admin\/login/);
+        }
+      });
+    }
+  } finally {
+    await context.close();
+  }
 });
 
 test('admin bulk review and publish actions persist professional lifecycle state after reload', async ({ browser }) => {

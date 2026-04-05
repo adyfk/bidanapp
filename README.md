@@ -82,10 +82,9 @@ npm run mcp:qa
 For a repeatable local QA run with a fully restored runtime matrix:
 
 ```bash
-npm run infra:up
-npm run atlas:apply --workspace @bidanapp/backend
-npm run seed:backend:json
-npm run smoke:seeded
+npm run qa:manual:setup
+npm run qa:manual:summary
+npm run qa:manual:smoke
 npm run mcp:playwright:install
 PLAYWRIGHT_BACKEND_MODE=seeded npm run test:e2e:frontend
 ```
@@ -102,6 +101,8 @@ The seeded runtime is designed to cover:
 
 Use these docs together when running manual or automated QA:
 
+- [docs/manual-qa-playbook.md](docs/manual-qa-playbook.md) for the English operator guide
+- [docs/manual-qa-playbook.id.md](docs/manual-qa-playbook.id.md) for the Bahasa Indonesia operator guide
 - [docs/qa-seed-matrix.md](docs/qa-seed-matrix.md) for exact seeded accounts, route suggestions, and manual test checklists
 - [docs/user-flows/README.md](docs/user-flows/README.md) for persona-by-persona product walkthroughs
 - [docs/getting-started.md](docs/getting-started.md) for local setup and infra prerequisites

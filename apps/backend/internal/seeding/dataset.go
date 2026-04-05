@@ -109,6 +109,7 @@ type dataset struct {
 	Consumers          []seedConsumerRow
 	Professionals      []readmodel.Professional
 	RuntimeSelections  []seedRuntimeSelectionRow
+	Services           []readmodel.GlobalService
 	ServiceOfferings   []seedServiceOfferingRow
 	SupportTickets     []clientstate.SupportTicketData
 	UserContexts       []seedUserContextRow
@@ -211,6 +212,7 @@ func loadDataset(ctx context.Context, dataDir string) (dataset, error) {
 		Consumers:          consumers,
 		Professionals:      catalog.Professionals,
 		RuntimeSelections:  runtimeSelections,
+		Services:           catalog.Services,
 		ServiceOfferings:   serviceOfferings,
 		SupportTickets:     supportTickets,
 		UserContexts:       userContexts,

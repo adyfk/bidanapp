@@ -7,9 +7,10 @@ This guide explains how to load the comprehensive backend seed and how to use th
 Make sure the local infra is available and the schema is current first:
 
 ```bash
-npm run infra:up
-npm run atlas:apply --workspace @bidanapp/backend
+npm run qa:manual:setup
 ```
+
+This root command already starts local infra, applies Atlas migrations, and reloads the canonical `comprehensive` seed.
 
 Reset mutable backend state and print a human-readable report:
 
@@ -20,7 +21,7 @@ npm run seed --workspace @bidanapp/backend
 Emit the same seeded runtime summary as JSON for automation or scripted smoke checks:
 
 ```bash
-npm run seed:json --workspace @bidanapp/backend
+npm run qa:manual:summary
 ```
 
 From the repo root you can use:
@@ -28,6 +29,7 @@ From the repo root you can use:
 ```bash
 npm run seed:backend
 npm run seed:backend:json
+npm run qa:manual:summary
 ```
 
 ## 2. What The Seeder Resets
@@ -73,46 +75,46 @@ The CLI report prints the seeded customer phones, professional phones, and seede
 
 ### Public and visitor coverage
 
-| Flow | Suggested routes | Expected focus |
-| --- | --- | --- |
-| onboarding and language switch | `/id`, `/en` | clean onboarding surface, locale switch, and access entry points |
-| public discovery | `/id/home`, `/id/explore`, `/id/services` | seeded catalog sections hydrate and browsing works as visitor |
-| published professional detail | `/id/p/clara-wijaya` | published trust, services, and booking surface behave like a live listing |
-| service-first discovery | `/id/s/pijat-bayi` | service detail routes into a compatible professional flow |
+| Case | Suggested routes | Sample refs | Expected focus |
+| --- | --- | --- | --- |
+| `PUB-01` locale switch and onboarding entry | `/id`, `/en` | `runtime-default`, `jakarta-selatan-cilandak` | clean onboarding surface, locale switch, and access entry points |
+| `PUB-02` public discovery surfaces | `/id/home`, `/id/explore`, `/id/services` | `s5 / konsultasi-laktasi`, `6 / clara-wijaya` | seeded catalog sections hydrate and browsing works as visitor |
+| `PUB-03` published professional detail | `/id/p/clara-wijaya` | `6 / clara-wijaya`, `s5 / konsultasi-laktasi` | published trust, services, and booking surface behave like a live listing |
+| `PUB-04` service-first discovery routing | `/id/s/konsultasi-laktasi` | `s5 / konsultasi-laktasi`, `6 / clara-wijaya` | service detail routes into a compatible professional flow |
 
 ### Customer personas
 
 All customer accounts use password `Customer2026A`.
 
-| Persona | Phone | Home context | Strongest branches | Manual focus |
-| --- | --- | --- | --- | --- |
-| Alya Rahma (`guest-primary`) | `+6281234567890` | Jakarta Selatan, Cilandak | almost every appointment status plus partial read notifications | profile hydration, notifications read state, appointment chat history, active lifecycle states |
-| Nadia Prameswari (`ibu-nadia`) | `+628119021456` | Tangerang Selatan, Serpong | unread notifications and `requested` appointment state | unread badge behavior, request-status cards, profile edits after refresh |
-| Hendra Saputra (`mr-hendra`) | `+6287812009087` | Surabaya, Tegalsari | `completed` and `cancelled` history | resolved appointment timeline, review/history flows, favorites and location persistence |
+| Case | Persona | Phone | Home context | Strongest branches | Manual focus |
+| --- | --- | --- | --- | --- | --- |
+| `CUS-01` | Alya Rahma (`guest-primary`) | `+6281234567890` | Jakarta Selatan, Cilandak | almost every appointment status plus partial read notifications | profile hydration, notifications read state, appointment chat history, and active lifecycle states using `apt-005`, `apt-004`, and `thread-apt-005` |
+| `CUS-02` | Nadia Prameswari (`ibu-nadia`) | `+628119021456` | Tangerang Selatan, Serpong | unread notifications and `requested` appointment state | unread badge behavior, request-status cards, and profile edits after refresh using `seed-qa-ibu-nadia-requested` |
+| `CUS-03` | Hendra Saputra (`mr-hendra`) | `+6287812009087` | Surabaya, Tegalsari | `completed` and `cancelled` history | resolved appointment timeline, review/history flows, and favorites or location persistence using `seed-qa-mr-hendra-completed` and `seed-qa-mr-hendra-cancelled` |
 
 ### Professional personas
 
 All professional accounts use password `Professional2026A`.
 
-| Persona | Phone | Market | Review status | Strongest branches |
-| --- | --- | --- | --- | --- |
-| Clara Wijaya (`professionalId=6`) | `+6281370000001` | Jakarta Selatan, Cilandak | `published` | public catalog visibility, persisted dashboard edits, featured service behavior |
-| Omeya Sen (`professionalId=1`) | `+6281370000002` | Surabaya, Tegalsari | `submitted` | read-only review-state handling while waiting for admin decision |
-| Rani Hartati (`professionalId=4`) | `+6281370000003` | Tangerang Selatan, Serpong | `changes_requested` | review feedback visibility, edit-and-resubmit flow |
-| Martha Teria (`professionalId=3`) | `+6281370000004` | Bandung, Coblong | `verified` | post-review pre-publish path and trust notifications |
-| Alex Ben (`professionalId=2`) | `+6281370000005` | Medan, Petisah | `draft` | empty services, incomplete coverage, onboarding prompts |
-| Dimas Pratama (`professionalId=5`) | `+6281370000006` | Bekasi, Bekasi Selatan | `ready_for_review` | pre-review warnings when services exist but featured service is missing |
+| Case | Persona | Phone | Market | Review status | Strongest branches |
+| --- | --- | --- | --- | --- | --- |
+| `PRO-01` | Clara Wijaya (`professionalId=6`) | `+6281370000001` | Jakarta Selatan, Cilandak | `published` | public catalog visibility, persisted dashboard edits, and `s5 / konsultasi-laktasi` as the anchor published service |
+| `PRO-02` | Omeya Sen (`professionalId=1`) | `+6281370000002` | Surabaya, Tegalsari | `submitted` | read-only review-state handling while waiting for admin decision, anchored by `s1 / pijat-bayi` |
+| `PRO-03` | Rani Hartati (`professionalId=4`) | `+6281370000003` | Tangerang Selatan, Serpong | `changes_requested` | review feedback visibility, edit-and-resubmit flow, anchored by `s7 / pendampingan-nifas` |
+| `PRO-04` | Martha Teria (`professionalId=3`) | `+6281370000004` | Bandung, Coblong | `verified` | post-review pre-publish path and trust notifications, anchored by `s6 / terapi-gerak-stroke` |
+| `PRO-05` | Alex Ben (`professionalId=2`) | `+6281370000005` | Medan, Petisah | `draft` | empty services, incomplete coverage, and onboarding prompts |
+| `PRO-06` | Dimas Pratama (`professionalId=5`) | `+6281370000006` | Bekasi, Bekasi Selatan | `ready_for_review` | pre-review warnings when services exist but featured service is missing, anchored by `s3 / pijat-full-body` |
 
 ### Admin personas
 
 Admin UI login uses the email below and the password configured in `apps/backend/.env` through `ADMIN_CONSOLE_CREDENTIALS_JSON`.
 
-| Persona | Email | Focus area | Manual focus |
-| --- | --- | --- | --- |
-| Naya | `naya@ops.bidanapp.id` | support | support desk urgency mix and seeded command-center context |
-| Rani | `rani@ops.bidanapp.id` | reviews | professional review operations and console hydration |
-| Dimas | `dimas@ops.bidanapp.id` | ops | appointment and customer-side operational context |
-| Vina | `vina@ops.bidanapp.id` | catalog | studio and service-table mutations |
+| Case | Persona | Email | Focus area | Manual focus |
+| --- | --- | --- | --- | --- |
+| `ADM-01` | Naya | `naya@ops.bidanapp.id` | support | support desk urgency mix and seeded command-center context using `ADM-CUS-1056`, `ADM-CUS-1048`, and `ADM-CUS-1036` |
+| `ADM-02` | Rani | `rani@ops.bidanapp.id` | reviews | professional review operations and console hydration using `omeya-sen`, `rani-hartati`, and `ADM-CUS-1036` |
+| `ADM-03` | Dimas | `dimas@ops.bidanapp.id` | ops | appointment and customer-side operational context using `ADM-CUS-1048` and `apt-007` |
+| `ADM-04` | Vina | `vina@ops.bidanapp.id` | catalog | studio and service-table mutations using `s5 / konsultasi-laktasi`, `ADM-PRO-2069`, and `clara-wijaya` |
 
 ## 5. Coverage Matrix
 
@@ -191,55 +193,57 @@ Current professional portal review-state counts from the comprehensive seed:
 
 ### Visitor and public browsing
 
-1. Open `/id` and `/en`, verify onboarding renders cleanly and language switcher changes copy.
-2. Continue as visitor, then open `/id/home`, `/id/explore`, and `/id/services`.
-3. Open `/id/p/clara-wijaya` and confirm a `published` professional is visible in public catalog and detail views.
-4. Open `/id/s/pijat-bayi`, continue into professional selection, and confirm service-to-professional routing stays consistent.
+1. Run `PUB-01`: open `/id` and `/en`, verify onboarding renders cleanly and language switching changes route plus copy.
+2. Run `PUB-02`: continue as a visitor, then open `/id/home`, `/id/explore`, and `/id/services`.
+3. Run `PUB-03`: open `/id/p/clara-wijaya` and confirm the `published` professional is visible in public catalog and detail views.
+4. Run `PUB-04`: open `/id/s/konsultasi-laktasi`, continue into professional selection, and confirm service-to-professional routing stays consistent.
 
 ### Customer flow: Alya Rahma
 
-1. Login at `/id/auth/customer` with `+6281234567890` and `Customer2026A`.
+1. Run `CUS-01`: login at `/id/auth/customer` with `+6281234567890` and `Customer2026A`.
 2. Open `/id/profile` and confirm session, profile data, and preferences hydrate immediately after login.
 3. Open `/id/notifications` and confirm some appointment-related alerts are already read while others remain unread.
-4. Open `/id/appointments`, then inspect active rows across request, payment, confirmed, and in-service branches.
-5. Open an appointment chat thread and verify seeded history appears before sending a new message.
+4. Open `/id/appointments`, then inspect active rows like `apt-005` and `apt-004`.
+5. Open thread `thread-apt-005` and verify seeded history appears before sending a new message.
 
 ### Customer flow: Nadia Prameswari
 
-1. Login with `+628119021456` and `Customer2026A` at `/id/auth/customer`.
+1. Run `CUS-02`: login with `+628119021456` and `Customer2026A` at `/id/auth/customer`.
 2. Confirm unread badges are still visible because no relevant notification has been pre-read.
-3. Open the `requested` appointment state and verify request-status cards, next steps, and confirmation copy align with backend state.
+3. Open `seed-qa-ibu-nadia-requested` and verify request-status cards, next steps, and confirmation copy align with backend state.
 4. Edit customer profile fields, refresh the page, and verify the mutation persists.
 
 ### Customer flow: Hendra Saputra
 
-1. Login with `+6287812009087` and `Customer2026A` at `/id/auth/customer`.
-2. Open completed and cancelled appointment history rows.
+1. Run `CUS-03`: login with `+6287812009087` and `Customer2026A` at `/id/auth/customer`.
+2. Open completed and cancelled appointment history rows like `seed-qa-mr-hendra-completed` and `seed-qa-mr-hendra-cancelled`.
 3. Verify timeline, cancellation context, and review/history surfaces remain coherent for closed journeys.
 4. Switch between service detail and professional detail screens and confirm favorites plus location context stay stable.
 
 ### Professional flows by review state
 
 1. Login at `/id/for-professionals` with the persona phone and `Professional2026A`.
-2. For Clara (`+6281370000001`), verify requests, services, trust, and coverage edits persist after refresh and that public surfaces reflect the `published` state.
-3. For Omeya (`+6281370000002`), verify the `submitted` state is visible and editing or publish actions remain gated.
-4. For Rani (`+6281370000003`), confirm admin feedback is visible, update portfolio or coverage data, and resubmit.
-5. For Martha (`+6281370000004`), confirm the `verified` state is visible and the account is ready for final publish action.
-6. For Alex (`+6281370000005`), verify draft/onboarding prompts, empty services, and incomplete coverage behavior.
-7. For Dimas (`+6281370000006`), verify the `ready_for_review` warning path when services exist but the featured-service requirement is still unmet.
+2. Run `PRO-01` for Clara (`+6281370000001`) and verify requests, services, trust, and coverage edits persist after refresh while public surfaces reflect `clara-wijaya`.
+3. Run `PRO-02` for Omeya (`+6281370000002`) and verify the `submitted` state is visible and editing or publish actions remain gated.
+4. Run `PRO-03` for Rani (`+6281370000003`) and confirm admin feedback is visible, update portfolio or coverage data, and resubmit.
+5. Run `PRO-04` for Martha (`+6281370000004`) and confirm the `verified` state is visible and the account is ready for final publish action.
+6. Run `PRO-05` for Alex (`+6281370000005`) and verify draft or onboarding prompts, empty services, and incomplete coverage behavior.
+7. Run `PRO-06` for Dimas (`+6281370000006`) and verify the `ready_for_review` warning path when services exist but the featured-service requirement is still unmet.
 
 ### Admin flows
 
 1. Login at `/admin/login` with one of the seeded emails and the password from `ADMIN_CONSOLE_CREDENTIALS_JSON`.
-2. Open `/admin/support` and verify urgent, high, and normal tickets are present together with seeded command-center context.
-3. Open `/admin/studio` and verify admin console tables hydrate from backend state without browser-only fallback data.
-4. Open customers, professionals, services, and appointments modules to confirm the console and support desk stay in sync after refresh.
-5. Make a safe admin mutation on a table row and verify granular table sync persists to backend state and is reflected by the matching runtime surface after refresh.
+2. Run `ADM-01`: open `/admin/support` and verify urgent, high, and normal tickets are present together with seeded command-center context.
+3. Run `ADM-02`: open `/admin/professionals` and verify review-oriented tables stay hydrated from backend state.
+4. Run `ADM-03`: open customers and appointments modules to confirm the console stays in sync after refresh.
+5. Run `ADM-04`: open `/admin/services` and `/admin/studio`, make a safe admin mutation on a table row, and verify granular table sync persists to backend state.
 
 ## 7. How To Use The JSON Report
 
 The JSON report is the easiest way to drive manual or automated QA because it exposes:
 
+- `manualQaCases`
+- `sampleEntityRefs`
 - `coveredCities`
 - `customerScenarios`
 - `professionalScenarios`
@@ -253,15 +257,15 @@ The JSON report is the easiest way to drive manual or automated QA because it ex
 Useful examples:
 
 ```bash
-npm --silent run seed:backend:json | jq '.customerScenarios'
+npm --silent run qa:manual:summary | jq '.manualQaCases[] | {id, titleEn, sampleEntityRefs}'
 ```
 
 ```bash
-npm --silent run seed:backend:json | jq '.professionalScenarios[] | {professionalId, reviewStatus, suggestedChecks}'
+npm --silent run qa:manual:summary | jq '.professionalScenarios[] | {professionalId, reviewStatus, suggestedChecks}'
 ```
 
 ```bash
-npm --silent run seed:backend:json | jq '.bearerTokens'
+npm --silent run qa:manual:summary | jq '.bearerTokens'
 ```
 
 ## 8. Recommended Verification Flow
@@ -279,7 +283,7 @@ Use the seed summary to run this quick sweep:
 For a self-contained backend smoke sweep, use:
 
 ```bash
-npm run smoke:seeded
+npm run qa:manual:smoke
 ```
 
 This command will:
@@ -294,7 +298,7 @@ This command will:
 If you already have the backend running, reuse it instead:
 
 ```bash
-npm run smoke:seeded -- --reuse-backend --base-url=http://127.0.0.1:8080/api/v1
+npm run qa:manual:smoke -- --reuse-backend --base-url=http://127.0.0.1:8080/api/v1
 ```
 
 For seeded browser E2E against the same dataset:

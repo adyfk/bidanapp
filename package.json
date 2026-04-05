@@ -29,6 +29,8 @@
     "mcp:playwright:install": "npx playwright install chromium",
     "mcp:qa": "npm run smoke:seeded && npm run test:e2e:frontend",
     "qa:manual:setup": "npm run infra:up && npm run atlas:apply --workspace @bidanapp/backend && npm run seed:backend",
+    "qa:manual:summary": "npm run seed:backend:json",
+    "qa:manual:smoke": "npm run smoke:seeded",
     "smoke:seeded": "node ./scripts/qa/run-seeded-smoke.mjs",
     "seed:backend": "npm run seed --workspace @bidanapp/backend",
     "seed:backend:json": "npm run seed:json --workspace @bidanapp/backend",

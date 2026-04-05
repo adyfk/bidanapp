@@ -23,9 +23,13 @@ func TestSummaryWriteReportIncludesScenarioMatrices(t *testing.T) {
 		BearerTokens: []BearerToken{
 			{Role: "admin", Description: "Seeded admin API session", Token: "seed-admin-token"},
 		},
-		ChatMessageCount:                3,
-		ChatThreadCount:                 2,
-		CoveredCities:                   []string{"Bandung", "Jakarta Selatan", "Surabaya"},
+		ChatMessageCount: 3,
+		ChatThreadCount:  2,
+		CoveredCities:    []string{"Bandung", "Jakarta Selatan", "Surabaya"},
+		ManualQACases: []ManualQACase{
+			{ID: "PUB-01"},
+			{ID: "CUS-01"},
+		},
 		PublishedReadModelDocumentCount: 10,
 		CustomerAccounts: []AccountLogin{
 			{ID: "guest-primary", Phone: "+628123", Password: "Customer2026A"},
@@ -45,6 +49,9 @@ func TestSummaryWriteReportIncludesScenarioMatrices(t *testing.T) {
 		ProfessionalNotificationStateCount: 1,
 		ProfessionalScenarios: []ProfessionalScenario{
 			{ProfessionalID: "prof-01", DisplayName: "Nadia", ReviewStatus: "published", CoverageReady: true, ServicesReady: true, HasFeaturedService: true, AppointmentStatuses: []string{"confirmed"}},
+		},
+		SampleEntityRefs: []SampleEntityRef{
+			{Kind: "service", ID: "svc-01", Label: "Sample service"},
 		},
 		Scenario:                  "comprehensive",
 		SupportedAppointmentModes: []string{"home_visit", "online", "onsite"},
@@ -66,6 +73,9 @@ func TestSummaryWriteReportIncludesScenarioMatrices(t *testing.T) {
 		"service_modes: home_visit, online, onsite",
 		"booking_flows: instant, request",
 		"appointment_modes: home_visit, online, onsite",
+		"manual_qa_cases: 2",
+		"manual_qa_case_ids: PUB-01, CUS-01",
+		"sample_entity_refs: 1",
 		"customer scenario matrix",
 		"professional scenario matrix",
 		"admin identities",

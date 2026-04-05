@@ -56,7 +56,9 @@ If you are new to the repository, read these documents in order:
 - [QA Seed Matrix](./qa-seed-matrix.md)
   How to reset the full runtime seed, which states and actors it creates, and how to use the report for product verification.
 - [Manual QA Playbook](./manual-qa-playbook.md)
-  Single-file setup, seeded-account, route, and checklist guide for repeatable manual QA on the seeded runtime.
+  English single-file setup, seeded-account, route, and checklist guide for repeatable manual QA on the seeded runtime.
+- [Manual QA Playbook (Bahasa Indonesia)](./manual-qa-playbook.id.md)
+  Pendamping berbahasa Indonesia untuk manual QA pada seeded runtime dengan case IDs dan contoh entity yang sama.
 - [Seed Data Contract](./seed-data-contract.md)
   Shape and ownership of the backend-owned normalized JSON seed dataset used by remaining read-model/bootstrap surfaces.
 - [Seed Data Blueprint](./seed-data/README.md)
