@@ -45,6 +45,10 @@ If you are new to the repository, read these documents in order:
   Pre-deploy checklist, env validation, migrations, Docker rollout, post-deploy smoke, and rollback flow.
 - [MCP Workspace Setup](./mcp-workspace.md)
   Workspace MCP servers, VS Code tasks, and the recommended browser-driven QA workflow for this project.
+- [QA Visual Reporting](./qa-visual-reporting.md)
+  Repo-local guidance for the trimmed QA toolchain: seeded evidence capture, Trace Viewer, and the manual QA storyboard page with legacy report layers removed.
+- [Playwright Trace Viewer Guide](./playwright-trace-viewer.md)
+  How to generate Playwright traces in lightweight or seeded mode, target one QA case ID, and open the latest trace archive quickly.
 - [System Flow Diagrams](./system-flow-diagrams.md)
   Detailed maintenance-oriented diagrams for runtime ownership, request flow, auth, portal state, chat, QA seed, and deploy paths.
 - [User-Facing Flow Diagrams](./user-facing-flow-diagrams.md)
@@ -108,6 +112,7 @@ Start with:
 ## How To Maintain These Docs
 
 - Update the relevant handbook page whenever behavior, commands, or file ownership changes.
+- If package scripts or QA entrypoints change, update the root [README](../README.md) Script Guide in the same change so the quick memory map stays accurate.
 - If a new subsystem is introduced, add it to [Architecture](./architecture.md) and to this index.
 - If a change affects onboarding, update [Getting Started](./getting-started.md).
 - If a change affects PR, release, or deploy flow, update [Development Workflow](./development-workflow.md) and [Operations](./operations.md).

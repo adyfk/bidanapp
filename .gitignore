@@ -12,10 +12,10 @@
 
 # testing
 /coverage
-/playwright-report
 /test-results
-apps/frontend/playwright-report
 apps/frontend/test-results
+apps/frontend/allure-results
+apps/frontend/manual-qa-summary
 
 # next.js
 /.next/

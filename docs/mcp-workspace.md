@@ -15,6 +15,10 @@ This repository now includes a workspace-level MCP setup aimed at browser-driven
   - installing the Playwright browser
   - running seeded API smoke
   - running browser E2E
+  - running browser E2E with traces
+  - running seeded browser E2E with traces
+  - running seeded browser E2E for storyboard evidence
+  - opening the latest Playwright trace
   - running the combined MCP QA sweep
 
 ## Why These Servers
@@ -100,6 +104,24 @@ npm run seed:backend
 npm run test:e2e:frontend
 ```
 
+### Browser E2E with Trace Viewer artifacts
+
+```bash
+npm run test:e2e:frontend:trace
+npm run test:e2e:frontend:trace:seeded
+npm run trace:show:frontend
+npm run manual-qa:summary:open:frontend
+```
+
+Run a single seeded manual QA case and open its trace:
+
+```bash
+npm run test:e2e:frontend:trace:seeded -- --grep "CUS-02"
+npm run trace:show:frontend -- CUS-02
+npm run test:e2e:frontend:evidence:seeded -- --grep "CUS-02"
+npm run manual-qa:summary:generate:frontend
+```
+
 ### Seeded API smoke only
 
 ```bash
@@ -115,6 +137,9 @@ npm run mcp:qa
 ## Maintenance Notes
 
 - Playwright MCP artifacts are written under `./.artifacts/mcp/playwright` and are gitignored.
+- Local Playwright test traces are written under `apps/frontend/test-results` and are gitignored.
+- Raw seeded evidence for the summary generator is written under `apps/frontend/allure-results`.
+- The custom manual QA summary page is written under `apps/frontend/manual-qa-summary`.
 - Keep `.vscode/mcp.json` focused on stable, shared workspace servers only.
 - If the frontend or backend default URLs change, update this document and the VS Code tasks together.
 - If a new team client does not read `.vscode/mcp.json`, copy the same server definitions into that client's MCP config.

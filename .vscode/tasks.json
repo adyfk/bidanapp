@@ -70,6 +70,66 @@
       "problemMatcher": []
     },
     {
+      "label": "BidanApp: run browser E2E with trace",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "test:e2e:frontend:trace"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "BidanApp: run seeded browser E2E with trace",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "test:e2e:frontend:trace:seeded"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "BidanApp: run seeded browser E2E for storyboard evidence",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "test:e2e:frontend:evidence:seeded"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "BidanApp: open latest Playwright trace",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "trace:show:frontend"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "BidanApp: generate manual QA summary page",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "manual-qa:summary:generate:frontend"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "BidanApp: open manual QA summary page",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "manual-qa:summary:open:frontend"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "BidanApp: run MCP QA sweep",
       "type": "shell",
       "command": "npm",

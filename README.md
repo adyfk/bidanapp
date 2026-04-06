@@ -77,6 +77,94 @@ npm run mcp:playwright:install
 npm run mcp:qa
 ```
 
+## Script Guide
+
+This section is meant to be the quick memory refresh when you open the repo again later.
+
+### Daily development
+
+- `npm run dev`
+  Runs frontend and backend together through Turborepo.
+- `npm run dev:frontend`
+  Runs only the Next.js frontend.
+- `npm run dev:backend`
+  Runs only the Go backend.
+- `npm run build`
+  Builds all workspace packages and apps.
+- `npm run lint`
+  Runs the repo lint flow.
+- `npm run typecheck`
+  Runs workspace type checking.
+- `npm run test`
+  Runs the default test suites.
+- `npm run check`
+  Runs the standard local quality gate: lint, typecheck, i18n audit, tests, and build.
+- `npm run ci:check`
+  Runs the broader CI-style validation flow, including contract generation and generated-file checks.
+
+### Seeded QA data setup
+
+- `npm run qa:manual:setup`
+  Brings up local infra, applies backend migrations, and reseeds the backend to the canonical manual-QA dataset. Use this before any deterministic QA pass.
+- `npm run qa:manual:summary`
+  Prints the machine-readable summary of the seeded QA pack so you can confirm actors, states, and coverage after reseeding.
+- `npm run qa:manual:smoke`
+  Runs the lightweight seeded smoke pass used as a quick backend or runtime sanity check before heavier browser work.
+- `npm run mcp:playwright:install`
+  Installs the Playwright Chromium browser used by local E2E and MCP browser automation. Usually needed once per machine.
+
+### Browser E2E and debugging
+
+- `npm run test:e2e:frontend`
+  Runs the frontend Playwright suite with default settings.
+- `npm run test:e2e:frontend:headed`
+  Runs the same E2E suite in headed mode for manual observation.
+- `npm run test:e2e:frontend:trace`
+  Runs E2E while writing Playwright trace artifacts for debugging.
+- `npm run test:e2e:frontend:trace:seeded`
+  Runs the seeded QA matrix with Playwright traces enabled.
+- `npm run trace:show:frontend`
+  Opens the newest trace archive found under frontend test artifacts.
+- `npm run trace:show:frontend -- <CASE-ID>`
+  Opens the newest trace that matches one case such as `PUB-01` or `PRO-03`.
+
+### Storyboard documentation workflow
+
+- `npm run test:e2e:frontend:evidence`
+  Runs browser E2E and writes raw evidence under `apps/frontend/allure-results`.
+- `npm run test:e2e:frontend:evidence:seeded`
+  Runs the seeded manual-QA matrix and writes the raw evidence used by the storyboard generator. It also clears the previous summary output and sweeps leftover legacy report folders before each run.
+- `npm run manual-qa:summary:generate:frontend`
+  Generates the custom storyboard page under `apps/frontend/manual-qa-summary` from the raw evidence results.
+- `npm run manual-qa:summary:open:frontend`
+  Opens the generated storyboard page locally.
+
+### QA flow to remember
+
+Use this order when you want the seeded browser flow from start to finish:
+
+1. `npm run qa:manual:setup`
+2. `npm run mcp:playwright:install`
+3. `npm run test:e2e:frontend:evidence:seeded`
+4. `npm run manual-qa:summary:generate:frontend`
+5. `npm run manual-qa:summary:open:frontend`
+6. Optional: `npm run trace:show:frontend -- <CASE-ID>` for deep debugging
+
+### Important QA folders
+
+- `apps/frontend/allure-results`
+  Raw evidence cache produced by the `allure-playwright` reporter. This is input data, not a final report meant for reading directly.
+- `apps/frontend/manual-qa-summary`
+  The final storyboard-style HTML document generated from the raw evidence.
+- `apps/frontend/test-results`
+  Playwright runtime artifacts such as traces, screenshots, and videos.
+
+Important note:
+
+- the output folder still uses the name `allure-results` because it is produced by the `allure-playwright` raw reporter
+- this repo no longer has Playwright HTML report or Allure HTML report workflows
+- treat `allure-results` as internal evidence storage for the storyboard generator
+
 ## Seeded QA Quickstart
 
 For a repeatable local QA run with a fully restored runtime matrix:
@@ -86,7 +174,8 @@ npm run qa:manual:setup
 npm run qa:manual:summary
 npm run qa:manual:smoke
 npm run mcp:playwright:install
-PLAYWRIGHT_BACKEND_MODE=seeded npm run test:e2e:frontend
+npm run test:e2e:frontend:evidence:seeded
+npm run manual-qa:summary:generate:frontend
 ```
 
 The seeded runtime is designed to cover:
@@ -103,6 +192,8 @@ Use these docs together when running manual or automated QA:
 
 - [docs/manual-qa-playbook.md](docs/manual-qa-playbook.md) for the English operator guide
 - [docs/manual-qa-playbook.id.md](docs/manual-qa-playbook.id.md) for the Bahasa Indonesia operator guide
+- [docs/qa-visual-reporting.md](docs/qa-visual-reporting.md) for the trimmed storyboard and trace workflow
+- [docs/playwright-trace-viewer.md](docs/playwright-trace-viewer.md) for case-by-case Trace Viewer usage in lightweight and seeded mode
 - [docs/qa-seed-matrix.md](docs/qa-seed-matrix.md) for exact seeded accounts, route suggestions, and manual test checklists
 - [docs/user-flows/README.md](docs/user-flows/README.md) for persona-by-persona product walkthroughs
 - [docs/getting-started.md](docs/getting-started.md) for local setup and infra prerequisites
@@ -140,6 +231,8 @@ Read [docs/README.md](docs/README.md) first for the full handbook. The most usef
 - [docs/operations.md](docs/operations.md)
 - [docs/environment.md](docs/environment.md)
 - [docs/mcp-workspace.md](docs/mcp-workspace.md)
+- [docs/qa-visual-reporting.md](docs/qa-visual-reporting.md)
+- [docs/playwright-trace-viewer.md](docs/playwright-trace-viewer.md)
 - [docs/system-flow-diagrams.md](docs/system-flow-diagrams.md)
 - [docs/user-facing-flow-diagrams.md](docs/user-facing-flow-diagrams.md)
 - [docs/user-flows/README.md](docs/user-flows/README.md)

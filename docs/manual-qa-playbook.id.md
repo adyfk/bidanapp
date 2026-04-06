@@ -7,6 +7,8 @@ Jika operator Anda lebih nyaman dengan dokumen teknis berbahasa Inggris, gunakan
 Gunakan referensi ini saat butuh konteks lebih dalam:
 
 - [Getting Started](./getting-started.md)
+- [QA Visual Reporting](./qa-visual-reporting.md)
+- [Playwright Trace Viewer Guide](./playwright-trace-viewer.md)
 - [QA Seed Matrix](./qa-seed-matrix.md)
 - [User Flow Pack](./user-flows/README.md)
 - [Seed Data Blueprint](./seed-data/README.md)
@@ -199,7 +201,15 @@ Jalankan browser E2E pada dataset yang sama:
 
 ```bash
 npm run mcp:playwright:install
-PLAYWRIGHT_BACKEND_MODE=seeded npm run test:e2e:frontend
+npm run test:e2e:frontend:evidence:seeded
+npm run manual-qa:summary:generate:frontend
+```
+
+Jalankan satu case manual QA dengan trace tersendiri:
+
+```bash
+npm run test:e2e:frontend:trace:seeded -- --grep "PRO-03"
+npm run trace:show:frontend -- PRO-03
 ```
 
 ## 9. Sumber Kebenaran
@@ -208,6 +218,8 @@ Gunakan playbook ini sebagai panduan operasional singkat.
 
 Saat butuh detail lebih dalam, gunakan:
 
+- [QA Visual Reporting](./qa-visual-reporting.md) untuk workflow storyboard dan trace yang sudah diringkas
+- [Playwright Trace Viewer Guide](./playwright-trace-viewer.md) untuk capture dan inspeksi trace per case
 - [QA Seed Matrix](./qa-seed-matrix.md) untuk peta skenario, count, dan contoh CLI yang lebih lengkap
 - [User Flow Pack](./user-flows/README.md) untuk perilaku produk per layar
 - [Seed Data Blueprint](./seed-data/README.md) untuk model seed ternormalisasi yang mendasari seluruh skenario ini

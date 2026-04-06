@@ -7,6 +7,8 @@ If your testers prefer Bahasa Indonesia, use the companion guide: [Manual QA Pla
 Use these references when you need more detail:
 
 - [Getting Started](./getting-started.md)
+- [QA Visual Reporting](./qa-visual-reporting.md)
+- [Playwright Trace Viewer Guide](./playwright-trace-viewer.md)
 - [QA Seed Matrix](./qa-seed-matrix.md)
 - [User Flow Pack](./user-flows/README.md)
 - [Seed Data Blueprint](./seed-data/README.md)
@@ -199,7 +201,15 @@ Run browser E2E against the same seeded dataset:
 
 ```bash
 npm run mcp:playwright:install
-PLAYWRIGHT_BACKEND_MODE=seeded npm run test:e2e:frontend
+npm run test:e2e:frontend:evidence:seeded
+npm run manual-qa:summary:generate:frontend
+```
+
+Run one manual QA case with its own dedicated trace:
+
+```bash
+npm run test:e2e:frontend:trace:seeded -- --grep "PRO-03"
+npm run trace:show:frontend -- PRO-03
 ```
 
 ## 9. Source Of Truth
@@ -208,6 +218,8 @@ Use this playbook as the short operational guide.
 
 Use the deeper docs when needed:
 
+- [QA Visual Reporting](./qa-visual-reporting.md) for the trimmed storyboard and trace workflow
+- [Playwright Trace Viewer Guide](./playwright-trace-viewer.md) for case-specific trace capture and inspection
 - [QA Seed Matrix](./qa-seed-matrix.md) for the full seeded scenario map, counts, and CLI examples
 - [User Flow Pack](./user-flows/README.md) for screen-by-screen product behavior
 - [Seed Data Blueprint](./seed-data/README.md) for the normalized seed model behind these scenarios
