@@ -27,7 +27,7 @@ import {
 import { ProfileSupportEntryCard, ProfileSupportSheet } from '@/features/profile/components/ProfileSupportCenter';
 import { useRouter } from '@/i18n/routing';
 import { sanitizePhoneValue } from '@/lib/form-input';
-import { APP_ROUTES, professionalDashboardRoute, professionalRoute } from '@/lib/routes';
+import { APP_ROUTES, professionalDashboardRoute, professionalPreviewRoute } from '@/lib/routes';
 import { useProfessionalAuthSession } from '@/lib/use-professional-auth-session';
 import { useProfessionalPortal } from '@/lib/use-professional-portal';
 
@@ -303,7 +303,7 @@ export const ProfessionalProfileScreen = () => {
               icon={<UserRound className="h-5 w-5" />}
               title={t('quickActions.publicProfileTitle')}
               description={t('quickActions.publicProfileDescription')}
-              onClick={() => router.push(professionalRoute(activeProfessional.slug))}
+              onClick={() => router.push(professionalPreviewRoute(activeProfessional.slug))}
             />
           </div>
 

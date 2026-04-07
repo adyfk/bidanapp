@@ -50,12 +50,14 @@ export interface ProfessionalServiceEntry {
 }
 
 export const useProfessionalDetail = ({
+  allowProfessionalPreview = true,
   areas,
   categories,
   initialProfessional = null,
   professionalSlug,
   services,
 }: {
+  allowProfessionalPreview?: boolean;
   areas: Area[];
   categories: Category[];
   initialProfessional?: Professional | null;
@@ -80,7 +82,7 @@ export const useProfessionalDetail = ({
   } = useProfessionalPortal();
 
   const professional = professionalSlug
-    ? (isProfessional ? getPreviewProfessionalBySlug(professionalSlug) : null) ||
+    ? (allowProfessionalPreview && isProfessional ? getPreviewProfessionalBySlug(professionalSlug) : null) ||
       initialProfessional ||
       getPublicProfessionalBySlug(professionalSlug) ||
       null

@@ -88,6 +88,12 @@ export {
   updateCustomerAuthPassword,
 } from './adapters/customer-auth';
 export {
+  fetchCatalog,
+  fetchProfessionalBySlug,
+  type PublicDirectoryCatalog,
+  type PublicDirectoryProfessional,
+} from './adapters/directory';
+export {
   createProfessionalAuthSession,
   deleteProfessionalAuthSession,
   fetchProfessionalAuthSession,

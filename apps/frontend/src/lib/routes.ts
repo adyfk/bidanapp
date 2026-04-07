@@ -5,6 +5,7 @@ import type { ServiceDeliveryMode } from '@/types/catalog';
 export type CustomerAccessIntent = 'general' | 'activity' | 'profile' | 'booking' | 'notifications';
 export type ProfessionalAccessTab = 'login' | 'register';
 export type ProfessionalRequestRouteStatus = 'new' | 'quoted' | 'scheduled' | 'completed';
+export type ProfessionalPublicSection = 'overview' | 'services' | 'reviews' | 'about';
 export const PROFESSIONAL_DASHBOARD_TABS = [
   'requests',
   'services',
@@ -30,8 +31,9 @@ export const APP_ROUTES = {
   notifications: '/notifications' as Route,
 } as const;
 
-export function professionalRoute(
+export function professionalSectionRoute(
   slug: string,
+  section: ProfessionalPublicSection,
   params: { mode?: ServiceDeliveryMode; serviceId?: string } = {},
 ): Route {
   const query = new URLSearchParams();
@@ -44,17 +46,29 @@ export function professionalRoute(
     query.set('mode', params.mode);
   }
 
+  const basePath = section === 'overview' ? `/p/${slug}` : `/p/${slug}/${section}`;
   const queryString = query.toString();
 
   if (!queryString) {
-    return `/p/${slug}` as Route;
+    return basePath as Route;
   }
 
-  return `/p/${slug}?${queryString}` as Route;
+  return `${basePath}?${queryString}` as Route;
+}
+
+export function professionalRoute(
+  slug: string,
+  params: { mode?: ServiceDeliveryMode; serviceId?: string } = {},
+): Route {
+  return professionalSectionRoute(slug, 'overview', params);
 }
 
 export function professionalDashboardRoute(tab: ProfessionalDashboardTab = PROFESSIONAL_DASHBOARD_DEFAULT_TAB): Route {
   return `/for-professionals/dashboard/${tab}` as Route;
+}
+
+export function professionalPreviewRoute(slug: string): Route {
+  return `/for-professionals/preview/${slug}` as Route;
 }
 
 export function professionalDashboardRequestsRoute(

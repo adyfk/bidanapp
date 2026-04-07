@@ -1,14 +1,15 @@
+import { createBidanappApiClient, fetchCatalog } from '@bidanapp/sdk';
 import type { MetadataRoute } from 'next';
 import { routing } from '@/i18n/routing';
+import { getBackendApiBaseUrl } from '@/lib/backend';
 import { APP_CONFIG } from '@/lib/config';
-import { getPublicBootstrapData } from '@/lib/public-bootstrap';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = APP_CONFIG.baseUrl;
   const locales = routing.locales;
-  const bootstrap = await getPublicBootstrapData();
+  const client = createBidanappApiClient(getBackendApiBaseUrl());
 
   // Base routes that exist in the app
   const defaultRoutes = ['', '/home', '/explore', '/services', '/appointments', '/profile'];
@@ -23,25 +24,34 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   );
 
-  // Map dynamic professional routes for all locales
-  const professionalRoutes: MetadataRoute.Sitemap = bootstrap.catalog.professionals.flatMap((prof) =>
-    locales.map((locale) => ({
-      url: `${baseUrl}/${locale}/p/${prof.slug}`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.7,
-    })),
-  );
+  try {
+    const catalog = await fetchCatalog(client);
 
-  // Map dynamic service routes for all locales
-  const serviceRoutes: MetadataRoute.Sitemap = bootstrap.catalog.services.flatMap((svc) =>
-    locales.map((locale) => ({
-      url: `${baseUrl}/${locale}/s/${svc.slug}`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.7,
-    })),
-  );
+    // Map dynamic professional routes for all locales
+    const professionalRoutes: MetadataRoute.Sitemap = (catalog.professionals as Array<{ slug: string }>).flatMap(
+      (prof) =>
+        ['', '/services', '/reviews', '/about'].flatMap((suffix) =>
+          locales.map((locale) => ({
+            url: `${baseUrl}/${locale}/p/${prof.slug}${suffix}`,
+            lastModified: new Date(),
+            changeFrequency: 'weekly' as const,
+            priority: suffix === '' ? 0.8 : 0.7,
+          })),
+        ),
+    );
 
-  return [...mappedRoutes, ...professionalRoutes, ...serviceRoutes];
+    // Map dynamic service routes for all locales
+    const serviceRoutes: MetadataRoute.Sitemap = (catalog.services as Array<{ slug: string }>).flatMap((svc) =>
+      locales.map((locale) => ({
+        url: `${baseUrl}/${locale}/s/${svc.slug}`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.7,
+      })),
+    );
+
+    return [...mappedRoutes, ...professionalRoutes, ...serviceRoutes];
+  } catch {
+    return mappedRoutes;
+  }
 }

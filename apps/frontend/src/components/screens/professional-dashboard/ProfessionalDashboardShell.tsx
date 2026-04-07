@@ -13,7 +13,7 @@ import {
   PROFESSIONAL_DASHBOARD_TABS,
   type ProfessionalDashboardTab,
   professionalDashboardRoute,
-  professionalRoute,
+  professionalPreviewRoute,
 } from '@/lib/routes';
 import { useProfessionalNotifications } from '@/lib/use-professional-notifications';
 import type { ProfessionalLifecycleReviewState } from '@/lib/use-professional-portal';
@@ -150,7 +150,7 @@ export const ProfessionalDashboardShell = ({
             icon={<UserRound className="h-4 w-4" />}
             title={t('actions.viewPublicProfile')}
             variant="primary"
-            onClick={() => router.push(professionalRoute(activeProfessional.slug))}
+            onClick={() => router.push(professionalPreviewRoute(activeProfessional.slug))}
           />
           <DashboardActionButton
             icon={<Compass className="h-4 w-4" />}

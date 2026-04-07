@@ -458,7 +458,7 @@ export const AdminConsoleShell = ({ children }: AdminConsoleShellProps) => {
                 </div>
                 <div>
                   <SectionEyebrow label="Admin Dashboard" tone="light" />
-                  <p className="mt-1 text-lg font-bold text-white">BidanApp Ops</p>
+                  <p className="mt-1 text-lg font-bold text-white">BidanApp Ops Console</p>
                 </div>
               </div>
 
