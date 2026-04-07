@@ -16,6 +16,14 @@ import {
 import type { Route } from 'next';
 import Link from 'next/link';
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
+import {
+  adminBadgeClass,
+  adminInsetSurfaceClass,
+  adminMonoClass,
+  adminPrimaryButtonClass,
+  adminSecondaryButtonClass,
+  adminSurfaceClass,
+} from '@/components/screens/admin/admin-theme';
 import { StandardCurrencyInput, StandardPhoneInput, StandardSearchInput } from '@/components/ui/form-controls';
 import {
   buildStandardInputClass,
@@ -36,22 +44,20 @@ import type { SupportCategoryId } from '@/types/admin';
 import type { AppointmentStatus } from '@/types/appointments';
 import type { ProfessionalRow } from '@/types/seed-data';
 
-const panelClass = 'rounded-[30px] border border-slate-200 bg-white p-5 shadow-[0_22px_50px_-38px_rgba(15,23,42,0.35)]';
-const inputClass = buildStandardInputClass({
+const panelClass = `${adminSurfaceClass} p-5`;
+const inputClass = `${buildStandardInputClass({
   accent: 'slate',
-  surface: 'muted',
-});
+  surface: 'soft',
+})} bg-white`;
 const textareaClass = `${inputClass} min-h-[130px] resize-y`;
 const labelClass = standardFieldLabelClass;
-const buttonPrimaryClass =
-  'inline-flex items-center justify-center rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800';
-const buttonSecondaryClass =
-  'inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50';
+const buttonPrimaryClass = adminPrimaryButtonClass;
+const buttonSecondaryClass = adminSecondaryButtonClass;
 const compactSelectClass = `${buildStandardSelectClass({
   accent: 'slate',
   surface: 'soft',
-})} px-3 py-2 text-xs font-semibold`;
-const checkboxClass = 'mt-1 h-4 w-4 rounded border border-slate-300 text-slate-900 focus:ring-2 focus:ring-slate-300';
+})} bg-white px-3 py-2 text-xs font-semibold`;
+const checkboxClass = 'mt-1 h-4 w-4 rounded border border-slate-300 text-[#0f4fa8] focus:ring-2 focus:ring-sky-200';
 
 const customerSupportCategoryOptions: SupportCategoryId[] = [
   'accountAccess',
@@ -338,7 +344,7 @@ const FilterPillGroup = ({
             onClick={() => onChange(option.value)}
             className={`rounded-full border px-3 py-2 text-xs font-semibold transition ${
               isActive
-                ? 'border-slate-900 bg-slate-900 text-white'
+                ? 'border-[#0f4fa8] bg-[#0f4fa8] text-white shadow-[0_14px_28px_-20px_rgba(15,79,168,0.75)]'
                 : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900'
             }`}
           >
@@ -354,25 +360,24 @@ const FilterPillGroup = ({
 );
 
 const CompactInsightCard = ({ detail, label, value }: { detail: string; label: string; value: string }) => (
-  <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-4">
+  <div className={`${adminInsetSurfaceClass} p-4`}>
     <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">{label}</p>
-    <p className="mt-2 text-[24px] font-black tracking-[-0.03em] text-slate-950">{value}</p>
+    <p className={`mt-2 text-[24px] font-black tracking-[-0.03em] text-slate-950 ${adminMonoClass}`}>{value}</p>
     <p className="mt-2 text-sm leading-6 text-slate-500">{detail}</p>
   </div>
 );
 
 const SectionHeader = ({ eyebrow, title, description }: { eyebrow: string; title: string; description: string }) => (
-  <div className="mb-5">
+  <div className="mb-6">
     <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">{eyebrow}</p>
-    <h2 className="mt-2 text-[26px] font-black tracking-[-0.03em] text-slate-950">{title}</h2>
+    <div className="mt-3 h-1 w-16 rounded-full bg-[linear-gradient(90deg,#0f4fa8_0%,#7cc2ff_100%)]" />
+    <h2 className="mt-3 text-[28px] font-black tracking-[-0.04em] text-slate-950">{title}</h2>
     <p className="mt-2 max-w-[68ch] text-sm leading-7 text-slate-500">{description}</p>
   </div>
 );
 
 const CountBadge = ({ value }: { value: string }) => (
-  <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600">
-    {value}
-  </span>
+  <span className={`${adminBadgeClass} gap-1 text-xs normal-case tracking-[0.02em]`}>{value}</span>
 );
 
 const PanelHeader = ({
@@ -393,7 +398,7 @@ const PanelHeader = ({
       {eyebrow ? (
         <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">{eyebrow}</p>
       ) : null}
-      <h3 className={`${eyebrow ? 'mt-2' : ''} text-lg font-bold text-slate-950`}>{title}</h3>
+      <h3 className={`${eyebrow ? 'mt-2' : ''} text-[20px] font-bold tracking-[-0.02em] text-slate-950`}>{title}</h3>
       {description ? <p className="mt-2 text-sm leading-6 text-slate-500">{description}</p> : null}
       {meta?.length ? (
         <div className="mt-3 flex flex-wrap gap-2">
@@ -418,13 +423,19 @@ const StatCard = ({
   detail: string;
   icon: ReactNode;
 }) => (
-  <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_22px_48px_-38px_rgba(15,23,42,0.3)]">
-    <div className="flex items-center gap-3 text-slate-500">
-      <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-800">{icon}</div>
-      <span className="text-[12px] font-semibold uppercase tracking-[0.14em]">{title}</span>
+  <div className={`${adminSurfaceClass} p-5`}>
+    <div className="flex items-start justify-between gap-4">
+      <div>
+        <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-slate-500">{title}</p>
+        <p className={`mt-4 text-[32px] font-black tracking-[-0.05em] text-slate-950 ${adminMonoClass}`}>{value}</p>
+      </div>
+      <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-[#0f4fa8]">
+        {icon}
+      </div>
     </div>
-    <p className="mt-5 text-[30px] font-black tracking-[-0.04em] text-slate-950">{value}</p>
-    <p className="mt-2 text-sm leading-6 text-slate-500">{detail}</p>
+    <div className={`${adminInsetSurfaceClass} mt-4 px-4 py-3`}>
+      <p className="text-sm leading-6 text-slate-600">{detail}</p>
+    </div>
   </div>
 );
 
@@ -443,11 +454,13 @@ const ListButton = ({
     type="button"
     onClick={onClick}
     className={`w-full rounded-[24px] border px-4 py-4 text-left transition ${
-      active ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-slate-50 text-slate-800 hover:bg-white'
+      active
+        ? 'border-[#0f4fa8]/25 bg-[#0f4fa8]/8 text-slate-900 shadow-[0_18px_34px_-26px_rgba(15,79,168,0.45)]'
+        : 'border-slate-200 bg-slate-50/70 text-slate-800 hover:bg-white'
     }`}
   >
     <p className="text-[14px] font-semibold">{title}</p>
-    <p className={`mt-1 text-[12px] leading-5 ${active ? 'text-slate-200' : 'text-slate-500'}`}>{subtitle}</p>
+    <p className={`mt-1 text-[12px] leading-5 ${active ? 'text-slate-600' : 'text-slate-500'}`}>{subtitle}</p>
   </button>
 );
 
@@ -460,7 +473,7 @@ const Field = ({ label, children }: { label: string; children: ReactNode }) => (
 
 const MessageBanner = ({ message }: { message: string }) =>
   message ? (
-    <div className="rounded-[24px] border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-600">
+    <div className="rounded-[24px] border border-sky-200 bg-sky-50/80 px-4 py-3 text-sm leading-6 text-sky-900">
       {message}
     </div>
   ) : null;
@@ -481,7 +494,9 @@ const FilterSummaryBar = ({
   const hasActiveFilters = activeFilters.length > 0;
 
   return (
-    <div className="mt-4 flex flex-col gap-3 rounded-[22px] border border-slate-200 bg-slate-50 px-4 py-3 lg:flex-row lg:items-center lg:justify-between">
+    <div
+      className={`${adminInsetSurfaceClass} mt-4 flex flex-col gap-3 px-4 py-3 lg:flex-row lg:items-center lg:justify-between`}
+    >
       <div className="flex flex-wrap items-center gap-2">
         <CountBadge value={`${formatInteger(totalCount)} ${itemLabel}`} />
         {hasActiveFilters ? (
@@ -510,7 +525,7 @@ const FilterSummaryBar = ({
 };
 
 const EmptyStateCard = ({ title, body }: { body: string; title: string }) => (
-  <div className="rounded-[24px] border border-dashed border-slate-200 bg-slate-50 px-4 py-5">
+  <div className="rounded-[24px] border border-dashed border-slate-300 bg-slate-50/70 px-4 py-5">
     <p className="text-sm font-semibold text-slate-700">{title}</p>
     <p className="mt-2 text-sm leading-6 text-slate-500">{body}</p>
   </div>
@@ -542,7 +557,9 @@ const SelectableListButton = ({
 }) => (
   <div
     className={`flex items-start gap-3 rounded-[24px] border px-4 py-4 transition ${
-      active ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-slate-50 text-slate-800 hover:bg-white'
+      active
+        ? 'border-[#0f4fa8]/25 bg-[#0f4fa8]/8 text-slate-900 shadow-[0_18px_34px_-26px_rgba(15,79,168,0.45)]'
+        : 'border-slate-200 bg-slate-50/70 text-slate-800 hover:bg-white'
     }`}
   >
     <input
@@ -554,9 +571,9 @@ const SelectableListButton = ({
     />
     <button type="button" onClick={onClick} className="flex-1 text-left">
       <p className="text-[14px] font-semibold">{title}</p>
-      <p className={`mt-1 text-[12px] leading-5 ${active ? 'text-slate-200' : 'text-slate-500'}`}>{subtitle}</p>
+      <p className={`mt-1 text-[12px] leading-5 ${active ? 'text-slate-600' : 'text-slate-500'}`}>{subtitle}</p>
       {detail ? (
-        <p className={`mt-2 text-xs leading-6 ${active ? 'text-slate-200' : 'text-slate-500'}`}>{detail}</p>
+        <p className={`mt-2 text-xs leading-6 ${active ? 'text-slate-600' : 'text-slate-500'}`}>{detail}</p>
       ) : null}
     </button>
   </div>
@@ -576,7 +593,9 @@ const BulkActionBar = ({
   onSelectPage: () => void;
 }) =>
   count > 0 ? (
-    <div className="mt-4 flex flex-col gap-3 rounded-[22px] border border-slate-200 bg-slate-50 px-4 py-3 lg:flex-row lg:items-center lg:justify-between">
+    <div
+      className={`${adminInsetSurfaceClass} mt-4 flex flex-col gap-3 px-4 py-3 lg:flex-row lg:items-center lg:justify-between`}
+    >
       <div className="flex flex-wrap items-center gap-2">
         <CountBadge value={`${formatInteger(count)} ${label} dipilih`} />
         <button type="button" className={buttonSecondaryClass} onClick={onSelectPage}>
@@ -639,7 +658,9 @@ const PaginationControls = ({
   setPageSize: (value: number) => void;
   totalCount: number;
 }) => (
-  <div className="mt-4 flex flex-col gap-3 rounded-[22px] border border-slate-200 bg-slate-50 px-4 py-3 md:flex-row md:items-center md:justify-between">
+  <div
+    className={`${adminInsetSurfaceClass} mt-4 flex flex-col gap-3 px-4 py-3 md:flex-row md:items-center md:justify-between`}
+  >
     <p className="text-xs text-slate-500">
       {totalCount === 0 ? `Tidak ada ${itemLabel}.` : `${rangeStart}-${rangeEnd} dari ${totalCount} ${itemLabel}`}
     </p>
@@ -5605,10 +5626,7 @@ export const AdminDataStudioScreen = () => {
 };
 
 const QuickLinkCard = ({ href, title, body }: { href: Route; title: string; body: string }) => (
-  <Link
-    href={href}
-    className="rounded-[26px] border border-slate-200 bg-slate-50 p-4 transition hover:border-slate-300 hover:bg-white"
-  >
+  <Link href={href} className={`${adminInsetSurfaceClass} p-4 transition hover:border-slate-300 hover:bg-white`}>
     <div className="flex items-center justify-between gap-3">
       <div>
         <p className="text-[15px] font-semibold text-slate-950">{title}</p>

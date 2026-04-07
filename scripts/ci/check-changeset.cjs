@@ -10,7 +10,9 @@ if (!prTitle) {
 
 const match = prTitle.match(/^([a-z]+)(\([^)]+\))?(!)?:\s.+$/);
 if (!match) {
-  console.error(`PR title must follow Conventional Commits before checking changesets. Received: ${prTitle}`);
+  console.error(
+    `PR title must start with an allowed prefix such as feat:, fix:, or chore: before checking changesets. Received: ${prTitle}`,
+  );
   process.exit(1);
 }
 

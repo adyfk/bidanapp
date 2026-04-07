@@ -29,7 +29,7 @@ If you are new to the repository, read these documents in order:
 - [SDK And API Contract](./sdk.md)
   How `@bidanapp/sdk` works, why it exists, what is generated, and how FE consumes backend contracts safely.
 - [Development Workflow](./development-workflow.md)
-  Issue-first work, branch naming, Conventional Commits, Changesets, PR rules, release flow, and required local checks.
+  Issue-first work, branch naming, commit/PR prefix rules, Changesets, PR rules, release flow, and required local checks.
 - [Operations](./operations.md)
   Docker, local infra, deploy compose, release metadata, and deploy jobs.
 - [Important Knowledge](./important-knowledge.md)

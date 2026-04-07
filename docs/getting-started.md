@@ -226,7 +226,7 @@ feat/128-chat-persistence
 npm run changeset
 ```
 
-8. Open a PR with a Conventional Commit title.
+8. Open a PR with an allowed prefix such as `feat:`, `fix:`, or `chore:`.
 9. Merge with squash only after checks pass.
 
 See [Development Workflow](./development-workflow.md) for the full governance rules.

@@ -25,7 +25,7 @@ export interface AdminNavItem {
 
 const BASE_ADMIN_NAV_ITEMS: AdminNavItem[] = [
   {
-    description: 'Command center, KPI harian, dan quick actions lintas operasional.',
+    description: 'Ringkasan utama untuk KPI harian, shortcut kerja, dan status operasional lintas modul.',
     focusArea: 'all',
     href: ADMIN_ROUTES.overview,
     keywords: ['dashboard', 'kpi', 'command center', 'ringkasan', 'overview'],
@@ -33,7 +33,7 @@ const BASE_ADMIN_NAV_ITEMS: AdminNavItem[] = [
     shortLabel: 'Ops',
   },
   {
-    description: 'Profil customer, user context, linked appointments, dan runtime aktif.',
+    description: 'Profil customer, user context, appointment terkait, dan runtime yang sedang aktif.',
     focusArea: 'ops',
     href: ADMIN_ROUTES.customers,
     keywords: ['consumer', 'customer', 'runtime', 'context', 'pelanggan'],
@@ -41,7 +41,7 @@ const BASE_ADMIN_NAV_ITEMS: AdminNavItem[] = [
     shortLabel: 'Cust',
   },
   {
-    description: 'Approval FIFO, publish control, dan review lifecycle profesional.',
+    description: 'Antrean approval profesional, kontrol publish, dan tindak lanjut review yang tertahan.',
     focusArea: 'reviews',
     href: ADMIN_ROUTES.professionals,
     keywords: ['approval', 'review', 'publish', 'provider', 'profesional'],
@@ -49,7 +49,7 @@ const BASE_ADMIN_NAV_ITEMS: AdminNavItem[] = [
     shortLabel: 'Pro',
   },
   {
-    description: 'Catalog global, category, service offering, dan mode delivery.',
+    description: 'Master katalog, category, service offering, dan mode delivery yang tersedia.',
     focusArea: 'catalog',
     href: ADMIN_ROUTES.services,
     keywords: ['catalog', 'layanan', 'service', 'offering', 'kategori'],
@@ -57,7 +57,7 @@ const BASE_ADMIN_NAV_ITEMS: AdminNavItem[] = [
     shortLabel: 'Svc',
   },
   {
-    description: 'Operasional booking, timeline, dan status delivery appointment.',
+    description: 'Booking desk untuk timeline, status delivery, dan progres appointment yang aktif.',
     focusArea: 'ops',
     href: ADMIN_ROUTES.appointments,
     keywords: ['booking', 'appointment', 'timeline', 'schedule', 'ops'],
@@ -65,7 +65,7 @@ const BASE_ADMIN_NAV_ITEMS: AdminNavItem[] = [
     shortLabel: 'Appt',
   },
   {
-    description: 'Triage desk, assignment PIC, eskalasi, refund, dan SLA support.',
+    description: 'Helpdesk untuk triage ticket, assignment PIC, refund, dan pemantauan SLA support.',
     focusArea: 'support',
     href: ADMIN_ROUTES.support,
     keywords: ['support', 'ticket', 'triage', 'sla', 'refund'],
@@ -73,7 +73,7 @@ const BASE_ADMIN_NAV_ITEMS: AdminNavItem[] = [
     shortLabel: 'Desk',
   },
   {
-    description: 'Raw tables, import-export snapshot, reset baseline backend, dan audit data operasional.',
+    description: 'Data studio untuk raw tables, import-export snapshot, reset baseline, dan audit perubahan data.',
     focusArea: 'all',
     href: ADMIN_ROUTES.studio,
     keywords: ['studio', 'snapshot', 'baseline', 'import', 'export', 'reset'],

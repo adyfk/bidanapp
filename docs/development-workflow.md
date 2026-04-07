@@ -8,7 +8,7 @@ The repository follows these principles:
 
 - issue-first work tracking
 - branch naming discipline
-- Conventional Commit based PR titles
+- commit and PR titles that keep a valid release prefix
 - squash-only merge to `main`
 - Changesets for release-worthy change tracking
 - local preflight checks as the default gate
@@ -66,18 +66,20 @@ Current local hooks:
 Important nuance:
 
 - commit messages are validated locally
-- PR titles should still follow Conventional Commits
+- commit and PR titles only need a valid allowed prefix such as `feat:`, `fix:`, or `chore:`
+- the message after the prefix is freeform
 - if your Git host supports squash-only merge, the PR title remains the most important message for release semantics
 
 ## 5. PR Title Rules
 
-PR titles must follow Conventional Commits.
+PR titles must start with an allowed release prefix.
 
 Examples:
 
 - `feat(api): extend read model catalog contract`
 - `fix(chat): sanitize websocket error handling`
 - `feat(api)!: replace read model appointments contract`
+- `chore: refresh local docs after admin dashboard review`
 
 Allowed types currently include:
 
@@ -214,7 +216,7 @@ If you want Codex to choose the minimum required checks for you, use the repo-lo
 ## 12. Common Mistakes To Avoid
 
 - opening a release-worthy PR without a changeset
-- using a vague PR title that does not follow Conventional Commits
+- using a commit or PR title that does not start with an allowed prefix
 - skipping issue linkage in the PR body
 - pushing directly to `main`
 - treating app `package.json` versions as the release source of truth
