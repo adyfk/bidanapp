@@ -131,9 +131,14 @@ func (s *Service) Login(ctx context.Context, input AdminAuthCreateSessionRequest
 	if err != nil {
 		return issuedSession{}, err
 	}
+	sessionID, err := newSessionID()
+	if err != nil {
+		return issuedSession{}, err
+	}
 
 	now := time.Now().UTC()
 	session := authstore.Session{
+		ID:          sessionID,
 		ExpiresAt:   now.Add(s.sessionTTL),
 		LastLoginAt: now,
 		Role:        sessionRole,
@@ -329,4 +334,13 @@ func generateToken() (string, error) {
 	}
 
 	return tokenPrefix + hex.EncodeToString(buffer), nil
+}
+
+func newSessionID() (string, error) {
+	buffer := make([]byte, 8)
+	if _, err := rand.Read(buffer); err != nil {
+		return "", err
+	}
+
+	return "sess_" + hex.EncodeToString(buffer), nil
 }

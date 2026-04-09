@@ -1,282 +1,137 @@
 # Getting Started
 
-This guide explains how to run the repository locally, what the minimum setup is, which commands matter most, and what you should verify before starting feature work.
+## Tujuan
 
-## 1. What You Are Running
+Dokumen ini adalah jalur tercepat untuk menyalakan workspace Bidan secara lokal dan langsung masuk ke flow QA dengan seeded data.
 
-The repository contains:
+## Current Truth
 
-- a Next.js frontend in `apps/frontend`
-- a Go backend in `apps/backend`
-- a shared integration package in `packages/sdk`
-- a release manifest package in `packages/release`
-- optional local infrastructure through Docker
-- optional app deployment templates through Docker Compose
+Repo aktif menjalankan:
 
-You do not need any self-hosted Git platform stack to start feature development. For most product work, the minimal requirement is Node, npm, Go, and the two app env files.
+- `apps/backend`
+- `apps/bidan`
+- `apps/admin`
 
-## 2. Required Tool Versions
+SSO lokal memakai sibling subdomain `*.lvh.me`, jadi jangan uji auth lintas app lewat `localhost`.
 
-Use at least these versions:
-
-- Node.js `24.12.0`
-- npm `11.6.2`
-- Go `1.26.x`
-- Docker Engine or Docker Desktop if you need PostgreSQL, Redis, Atlas, or deployment stack validation
-
-Useful local consistency files already exist:
-
-- `.nvmrc`
-- `.editorconfig`
-- `Makefile`
-
-## 3. First-Time Setup
-
-### Install dependencies
+## First Setup
 
 ```bash
 npm install
+npm run dev:setup
 ```
 
-### Create environment files
+`npm run dev:setup` akan:
 
-```bash
-cp apps/frontend/.env.example apps/frontend/.env.local
-cp apps/backend/.env.example apps/backend/.env
-```
+- membuat `.env` yang belum ada dari `.env.example`
+- validasi env contract lokal
+- menyalakan PostgreSQL dan Redis lokal bila dibutuhkan
+- apply migration backend
+- menjalankan Bidan demo seed
 
-The current defaults are suitable for local development:
-
-- frontend public site URL: `http://localhost:3000`
-- frontend public API base URL: `http://localhost:8080/api/v1`
-- backend port: `8080`
-- backend CORS origin: `http://localhost:3000`
-- backend seed data dir: `./seeddata`
-- PostgreSQL URL: `postgres://postgres:postgres@localhost:5432/bidanapp?sslmode=disable`
-- Redis URL: `redis://localhost:6379`
-
-The backend validates these values at boot. If an env value is malformed, the process exits immediately.
-
-## 4. Running The App
-
-### Run frontend and backend together
+Setelah itu:
 
 ```bash
 npm run dev
 ```
 
-### Run a single app
+## Local URLs
 
-Frontend only:
+- Bidan app: `http://bidan.lvh.me:3002/id`
+- Bidan account security: `http://bidan.lvh.me:3002/id/security`
+- Bidan device sessions: `http://bidan.lvh.me:3002/id/sessions`
+- Admin app: `http://admin.lvh.me:3005/overview`
+- Backend health: `http://api.lvh.me:8080/api/v1/health`
+- Backend docs: `http://api.lvh.me:8080/api/v1/docs`
 
-```bash
-npm run dev:frontend
-```
+Useful pages:
 
-Backend only:
+- `http://bidan.lvh.me:3002/id/login`
+- `http://bidan.lvh.me:3002/id/register`
+- `http://bidan.lvh.me:3002/id/explore`
+- `http://bidan.lvh.me:3002/id/services`
+- `http://bidan.lvh.me:3002/id/orders`
+- `http://bidan.lvh.me:3002/id/security`
+- `http://bidan.lvh.me:3002/id/sessions`
+- `http://bidan.lvh.me:3002/id/professionals/apply`
+- `http://bidan.lvh.me:3002/id/professionals/dashboard`
+- `http://admin.lvh.me:3005/login`
 
-```bash
-npm run dev:backend
-```
+## Demo Credentials
 
-### Run optional local infra
+- Viewer password: `BidanDemo#2026`
+- Customer: `+628111111001`
+- Approved professional: `+628111111002`
+- Submitted professional: `+628111111003`
+- Draft professional: `+628111111004`
+- Admin password: `AdminDemo#2026`
+- Admin emails:
+  - `naya@ops.bidanapp.id`
+  - `rani@ops.bidanapp.id`
+  - `dimas@ops.bidanapp.id`
+  - `vina@ops.bidanapp.id`
 
-```bash
-npm run infra:up
-```
-
-This starts:
-
-- PostgreSQL `18.1` on `localhost:5432`
-- Redis `8.6.1` on `localhost:6379`
-
-Stop it with:
-
-```bash
-npm run infra:down
-```
-
-### Use Atlas locally
-
-Bring up PostgreSQL if it is not running yet:
-
-```bash
-npm run db:up --workspace @bidanapp/backend
-```
-
-Inspect migration status:
-
-```bash
-npm run atlas:status --workspace @bidanapp/backend
-```
-
-Apply migrations:
-
-```bash
-npm run atlas:apply --workspace @bidanapp/backend
-```
-
-Seed the full backend runtime matrix used for QA and manual product checks:
-
-```bash
-npm run seed --workspace @bidanapp/backend
-```
-
-Emit the same seed result as structured JSON:
-
-```bash
-npm run seed:json --workspace @bidanapp/backend
-```
-
-This seeder resets and rehydrates:
-
-- published read-model documents
-- database-backed customer, professional, and admin auth accounts plus sessions
-- professional portal runtime state
-- chat threads and messages
-- customer and professional notification state tables
-- consumer preferences state tables
-- admin support desk and admin console runtime tables
-
-The command prints seeded customer/professional login credentials and API bearer tokens for quick verification.
-See [QA Seed Matrix](./qa-seed-matrix.md) for the scenario map and suggested validation flow.
-
-For a self-contained backend smoke sweep on top of the seeded runtime:
-
-```bash
-npm run smoke:seeded
-```
-
-For a local Docker deployment rehearsal with the production compose topology:
-
-```bash
-cp ops/deploy/local-smoke.env.example ops/deploy/local-smoke.env
-node ./scripts/deploy/check-env.mjs ops/deploy/local-smoke.env
-sh ./scripts/deploy/build-images.sh ops/deploy/local-smoke.env
-sh ./scripts/deploy/deploy.sh local ops/deploy/local-smoke.env
-```
-
-## 5. Local URLs To Verify
-
-After `npm run dev`, confirm these routes:
-
-- frontend root: `http://localhost:3000`
-- localized frontend root: `http://localhost:3000/id`
-- backend health: `http://localhost:8080/api/v1/health`
-- backend docs: `http://localhost:8080/api/v1/docs`
-- backend OpenAPI JSON: `http://localhost:8080/api/v1/openapi.json`
-
-## 6. Root Commands You Will Use Often
-
-### Development and validation
+## Daily Commands
 
 ```bash
 npm run dev
-npm run build
-npm run lint
-npm run format
-npm run test
-npm run typecheck
-npm run check
-npm run ci:check
+npm run dev:doctor
+npm run dev:db:reset
+npm run dev:seed:bidan
+npm run dev:smoke
+npm run env:sync
+npm run platform:scaffold -- therapist 3011
 ```
 
-### Contract and release workflow
+Validation commands:
 
 ```bash
 npm run contract:generate
-npm run generated:check
-npm run commit
-npm run changeset
-npm run changeset:status
-npm run release:dry-run
+npm run boundary:check
+npm run lint
+npm run typecheck
+npm run test
+npm run build
+npm run e2e:install
+npm run e2e:smoke
+npm run e2e:journey
+npm run journey:open
 ```
 
-### Health checks for your environment
+## Daily Workflow
 
-```bash
-npm run doctor
-make doctor
-```
+1. Jalankan `npm run dev`.
+2. Login sebagai customer, professional, atau admin menggunakan seeded account.
+3. Jika data demo perlu dikembalikan ke baseline, jalankan `npm run dev:seed:bidan`.
+4. Jika schema lokal rusak atau drift, jalankan `npm run dev:db:reset`.
+5. Sebelum merge, jalankan validation commands.
+6. Untuk browser-level verification, jalankan `npm run e2e` atau `npm run e2e:smoke`.
+7. Untuk visual proof browser-level, jalankan `npm run e2e:journey` lalu buka `npm run journey:open`.
 
-## 7. Daily Development Flow
+## Reusable Vertical Setup
 
-The expected daily loop is:
+Jika nanti ingin membuka vertical baru, jangan copy-paste screen lama.
 
-1. Pull the latest `main`.
-2. Create or confirm the issue that tracks the work.
-3. Create a branch with the required format:
+Flow yang benar:
 
-```text
-<type>/<issue-number>-<slug>
-```
+1. Jalankan `npm run platform:scaffold -- <slug> <port>`.
+2. Tambahkan entry manifest dan domain.
+3. Sambungkan copy, theme preset, feature flags, dan professional attribute schema.
+4. Reuse screen graph dan business logic yang sudah ada dari `@marketplace/web` dan `@marketplace/marketplace-core`.
 
-Example:
+## Quick QA Start
 
-```text
-feat/128-chat-persistence
-```
+- Customer:
+  login di `bidan`, buka `/id/orders`, buat order dari seeded offering, lalu cek order detail dan support.
+- Professional:
+  login sebagai approved atau submitted professional, lalu buka dashboard dan apply flow.
+- Admin:
+  login di `/login`, buka queue professional review, orders, support, refunds, dan payouts.
 
-4. Start the apps you need.
-5. Make the change in the right layer.
-6. Run relevant checks locally.
-7. If the change is release-worthy, add a changeset:
+## Troubleshooting Singkat
 
-```bash
-npm run changeset
-```
-
-8. Open a PR with an allowed prefix such as `feat:`, `fix:`, or `chore:`.
-9. Merge with squash only after checks pass.
-
-See [Development Workflow](./development-workflow.md) for the full governance rules.
-
-## 8. What You Should Read Next
-
-- For repo design and system boundaries, read [Architecture](./architecture.md).
-- For frontend work, read [Frontend Guide](./frontend.md).
-- For backend work, read [Backend Guide](./backend.md).
-- For FE/BE alignment, read [SDK And API Contract](./sdk.md).
-- For environment details, read [Environment Setup](./environment.md).
-- For rollout and rollback steps, read [Production Rollout](./production-rollout.md).
-
-## 9. Common First-Day Tasks
-
-### I only need UI work
-
-- Run `npm install`.
-- Copy env files.
-- Run `npm run dev`.
-- Work primarily in `apps/frontend`.
-- Read [Frontend Guide](./frontend.md).
-
-You can still do purely presentational UI work without PostgreSQL, but mutable product flows now rely on backend persistence for chat history, professional portal state, viewer/app state, and admin/support operations. If you touch those flows, start PostgreSQL first.
-
-### I need API contract changes
-
-- Run `npm install`.
-- Copy env files.
-- Run `npm run dev:backend`.
-- Change the backend route, DTO, or module.
-- Run `npm run contract:generate`.
-- Update frontend or SDK consumers as needed.
-
-### I need database work
-
-- Start local PostgreSQL with `npm run infra:up` or `npm run db:up --workspace @bidanapp/backend`.
-- Read `apps/backend/atlas.hcl`, `apps/backend/db/schema.sql`, and [Backend Guide](./backend.md).
-- Keep Atlas schema, migrations, and backend behavior aligned.
-
-## 10. Troubleshooting
-
-### Backend fails on boot because of config
-
-The backend is fail-fast. Common causes:
-
-- invalid URL in `DATABASE_URL`
-- invalid URL in `REDIS_URL`
-- invalid `CORS_ALLOWED_ORIGINS`
-- non-existent `SEED_DATA_DIR`
-- unsupported `APP_ENV`, `LOG_LEVEL`, or `LOG_FORMAT`
-
-Check [Environment Setup](./environment.md) and verify the env files you copied.
+- Jika env mismatch, jalankan `npm run dev:doctor`.
+- Jika smoke gagal, jalankan `npm run dev:smoke` lalu lihat detail error.
+- Jika DB drift, pakai `npm run dev:db:reset`.
+- Jika perlu visual proof step-by-step berbasis screenshot, video, dan trace, lihat [Journeys](./journeys/README.md).
+- Jika perlu panduan lebih detail, lihat [Local Runtime Troubleshooting](./local-runtime-troubleshooting.md).

@@ -1,0 +1,31 @@
+{
+  "name": "@marketplace/bidan",
+  "version": "0.0.0-private",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev -p 3002",
+    "lint": "biome ci .",
+    "start": "next start -p 3002",
+    "test": "node --test",
+    "typecheck": "rm -f tsconfig.tsbuildinfo && next typegen && tsc --noEmit"
+  },
+  "dependencies": {
+    "@marketplace/marketplace-core": "0.0.0-private",
+    "@marketplace/platform-config": "0.0.0-private",
+    "@marketplace/ui": "0.0.0-private",
+    "@marketplace/web": "0.0.0-private",
+    "framer-motion": "^12.38.0",
+    "next": "16.1.6",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

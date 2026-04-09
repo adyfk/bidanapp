@@ -1,14 +1,13 @@
 {
-  "name": "@bidanapp/backend",
+  "name": "@marketplace/backend",
   "version": "0.0.0-private",
   "private": true,
   "scripts": {
+    "clear:auth-rate-limit": "go run ./cmd/clear-auth-rate-limit",
     "dev": "go run ./cmd/api",
-    "seed": "go run ./cmd/seed --reset",
-    "seed:no-reset": "go run ./cmd/seed --reset=false",
-    "seed:json": "go run ./cmd/seed --reset --format=json",
     "build": "mkdir -p ./bin && go build -o ./bin/api ./cmd/api",
     "start": "./bin/api",
+    "seed:bidan-demo": "go run ./cmd/seed-bidan-demo",
     "db:up": "docker compose -f ../../docker-compose.dev.yml up -d postgres",
     "db:down": "docker compose -f ../../docker-compose.dev.yml stop postgres",
     "atlas": "./scripts/atlas.sh",

@@ -13,9 +13,10 @@
 # testing
 /coverage
 /test-results
-apps/frontend/test-results
-apps/frontend/allure-results
-apps/frontend/manual-qa-summary
+/artifacts/journeys
+/artifacts/playwright-report
+!/docs/journeys/golden
+!/docs/journeys/golden/**
 
 # next.js
 /.next/
@@ -60,3 +61,5 @@ yarn-error.log*
 next-env.d.ts
 
 .codex
+
+artifacts

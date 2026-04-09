@@ -1,4 +1,4 @@
-"@bidanapp/release": minor
+"@marketplace/release": minor
 ---
 
 Refactor professional booking to use shared availability instead of per-service slots.

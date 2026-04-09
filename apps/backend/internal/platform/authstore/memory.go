@@ -7,193 +7,16 @@ import (
 )
 
 type MemoryStore struct {
-	adminAccounts        map[string]AdminAccount
-	customerAccounts     map[string]CustomerAccount
-	professionalAccounts map[string]ProfessionalAccount
-	sessions             map[string]Session
-	mu                   sync.RWMutex
+	adminAccounts map[string]AdminAccount
+	sessions      map[string]Session
+	mu            sync.RWMutex
 }
 
 func NewMemoryStore() *MemoryStore {
 	return &MemoryStore{
-		adminAccounts:        map[string]AdminAccount{},
-		customerAccounts:     map[string]CustomerAccount{},
-		professionalAccounts: map[string]ProfessionalAccount{},
-		sessions:             map[string]Session{},
+		adminAccounts: map[string]AdminAccount{},
+		sessions:      map[string]Session{},
 	}
-}
-
-func (s *MemoryStore) CreateCustomerAccount(ctx context.Context, account CustomerAccount) (CustomerAccount, error) {
-	if err := ctx.Err(); err != nil {
-		return CustomerAccount{}, err
-	}
-
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	if _, exists := s.customerAccounts[account.ConsumerID]; exists {
-		return CustomerAccount{}, ErrConflict
-	}
-	if s.customerPhoneInUse(account.PhoneNormalized, account.ConsumerID) {
-		return CustomerAccount{}, ErrConflict
-	}
-
-	if account.RegisteredAt.IsZero() {
-		account.RegisteredAt = time.Now().UTC()
-	}
-
-	cloned := cloneCustomerAccount(account)
-	s.customerAccounts[account.ConsumerID] = cloned
-	return cloneCustomerAccount(cloned), nil
-}
-
-func (s *MemoryStore) CustomerAccountByConsumerID(ctx context.Context, consumerID string) (CustomerAccount, error) {
-	if err := ctx.Err(); err != nil {
-		return CustomerAccount{}, err
-	}
-
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-
-	account, ok := s.customerAccounts[consumerID]
-	if !ok {
-		return CustomerAccount{}, ErrNotFound
-	}
-
-	return cloneCustomerAccount(account), nil
-}
-
-func (s *MemoryStore) CustomerAccountByPhone(ctx context.Context, phoneNormalized string) (CustomerAccount, error) {
-	if err := ctx.Err(); err != nil {
-		return CustomerAccount{}, err
-	}
-
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-
-	for _, account := range s.customerAccounts {
-		if account.PhoneNormalized == phoneNormalized {
-			return cloneCustomerAccount(account), nil
-		}
-	}
-
-	return CustomerAccount{}, ErrNotFound
-}
-
-func (s *MemoryStore) UpdateCustomerAccount(ctx context.Context, account CustomerAccount) (CustomerAccount, error) {
-	if err := ctx.Err(); err != nil {
-		return CustomerAccount{}, err
-	}
-
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	existing, ok := s.customerAccounts[account.ConsumerID]
-	if !ok {
-		return CustomerAccount{}, ErrNotFound
-	}
-	if s.customerPhoneInUse(account.PhoneNormalized, account.ConsumerID) {
-		return CustomerAccount{}, ErrConflict
-	}
-
-	if account.UserID == "" {
-		account.UserID = existing.UserID
-	}
-	if account.RegisteredAt.IsZero() {
-		account.RegisteredAt = existing.RegisteredAt
-	}
-
-	cloned := cloneCustomerAccount(account)
-	s.customerAccounts[account.ConsumerID] = cloned
-	return cloneCustomerAccount(cloned), nil
-}
-
-func (s *MemoryStore) CreateProfessionalAccount(ctx context.Context, account ProfessionalAccount) (ProfessionalAccount, error) {
-	if err := ctx.Err(); err != nil {
-		return ProfessionalAccount{}, err
-	}
-
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	if _, exists := s.professionalAccounts[account.ProfessionalID]; exists {
-		return ProfessionalAccount{}, ErrConflict
-	}
-	if s.professionalPhoneInUse(account.PhoneNormalized, account.ProfessionalID) {
-		return ProfessionalAccount{}, ErrConflict
-	}
-
-	if account.RegisteredAt.IsZero() {
-		account.RegisteredAt = time.Now().UTC()
-	}
-
-	cloned := cloneProfessionalAccount(account)
-	s.professionalAccounts[account.ProfessionalID] = cloned
-	return cloneProfessionalAccount(cloned), nil
-}
-
-func (s *MemoryStore) ProfessionalAccountByPhone(ctx context.Context, phoneNormalized string) (ProfessionalAccount, error) {
-	if err := ctx.Err(); err != nil {
-		return ProfessionalAccount{}, err
-	}
-
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-
-	for _, account := range s.professionalAccounts {
-		if account.PhoneNormalized == phoneNormalized {
-			return cloneProfessionalAccount(account), nil
-		}
-	}
-
-	return ProfessionalAccount{}, ErrNotFound
-}
-
-func (s *MemoryStore) ProfessionalAccountByProfessionalID(ctx context.Context, professionalID string) (ProfessionalAccount, error) {
-	if err := ctx.Err(); err != nil {
-		return ProfessionalAccount{}, err
-	}
-
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-
-	account, ok := s.professionalAccounts[professionalID]
-	if !ok {
-		return ProfessionalAccount{}, ErrNotFound
-	}
-
-	return cloneProfessionalAccount(account), nil
-}
-
-func (s *MemoryStore) UpdateProfessionalAccount(ctx context.Context, account ProfessionalAccount) (ProfessionalAccount, error) {
-	if err := ctx.Err(); err != nil {
-		return ProfessionalAccount{}, err
-	}
-
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	existing, ok := s.professionalAccounts[account.ProfessionalID]
-	if !ok {
-		return ProfessionalAccount{}, ErrNotFound
-	}
-	if s.professionalPhoneInUse(account.PhoneNormalized, account.ProfessionalID) {
-		return ProfessionalAccount{}, ErrConflict
-	}
-
-	if account.UserID == "" {
-		account.UserID = existing.UserID
-	}
-	if account.RegisteredAt.IsZero() {
-		account.RegisteredAt = existing.RegisteredAt
-	}
-	if account.RecoveryRequestedAt == nil {
-		account.RecoveryRequestedAt = cloneTimePointer(existing.RecoveryRequestedAt)
-	}
-
-	cloned := cloneProfessionalAccount(account)
-	s.professionalAccounts[account.ProfessionalID] = cloned
-	return cloneProfessionalAccount(cloned), nil
 }
 
 func (s *MemoryStore) CreateAdminAccount(ctx context.Context, account AdminAccount) (AdminAccount, error) {
@@ -210,7 +33,6 @@ func (s *MemoryStore) CreateAdminAccount(ctx context.Context, account AdminAccou
 	if s.adminEmailInUse(account.Email, account.AdminID) {
 		return AdminAccount{}, ErrConflict
 	}
-
 	if account.CreatedAt.IsZero() {
 		account.CreatedAt = time.Now().UTC()
 	}
@@ -268,7 +90,6 @@ func (s *MemoryStore) UpdateAdminAccount(ctx context.Context, account AdminAccou
 	if s.adminEmailInUse(account.Email, account.AdminID) {
 		return AdminAccount{}, ErrConflict
 	}
-
 	if account.UserID == "" {
 		account.UserID = existing.UserID
 	}
@@ -297,6 +118,25 @@ func (s *MemoryStore) SessionByTokenHash(ctx context.Context, role string, token
 	return cloneSession(session), nil
 }
 
+func (s *MemoryStore) SessionsBySubject(ctx context.Context, role string, subjectID string) ([]Session, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	sessions := make([]Session, 0)
+	for _, session := range s.sessions {
+		if session.Role != role || session.SubjectID != subjectID {
+			continue
+		}
+		sessions = append(sessions, cloneSession(session))
+	}
+
+	return sessions, nil
+}
+
 func (s *MemoryStore) SaveSession(ctx context.Context, session Session) (Session, error) {
 	if err := ctx.Err(); err != nil {
 		return Session{}, err
@@ -314,28 +154,51 @@ func (s *MemoryStore) SaveSession(ctx context.Context, session Session) (Session
 	return cloneSession(cloned), nil
 }
 
-func (s *MemoryStore) customerPhoneInUse(phoneNormalized string, excludedConsumerID string) bool {
-	for consumerID, account := range s.customerAccounts {
-		if consumerID == excludedConsumerID {
+func (s *MemoryStore) RevokeSession(ctx context.Context, role string, subjectID string, sessionID string, revokedAt time.Time) (Session, error) {
+	if err := ctx.Err(); err != nil {
+		return Session{}, err
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	for key, session := range s.sessions {
+		if session.Role != role || session.SubjectID != subjectID || session.ID != sessionID {
 			continue
 		}
-		if account.PhoneNormalized == phoneNormalized {
-			return true
-		}
+		session.RevokedAt = cloneTimePointer(&revokedAt)
+		s.sessions[key] = session
+		return cloneSession(session), nil
 	}
-	return false
+
+	return Session{}, ErrNotFound
 }
 
-func (s *MemoryStore) professionalPhoneInUse(phoneNormalized string, excludedProfessionalID string) bool {
-	for professionalID, account := range s.professionalAccounts {
-		if professionalID == excludedProfessionalID {
+func (s *MemoryStore) RevokeAllOtherSessions(
+	ctx context.Context,
+	role string,
+	subjectID string,
+	excludedSessionID string,
+	revokedAt time.Time,
+) (int, error) {
+	if err := ctx.Err(); err != nil {
+		return 0, err
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	count := 0
+	for key, session := range s.sessions {
+		if session.Role != role || session.SubjectID != subjectID || session.ID == excludedSessionID || session.RevokedAt != nil {
 			continue
 		}
-		if account.PhoneNormalized == phoneNormalized {
-			return true
-		}
+		session.RevokedAt = cloneTimePointer(&revokedAt)
+		s.sessions[key] = session
+		count++
 	}
-	return false
+
+	return count, nil
 }
 
 func (s *MemoryStore) adminEmailInUse(email string, excludedAdminID string) bool {
@@ -352,16 +215,6 @@ func (s *MemoryStore) adminEmailInUse(email string, excludedAdminID string) bool
 
 func buildSessionKey(role string, tokenHash string) string {
 	return role + "::" + tokenHash
-}
-
-func cloneCustomerAccount(account CustomerAccount) CustomerAccount {
-	return account
-}
-
-func cloneProfessionalAccount(account ProfessionalAccount) ProfessionalAccount {
-	cloned := account
-	cloned.RecoveryRequestedAt = cloneTimePointer(account.RecoveryRequestedAt)
-	return cloned
 }
 
 func cloneAdminAccount(account AdminAccount) AdminAccount {

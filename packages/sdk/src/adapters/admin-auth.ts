@@ -1,11 +1,11 @@
-import type { BidanappApiClient, BidanappComponents } from '../client';
+import type { MarketplaceApiClient, MarketplaceComponents } from '../client';
 
-export type AdminAuthCreateSessionInput = BidanappComponents['schemas']['AdminAuthCreateSessionRequest'];
-export type AdminAuthSession = BidanappComponents['schemas']['AdminAuthSessionData'];
-export type AdminAuthSessionUpdateInput = BidanappComponents['schemas']['AdminAuthSessionUpdateRequest'];
+export type AdminAuthCreateSessionInput = MarketplaceComponents['schemas']['AdminAuthCreateSessionRequest'];
+export type AdminAuthSession = MarketplaceComponents['schemas']['AdminAuthSessionData'];
+export type AdminAuthSessionUpdateInput = MarketplaceComponents['schemas']['AdminAuthSessionUpdateRequest'];
 
 export async function createAdminAuthSession(
-  client: BidanappApiClient,
+  client: MarketplaceApiClient,
   input: AdminAuthCreateSessionInput,
 ): Promise<AdminAuthSession> {
   const result = await client.POST('/admin/auth/session', {
@@ -19,7 +19,7 @@ export async function createAdminAuthSession(
   return result.data.data;
 }
 
-export async function fetchAdminAuthSession(client: BidanappApiClient): Promise<AdminAuthSession> {
+export async function fetchAdminAuthSession(client: MarketplaceApiClient): Promise<AdminAuthSession> {
   const result = await client.GET('/admin/auth/session');
 
   if (result.error || !result.data?.data) {
@@ -30,7 +30,7 @@ export async function fetchAdminAuthSession(client: BidanappApiClient): Promise<
 }
 
 export async function updateAdminAuthSession(
-  client: BidanappApiClient,
+  client: MarketplaceApiClient,
   input: AdminAuthSessionUpdateInput,
 ): Promise<AdminAuthSession> {
   const result = await client.PUT('/admin/auth/session', {
@@ -44,7 +44,7 @@ export async function updateAdminAuthSession(
   return result.data.data;
 }
 
-export async function deleteAdminAuthSession(client: BidanappApiClient): Promise<AdminAuthSession> {
+export async function deleteAdminAuthSession(client: MarketplaceApiClient): Promise<AdminAuthSession> {
   const result = await client.DELETE('/admin/auth/session');
 
   if (result.error || !result.data?.data) {

@@ -61,7 +61,9 @@ const hasChangeset = changedFiles.some(
 );
 
 if (!hasChangeset) {
-  console.error(`PR title "${prTitle}" requires a changeset. Run \`npm run changeset\` and select @bidanapp/release.`);
+  console.error(
+    `PR title "${prTitle}" requires a changeset. Run \`npm run changeset\` and select @marketplace/release.`,
+  );
   process.exit(1);
 }
 

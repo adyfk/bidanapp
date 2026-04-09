@@ -1,0 +1,4 @@
+Dokumen demo SIPB Bidan Nabila Lestari
+Nomor izin: SIPB-BDN-2026-0001
+Wilayah praktik: Jakarta Selatan
+Catatan: berkas fixture untuk local QA Bidan V2.

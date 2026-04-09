@@ -16,15 +16,15 @@ import (
 const (
 	defaultAppName             = "bidanapp-backend"
 	defaultAppVersion          = "dev"
-	defaultEnvironment         = "development"
-	defaultFrontendOrigin      = "http://localhost:3000"
-	defaultAuthCookiePath      = "/api/v1"
+	defaultEnvironment         = "local"
+	defaultFrontendOrigin      = "http://bidan.lvh.me:3002"
+	defaultAuthCookiePath      = "/"
 	defaultAuthCookieSameSite  = "lax"
 	defaultAuthRateLimitWindow = 5 * time.Minute
-	defaultAuthRateLimitMax    = 10
 	defaultAdminAuthTTL        = 24 * time.Hour
-	defaultCustomerAuthTTL     = 24 * time.Hour
-	defaultProfessionalAuthTTL = 24 * time.Hour
+	defaultViewerAuthTTL       = 24 * time.Hour
+	defaultChallengeCodeTTL    = 10 * time.Minute
+	defaultChallengeMaxAttempts = 5
 	defaultPaymentCurrency     = "IDR"
 	defaultAdminPassword       = "$2a$12$VUpiMPsu6djn6JDj.a0a8OACtyvGtGninz4/ZwTsPGGQOK0CL./1C"
 )
@@ -50,6 +50,13 @@ func loadFromAppRoot(appRoot string) (Config, error) {
 	)
 	if err != nil {
 		return Config{}, fmt.Errorf("resolve seed data dir: %w", err)
+	}
+	assetStorageDir, err := resolveDir(
+		appRoot,
+		envOrDefault("ASSET_STORAGE_DIR", filepath.Join(appRoot, "storage")),
+	)
+	if err != nil {
+		return Config{}, fmt.Errorf("resolve asset storage dir: %w", err)
 	}
 
 	httpPort, err := envIntOrDefault("HTTP_PORT", 8080)
@@ -99,7 +106,7 @@ func loadFromAppRoot(appRoot string) (Config, error) {
 	if err != nil {
 		return Config{}, err
 	}
-	authRateLimitMaxAttempts, err := envIntOrDefault("AUTH_RATE_LIMIT_MAX_ATTEMPTS", defaultAuthRateLimitMax)
+	authRateLimitMaxAttempts, err := envIntOrDefault("AUTH_RATE_LIMIT_MAX_ATTEMPTS", defaultAuthRateLimitMax(environment))
 	if err != nil {
 		return Config{}, err
 	}
@@ -107,11 +114,15 @@ func loadFromAppRoot(appRoot string) (Config, error) {
 	if err != nil {
 		return Config{}, err
 	}
-	customerSessionTTL, err := envDurationOrDefault("CUSTOMER_AUTH_SESSION_TTL", defaultCustomerAuthTTL)
+	viewerSessionTTL, err := envDurationOrDefault("VIEWER_AUTH_SESSION_TTL", defaultViewerAuthTTL)
 	if err != nil {
 		return Config{}, err
 	}
-	professionalSessionTTL, err := envDurationOrDefault("PROFESSIONAL_AUTH_SESSION_TTL", defaultProfessionalAuthTTL)
+	challengeCodeTTL, err := envDurationOrDefault("AUTH_CHALLENGE_CODE_TTL", defaultChallengeCodeTTL)
+	if err != nil {
+		return Config{}, err
+	}
+	challengeMaxAttempts, err := envIntOrDefault("AUTH_CHALLENGE_MAX_ATTEMPTS", defaultChallengeMaxAttempts)
 	if err != nil {
 		return Config{}, err
 	}
@@ -119,6 +130,10 @@ func loadFromAppRoot(appRoot string) (Config, error) {
 	paymentCurrency := strings.ToUpper(envOrDefault("PAYMENT_CURRENCY", defaultPaymentCurrency))
 	xenditSecretKey := strings.TrimSpace(os.Getenv("XENDIT_SECRET_KEY"))
 	xenditWebhookToken := strings.TrimSpace(os.Getenv("XENDIT_WEBHOOK_TOKEN"))
+	smsProvider := strings.ToLower(envOrDefault("SMS_PROVIDER", defaultSMSProvider(environment)))
+	twilioAccountSID := strings.TrimSpace(os.Getenv("SMS_TWILIO_ACCOUNT_SID"))
+	twilioAuthToken := strings.TrimSpace(os.Getenv("SMS_TWILIO_AUTH_TOKEN"))
+	twilioFromNumber := strings.TrimSpace(os.Getenv("SMS_TWILIO_FROM_NUMBER"))
 	webPushSubject := strings.TrimSpace(os.Getenv("WEB_PUSH_SUBJECT"))
 	webPushPublicKey := strings.TrimSpace(os.Getenv("WEB_PUSH_PUBLIC_KEY"))
 	webPushPrivateKey := strings.TrimSpace(os.Getenv("WEB_PUSH_PRIVATE_KEY"))
@@ -150,6 +165,9 @@ func loadFromAppRoot(appRoot string) (Config, error) {
 		SeedData: SeedDataConfig{
 			DataDir: seedDataDir,
 		},
+		Assets: AssetStorageConfig{
+			RootDir: assetStorageDir,
+		},
 		Database: DatabaseConfig{
 			URL: envOrDefault("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/bidanapp?sslmode=disable"),
 		},
@@ -168,25 +186,27 @@ func loadFromAppRoot(appRoot string) (Config, error) {
 			},
 			SessionTTL: adminSessionTTL,
 		},
-		CustomerAuth: CustomerAuthConfig{
+		ViewerAuth: ViewerAuthConfig{
+			Challenge: ChallengeConfig{
+				CodeTTL:     challengeCodeTTL,
+				MaxAttempts: challengeMaxAttempts,
+			},
 			Cookie: SessionCookieConfig{
 				Domain:   authCookieDomain,
-				Name:     envOrDefault("CUSTOMER_AUTH_COOKIE_NAME", "bidanapp_customer_session"),
+				Name:     envOrDefault("VIEWER_AUTH_COOKIE_NAME", "bidanapp_viewer_session"),
 				Path:     authCookiePath,
 				SameSite: authCookieSameSite,
 				Secure:   authCookieSecure,
 			},
-			SessionTTL: customerSessionTTL,
-		},
-		ProfessionalAuth: ProfessionalAuthConfig{
-			Cookie: SessionCookieConfig{
-				Domain:   authCookieDomain,
-				Name:     envOrDefault("PROFESSIONAL_AUTH_COOKIE_NAME", "bidanapp_professional_session"),
-				Path:     authCookiePath,
-				SameSite: authCookieSameSite,
-				Secure:   authCookieSecure,
+			SessionTTL: viewerSessionTTL,
+			SMS: SMSConfig{
+				Provider: smsProvider,
+				Twilio: TwilioSMSConfig{
+					AccountSID: twilioAccountSID,
+					AuthToken:  twilioAuthToken,
+					FromNumber: twilioFromNumber,
+				},
 			},
-			SessionTTL: professionalSessionTTL,
 		},
 		Payment: PaymentConfig{
 			Provider: paymentProvider,
@@ -220,8 +240,8 @@ func loadFromAppRoot(appRoot string) (Config, error) {
 func (c *Config) validate() error {
 	var issues []string
 
-	if !oneOf(c.App.Environment, "development", "staging", "production", "test") {
-		issues = append(issues, fmt.Sprintf("APP_ENV must be one of development, staging, production, test (got %q)", c.App.Environment))
+	if !oneOf(c.App.Environment, "local", "development", "staging", "production", "test") {
+		issues = append(issues, fmt.Sprintf("APP_ENV must be one of local, development, staging, production, test (got %q)", c.App.Environment))
 	}
 
 	if strings.TrimSpace(c.App.Name) == "" {
@@ -299,11 +319,14 @@ func (c *Config) validate() error {
 	if c.AdminAuth.SessionTTL <= 0 {
 		issues = append(issues, "ADMIN_AUTH_SESSION_TTL must be greater than 0")
 	}
-	if c.CustomerAuth.SessionTTL <= 0 {
-		issues = append(issues, "CUSTOMER_AUTH_SESSION_TTL must be greater than 0")
+	if c.ViewerAuth.SessionTTL <= 0 {
+		issues = append(issues, "VIEWER_AUTH_SESSION_TTL must be greater than 0")
 	}
-	if c.ProfessionalAuth.SessionTTL <= 0 {
-		issues = append(issues, "PROFESSIONAL_AUTH_SESSION_TTL must be greater than 0")
+	if c.ViewerAuth.Challenge.CodeTTL <= 0 {
+		issues = append(issues, "AUTH_CHALLENGE_CODE_TTL must be greater than 0")
+	}
+	if c.ViewerAuth.Challenge.MaxAttempts <= 0 {
+		issues = append(issues, "AUTH_CHALLENGE_MAX_ATTEMPTS must be greater than 0")
 	}
 	if c.AuthRateLimit.Window <= 0 {
 		issues = append(issues, "AUTH_RATE_LIMIT_WINDOW must be greater than 0")
@@ -322,6 +345,27 @@ func (c *Config) validate() error {
 	if strings.TrimSpace(c.Payment.Currency) == "" {
 		issues = append(issues, "PAYMENT_CURRENCY must not be empty")
 	}
+	c.ViewerAuth.SMS.Provider = strings.ToLower(strings.TrimSpace(c.ViewerAuth.SMS.Provider))
+	c.ViewerAuth.SMS.Twilio.AccountSID = strings.TrimSpace(c.ViewerAuth.SMS.Twilio.AccountSID)
+	c.ViewerAuth.SMS.Twilio.AuthToken = strings.TrimSpace(c.ViewerAuth.SMS.Twilio.AuthToken)
+	c.ViewerAuth.SMS.Twilio.FromNumber = strings.TrimSpace(c.ViewerAuth.SMS.Twilio.FromNumber)
+	if !oneOf(c.ViewerAuth.SMS.Provider, "console", "twilio") {
+		issues = append(issues, fmt.Sprintf("SMS_PROVIDER must be one of console, twilio (got %q)", c.ViewerAuth.SMS.Provider))
+	}
+	if c.ViewerAuth.SMS.Provider == "twilio" {
+		if c.ViewerAuth.SMS.Twilio.AccountSID == "" {
+			issues = append(issues, "SMS_TWILIO_ACCOUNT_SID must not be empty when SMS_PROVIDER=twilio")
+		}
+		if c.ViewerAuth.SMS.Twilio.AuthToken == "" {
+			issues = append(issues, "SMS_TWILIO_AUTH_TOKEN must not be empty when SMS_PROVIDER=twilio")
+		}
+		if c.ViewerAuth.SMS.Twilio.FromNumber == "" {
+			issues = append(issues, "SMS_TWILIO_FROM_NUMBER must not be empty when SMS_PROVIDER=twilio")
+		}
+	}
+	if isProductionLike(c.App.Environment) && c.ViewerAuth.SMS.Provider != "twilio" {
+		issues = append(issues, fmt.Sprintf("SMS_PROVIDER must be twilio in %s", c.App.Environment))
+	}
 	if c.Payment.Provider == "xendit" {
 		if c.Payment.Xendit.SecretKey == "" {
 			issues = append(issues, "XENDIT_SECRET_KEY must not be empty when PAYMENT_PROVIDER=xendit")
@@ -334,8 +378,7 @@ func (c *Config) validate() error {
 		issues = append(issues, fmt.Sprintf("PAYMENT_PROVIDER must be xendit in %s", c.App.Environment))
 	}
 	issues = append(issues, validateSessionCookieConfig("ADMIN_AUTH", c.AdminAuth.Cookie, c.App.Environment)...)
-	issues = append(issues, validateSessionCookieConfig("CUSTOMER_AUTH", c.CustomerAuth.Cookie, c.App.Environment)...)
-	issues = append(issues, validateSessionCookieConfig("PROFESSIONAL_AUTH", c.ProfessionalAuth.Cookie, c.App.Environment)...)
+	issues = append(issues, validateSessionCookieConfig("VIEWER_AUTH", c.ViewerAuth.Cookie, c.App.Environment)...)
 	issues = append(issues, validateWebPushConfig(c.WebPush)...)
 
 	if len(c.AdminAuth.Credentials) == 0 {
@@ -562,6 +605,22 @@ func defaultPaymentProvider(environment string) string {
 	return "manual_test"
 }
 
+func defaultAuthRateLimitMax(environment string) int {
+	if environment == "local" {
+		return 60
+	}
+
+	return 10
+}
+
+func defaultSMSProvider(environment string) string {
+	if isProductionLike(environment) {
+		return "twilio"
+	}
+
+	return "console"
+}
+
 func defaultAuthCookieSecure(environment string) bool {
 	return environment == "production" || environment == "staging"
 }
@@ -575,6 +634,8 @@ func validateSessionCookieConfig(prefix string, cfg SessionCookieConfig, environ
 
 	if strings.TrimSpace(cfg.Path) == "" || !strings.HasPrefix(cfg.Path, "/") {
 		issues = append(issues, fmt.Sprintf("%s cookie path must start with / (got %q)", prefix, cfg.Path))
+	} else if cfg.Path != "/" {
+		issues = append(issues, fmt.Sprintf("%s cookie path must be / for shared subdomain auth (got %q)", prefix, cfg.Path))
 	}
 
 	if !oneOf(strings.ToLower(cfg.SameSite), "lax", "strict", "none") {
@@ -595,7 +656,7 @@ func validateSessionCookieConfig(prefix string, cfg SessionCookieConfig, environ
 func loadAdminCredentials(environment string) ([]AdminCredentialConfig, error) {
 	rawValue := strings.TrimSpace(os.Getenv("ADMIN_CONSOLE_CREDENTIALS_JSON"))
 	if rawValue == "" {
-		if environment != "development" && environment != "test" {
+		if environment != "local" && environment != "development" && environment != "test" {
 			return nil, nil
 		}
 

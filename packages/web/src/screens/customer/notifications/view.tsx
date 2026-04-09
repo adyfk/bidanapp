@@ -1,0 +1,242 @@
+'use client';
+
+import type { NotificationItem, ViewerSession } from '@marketplace/marketplace-core';
+import { createMarketplaceApiClient } from '@marketplace/marketplace-core';
+import type { ServicePlatformId } from '@marketplace/platform-config';
+import { getServicePlatformConfig } from '@marketplace/platform-config';
+import {
+  MarketplaceEmptyCard,
+  MarketplaceFilterChip,
+  MarketplaceMobileShell,
+  MarketplaceNotificationGroup,
+  MarketplaceStatusFilters,
+  MessageBanner,
+} from '@marketplace/ui';
+import { Bell, CalendarClock, CreditCard, LifeBuoy, MessageCircleMore, ShieldCheck } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { createPrimaryMarketplaceNav } from '../../../layout/navigation';
+import { getApiBaseUrl } from '../../../lib/env';
+import { formatDateTime, notificationKindLabel } from '../../../lib/marketplace-copy';
+import { createLocalizedPath } from '../../../lib/platform';
+import { CustomerAccessLock } from '../shared/parts/access-lock';
+import { notificationSections } from '../shared/parts/notification-sections';
+import { MarketplaceStickyPageHeader } from '../shared/parts/page-header';
+import { useCustomerMarketplaceController } from '../shared/use-customer-marketplace-controller';
+
+const apiBaseUrl = getApiBaseUrl();
+const client = createMarketplaceApiClient(apiBaseUrl);
+
+type NotificationFilter = 'all' | 'message' | 'order' | 'payment' | 'support';
+
+function resolveNotificationHref(locale: string, item: NotificationItem) {
+  if (item.kind === 'support') {
+    return createLocalizedPath(locale, '/support');
+  }
+  if (item.kind === 'order' || item.kind === 'payment' || item.kind === 'message') {
+    return createLocalizedPath(locale, `/orders/${item.entityId}`);
+  }
+  return createLocalizedPath(locale, '/notifications');
+}
+
+export function CustomerNotificationsPage({
+  authHref,
+  initialSession,
+  locale,
+  platformId,
+}: {
+  authHref: string;
+  initialSession?: ViewerSession | null;
+  locale: string;
+  platformId: ServicePlatformId;
+}) {
+  const customerController = useCustomerMarketplaceController();
+  const [session, setSession] = useState<ViewerSession | null>(initialSession ?? null);
+  const [items, setItems] = useState<NotificationItem[]>([]);
+  const [feedback, setFeedback] = useState('');
+  const [activeFilter, setActiveFilter] = useState<NotificationFilter>('all');
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        const sessionPayload = await customerController.viewerAuth.fetchSession(client);
+        setSession(sessionPayload);
+        if (!sessionPayload.isAuthenticated) {
+          return;
+        }
+        const payload = await customerController.notifications.fetchNotifications(client, platformId);
+        setItems(payload.items);
+      } catch (error) {
+        setFeedback(error instanceof Error ? error.message : 'Gagal memuat notifikasi.');
+      }
+    })();
+  }, [customerController.notifications, customerController.viewerAuth, platformId]);
+
+  const filteredItems = useMemo(() => {
+    return items.filter((item) => (activeFilter === 'all' ? true : item.kind === activeFilter));
+  }, [activeFilter, items]);
+
+  const sections = notificationSections(filteredItems);
+
+  const iconForNotification = (kind: NotificationItem['kind']) => {
+    if (kind === 'payment') {
+      return {
+        icon: <CreditCard className="h-5 w-5" />,
+        iconClassName: 'bg-amber-50 text-amber-600',
+        tagClassName: 'bg-amber-50 text-amber-700',
+      };
+    }
+    if (kind === 'support') {
+      return {
+        icon: <LifeBuoy className="h-5 w-5" />,
+        iconClassName: 'bg-blue-50 text-blue-600',
+        tagClassName: 'bg-blue-50 text-blue-700',
+      };
+    }
+    if (kind === 'message') {
+      return {
+        icon: <MessageCircleMore className="h-5 w-5" />,
+        iconClassName: 'bg-violet-50 text-violet-600',
+        tagClassName: 'bg-violet-50 text-violet-700',
+      };
+    }
+    if (kind === 'order') {
+      return {
+        icon: <CalendarClock className="h-5 w-5" />,
+        iconClassName: 'bg-pink-50 text-pink-600',
+        tagClassName: 'bg-pink-50 text-pink-700',
+      };
+    }
+    return {
+      icon: <ShieldCheck className="h-5 w-5" />,
+      iconClassName: 'bg-slate-100 text-slate-600',
+      tagClassName: 'bg-slate-100 text-slate-700',
+    };
+  };
+
+  const renderNotificationCard = (item: NotificationItem, emphasized: boolean) => {
+    const config = iconForNotification(item.kind);
+    return (
+      <a href={resolveNotificationHref(locale, item)} key={item.id}>
+        <article
+          className={`rounded-[26px] border bg-white p-4 shadow-sm transition-all hover:bg-gray-50/70 ${
+            emphasized ? 'border-pink-100 shadow-pink-100/40' : 'border-gray-100'
+          }`}
+        >
+          <div className="flex items-start gap-3">
+            <div
+              className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl ${config.iconClassName}`}
+            >
+              {config.icon}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${config.tagClassName}`}>
+                  {notificationKindLabel(item.kind, locale)}
+                </span>
+                <span className="text-[11px] font-medium text-gray-400">{formatDateTime(item.createdAt, locale)}</span>
+              </div>
+              <h3 className="mt-3 text-[15px] font-bold text-gray-900">{item.title}</h3>
+              <p className="mt-2 text-[13px] leading-6 text-gray-500">{item.message}</p>
+            </div>
+          </div>
+        </article>
+      </a>
+    );
+  };
+
+  return (
+    <MarketplaceMobileShell
+      navItems={createPrimaryMarketplaceNav(getServicePlatformConfig(platformId), locale)}
+      showNav={Boolean(session?.isAuthenticated)}
+    >
+      <div className="min-h-full bg-[#f9fafb] pb-24">
+        <MarketplaceStickyPageHeader backHref={createLocalizedPath(locale, '/home')} title="Notifikasi" />
+
+        <div className="space-y-5 px-5 py-5">
+          {!session?.isAuthenticated ? (
+            <CustomerAccessLock
+              authHref={authHref}
+              description="Masuk untuk melihat update order, pembayaran, dan pesan penting."
+              icon={<Bell className="h-5 w-5" />}
+              title="Feed notifikasi belum tersedia"
+            />
+          ) : (
+            <>
+              <section
+                className="overflow-hidden rounded-[30px] p-5 text-white shadow-[0_24px_60px_-32px_rgba(190,24,93,0.55)]"
+                style={{
+                  background: 'linear-gradient(145deg, var(--ui-primary) 0%, var(--ui-secondary) 100%)',
+                }}
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/90">
+                      <Bell className="h-3.5 w-3.5" />
+                      Feed
+                    </div>
+                    <h1 className="mt-4 text-[24px] font-bold leading-tight text-white">Update terbaru Anda</h1>
+                    <p className="mt-2 text-[13px] leading-relaxed text-white/85">
+                      Order, pembayaran, support, dan pesan penting akan muncul di sini.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-5 grid grid-cols-2 gap-3">
+                  <div className="rounded-[22px] border border-white/15 bg-white/12 p-4 backdrop-blur-sm">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">Total</p>
+                    <p className="mt-2 text-[28px] font-bold text-white">{items.length}</p>
+                  </div>
+                  <div className="rounded-[22px] border border-white/15 bg-white/12 p-4 backdrop-blur-sm">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">Filter</p>
+                    <p className="mt-2 text-[22px] font-bold capitalize text-white">{activeFilter}</p>
+                  </div>
+                </div>
+              </section>
+
+              <MarketplaceStatusFilters>
+                <MarketplaceFilterChip active={activeFilter === 'all'} onClick={() => setActiveFilter('all')}>
+                  Semua
+                </MarketplaceFilterChip>
+                <MarketplaceFilterChip active={activeFilter === 'order'} onClick={() => setActiveFilter('order')}>
+                  Order
+                </MarketplaceFilterChip>
+                <MarketplaceFilterChip active={activeFilter === 'payment'} onClick={() => setActiveFilter('payment')}>
+                  Pembayaran
+                </MarketplaceFilterChip>
+                <MarketplaceFilterChip active={activeFilter === 'message'} onClick={() => setActiveFilter('message')}>
+                  Pesan
+                </MarketplaceFilterChip>
+                <MarketplaceFilterChip active={activeFilter === 'support'} onClick={() => setActiveFilter('support')}>
+                  Support
+                </MarketplaceFilterChip>
+              </MarketplaceStatusFilters>
+
+              {feedback ? <MessageBanner tone="info">{feedback}</MessageBanner> : null}
+
+              {filteredItems.length ? (
+                <div className="space-y-5">
+                  {sections.today.length ? (
+                    <MarketplaceNotificationGroup count={sections.today.length} title="Hari ini">
+                      {sections.today.map((item) => renderNotificationCard(item, true))}
+                    </MarketplaceNotificationGroup>
+                  ) : null}
+
+                  {sections.earlier.length ? (
+                    <MarketplaceNotificationGroup count={sections.earlier.length} title="Sebelumnya">
+                      {sections.earlier.map((item) => renderNotificationCard(item, false))}
+                    </MarketplaceNotificationGroup>
+                  ) : null}
+                </div>
+              ) : (
+                <MarketplaceEmptyCard
+                  description="Notifikasi akan muncul setelah ada update order, pembayaran, atau support."
+                  title="Belum ada notifikasi"
+                />
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    </MarketplaceMobileShell>
+  );
+}

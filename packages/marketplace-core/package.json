@@ -1,0 +1,26 @@
+{
+  "name": "@marketplace/marketplace-core",
+  "version": "0.0.0-private",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "dependencies": {
+    "@marketplace/platform-config": "0.0.0-private",
+    "@marketplace/sdk": "0.0.0-private"
+  },
+  "scripts": {
+    "build": "rm -rf dist && mkdir -p dist && npm run typecheck",
+    "lint": "biome ci .",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

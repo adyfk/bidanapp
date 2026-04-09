@@ -1,0 +1,8 @@
+@import "tailwindcss";
+@source "../../../../packages/ui/src";
+@source "../../../../packages/web/src";
+@import "@marketplace/ui/system.css";
+
+body {
+  margin: 0;
+}

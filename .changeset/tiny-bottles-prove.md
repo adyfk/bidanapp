@@ -1,5 +1,5 @@
 ---
-"@bidanapp/release": minor
+"@marketplace/release": minor
 ---
 
 Move the app to backend-owned runtime state and production-style deployment flows.

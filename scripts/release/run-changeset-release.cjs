@@ -146,7 +146,7 @@ async function main() {
     const currentVersion = readReleaseVersion();
     const highestReleaseType = pending.reduce((current, fileName) => {
       const changeset = parseChangeset(fs.readFileSync(path.join(changesetDir, fileName), 'utf8'));
-      const release = changeset.releases.find((entry) => entry.name === '@bidanapp/release');
+      const release = changeset.releases.find((entry) => entry.name === '@marketplace/release');
       if (!release) {
         return current;
       }
@@ -159,7 +159,7 @@ async function main() {
     }, null);
 
     if (!highestReleaseType) {
-      console.log('No release change found for @bidanapp/release. Skipping release.');
+      console.log('No release change found for @marketplace/release. Skipping release.');
       return;
     }
 

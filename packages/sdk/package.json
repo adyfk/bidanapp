@@ -1,5 +1,5 @@
 {
-  "name": "@bidanapp/sdk",
+  "name": "@marketplace/sdk",
   "version": "0.0.0-private",
   "private": true,
   "type": "module",
@@ -14,7 +14,7 @@
   "scripts": {
     "build": "npm run generate && npm run typecheck",
     "generate": "npm run export:spec && npm run generate:types",
-    "export:spec": "cd ../../apps/backend && go run ./cmd/openapi-export -json ../../packages/sdk/openapi.json",
+    "export:spec": "cd ../../apps/backend && AUTH_COOKIE_PATH=/ go run ./cmd/openapi-export -json ../../packages/sdk/openapi.json",
     "generate:types": "openapi-typescript ./openapi.json -o ./src/generated/types.ts",
     "lint": "biome ci .",
     "typecheck": "tsc -p tsconfig.json --noEmit"

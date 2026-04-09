@@ -51,16 +51,10 @@ func authRateLimitBucket(r *http.Request) (string, bool) {
 	switch {
 	case r.Method == http.MethodPost && r.URL.Path == "/api/v1/admin/auth/session":
 		return "admin-session-create", true
-	case r.Method == http.MethodPost && r.URL.Path == "/api/v1/customers/auth/register":
-		return "customer-register", true
-	case r.Method == http.MethodPost && r.URL.Path == "/api/v1/customers/auth/session":
-		return "customer-session-create", true
-	case r.Method == http.MethodPost && r.URL.Path == "/api/v1/professionals/auth/register":
-		return "professional-register", true
-	case r.Method == http.MethodPost && r.URL.Path == "/api/v1/professionals/auth/session":
-		return "professional-session-create", true
-	case r.Method == http.MethodPost && r.URL.Path == "/api/v1/professionals/auth/password-recovery":
-		return "professional-password-recovery", true
+	case r.Method == http.MethodPost && r.URL.Path == "/api/v1/auth/register":
+		return "viewer-register", true
+	case r.Method == http.MethodPost && r.URL.Path == "/api/v1/auth/login":
+		return "viewer-session-create", true
 	default:
 		return "", false
 	}

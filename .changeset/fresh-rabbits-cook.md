@@ -1,4 +1,4 @@
-"@bidanapp/release": patch
+"@marketplace/release": patch
 ---
 
 Close trust and ops gaps by persisting scoped support tickets and appointment reviews,

@@ -11,11 +11,11 @@ type Config struct {
 	HTTP             HTTPConfig
 	CORS             CORSConfig
 	SeedData         SeedDataConfig
+	Assets           AssetStorageConfig
 	Database         DatabaseConfig
 	AuthRateLimit    AuthRateLimitConfig
 	AdminAuth        AdminAuthConfig
-	CustomerAuth     CustomerAuthConfig
-	ProfessionalAuth ProfessionalAuthConfig
+	ViewerAuth       ViewerAuthConfig
 	Payment          PaymentConfig
 	WebPush          WebPushConfig
 	Redis            RedisConfig
@@ -59,6 +59,10 @@ type SeedDataConfig struct {
 	DataDir string
 }
 
+type AssetStorageConfig struct {
+	RootDir string
+}
+
 type DatabaseConfig struct {
 	URL string
 }
@@ -89,14 +93,27 @@ type AdminCredentialConfig struct {
 	FocusArea    string
 }
 
-type CustomerAuthConfig struct {
-	Cookie     SessionCookieConfig
+type ViewerAuthConfig struct {
+	Challenge ChallengeConfig
+	Cookie    SessionCookieConfig
 	SessionTTL time.Duration
+	SMS       SMSConfig
 }
 
-type ProfessionalAuthConfig struct {
-	Cookie     SessionCookieConfig
-	SessionTTL time.Duration
+type ChallengeConfig struct {
+	CodeTTL     time.Duration
+	MaxAttempts int
+}
+
+type SMSConfig struct {
+	Provider string
+	Twilio   TwilioSMSConfig
+}
+
+type TwilioSMSConfig struct {
+	AccountSID string
+	AuthToken  string
+	FromNumber string
 }
 
 type PaymentConfig struct {

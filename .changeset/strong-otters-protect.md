@@ -1,4 +1,4 @@
-"@bidanapp/release": patch
+"@marketplace/release": patch
 ---
 
 Harden runtime persistence for production by removing remaining legacy document paths,

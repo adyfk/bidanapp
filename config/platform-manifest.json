@@ -1,0 +1,279 @@
+{
+  "version": 1,
+  "platforms": [
+    {
+      "id": "bidan",
+      "slug": "bidan",
+      "name": "BidanCare",
+      "description": "Platform layanan bidan dengan storefront profesional per subdomain.",
+      "summary": "Layanan bidan, konseling laktasi, dan produk digital untuk ibu dan bayi.",
+      "domains": ["bidan.xxx.id", "bidan.lvh.me"],
+      "defaultLocale": "id",
+      "supportedLocales": ["id", "en"],
+      "themePreset": "classic",
+      "motionPreset": "rich",
+      "seo": {
+        "title": "BidanCare",
+        "description": "Temukan bidan tepercaya, konsultasi online, kunjungan rumah, dan produk edukasi ibu-bayi.",
+        "ogTitle": "BidanCare",
+        "ogDescription": "Marketplace dan creator platform untuk bidan profesional."
+      },
+      "seoByLocale": {
+        "id": {
+          "title": "BidanCare",
+          "description": "Temukan bidan tepercaya, konsultasi online, kunjungan rumah, dan produk edukasi ibu-bayi.",
+          "ogTitle": "BidanCare",
+          "ogDescription": "Marketplace dan creator platform untuk bidan profesional."
+        },
+        "en": {
+          "title": "BidanCare",
+          "description": "Find trusted midwives, online consultations, home visits, and digital products for mothers and babies.",
+          "ogTitle": "BidanCare",
+          "ogDescription": "A marketplace and creator platform for professional midwives."
+        }
+      },
+      "theme": {
+        "primary": "#E91E8C",
+        "secondary": "#7C3AED",
+        "accent": "#F97316",
+        "background": "#F9FAFB",
+        "surface": "#ffffff",
+        "surfaceMuted": "#FCE4F2",
+        "surfaceElevated": "#ffffff",
+        "border": "#E5E7EB",
+        "borderStrong": "#CBD5E1",
+        "text": "#111827",
+        "textStrong": "#111827",
+        "textMuted": "#6B7280",
+        "muted": "#6B7280",
+        "success": "#10B981",
+        "warning": "#F59E0B",
+        "danger": "#EF4444",
+        "info": "#2563EB",
+        "focusRing": "#FBCFE8",
+        "pillBackground": "#FCE4F2",
+        "pillText": "#C2177A",
+        "navActiveBackground": "#1E1E1E",
+        "navActiveText": "#FFFFFF",
+        "heroGradient": "linear-gradient(180deg, #C2177A 0%, #E91E8C 34%, #F29AC4 58%, #FFF3F9 79%, #FFFAFC 100%)",
+        "heroOverlay": "linear-gradient(180deg, rgba(255,255,255,0.24) 0%, rgba(255,255,255,0.02) 38%, rgba(253,242,248,0.65) 100%)"
+      },
+      "featureFlags": {
+        "adminReview": true,
+        "payments": true,
+        "professionalDocuments": true,
+        "professionalOnboarding": true
+      },
+      "screenCapabilities": {
+        "admin": true,
+        "authHub": true,
+        "customer": true,
+        "professional": true,
+        "support": true
+      },
+      "copy": {
+        "accessBadge": "Get started",
+        "authDescription": "Masuk ke BidanCare untuk melanjutkan order, chat, dan profil Anda.",
+        "authTitle": "Masuk ke BidanCare",
+        "homeEyebrow": "Get started",
+        "navigation": [
+          { "id": "home", "label": "Home", "href": "/home", "icon": "sparkles" },
+          { "id": "services", "label": "Cari", "href": "/services", "icon": "search" },
+          { "id": "explore", "label": "Ahli", "href": "/explore", "icon": "compass" },
+          { "id": "orders", "label": "Aktivitas", "href": "/orders", "icon": "calendar" }
+        ]
+      },
+      "copyByLocale": {
+        "id": {
+          "accessBadge": "Get started",
+          "authDescription": "Masuk ke BidanCare untuk melanjutkan order, chat, dan profil Anda.",
+          "authTitle": "Masuk ke BidanCare",
+          "homeEyebrow": "Get started",
+          "navigation": [
+            { "id": "home", "label": "Home", "href": "/home", "icon": "sparkles" },
+            { "id": "services", "label": "Cari", "href": "/services", "icon": "search" },
+            { "id": "explore", "label": "Ahli", "href": "/explore", "icon": "compass" },
+            { "id": "orders", "label": "Aktivitas", "href": "/orders", "icon": "calendar" }
+          ]
+        },
+        "en": {
+          "accessBadge": "Get started",
+          "authDescription": "Sign in to BidanCare to continue your orders, chats, and profile.",
+          "authTitle": "Sign in to BidanCare",
+          "homeEyebrow": "Get started",
+          "navigation": [
+            { "id": "home", "label": "Home", "href": "/home", "icon": "sparkles" },
+            { "id": "services", "label": "Search", "href": "/services", "icon": "search" },
+            { "id": "explore", "label": "Experts", "href": "/explore", "icon": "compass" },
+            { "id": "orders", "label": "Activity", "href": "/orders", "icon": "calendar" }
+          ]
+        }
+      },
+      "presentation": {
+        "activityTitle": "Aktivitas customer",
+        "activityDescription": "Pantau order, pembayaran, dan tindak lanjut dalam satu tempat.",
+        "exploreTitle": "Jelajahi profesional",
+        "exploreDescription": "Cari profesional berdasarkan kebutuhan dan area yang paling relevan.",
+        "servicesTitle": "Katalog layanan",
+        "servicesDescription": "Telusuri layanan yang sudah siap dibuka, lalu lanjutkan ke profil atau order.",
+        "helpTitle": "Butuh bantuan cepat?",
+        "helpDescription": "Buka support bila Anda membutuhkan bantuan untuk order atau tindak lanjut.",
+        "homeCategorySection": {
+          "id": "home-categories",
+          "title": "Kategori pilihan",
+          "description": "Mulai dari kategori yang paling dekat dengan kebutuhan Anda hari ini."
+        },
+        "homeServiceSection": {
+          "id": "home-services",
+          "title": "Layanan populer",
+          "description": "Layanan populer untuk konsultasi, kunjungan rumah, dan edukasi pendamping."
+        },
+        "homeProfessionalSection": {
+          "id": "home-professionals",
+          "title": "Profesional tepercaya",
+          "description": "Buka profil profesional dan lanjutkan ke layanan yang paling cocok."
+        },
+        "categories": [
+          {
+            "id": "postpartum",
+            "label": "Pascamelahirkan",
+            "caption": "Untuk ibu baru",
+            "href": "/services?q=pascamelahirkan",
+            "query": "pascamelahirkan"
+          },
+          {
+            "id": "lactation",
+            "label": "Laktasi",
+            "caption": "ASI dan menyusui",
+            "href": "/services?q=laktasi",
+            "query": "laktasi"
+          },
+          {
+            "id": "consultation",
+            "label": "Konsultasi",
+            "caption": "Konsultasi ringan",
+            "href": "/services?q=konsultasi",
+            "query": "konsultasi"
+          },
+          {
+            "id": "digital",
+            "label": "Edukasi",
+            "caption": "Produk edukasi",
+            "href": "/services?q=workbook",
+            "query": "workbook"
+          }
+        ]
+      },
+      "registrationSchema": {
+        "version": 1,
+        "title": "Registrasi Profesional Bidan",
+        "description": "Lengkapi data dan dokumen Anda untuk mulai bergabung sebagai profesional BidanCare.",
+        "fields": [
+          {
+            "key": "str_number",
+            "label": "Nomor STR",
+            "type": "text",
+            "required": true,
+            "placeholder": "Masukkan nomor STR aktif",
+            "helperText": "Nomor STR aktif wajib diisi sebelum pengajuan ditinjau."
+          },
+          {
+            "key": "sipb_document_url",
+            "label": "Dokumen SIPB",
+            "type": "document",
+            "required": true,
+            "placeholder": "Unggah dokumen SIPB aktif",
+            "helperText": "Unggah scan atau foto SIPB yang masih berlaku."
+          },
+          {
+            "key": "education_history",
+            "label": "Riwayat Pendidikan",
+            "type": "textarea",
+            "required": true,
+            "placeholder": "Contoh: D3 Kebidanan Poltekkes Jakarta"
+          },
+          {
+            "key": "certified_lactation",
+            "label": "Memiliki sertifikasi laktasi",
+            "type": "boolean",
+            "required": false
+          }
+        ]
+      },
+      "registrationSchemaByLocale": {
+        "id": {
+          "version": 1,
+          "title": "Registrasi Profesional Bidan",
+          "description": "Lengkapi data dan dokumen Anda untuk mulai bergabung sebagai profesional BidanCare.",
+          "fields": [
+            {
+              "key": "str_number",
+              "label": "Nomor STR",
+              "type": "text",
+              "required": true,
+              "placeholder": "Masukkan nomor STR aktif",
+              "helperText": "Nomor STR aktif wajib diisi sebelum pengajuan ditinjau."
+            },
+            {
+              "key": "sipb_document_url",
+              "label": "Dokumen SIPB",
+              "type": "document",
+              "required": true,
+              "placeholder": "Unggah dokumen SIPB aktif",
+              "helperText": "Unggah scan atau foto SIPB yang masih berlaku."
+            },
+            {
+              "key": "education_history",
+              "label": "Riwayat Pendidikan",
+              "type": "textarea",
+              "required": true,
+              "placeholder": "Contoh: D3 Kebidanan Poltekkes Jakarta"
+            },
+            {
+              "key": "certified_lactation",
+              "label": "Memiliki sertifikasi laktasi",
+              "type": "boolean",
+              "required": false
+            }
+          ]
+        },
+        "en": {
+          "version": 1,
+          "title": "Midwife Professional Registration",
+          "description": "Complete your details and documents to join BidanCare as a professional.",
+          "fields": [
+            {
+              "key": "str_number",
+              "label": "STR License Number",
+              "type": "text",
+              "required": true,
+              "placeholder": "Enter the active STR number",
+              "helperText": "An active STR number is required before review."
+            },
+            {
+              "key": "sipb_document_url",
+              "label": "SIPB Document",
+              "type": "document",
+              "required": true,
+              "placeholder": "Upload the active SIPB document",
+              "helperText": "Upload a clear scan or photo of the valid SIPB."
+            },
+            {
+              "key": "education_history",
+              "label": "Education History",
+              "type": "textarea",
+              "required": true,
+              "placeholder": "Example: Diploma in Midwifery, Jakarta Health Polytechnic"
+            },
+            {
+              "key": "certified_lactation",
+              "label": "Has lactation certification",
+              "type": "boolean",
+              "required": false
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,12 +1,12 @@
 import createClient from 'openapi-fetch';
 import type { components, operations, paths } from './generated/types';
 
-export type BidanappApiClient = ReturnType<typeof createBidanappApiClient>;
-export type BidanappComponents = components;
-export type BidanappOperations = operations;
-export type BidanappPaths = paths;
+export type MarketplaceApiClient = ReturnType<typeof createMarketplaceApiClient>;
+export type MarketplaceComponents = components;
+export type MarketplaceOperations = operations;
+export type MarketplacePaths = paths;
 
-export function createBidanappApiClient(baseUrl: string) {
+export function createMarketplaceApiClient(baseUrl: string) {
   return createClient<paths>({
     baseUrl,
     credentials: 'include',

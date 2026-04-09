@@ -49,8 +49,13 @@ func (s *Service) SeedSession(ctx context.Context, input SeedSessionInput) (Admi
 		}
 		return AdminAuthSessionData{}, err
 	}
+	sessionID, err := newSessionID()
+	if err != nil {
+		return AdminAuthSessionData{}, err
+	}
 
 	session := authstore.Session{
+		ID:               sessionID,
 		ExpiresAt:        expiresAt,
 		LastLoginAt:      lastLoginAt,
 		LastVisitedRoute: strings.TrimSpace(input.LastVisitedRoute),

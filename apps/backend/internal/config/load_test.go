@@ -30,12 +30,15 @@ func TestLoadFromAppRootReadsEnvFilesAndNormalizesConfig(t *testing.T) {
 		"CORS_ALLOWED_ORIGINS=https://example.com/, https://admin.example.com",
 		"SEED_DATA_DIR=./fixtures/seeddata",
 		"DATABASE_URL=postgres://postgres:postgres@localhost:5432/bidanapp?sslmode=disable",
-		"CUSTOMER_AUTH_SESSION_TTL=10h",
-		"PROFESSIONAL_AUTH_SESSION_TTL=12h",
+		"VIEWER_AUTH_SESSION_TTL=10h",
 		"PAYMENT_PROVIDER=xendit",
 		"PAYMENT_CURRENCY=IDR",
 		"XENDIT_SECRET_KEY=xnd_development_secret_key",
 		"XENDIT_WEBHOOK_TOKEN=xnd_webhook_token",
+		"SMS_PROVIDER=twilio",
+		"SMS_TWILIO_ACCOUNT_SID=AC1234567890",
+		"SMS_TWILIO_AUTH_TOKEN=secret-token",
+		"SMS_TWILIO_FROM_NUMBER=+12025550123",
 		`ADMIN_CONSOLE_CREDENTIALS_JSON=[{"adminId":"adm-01","email":"naya@ops.bidanapp.id","passwordHash":"$2a$12$9kXq1E5j3H6m7L8n2P4rUeB9tJ0vC1xYzAqR4mTnV7pQwS6dF8gHi","focusArea":"support"}]`,
 		"REDIS_URL=redis://localhost:6379",
 		"LOG_LEVEL=warn",
@@ -61,12 +64,15 @@ func TestLoadFromAppRootReadsEnvFilesAndNormalizesConfig(t *testing.T) {
 		"CORS_ALLOWED_ORIGINS",
 		"SEED_DATA_DIR",
 		"DATABASE_URL",
-		"CUSTOMER_AUTH_SESSION_TTL",
-		"PROFESSIONAL_AUTH_SESSION_TTL",
+		"VIEWER_AUTH_SESSION_TTL",
 		"PAYMENT_PROVIDER",
 		"PAYMENT_CURRENCY",
 		"XENDIT_SECRET_KEY",
 		"XENDIT_WEBHOOK_TOKEN",
+		"SMS_PROVIDER",
+		"SMS_TWILIO_ACCOUNT_SID",
+		"SMS_TWILIO_AUTH_TOKEN",
+		"SMS_TWILIO_FROM_NUMBER",
 		"ADMIN_CONSOLE_CREDENTIALS_JSON",
 		"REDIS_URL",
 		"LOG_LEVEL",
@@ -103,15 +109,11 @@ func TestLoadFromAppRootReadsEnvFilesAndNormalizesConfig(t *testing.T) {
 		t.Fatalf("unexpected log format: %s", cfg.Observability.LogFormat)
 	}
 
-	if got, want := cfg.CustomerAuth.SessionTTL.String(), "10h0m0s"; got != want {
-		t.Fatalf("unexpected customer auth ttl: got %s want %s", got, want)
+	if got, want := cfg.ViewerAuth.SessionTTL.String(), "10h0m0s"; got != want {
+		t.Fatalf("unexpected viewer auth ttl: got %s want %s", got, want)
 	}
 
-	if got, want := cfg.ProfessionalAuth.SessionTTL.String(), "12h0m0s"; got != want {
-		t.Fatalf("unexpected professional auth ttl: got %s want %s", got, want)
-	}
-
-	if got, want := cfg.AdminAuth.Cookie.Path, "/api/v1"; got != want {
+	if got, want := cfg.AdminAuth.Cookie.Path, "/"; got != want {
 		t.Fatalf("unexpected auth cookie path: got %s want %s", got, want)
 	}
 
@@ -162,6 +164,51 @@ func TestLoadFromAppRootFailsForInvalidPort(t *testing.T) {
 	}
 }
 
+func TestLoadFromAppRootAllowsLocalEnvironmentDefaults(t *testing.T) {
+	appRoot := t.TempDir()
+	seedDataDir := filepath.Join(appRoot, "seeddata")
+
+	if err := os.MkdirAll(seedDataDir, 0o755); err != nil {
+		t.Fatalf("create seed data dir: %v", err)
+	}
+
+	envFile := strings.Join([]string{
+		"APP_ENV=local",
+		"SEED_DATA_DIR=./seeddata",
+		"DATABASE_URL=postgres://postgres:postgres@localhost:5432/bidanapp?sslmode=disable",
+		"CORS_ALLOWED_ORIGINS=http://bidan.lvh.me:3002,http://admin.lvh.me:3005",
+		"REDIS_URL=redis://localhost:6379",
+	}, "\n")
+
+	if err := os.WriteFile(filepath.Join(appRoot, ".env"), []byte(envFile), 0o644); err != nil {
+		t.Fatalf("write env file: %v", err)
+	}
+
+	restore := clearEnv("APP_ENV", "SEED_DATA_DIR", "DATABASE_URL", "CORS_ALLOWED_ORIGINS", "REDIS_URL", "ADMIN_CONSOLE_CREDENTIALS_JSON")
+	defer restore()
+
+	cfg, err := loadFromAppRoot(appRoot)
+	if err != nil {
+		t.Fatalf("load config: %v", err)
+	}
+
+	if got, want := cfg.App.Environment, "local"; got != want {
+		t.Fatalf("unexpected environment: got %s want %s", got, want)
+	}
+
+	if got, want := cfg.Payment.Provider, "manual_test"; got != want {
+		t.Fatalf("unexpected payment provider: got %s want %s", got, want)
+	}
+
+	if got, want := cfg.ViewerAuth.SMS.Provider, "console"; got != want {
+		t.Fatalf("unexpected sms provider: got %s want %s", got, want)
+	}
+
+	if len(cfg.AdminAuth.Credentials) == 0 {
+		t.Fatal("expected local environment to fall back to default admin credentials")
+	}
+}
+
 func TestLoadFromAppRootFailsWhenProductionAdminCredentialsAreMissing(t *testing.T) {
 	appRoot := t.TempDir()
 	seedDataDir := filepath.Join(appRoot, "seeddata")
@@ -178,6 +225,10 @@ func TestLoadFromAppRootFailsWhenProductionAdminCredentialsAreMissing(t *testing
 		"PAYMENT_PROVIDER=xendit",
 		"XENDIT_SECRET_KEY=xnd_test_key",
 		"XENDIT_WEBHOOK_TOKEN=xnd_test_token",
+		"SMS_PROVIDER=twilio",
+		"SMS_TWILIO_ACCOUNT_SID=AC1234567890",
+		"SMS_TWILIO_AUTH_TOKEN=secret-token",
+		"SMS_TWILIO_FROM_NUMBER=+12025550123",
 		"REDIS_URL=redis://localhost:6379",
 	}, "\n")
 
@@ -185,7 +236,7 @@ func TestLoadFromAppRootFailsWhenProductionAdminCredentialsAreMissing(t *testing
 		t.Fatalf("write env file: %v", err)
 	}
 
-	restore := clearEnv("APP_ENV", "SEED_DATA_DIR", "DATABASE_URL", "CORS_ALLOWED_ORIGINS", "PAYMENT_PROVIDER", "XENDIT_SECRET_KEY", "XENDIT_WEBHOOK_TOKEN", "REDIS_URL", "ADMIN_CONSOLE_CREDENTIALS_JSON")
+	restore := clearEnv("APP_ENV", "SEED_DATA_DIR", "DATABASE_URL", "CORS_ALLOWED_ORIGINS", "PAYMENT_PROVIDER", "XENDIT_SECRET_KEY", "XENDIT_WEBHOOK_TOKEN", "SMS_PROVIDER", "SMS_TWILIO_ACCOUNT_SID", "SMS_TWILIO_AUTH_TOKEN", "SMS_TWILIO_FROM_NUMBER", "REDIS_URL", "ADMIN_CONSOLE_CREDENTIALS_JSON")
 	defer restore()
 
 	_, err := loadFromAppRoot(appRoot)
@@ -214,6 +265,10 @@ func TestLoadFromAppRootFailsWhenProductionUsesDefaultAdminPasswordHash(t *testi
 		"PAYMENT_PROVIDER=xendit",
 		"XENDIT_SECRET_KEY=xnd_test_key",
 		"XENDIT_WEBHOOK_TOKEN=xnd_test_token",
+		"SMS_PROVIDER=twilio",
+		"SMS_TWILIO_ACCOUNT_SID=AC1234567890",
+		"SMS_TWILIO_AUTH_TOKEN=secret-token",
+		"SMS_TWILIO_FROM_NUMBER=+12025550123",
 		`ADMIN_CONSOLE_CREDENTIALS_JSON=[{"adminId":"adm-01","email":"ops@bidanapp.id","passwordHash":"` + defaultAdminPassword + `","focusArea":"support"}]`,
 		"REDIS_URL=redis://localhost:6379",
 	}, "\n")
@@ -222,7 +277,7 @@ func TestLoadFromAppRootFailsWhenProductionUsesDefaultAdminPasswordHash(t *testi
 		t.Fatalf("write env file: %v", err)
 	}
 
-	restore := clearEnv("APP_ENV", "SEED_DATA_DIR", "DATABASE_URL", "CORS_ALLOWED_ORIGINS", "PAYMENT_PROVIDER", "XENDIT_SECRET_KEY", "XENDIT_WEBHOOK_TOKEN", "REDIS_URL", "ADMIN_CONSOLE_CREDENTIALS_JSON")
+	restore := clearEnv("APP_ENV", "SEED_DATA_DIR", "DATABASE_URL", "CORS_ALLOWED_ORIGINS", "PAYMENT_PROVIDER", "XENDIT_SECRET_KEY", "XENDIT_WEBHOOK_TOKEN", "SMS_PROVIDER", "SMS_TWILIO_ACCOUNT_SID", "SMS_TWILIO_AUTH_TOKEN", "SMS_TWILIO_FROM_NUMBER", "REDIS_URL", "ADMIN_CONSOLE_CREDENTIALS_JSON")
 	defer restore()
 
 	_, err := loadFromAppRoot(appRoot)
@@ -247,7 +302,7 @@ func TestLoadFromAppRootAllowsDevelopmentDefaultAdminCredentials(t *testing.T) {
 		"APP_ENV=development",
 		"SEED_DATA_DIR=./seeddata",
 		"DATABASE_URL=postgres://postgres:postgres@localhost:5432/bidanapp?sslmode=disable",
-		"CORS_ALLOWED_ORIGINS=http://localhost:3000",
+		"CORS_ALLOWED_ORIGINS=http://bidan.lvh.me:3002",
 		"REDIS_URL=redis://localhost:6379",
 	}, "\n")
 
@@ -288,6 +343,10 @@ func TestLoadFromAppRootFailsWhenProductionCookiesAreNotSecure(t *testing.T) {
 		"PAYMENT_PROVIDER=xendit",
 		"XENDIT_SECRET_KEY=xnd_test_key",
 		"XENDIT_WEBHOOK_TOKEN=xnd_test_token",
+		"SMS_PROVIDER=twilio",
+		"SMS_TWILIO_ACCOUNT_SID=AC1234567890",
+		"SMS_TWILIO_AUTH_TOKEN=secret-token",
+		"SMS_TWILIO_FROM_NUMBER=+12025550123",
 		"AUTH_COOKIE_SECURE=false",
 		`ADMIN_CONSOLE_CREDENTIALS_JSON=[{"adminId":"adm-01","email":"ops@bidanapp.id","passwordHash":"$2a$12$9kXq1E5j3H6m7L8n2P4rUeB9tJ0vC1xYzAqR4mTnV7pQwS6dF8gHi","focusArea":"support"}]`,
 		"REDIS_URL=redis://localhost:6379",
@@ -297,7 +356,7 @@ func TestLoadFromAppRootFailsWhenProductionCookiesAreNotSecure(t *testing.T) {
 		t.Fatalf("write env file: %v", err)
 	}
 
-	restore := clearEnv("APP_ENV", "SEED_DATA_DIR", "DATABASE_URL", "CORS_ALLOWED_ORIGINS", "PAYMENT_PROVIDER", "XENDIT_SECRET_KEY", "XENDIT_WEBHOOK_TOKEN", "AUTH_COOKIE_SECURE", "ADMIN_CONSOLE_CREDENTIALS_JSON", "REDIS_URL")
+	restore := clearEnv("APP_ENV", "SEED_DATA_DIR", "DATABASE_URL", "CORS_ALLOWED_ORIGINS", "PAYMENT_PROVIDER", "XENDIT_SECRET_KEY", "XENDIT_WEBHOOK_TOKEN", "SMS_PROVIDER", "SMS_TWILIO_ACCOUNT_SID", "SMS_TWILIO_AUTH_TOKEN", "SMS_TWILIO_FROM_NUMBER", "AUTH_COOKIE_SECURE", "ADMIN_CONSOLE_CREDENTIALS_JSON", "REDIS_URL")
 	defer restore()
 
 	_, err := loadFromAppRoot(appRoot)
@@ -326,6 +385,10 @@ func TestLoadFromAppRootFailsWhenProductionOriginIsNotHTTPS(t *testing.T) {
 		"PAYMENT_PROVIDER=xendit",
 		"XENDIT_SECRET_KEY=xnd_test_key",
 		"XENDIT_WEBHOOK_TOKEN=xnd_test_token",
+		"SMS_PROVIDER=twilio",
+		"SMS_TWILIO_ACCOUNT_SID=AC1234567890",
+		"SMS_TWILIO_AUTH_TOKEN=secret-token",
+		"SMS_TWILIO_FROM_NUMBER=+12025550123",
 		`ADMIN_CONSOLE_CREDENTIALS_JSON=[{"adminId":"adm-01","email":"ops@bidanapp.id","passwordHash":"$2a$12$9kXq1E5j3H6m7L8n2P4rUeB9tJ0vC1xYzAqR4mTnV7pQwS6dF8gHi","focusArea":"support"}]`,
 		"REDIS_URL=redis://localhost:6379",
 	}, "\n")
@@ -334,7 +397,7 @@ func TestLoadFromAppRootFailsWhenProductionOriginIsNotHTTPS(t *testing.T) {
 		t.Fatalf("write env file: %v", err)
 	}
 
-	restore := clearEnv("APP_ENV", "SEED_DATA_DIR", "DATABASE_URL", "CORS_ALLOWED_ORIGINS", "PAYMENT_PROVIDER", "XENDIT_SECRET_KEY", "XENDIT_WEBHOOK_TOKEN", "ADMIN_CONSOLE_CREDENTIALS_JSON", "REDIS_URL")
+	restore := clearEnv("APP_ENV", "SEED_DATA_DIR", "DATABASE_URL", "CORS_ALLOWED_ORIGINS", "PAYMENT_PROVIDER", "XENDIT_SECRET_KEY", "XENDIT_WEBHOOK_TOKEN", "SMS_PROVIDER", "SMS_TWILIO_ACCOUNT_SID", "SMS_TWILIO_AUTH_TOKEN", "SMS_TWILIO_FROM_NUMBER", "ADMIN_CONSOLE_CREDENTIALS_JSON", "REDIS_URL")
 	defer restore()
 
 	_, err := loadFromAppRoot(appRoot)
@@ -361,6 +424,10 @@ func TestLoadFromAppRootFailsWhenProductionPaymentProviderIsNotXendit(t *testing
 		"DATABASE_URL=postgres://postgres:postgres@localhost:5432/bidanapp?sslmode=disable",
 		"CORS_ALLOWED_ORIGINS=https://app.bidanapp.id",
 		"PAYMENT_PROVIDER=manual_test",
+		"SMS_PROVIDER=twilio",
+		"SMS_TWILIO_ACCOUNT_SID=AC1234567890",
+		"SMS_TWILIO_AUTH_TOKEN=secret-token",
+		"SMS_TWILIO_FROM_NUMBER=+12025550123",
 		`ADMIN_CONSOLE_CREDENTIALS_JSON=[{"adminId":"adm-01","email":"ops@bidanapp.id","passwordHash":"$2a$12$9kXq1E5j3H6m7L8n2P4rUeB9tJ0vC1xYzAqR4mTnV7pQwS6dF8gHi","focusArea":"support"}]`,
 		"REDIS_URL=redis://localhost:6379",
 	}, "\n")
@@ -369,7 +436,7 @@ func TestLoadFromAppRootFailsWhenProductionPaymentProviderIsNotXendit(t *testing
 		t.Fatalf("write env file: %v", err)
 	}
 
-	restore := clearEnv("APP_ENV", "SEED_DATA_DIR", "DATABASE_URL", "CORS_ALLOWED_ORIGINS", "PAYMENT_PROVIDER", "ADMIN_CONSOLE_CREDENTIALS_JSON", "REDIS_URL")
+	restore := clearEnv("APP_ENV", "SEED_DATA_DIR", "DATABASE_URL", "CORS_ALLOWED_ORIGINS", "PAYMENT_PROVIDER", "SMS_PROVIDER", "SMS_TWILIO_ACCOUNT_SID", "SMS_TWILIO_AUTH_TOKEN", "SMS_TWILIO_FROM_NUMBER", "ADMIN_CONSOLE_CREDENTIALS_JSON", "REDIS_URL")
 	defer restore()
 
 	_, err := loadFromAppRoot(appRoot)
@@ -396,6 +463,10 @@ func TestLoadFromAppRootFailsWhenXenditSecretsAreMissing(t *testing.T) {
 		"DATABASE_URL=postgres://postgres:postgres@localhost:5432/bidanapp?sslmode=disable",
 		"CORS_ALLOWED_ORIGINS=https://staging.bidanapp.id",
 		"PAYMENT_PROVIDER=xendit",
+		"SMS_PROVIDER=twilio",
+		"SMS_TWILIO_ACCOUNT_SID=AC1234567890",
+		"SMS_TWILIO_AUTH_TOKEN=secret-token",
+		"SMS_TWILIO_FROM_NUMBER=+12025550123",
 		`ADMIN_CONSOLE_CREDENTIALS_JSON=[{"adminId":"adm-01","email":"ops@bidanapp.id","passwordHash":"$2a$12$9kXq1E5j3H6m7L8n2P4rUeB9tJ0vC1xYzAqR4mTnV7pQwS6dF8gHi","focusArea":"support"}]`,
 		"REDIS_URL=redis://localhost:6379",
 	}, "\n")
@@ -404,7 +475,7 @@ func TestLoadFromAppRootFailsWhenXenditSecretsAreMissing(t *testing.T) {
 		t.Fatalf("write env file: %v", err)
 	}
 
-	restore := clearEnv("APP_ENV", "SEED_DATA_DIR", "DATABASE_URL", "CORS_ALLOWED_ORIGINS", "PAYMENT_PROVIDER", "ADMIN_CONSOLE_CREDENTIALS_JSON", "REDIS_URL")
+	restore := clearEnv("APP_ENV", "SEED_DATA_DIR", "DATABASE_URL", "CORS_ALLOWED_ORIGINS", "PAYMENT_PROVIDER", "SMS_PROVIDER", "SMS_TWILIO_ACCOUNT_SID", "SMS_TWILIO_AUTH_TOKEN", "SMS_TWILIO_FROM_NUMBER", "ADMIN_CONSOLE_CREDENTIALS_JSON", "REDIS_URL")
 	defer restore()
 
 	_, err := loadFromAppRoot(appRoot)

@@ -23,7 +23,7 @@ func loadEnvFiles(appRoot string) error {
 		}
 	}
 
-	environment := firstNonEmpty(originalEnv["APP_ENV"], mergedValues["APP_ENV"], "development")
+	environment := firstNonEmpty(originalEnv["APP_ENV"], mergedValues["APP_ENV"], "local")
 	envFiles := []string{
 		filepath.Join(appRoot, ".env."+environment),
 		filepath.Join(appRoot, ".env."+environment+".local"),

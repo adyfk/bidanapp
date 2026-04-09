@@ -1,217 +1,107 @@
-# Frontend Guide
+# Frontend
 
-This guide explains how the frontend is structured, how routing and locale handling work, where data comes from, and how to add features without collapsing screen logic back into large monolith components.
+## Tujuan
 
-## 1. Frontend Stack
+Dokumen ini menjelaskan ownership frontend, route shape, dan aturan shared UI untuk Bidan V2.
 
-The frontend app lives in `apps/frontend` and uses:
+## Current Truth
 
-- Next.js `16.1.6`
-- React `19.2.4`
-- `next-intl` for localization
-- Tailwind CSS `4`
-- Biome for formatting and linting
-- Node test runner for smoke tests
+Frontend aktif terdiri dari:
 
-## 2. Directory Structure
+- `apps/bidan`
+- `apps/admin`
 
-The important frontend directories are:
+Shared logic berada di:
 
-```text
-apps/frontend/src
-├── app                        # App Router entrypoints
-├── components
-│   ├── layout                 # layout-level components such as bottom navigation
-│   ├── screens                # page-sized screen containers
-│   ├── providers              # React providers when needed
-│   └── ui                     # shared presentational primitives
-├── features
-│   ├── appointments
-│   ├── backend-integration
-│   ├── professional-detail
-│   └── service-detail
-├── i18n                       # next-intl locale routing and request helpers
-├── lib                        # config, env, routes, backend adapters, shell/read-model helpers
-├── messages                   # localized message catalogs
-└── types                      # TypeScript app-specific types
-```
+- `packages/marketplace-core`
+- `packages/platform-config`
+- `packages/sdk`
+- `packages/ui`
+- `packages/web`
 
-## 3. Route Structure
+## Ownership Rules
 
-The frontend uses localized public routes under `apps/frontend/src/app/(public)/[locale]` and a separate admin tree under `apps/frontend/src/app/(admin)/admin`.
+- `apps/*` harus tetap tipis
+- `packages/web` memiliki generic marketplace screen graph, route composition, route adapters, dan server helpers
+- `packages/marketplace-core` memiliki reusable business logic, view-model mapping, dan orchestration helpers
+- `packages/ui` memiliki generic marketplace visual foundations, motion primitives, dan reusable patterns
+- `packages/platform-config` memiliki manifest theme preset, motion preset, locale, SEO, nav/copy pack, dan registration schema
+- `packages/sdk` memiliki generated client dan typed adapters
 
-Current public route files include:
+## Bidan Visual Contract
 
-- `apps/frontend/src/app/(public)/[locale]/page.tsx`
-- `apps/frontend/src/app/(public)/[locale]/home/page.tsx`
-- `apps/frontend/src/app/(public)/[locale]/explore/page.tsx`
-- `apps/frontend/src/app/(public)/[locale]/services/page.tsx`
-- `apps/frontend/src/app/(public)/[locale]/appointments/page.tsx`
-- `apps/frontend/src/app/(public)/[locale]/appointments/[id]/page.tsx`
-- `apps/frontend/src/app/(public)/[locale]/activity/[id]/page.tsx`
-- `apps/frontend/src/app/(public)/[locale]/p/[slug]/page.tsx`
-- `apps/frontend/src/app/(public)/[locale]/s/[slug]/page.tsx`
-- `apps/frontend/src/app/(public)/[locale]/profile/page.tsx`
-- `apps/frontend/src/app/(public)/[locale]/for-professionals/page.tsx`
-- `apps/frontend/src/app/(public)/[locale]/for-professionals/dashboard/*`
+- Bidan adalah canonical visual language
+- `packages/ui` adalah owner seluruh visual recipes reusable
+- preset visual Bidan diambil dari repo copy lama, lalu dipetakan ke generic marketplace primitives
+- motion resmi memakai `framer-motion` lewat `packages/ui`
+- `packages/web` tidak boleh membuat primitive visual baru
+- `packages/web` tidak boleh hardcode presentational colors
+- semua app `globals.css` harus mendeklarasikan Tailwind `@source` ke shared packages
 
-Current admin route files include:
+## Route Ownership
 
-- `apps/frontend/src/app/(admin)/admin/login/page.tsx`
-- `apps/frontend/src/app/(admin)/admin/(console)/*`
+`packages/web` mengemas:
 
-Global metadata routes also exist:
+- landing dan public directory pages
+- customer pages
+- professional apply flow
+- professional dashboard sections
+- native auth dan account pages
+- admin console pages
 
-- `apps/frontend/src/app/robots.ts`
-- `apps/frontend/src/app/sitemap.ts`
+`apps/bidan` hanya bind route shell, locale context, dan metadata.
 
-## 4. Locale And Navigation Rules
+`packages/web/src/screens` adalah owner screen aktif per surface:
 
-Locale routing is defined in `src/i18n/routing.ts`.
+- `public`
+- `auth`
+- `customer`
+- `professional`
+- `admin`
 
-Current locale setup:
+Setiap vertical baru harus memakai graph yang sama dan hanya mengubah preset/copy/schema dari config.
 
-- supported locales: `id`, `en`
-- default locale: `id`
+## Vertical Scaffolding
 
-Important rules:
-
-- use `@/i18n/routing` as the source of truth for locale-aware navigation primitives
-- use route helpers from `@/lib/routes.ts` for app paths, slug routes, and query-based routes
-- do not hardcode localized route strings in unrelated components
-- if you add a new route, ensure it works for both `/id/*` and `/en/*`
-
-The smoke test in `apps/frontend/tests/route-smoke.test.mjs` explicitly checks both locales and invalid slugs.
-
-## 5. Screen Composition Pattern
-
-The expected structure for non-trivial UI is:
-
-```text
-route file
-  -> screen container
-  -> feature sections
-  -> feature hooks or action handlers
-  -> shared UI primitives
-```
-
-Examples already in the repository:
-
-- appointments flow split into screen, feature components, and `useAppointmentFlow`
-- professional detail split into screen, feature sections, and `useProfessionalDetail`
-- service detail split into screen, feature sections, and `useServiceDetail`
-
-Why this matters:
-
-- route files stay thin
-- screen containers handle page composition
-- hooks manage derived state and actions
-- section components stay reusable and testable
-- placeholder `alert()` flows are avoided in favor of visible UI state
-
-## 6. Shared UI Boundaries
-
-Use these layers consistently:
-
-- `components/screens/*`
-  Page-scale composition only.
-- `features/*/components/*`
-  Domain or feature sections.
-- `features/*/hooks/*`
-  State, side effects, and action handling for one feature.
-- `components/ui/*`
-  Reusable design primitives shared across screens.
-- `components/layout/*`
-  Cross-page structural components such as navigation.
-
-If a component becomes page-aware, it probably belongs in `components/screens` or `features/*`, not in `components/ui`.
-
-## 7. Data Sources In The Frontend
-
-The frontend is backend-first.
-
-Runtime data should go through:
-
-- `@bidanapp/sdk` for typed transport
-- `src/lib/backend.ts` for frontend runtime URL helpers
-- SDK adapters in `packages/sdk/src/adapters/*`
-- frontend composition helpers such as `src/lib/public-bootstrap.ts`, `src/lib/use-app-shell.ts`, and `src/lib/use-catalog-read-model.ts`
-
-Backend-owned seed data now lives under `apps/backend/seeddata`.
-Frontend app code should not import seed JSON directly. Direct seed reads are limited to backend bootstrap/import paths and contract-oriented tests.
-
-## 8. Runtime Configuration
-
-Frontend public env values are loaded in `src/lib/env.ts` and composed with code-level app config in `src/lib/config.ts`.
-
-Important runtime values:
-
-- `NEXT_PUBLIC_SITE_URL`
-- `NEXT_PUBLIC_API_BASE_URL`
-- `NEXT_PUBLIC_APP_VERSION`
-
-`APP_CONFIG` combines:
-
-- branding and theme constants from code
-- deployment-specific public env values
-
-This split is important:
-
-- env controls environment-specific values
-- code constants control product defaults that are not domain data
-
-## 9. Styling And UI Notes
-
-Current styling conventions:
-
-- shared visual values come from `APP_CONFIG.colors`
-- route-level layout is applied in `apps/frontend/src/app/(public)/[locale]/layout.tsx`
-- the app shell uses a mobile-app inspired layout with bottom navigation
-- design primitives should be kept reusable, not page-coupled
-
-When editing UI:
-
-- preserve the current visual direction
-- avoid introducing route-specific layout hacks into shared primitives
-- keep accessibility warnings clean under Biome where practical
-
-## 10. Testing Strategy
-
-Frontend testing is intentionally lightweight but targeted:
-
-- smoke and route integration coverage via `apps/frontend/tests/route-smoke.test.mjs`
-- both locales `id` and `en` are verified
-- invalid slugs must return `404`
-
-Useful commands:
+Untuk membuat vertical baru yang tetap tipis:
 
 ```bash
-npm run test --workspace @bidanapp/frontend
-npm run typecheck --workspace @bidanapp/frontend
-npm run lint --workspace @bidanapp/frontend
+npm run platform:scaffold -- therapist 3011
 ```
 
-The smoke test runs a real Next.js dev server, so it is slower than a pure unit test. That tradeoff is intentional for route confidence.
+Command ini membuat:
 
-## 11. Adding A New Frontend Feature
+- shell app Next tipis di `apps/<vertical>`
+- wrapper routes yang import adapter dari `@marketplace/web`
+- stub config di `config/platform-stubs/<vertical>.json`
 
-Recommended checklist:
+Setelah itu cukup sambungkan manifest, domain, copy, theme preset, dan professional attribute schema.
 
-1. Decide which backend contract or read-model surface owns the feature data.
-2. Add or update route files under `apps/frontend/src/app/(public)/[locale]` or `apps/frontend/src/app/(admin)/admin` as needed.
-3. Create or update a screen container in `components/screens`.
-4. Split complex sections into `features/<feature>/components`.
-5. Put state or action logic into `features/<feature>/hooks`.
-6. Use `@/i18n/routing` and `@/lib/routes.ts` for navigation.
-7. If the feature consumes backend data, use `@bidanapp/sdk`.
-8. If the feature changes route coverage, update or extend the smoke test.
-9. If the feature needs new backend data, add the route or adapter first instead of reviving frontend seed hydration.
+## Auth UX Contract
 
-## 12. Common Mistakes To Avoid
+- `bidan` memiliki halaman:
+  - `/{locale}/login`
+  - `/{locale}/register`
+  - `/{locale}/forgot-password`
+- `/{locale}/security`
+- `/{locale}/sessions`
+- form auth di `bidan` memakai shared components reusable dari `@marketplace/web`
+- header/account state harus membaca shared viewer session
 
-- hardcoding links instead of using routing helpers
-- coupling a screen directly to raw backend transport data when an adapter is needed
-- putting page-specific logic into shared UI primitives
-- reintroducing monolithic screen components when sections and hooks are more appropriate
-- forgetting to validate both `/id/*` and `/en/*`
-- reading seed JSON directly from frontend runtime code instead of going through backend-owned contracts
+## Daily Frontend Checks
+
+Gunakan command ini sebelum merge:
+
+```bash
+npm run ui:guard
+npm run typecheck
+npm run build
+npm run e2e:smoke
+```
+
+Untuk visual QA manual, fokus pada:
+
+- `bidan` home, explore, services, professional detail, offering detail
+- auth routes di `bidan`
+- professional apply dan dashboard
+- admin overview dan queue pages

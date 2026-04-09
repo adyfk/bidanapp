@@ -8,20 +8,46 @@ import (
 	"bidanapp/apps/backend/internal/platform/web"
 )
 
+type adminAuthMode int
+
+const (
+	adminAuthNone adminAuthMode = iota
+	adminAuthOptional
+	adminAuthRequired
+)
+
 func AdminAuth(service *adminauth.Service) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if service == nil || !requiresAdminAuth(r) {
+			if service == nil {
+				next.ServeHTTP(w, r)
+				return
+			}
+
+			mode := adminAuthModeForRequest(r)
+			if mode == adminAuthNone {
+				next.ServeHTTP(w, r)
+				return
+			}
+
+			cookieValue := readCookieValue(r, service.CookieName())
+			authorizationHeader := r.Header.Get("Authorization")
+			if mode == adminAuthOptional && strings.TrimSpace(cookieValue) == "" && strings.TrimSpace(authorizationHeader) == "" {
 				next.ServeHTTP(w, r)
 				return
 			}
 
 			session, err := service.AuthenticateRequest(
 				r.Context(),
-				r.Header.Get("Authorization"),
-				readCookieValue(r, service.CookieName()),
+				authorizationHeader,
+				cookieValue,
 			)
 			if err != nil {
+				if mode == adminAuthOptional {
+					next.ServeHTTP(w, r)
+					return
+				}
+
 				writeAdminAuthError(w, err)
 				return
 			}
@@ -31,12 +57,20 @@ func AdminAuth(service *adminauth.Service) Middleware {
 	}
 }
 
-func requiresAdminAuth(r *http.Request) bool {
-	if !strings.HasPrefix(r.URL.Path, "/api/v1/admin/") {
-		return false
+func adminAuthModeForRequest(r *http.Request) adminAuthMode {
+	if strings.HasPrefix(r.URL.Path, "/api/v1/admin/") {
+		if r.URL.Path == "/api/v1/admin/auth/session" && r.Method == http.MethodPost {
+			return adminAuthNone
+		}
+
+		return adminAuthRequired
 	}
 
-	return !(r.URL.Path == "/api/v1/admin/auth/session" && r.Method == http.MethodPost)
+	if strings.HasPrefix(r.URL.Path, "/api/v1/professional-documents/") && r.Method == http.MethodGet {
+		return adminAuthOptional
+	}
+
+	return adminAuthNone
 }
 
 func writeAdminAuthError(w http.ResponseWriter, err error) {

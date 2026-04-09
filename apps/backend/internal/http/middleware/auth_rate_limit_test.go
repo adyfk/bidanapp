@@ -21,7 +21,7 @@ func TestAuthRateLimitRejectsAfterConfiguredAttempts(t *testing.T) {
 	}))
 
 	for attempt := 1; attempt <= 3; attempt++ {
-		request := httptest.NewRequest(http.MethodPost, "/api/v1/customers/auth/session", nil)
+		request := httptest.NewRequest(http.MethodPost, "/api/v1/auth/login", nil)
 		request.RemoteAddr = "127.0.0.1:12345"
 		recorder := httptest.NewRecorder()
 
@@ -56,7 +56,7 @@ func TestAuthRateLimitSkipsNonAuthRoutes(t *testing.T) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
 
-	request := httptest.NewRequest(http.MethodGet, "/api/v1/bootstrap", nil)
+	request := httptest.NewRequest(http.MethodGet, "/api/v1/platforms", nil)
 	request.RemoteAddr = "127.0.0.1:12345"
 	recorder := httptest.NewRecorder()
 

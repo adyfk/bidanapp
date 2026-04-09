@@ -12,5 +12,5 @@
   "access": "restricted",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["@bidanapp/backend", "@bidanapp/sdk"]
+  "ignore": ["@marketplace/backend", "@marketplace/sdk"]
 }

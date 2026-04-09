@@ -9,52 +9,58 @@ import (
 
 	"bidanapp/apps/backend/internal/config"
 	"bidanapp/apps/backend/internal/modules/adminauth"
-	"bidanapp/apps/backend/internal/modules/appointments"
-	"bidanapp/apps/backend/internal/modules/clientstate"
-	"bidanapp/apps/backend/internal/modules/customerauth"
+	"bidanapp/apps/backend/internal/modules/adminops"
+	"bidanapp/apps/backend/internal/modules/adminreview"
+	"bidanapp/apps/backend/internal/modules/chat"
+	"bidanapp/apps/backend/internal/modules/directory"
 	"bidanapp/apps/backend/internal/modules/health"
-	"bidanapp/apps/backend/internal/modules/professionalauth"
-	"bidanapp/apps/backend/internal/modules/professionalportal"
-	"bidanapp/apps/backend/internal/modules/readmodel"
-	"bidanapp/apps/backend/internal/platform/appointmentstore"
+	"bidanapp/apps/backend/internal/modules/notifications"
+	"bidanapp/apps/backend/internal/modules/offerings"
+	"bidanapp/apps/backend/internal/modules/orders"
+	"bidanapp/apps/backend/internal/modules/platformregistry"
+	"bidanapp/apps/backend/internal/modules/professionalonboarding"
+	"bidanapp/apps/backend/internal/modules/professionalworkspace"
+	"bidanapp/apps/backend/internal/modules/support"
+	"bidanapp/apps/backend/internal/modules/viewerauth"
 	"bidanapp/apps/backend/internal/platform/authstore"
-	"bidanapp/apps/backend/internal/platform/contentstore"
-	"bidanapp/apps/backend/internal/platform/documentstore"
-	"bidanapp/apps/backend/internal/platform/portalstore"
-	"bidanapp/apps/backend/internal/platform/pushstore"
+	"bidanapp/apps/backend/internal/platform/sms"
 	"bidanapp/apps/backend/internal/platform/web"
-	internalwebpush "bidanapp/apps/backend/internal/platform/webpush"
 )
 
 var configureErrorsOnce sync.Once
 
 type RuntimeServices struct {
-	AdminAuth          *adminauth.Service
-	CustomerAuth       *customerauth.Service
-	ProfessionalAuth   *professionalauth.Service
-	AppointmentWrites  *appointments.Service
-	ProfessionalPortal *professionalportal.Service
-	ReadModel          readmodel.Service
-	ClientState        *clientstate.Service
+	AdminOps               *adminops.Service
+	AdminAuth              *adminauth.Service
+	AdminReview            *adminreview.Service
+	Chat                   *chat.Service
+	Directory              *directory.Service
+	Notifications          *notifications.Service
+	ViewerAuth             *viewerauth.Service
+	PlatformRegistry       *platformregistry.Service
+	ProfessionalOnboarding *professionalonboarding.Service
+	ProfessionalWorkspace  *professionalworkspace.Service
+	Offerings              *offerings.Service
+	Orders                 *orders.Service
+	Support                *support.Service
 }
 
 func Build(mux *http.ServeMux, cfg config.Config) huma.API {
+	platforms := platformregistry.NewService(nil)
 	return build(mux, cfg, RuntimeServices{
-		AdminAuth:          adminauth.NewService(cfg.AdminAuth, authstore.NewMemoryStore()),
-		CustomerAuth:       customerauth.NewService(cfg.CustomerAuth, authstore.NewMemoryStore()),
-		ProfessionalAuth:   nil,
-		AppointmentWrites:  nil,
-		ProfessionalPortal: professionalportal.NewService(portalstore.NewMemoryStore()),
-		ReadModel: readmodel.NewService(
-			cfg.SeedData.DataDir,
-			portalstore.NewMemoryStore(),
-			appointmentstore.NewMemoryStore(),
-		),
-		ClientState: clientstate.NewService(
-			documentstore.NewMemoryStore(),
-			pushstore.NewMemoryStore(),
-			contentstore.NewMemoryStore(),
-		),
+		AdminOps:               adminops.NewService(nil),
+		AdminAuth:              adminauth.NewService(cfg.AdminAuth, authstore.NewMemoryStore()),
+		AdminReview:            adminreview.NewService(nil),
+		Chat:                   chat.NewService(nil),
+		Directory:              directory.NewService(nil),
+		Notifications:          notifications.NewService(nil),
+		ViewerAuth:             viewerauth.NewService(cfg.ViewerAuth, nil, authstore.NewMemoryStore(), sms.NewSender(cfg.ViewerAuth.SMS, nil)),
+		PlatformRegistry:       platforms,
+		ProfessionalOnboarding: professionalonboarding.NewService(nil, platforms, ""),
+		ProfessionalWorkspace:  professionalworkspace.NewService(nil),
+		Offerings:              offerings.NewService(nil),
+		Orders:                 orders.NewService(nil),
+		Support:                support.NewService(nil),
 	})
 }
 
@@ -70,64 +76,66 @@ func build(mux *http.ServeMux, cfg config.Config, services RuntimeServices) huma
 	})
 
 	humaConfig := huma.DefaultConfig(cfg.App.Name, cfg.App.Version)
-	humaConfig.OpenAPI.Info.Description = "Backend-generated OpenAPI contract for BidanApp."
+	humaConfig.OpenAPI.Info.Description = "Backend-generated OpenAPI contract for the marketplace runtime."
 	humaConfig.OpenAPIPath = "/openapi"
 	humaConfig.DocsPath = "/docs"
 
-	if services.ProfessionalPortal == nil {
-		services.ProfessionalPortal = professionalportal.NewService(portalstore.NewMemoryStore())
+	if services.PlatformRegistry == nil {
+		services.PlatformRegistry = platformregistry.NewService(nil)
 	}
 	if services.AdminAuth == nil {
 		services.AdminAuth = adminauth.NewService(cfg.AdminAuth, authstore.NewMemoryStore())
 	}
-	if services.CustomerAuth == nil {
-		services.CustomerAuth = customerauth.NewService(cfg.CustomerAuth, authstore.NewMemoryStore())
+	if services.AdminOps == nil {
+		services.AdminOps = adminops.NewService(nil)
 	}
-	var zeroReadModel readmodel.Service
-	if services.ReadModel == zeroReadModel {
-		services.ReadModel = readmodel.NewService(
-			cfg.SeedData.DataDir,
-			portalstore.NewMemoryStore(),
-			appointmentstore.NewMemoryStore(),
-		)
+	if services.AdminReview == nil {
+		services.AdminReview = adminreview.NewService(nil)
 	}
-	if services.ProfessionalAuth == nil {
-		services.ProfessionalAuth = professionalauth.NewService(
-			cfg.ProfessionalAuth,
-			services.ReadModel,
-			authstore.NewMemoryStore(),
-		)
+	if services.Chat == nil {
+		services.Chat = chat.NewService(nil)
 	}
-	if services.AppointmentWrites == nil {
-		services.AppointmentWrites = appointments.NewService(
-			services.ProfessionalPortal,
-			services.ReadModel,
-			services.ReadModel,
-			appointmentstore.NewMemoryStore(),
-			pushstore.NewMemoryStore(),
-			internalwebpush.NewNoopSender(),
-			appointments.WithPaymentConfig(cfg.Payment),
-			appointments.WithFrontendOrigin(cfg.CORS.PrimaryOrigin()),
-		)
+	if services.Directory == nil {
+		services.Directory = directory.NewService(nil)
 	}
-	if services.ClientState == nil {
-		services.ClientState = clientstate.NewService(
-			documentstore.NewMemoryStore(),
-			pushstore.NewMemoryStore(),
-			contentstore.NewMemoryStore(),
-		)
+	if services.Notifications == nil {
+		services.Notifications = notifications.NewService(nil)
+	}
+	if services.ViewerAuth == nil {
+		services.ViewerAuth = viewerauth.NewService(cfg.ViewerAuth, nil, authstore.NewMemoryStore(), sms.NewSender(cfg.ViewerAuth.SMS, nil))
+	}
+	if services.ProfessionalOnboarding == nil {
+		services.ProfessionalOnboarding = professionalonboarding.NewService(nil, services.PlatformRegistry, "")
+	}
+	if services.ProfessionalWorkspace == nil {
+		services.ProfessionalWorkspace = professionalworkspace.NewService(nil)
+	}
+	if services.Offerings == nil {
+		services.Offerings = offerings.NewService(nil)
+	}
+	if services.Orders == nil {
+		services.Orders = orders.NewService(nil)
+	}
+	if services.Support == nil {
+		services.Support = support.NewService(nil)
 	}
 
 	api := humago.NewWithPrefix(mux, "/api/v1", humaConfig)
 	configureSecuritySchemes(api, cfg)
 	health.RegisterRoutes(api, cfg)
 	adminauth.RegisterRoutes(api, services.AdminAuth)
-	customerauth.RegisterRoutes(api, services.CustomerAuth)
-	professionalauth.RegisterRoutes(api, services.ProfessionalAuth)
-	readmodel.RegisterRoutes(api, services.ReadModel)
-	appointments.RegisterRoutes(api, services.AppointmentWrites)
-	professionalportal.RegisterRoutes(api, services.ProfessionalPortal)
-	clientstate.RegisterRoutes(api, services.ClientState)
+	adminops.RegisterRoutes(api, services.AdminOps)
+	adminreview.RegisterRoutes(api, services.AdminReview)
+	chat.RegisterRESTRoutes(api, services.Chat)
+	directory.RegisterRoutes(api, services.Directory)
+	notifications.RegisterRoutes(api, services.Notifications)
+	viewerauth.RegisterRoutes(api, services.ViewerAuth)
+	platformregistry.RegisterRoutes(api, services.PlatformRegistry)
+	professionalonboarding.RegisterRoutes(api, services.ProfessionalOnboarding)
+	professionalworkspace.RegisterRoutes(api, services.ProfessionalWorkspace)
+	offerings.RegisterRoutes(api, services.Offerings)
+	orders.RegisterRoutes(api, services.Orders)
+	support.RegisterRoutes(api, services.Support)
 	registerWebsocketContract(api)
 
 	return api
@@ -149,17 +157,11 @@ func configureSecuritySchemes(api huma.API, cfg config.Config) {
 		Name:        cfg.AdminAuth.Cookie.Name,
 		Description: "Admin session cookie issued by POST /api/v1/admin/auth/session.",
 	}
-	api.OpenAPI().Components.SecuritySchemes[customerauth.SecuritySchemeName] = &huma.SecurityScheme{
+	api.OpenAPI().Components.SecuritySchemes[viewerauth.SecuritySchemeName] = &huma.SecurityScheme{
 		Type:        "apiKey",
 		In:          "cookie",
-		Name:        cfg.CustomerAuth.Cookie.Name,
-		Description: "Customer session cookie issued by POST /api/v1/customers/auth/session.",
-	}
-	api.OpenAPI().Components.SecuritySchemes[professionalauth.SecuritySchemeName] = &huma.SecurityScheme{
-		Type:        "apiKey",
-		In:          "cookie",
-		Name:        cfg.ProfessionalAuth.Cookie.Name,
-		Description: "Professional session cookie issued by POST /api/v1/professionals/auth/session.",
+		Name:        cfg.ViewerAuth.Cookie.Name,
+		Description: "Viewer session cookie issued by POST /api/v1/auth/login or POST /api/v1/auth/register.",
 	}
 }
 
@@ -194,53 +196,8 @@ func registerWebsocketContract(api huma.API) {
 				},
 			},
 			Responses: map[string]*huma.Response{
-				"101": {
-					Description: "WebSocket handshake accepted.",
-				},
-				"403": {
-					Description: "Origin is not authorized for this WebSocket endpoint.",
-				},
-			},
-			Extensions: map[string]any{
-				"x-bidanapp-realtime-events": map[string]any{
-					"incoming": []map[string]any{
-						{
-							"type": "message",
-							"shape": map[string]any{
-								"type":   "message",
-								"sender": "Web Client",
-								"text":   "Halo dari frontend",
-							},
-						},
-					},
-					"outgoing": []map[string]any{
-						{
-							"type": "connected",
-							"shape": map[string]any{
-								"type":      "connected",
-								"threadId":  "integration-thread",
-								"clientId":  "web-client",
-								"messages":  []map[string]any{},
-								"timestamp": "2026-03-15T09:00:00Z",
-							},
-						},
-						{
-							"type": "message",
-							"shape": map[string]any{
-								"type":     "message",
-								"threadId": "integration-thread",
-								"message": map[string]any{
-									"id":       "20260315090000-1",
-									"threadId": "integration-thread",
-									"sender":   "Web Client",
-									"text":     "Halo dari frontend",
-									"sentAt":   "2026-03-15T09:00:00Z",
-								},
-								"timestamp": "2026-03-15T09:00:00Z",
-							},
-						},
-					},
-				},
+				"101": {Description: "WebSocket handshake accepted."},
+				"403": {Description: "Origin is not authorized for this WebSocket endpoint."},
 			},
 		},
 	}

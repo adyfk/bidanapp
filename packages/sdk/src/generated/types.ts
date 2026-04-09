@@ -24,68 +24,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/console": {
+    "/admin/customers": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get persisted admin console snapshot */
-        get: operations["get-admin-console"];
-        /** Persist admin console snapshot */
-        put: operations["upsert-admin-console"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/admin/console/tables/{table_name}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get persisted admin console table snapshot */
-        get: operations["get-admin-console-table"];
-        /** Persist admin console table snapshot */
-        put: operations["upsert-admin-console-table"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/admin/professionals/review-state": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Persist a professional review state from the admin console */
-        put: operations["upsert-admin-professional-portal-review-state"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/admin/professionals/review-states": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get the professional review-state map for the admin console */
-        get: operations["get-admin-professional-portal-review-states"];
+        /** List customer rows for admin ops */
+        get: operations["list-admin-customers"];
         put?: never;
         post?: never;
         delete?: never;
@@ -94,51 +41,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/session": {
+    "/admin/orders": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get persisted admin session state */
-        get: operations["get-admin-session"];
-        /** Persist admin session state */
-        put: operations["upsert-admin-session"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/admin/support-desk": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get persisted admin support desk snapshot */
-        get: operations["get-admin-support-desk"];
-        /** Persist admin support desk snapshot */
-        put: operations["upsert-admin-support-desk"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/appointments": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get appointment read model payload for admin operations */
-        get: operations["get-appointments"];
+        /** List orders for admin operations */
+        get: operations["list-admin-orders"];
         put?: never;
         post?: never;
         delete?: never;
@@ -147,24 +58,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/appointments/{appointment_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Create or update a persisted appointment record */
-        put: operations["upsert-appointment-record"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/appointments/{appointment_id}/depart": {
+    "/admin/orders/{order_id}/status": {
         parameters: {
             query?: never;
             header?: never;
@@ -173,23 +67,23 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Mark a confirmed home-visit appointment as on the way */
-        post: operations["depart-home-visit-appointment"];
+        /** Update order and payment status from the admin console */
+        post: operations["update-admin-order-status"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/bootstrap": {
+    "/admin/overview": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get frontend-ready bootstrap payload */
-        get: operations["get-bootstrap"];
+        /** Get top-level admin overview metrics */
+        get: operations["get-admin-overview"];
         put?: never;
         post?: never;
         delete?: never;
@@ -198,15 +92,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/catalog": {
+    "/admin/payouts": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get categories, services, and professionals */
-        get: operations["get-catalog"];
+        /** List payouts for admin finance ops */
+        get: operations["list-admin-payouts"];
+        put?: never;
+        /** Create a payout row from the admin console */
+        post: operations["create-admin-payout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/payouts/{payout_id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Update payout state from the admin console */
+        post: operations["update-admin-payout-status"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/platforms/{platform_id}/professional-applications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List professional applications for one platform review queue */
+        get: operations["list-platform-professional-applications"];
         put?: never;
         post?: never;
         delete?: never;
@@ -215,15 +144,67 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/chat": {
+    "/admin/platforms/{platform_id}/professional-applications/{application_id}/review": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get chat thread read model payload */
-        get: operations["get-chat"];
+        get?: never;
+        put?: never;
+        /** Approve, reject, or request changes for one professional application */
+        post: operations["review-platform-professional-application"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/refunds": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List refunds for admin finance ops */
+        get: operations["list-admin-refunds"];
+        put?: never;
+        /** Create a refund request from admin ops */
+        post: operations["create-admin-refund"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/refunds/{refund_id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Update refund state from the admin console */
+        post: operations["update-admin-refund-status"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/studio": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a lightweight studio snapshot for finance and ops */
+        get: operations["get-admin-studio"];
         put?: never;
         post?: never;
         delete?: never;
@@ -232,85 +213,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/consumers/preferences": {
+    "/admin/support/tickets": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get persisted consumer preference state */
-        get: operations["get-consumer-preferences"];
-        /** Persist consumer preference state */
-        put: operations["upsert-consumer-preferences"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/customers/appointments": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List appointments for the authenticated customer */
-        get: operations["list-customer-appointments"];
-        put?: never;
-        /** Create a transactional appointment request */
-        post: operations["create-customer-appointment"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/customers/appointments/{appointment_id}/cancel": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Cancel a customer appointment */
-        post: operations["cancel-customer-appointment"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/customers/appointments/{appointment_id}/feedback": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Submit customer feedback for a completed appointment */
-        post: operations["submit-appointment-feedback"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/customers/appointments/{appointment_id}/home-visit-status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get customer-facing home-visit departure status */
-        get: operations["get-customer-home-visit-status"];
+        /** List support tickets for admin triage */
+        get: operations["list-admin-support-tickets"];
         put?: never;
         post?: never;
         delete?: never;
@@ -319,7 +230,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/customers/appointments/{appointment_id}/payment-requests": {
+    "/admin/support/tickets/{ticket_id}/triage": {
         parameters: {
             query?: never;
             header?: never;
@@ -328,15 +239,15 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Create a hosted payment request for an appointment */
-        post: operations["create-appointment-payment-request"];
+        /** Triage and update a support ticket as an admin */
+        post: operations["triage-admin-support-ticket"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/customers/auth/account": {
+    "/auth/challenges/sms": {
         parameters: {
             query?: never;
             header?: never;
@@ -344,8 +255,93 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        /** Update authenticated customer account metadata */
-        put: operations["update-customer-auth-account"];
+        put?: never;
+        /** Issue an SMS challenge for password recovery or identity verification */
+        post: operations["create-viewer-auth-sms-challenge"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/challenges/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Verify an SMS challenge code */
+        post: operations["verify-viewer-auth-challenge"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create one global viewer session from a phone identity */
+        post: operations["create-viewer-auth-session"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/password/forgot": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Request an SMS password reset challenge for a viewer identity */
+        post: operations["request-viewer-password-reset"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/password/reset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reset a viewer password by consuming a verified SMS challenge */
+        post: operations["reset-viewer-password"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update the global customer profile for the authenticated viewer */
+        put: operations["update-viewer-customer-profile"];
         post?: never;
         delete?: never;
         options?: never;
@@ -353,7 +349,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/customers/auth/password": {
+    "/auth/register": {
         parameters: {
             query?: never;
             header?: never;
@@ -361,8 +357,43 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        /** Change the authenticated customer password */
-        put: operations["update-customer-auth-password"];
+        put?: never;
+        /** Register one global viewer identity and issue a shared session */
+        post: operations["register-viewer-auth-account"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get the active global viewer session if one is available */
+        get: operations["get-viewer-auth-session"];
+        put?: never;
+        post?: never;
+        /** Revoke the active global viewer session */
+        delete: operations["delete-viewer-auth-session"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List active and recent viewer sessions for the authenticated user */
+        get: operations["list-viewer-auth-sessions"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -370,7 +401,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/customers/auth/register": {
+    "/auth/sessions/logout-all": {
         parameters: {
             query?: never;
             header?: never;
@@ -379,34 +410,15 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Register a customer account */
-        post: operations["register-customer-auth-account"];
+        /** Revoke every other viewer session except the current one */
+        post: operations["logout-all-other-viewer-auth-sessions"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/customers/auth/session": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get the authenticated customer session */
-        get: operations["get-customer-auth-session"];
-        put?: never;
-        /** Create an authenticated customer session */
-        post: operations["create-customer-auth-session"];
-        /** Revoke the authenticated customer session */
-        delete: operations["delete-customer-auth-session"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/customers/payments/requests/{payment_request_id}/complete-test": {
+    "/auth/sessions/{session_id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -415,26 +427,60 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Complete a manual test payment request */
-        post: operations["complete-test-payment-request"];
-        delete?: never;
+        post?: never;
+        /** Revoke one viewer session by session id */
+        delete: operations["revoke-viewer-auth-session"];
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/customers/support/tickets": {
+    "/chat/threads": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** List support tickets for the authenticated customer */
-        get: operations["list-customer-support-tickets"];
+        /** List conversation and order chat threads for the authenticated viewer */
+        get: operations["list-chat-threads"];
         put?: never;
-        /** Create a support ticket for the authenticated customer */
-        post: operations["create-customer-support-ticket"];
+        /** Create a conversation or order-linked chat thread */
+        post: operations["create-chat-thread"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/chat/threads/{thread_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get one chat thread and its message history */
+        get: operations["get-chat-thread"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/chat/threads/{thread_id}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create a message inside one chat thread */
+        post: operations["create-chat-message"];
         delete?: never;
         options?: never;
         head?: never;
@@ -458,61 +504,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/notifications/customer": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get persisted customer notification read state */
-        get: operations["get-customer-notifications-state"];
-        /** Persist customer notification read state */
-        put: operations["upsert-customer-notifications-state"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/notifications/customer/push-subscription": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Persist customer web push subscription */
-        put: operations["upsert-customer-push-subscription"];
-        post?: never;
-        /** Delete customer web push subscription */
-        delete: operations["delete-customer-push-subscription"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/notifications/professional": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get persisted professional notification read state */
-        get: operations["get-professional-notifications-state"];
-        /** Persist professional notification read state */
-        put: operations["upsert-professional-notifications-state"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/payments/webhooks/xendit": {
+    "/orders/{order_id}/payments/session": {
         parameters: {
             query?: never;
             header?: never;
@@ -521,23 +513,23 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Handle Xendit payment webhooks */
-        post: operations["handle-xendit-payment-webhook"];
+        /** Create one payment checkout session for an authenticated viewer-owned order */
+        post: operations["create-order-payment-session"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/professionals": {
+    "/platforms": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** List professionals */
-        get: operations["list-professionals"];
+        /** List configured service platforms */
+        get: operations["list-platforms"];
         put?: never;
         post?: never;
         delete?: never;
@@ -546,15 +538,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/professionals/appointments": {
+    "/platforms/resolve": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** List appointments for the authenticated professional */
-        get: operations["list-professional-appointments"];
+        /** Resolve one platform from a host or subdomain */
+        get: operations["resolve-platform-by-host"];
         put?: never;
         post?: never;
         delete?: never;
@@ -563,7 +555,160 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/professionals/appointments/{appointment_id}/approve": {
+    "/platforms/{platform_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get one platform by id */
+        get: operations["get-platform-by-id"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platforms/{platform_id}/customers/me/orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List orders for the authenticated customer on one platform */
+        get: operations["list-customer-platform-orders"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platforms/{platform_id}/customers/me/orders/{order_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get one order for the authenticated customer on one platform */
+        get: operations["get-customer-platform-order"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platforms/{platform_id}/directory/offerings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List public offerings for one platform with directory metadata */
+        get: operations["list-directory-offerings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platforms/{platform_id}/directory/offerings/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get one public offering by slug */
+        get: operations["get-directory-offering-by-slug"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platforms/{platform_id}/directory/professionals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List public professionals for one platform */
+        get: operations["list-directory-professionals"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platforms/{platform_id}/directory/professionals/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get one public professional storefront by slug */
+        get: operations["get-directory-professional-by-slug"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platforms/{platform_id}/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List customer and professional notifications for the authenticated viewer on one platform */
+        get: operations["list-platform-notifications"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platforms/{platform_id}/offerings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List public offerings for one platform */
+        get: operations["list-platform-offerings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platforms/{platform_id}/orders": {
         parameters: {
             query?: never;
             header?: never;
@@ -572,15 +717,32 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Approve a requested appointment and advance it to payment */
-        post: operations["approve-appointment"];
+        /** Create one new order under the authenticated customer */
+        post: operations["create-platform-order"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/professionals/appointments/{appointment_id}/cancel": {
+    "/platforms/{platform_id}/professional-schema": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get the active professional registration schema for one platform */
+        get: operations["get-professional-schema-by-platform"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platforms/{platform_id}/professionals/me/documents/upload-token": {
         parameters: {
             query?: never;
             header?: never;
@@ -589,15 +751,222 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Cancel an active appointment as the assigned professional */
-        post: operations["cancel-professional-appointment"];
+        /** Issue an upload token for one professional document in local storage */
+        post: operations["issue-professional-document-upload-token"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/professionals/appointments/{appointment_id}/complete": {
+    "/platforms/{platform_id}/professionals/me/offerings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List offerings owned by the authenticated professional for one platform */
+        get: operations["list-professional-platform-offerings"];
+        put?: never;
+        /** Create one offering under the authenticated professional storefront */
+        post: operations["create-professional-platform-offering"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platforms/{platform_id}/professionals/me/onboarding": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get the active professional workspace for one platform */
+        get: operations["get-professional-platform-workspace"];
+        /** Create or update the professional application and storefront profile for one platform */
+        put: operations["upsert-professional-platform-workspace"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platforms/{platform_id}/professionals/me/workspace": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get the workspace snapshot for the authenticated professional on one platform */
+        get: operations["get-professional-workspace-snapshot"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platforms/{platform_id}/professionals/me/workspace/availability": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Replace availability rules for one professional workspace */
+        put: operations["replace-professional-workspace-availability"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platforms/{platform_id}/professionals/me/workspace/coverage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Replace coverage areas for one professional workspace */
+        put: operations["replace-professional-workspace-coverage"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platforms/{platform_id}/professionals/me/workspace/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update notification preferences for one professional workspace */
+        put: operations["update-professional-workspace-notifications"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platforms/{platform_id}/professionals/me/workspace/orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List order queue items for the authenticated professional on one platform */
+        get: operations["list-professional-workspace-orders"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platforms/{platform_id}/professionals/me/workspace/portfolio": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Replace portfolio and gallery entries for one professional workspace */
+        put: operations["replace-professional-workspace-portfolio"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platforms/{platform_id}/professionals/me/workspace/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Create or update professional profile data for one platform */
+        put: operations["upsert-professional-workspace-profile"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platforms/{platform_id}/professionals/me/workspace/trust": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Replace trust-building content such as credentials and stories */
+        put: operations["replace-professional-workspace-trust"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/support/tickets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List support tickets owned by the authenticated viewer */
+        get: operations["list-viewer-support-tickets"];
+        put?: never;
+        /** Create a new support ticket for the authenticated viewer */
+        post: operations["create-viewer-support-ticket"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/support/tickets/{ticket_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get one viewer-owned support ticket */
+        get: operations["get-viewer-support-ticket"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/webhooks/payments/{provider}": {
         parameters: {
             query?: never;
             header?: never;
@@ -606,360 +975,8 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Complete an in-service appointment */
-        post: operations["complete-appointment"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/professionals/appointments/{appointment_id}/home-visit-status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get professional-facing home-visit departure status */
-        get: operations["get-professional-home-visit-status"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/professionals/appointments/{appointment_id}/reject": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Reject a requested appointment */
-        post: operations["reject-appointment"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/professionals/appointments/{appointment_id}/start-service": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Start the service for an appointment */
-        post: operations["start-appointment-service"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/professionals/auth/account": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Update authenticated professional account metadata */
-        put: operations["update-professional-auth-account"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/professionals/auth/password": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Change the authenticated professional password */
-        put: operations["update-professional-auth-password"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/professionals/auth/password-recovery": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Request a professional password recovery link */
-        post: operations["request-professional-password-recovery"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/professionals/auth/register": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Register a professional portal account */
-        post: operations["register-professional-auth-account"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/professionals/auth/session": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get the authenticated professional session */
-        get: operations["get-professional-auth-session"];
-        put?: never;
-        /** Create an authenticated professional session */
-        post: operations["create-professional-auth-session"];
-        /** Revoke the authenticated professional session */
-        delete: operations["delete-professional-auth-session"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/professionals/me/coverage": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get persisted professional coverage resource */
-        get: operations["get-professional-portal-coverage"];
-        /** Persist professional coverage resource */
-        put: operations["upsert-professional-portal-coverage"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/professionals/me/gallery": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get persisted professional gallery resource */
-        get: operations["get-professional-portal-gallery"];
-        /** Persist professional gallery resource */
-        put: operations["upsert-professional-portal-gallery"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/professionals/me/portfolio": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get persisted professional portfolio resource */
-        get: operations["get-professional-portal-portfolio"];
-        /** Persist professional portfolio resource */
-        put: operations["upsert-professional-portal-portfolio"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/professionals/me/profile": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get persisted professional profile resource */
-        get: operations["get-professional-portal-profile"];
-        /** Persist professional profile resource */
-        put: operations["upsert-professional-portal-profile"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/professionals/me/profile/submit-review": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Submit the authenticated professional profile for admin review */
-        post: operations["submit-professional-portal-profile-for-review"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/professionals/me/requests": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get persisted professional request records resource */
-        get: operations["get-professional-portal-requests"];
-        /** Persist professional request records resource */
-        put: operations["upsert-professional-portal-requests"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/professionals/me/services": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get persisted professional services resource */
-        get: operations["get-professional-portal-services"];
-        /** Persist professional services resource */
-        put: operations["upsert-professional-portal-services"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/professionals/me/trust": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get persisted professional trust resource */
-        get: operations["get-professional-portal-trust"];
-        /** Persist professional trust resource */
-        put: operations["upsert-professional-portal-trust"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/professionals/portal/session": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get persisted professional portal session */
-        get: operations["get-professional-portal-session"];
-        /** Persist professional portal session */
-        put: operations["upsert-professional-portal-session"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/professionals/support/tickets": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List support tickets for the authenticated professional */
-        get: operations["list-professional-support-tickets"];
-        put?: never;
-        /** Create a support ticket for the authenticated professional */
-        post: operations["create-professional-support-ticket"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/professionals/{slug}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get professional by slug */
-        get: operations["get-professional"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/viewer/session": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get persisted viewer session state */
-        get: operations["get-viewer-session"];
-        /** Persist viewer session state */
-        put: operations["upsert-viewer-session"];
-        post?: never;
+        /** Update order and payment state from a payment provider callback */
+        post: operations["handle-payment-webhook"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1036,653 +1053,485 @@ export interface components {
             readonly $schema?: string;
             lastVisitedRoute?: string;
         };
-        AdminCommandCenterStateData: {
-            activeAdminId: string;
-            commandNote: string;
-            focusArea: string;
-            highlightedProfessionalId: string;
-            incidentMode: string;
-            runtimeNarrative: string;
-            watchAreaId: string;
-        };
-        AdminConsoleData: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/AdminConsoleData.json
-             */
-            readonly $schema?: string;
-            savedAt?: string;
-            /** Format: int64 */
-            schemaVersion: number;
-            tables: {
-                [key: string]: {
-                    [key: string]: unknown;
-                }[] | null;
-            };
-        };
-        AdminConsoleResponseBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/AdminConsoleResponseBody.json
-             */
-            readonly $schema?: string;
-            data: components["schemas"]["AdminConsoleData"];
-        };
-        AdminConsoleTableData: {
-            rows: {
-                [key: string]: unknown;
-            }[] | null;
-            savedAt?: string;
-            /** Format: int64 */
-            schemaVersion: number;
-            tableName: string;
-        };
-        AdminConsoleTableResponseBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/AdminConsoleTableResponseBody.json
-             */
-            readonly $schema?: string;
-            data: components["schemas"]["AdminConsoleTableData"];
-        };
-        AdminConsoleTableUpsertData: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/AdminConsoleTableUpsertData.json
-             */
-            readonly $schema?: string;
-            rows: {
-                [key: string]: unknown;
-            }[] | null;
-            savedAt?: string;
-            /** Format: int64 */
-            schemaVersion: number;
-        };
-        AdminReviewStatesResponseBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/AdminReviewStatesResponseBody.json
-             */
-            readonly $schema?: string;
-            data: components["schemas"]["ProfessionalPortalAdminReviewStatesData"];
-        };
-        AdminSessionData: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/AdminSessionData.json
-             */
-            readonly $schema?: string;
-            adminId: string;
-            email: string;
-            focusArea: string;
-            isAuthenticated: boolean;
-            lastLoginAt?: string;
-            lastVisitedRoute?: string;
-        };
-        AdminSessionResponseBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/AdminSessionResponseBody.json
-             */
-            readonly $schema?: string;
-            data: components["schemas"]["AdminSessionData"];
-        };
-        AppSectionConfig: {
-            homeCategoryIds: string[] | null;
-        };
-        AppointmentActionInputData: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/AppointmentActionInputData.json
-             */
-            readonly $schema?: string;
-            customerSummary?: string;
-            evidenceUrl?: string;
-            internalNote?: string;
-            reason?: string;
-        };
-        AppointmentCancellationPolicySnapshot: {
-            afterCutoffOutcome: string;
-            beforeCutoffOutcome: string;
-            /** Format: int64 */
-            customerPaidCancelCutoffHours: number;
-            professionalCancelOutcome: string;
-        };
-        AppointmentCancellationResolution: {
-            cancellationReason: string;
-            cancelledAt: string;
-            cancelledBy: string;
-            financialOutcome: string;
-        };
-        AppointmentCommandData: {
-            appointmentId: string;
-            checkoutUrl?: string;
-            message: string;
-            paymentProvider?: string;
-            paymentRequestId?: string;
-            paymentStatus?: string;
-            status: string;
-        };
-        AppointmentCommandResponseBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/AppointmentCommandResponseBody.json
-             */
-            readonly $schema?: string;
-            data: components["schemas"]["AppointmentCommandData"];
-        };
-        AppointmentData: {
-            appointments: components["schemas"]["AppointmentSeed"][] | null;
-        };
-        AppointmentDepartInputData: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/AppointmentDepartInputData.json
-             */
-            readonly $schema?: string;
-            currentLocation?: components["schemas"]["GeoPointInput"];
-        };
-        AppointmentFeedback: {
-            author: string;
-            dateLabel: string;
-            image: string;
-            quote: string;
-            /** Format: double */
-            rating: number;
-            role: string;
-        };
-        AppointmentHomeVisitStatusData: {
-            departedAt?: string;
-            /** Format: double */
-            distanceKmHint?: number;
-            enabled: boolean;
-            /** Format: int64 */
-            etaMinutesHint?: number;
-            hasDeparted: boolean;
-            message: string;
-            showEtaHint: boolean;
-            updatedAt?: string;
-        };
-        AppointmentHomeVisitStatusResponseBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/AppointmentHomeVisitStatusResponseBody.json
-             */
-            readonly $schema?: string;
-            data: components["schemas"]["AppointmentHomeVisitStatusData"];
-        };
-        AppointmentRecentActivity: {
-            channel: string;
-            dateLabel: string;
-            summary: string;
-            title: string;
-        };
-        AppointmentRecordUpsertData: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/AppointmentRecordUpsertData.json
-             */
-            readonly $schema?: string;
-            appointmentRecord: components["schemas"]["ProfessionalPortalManagedAppointmentRecord"];
-            professionalId: string;
-        };
-        AppointmentRequestsResponseBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/AppointmentRequestsResponseBody.json
-             */
-            readonly $schema?: string;
-            data: components["schemas"]["ProfessionalPortalRequestsData"];
-        };
-        AppointmentScheduleInputData: {
-            dateIso?: string;
-            requiresSchedule: boolean;
-            scheduleDayId?: string;
-            scheduleDayLabel?: string;
-            scheduledTimeLabel: string;
-            timeSlotId?: string;
-            timeSlotLabel?: string;
-        };
-        AppointmentScheduleSnapshot: {
-            dateIso?: string;
-            requiresSchedule: boolean;
-            scheduleDayId?: string;
-            scheduleDayLabel?: string;
-            scheduledTimeLabel: string;
-            timeSlotId?: string;
-            timeSlotLabel?: string;
-        };
-        AppointmentSeed: {
-            areaId: string;
-            bookingFlow: string;
-            cancellationPolicySnapshot: components["schemas"]["AppointmentCancellationPolicySnapshot"];
-            cancellationResolution?: components["schemas"]["AppointmentCancellationResolution"];
-            consumerId: string;
-            customerFeedback?: components["schemas"]["AppointmentFeedback"];
-            id: string;
-            /** Format: int64 */
-            index: number;
-            professionalId: string;
-            recentActivity?: components["schemas"]["AppointmentRecentActivity"];
-            requestNote: string;
-            requestedAt: string;
-            requestedMode: string;
-            scheduleSnapshot: components["schemas"]["AppointmentScheduleSnapshot"];
-            scheduledTimeLabel: string;
-            serviceId: string;
-            serviceOfferingId: string;
-            serviceSnapshot: components["schemas"]["AppointmentServiceSnapshot"];
-            status: string;
-            timeline: components["schemas"]["AppointmentTimelineEvent"][] | null;
-            totalPriceLabel: string;
-        };
-        AppointmentServiceSnapshot: {
-            bookingFlow: string;
-            categoryId: string;
-            coverImage: string;
-            defaultMode: string;
-            description: string;
-            durationLabel: string;
-            highlights: string[] | null;
-            image: string;
-            name: string;
-            /** Format: int64 */
-            priceAmount: number;
-            priceLabel: string;
-            serviceId: string;
-            serviceModes: components["schemas"]["ServiceMode"];
-            serviceOfferingId: string;
-            shortDescription: string;
-            slug: string;
-            summary: string;
-            tags: string[] | null;
-        };
-        AppointmentTimelineEvent: {
-            actor: string;
-            createdAt: string;
-            createdAtLabel: string;
-            customerSummary?: string;
-            evidenceUrl?: string;
-            fromStatus?: string;
-            id: string;
-            internalNote?: string;
-            toStatus: string;
-        };
-        AppointmentsResponseBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/AppointmentsResponseBody.json
-             */
-            readonly $schema?: string;
-            data: components["schemas"]["AppointmentData"];
-        };
-        Area: {
+        AdminCustomer: {
             city: string;
-            district: string;
-            id: string;
-            /** Format: int64 */
-            index: number;
-            label: string;
-            /** Format: double */
-            latitude: number;
-            /** Format: double */
-            longitude: number;
-            province: string;
-        };
-        BootstrapData: {
-            activeHomeFeed: components["schemas"]["HomeFeedSnapshot"];
-            appSectionConfig: components["schemas"]["AppSectionConfig"];
-            catalog: components["schemas"]["CatalogData"];
-            currentConsumer: components["schemas"]["ConsumerProfile"];
-            currentUserContext: components["schemas"]["UserContext"];
-        };
-        BootstrapResponseBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/BootstrapResponseBody.json
-             */
-            readonly $schema?: string;
-            data: components["schemas"]["BootstrapData"];
-        };
-        CatalogData: {
-            areas: components["schemas"]["Area"][] | null;
-            categories: components["schemas"]["Category"][] | null;
-            professionals: components["schemas"]["Professional"][] | null;
-            services: components["schemas"]["GlobalService"][] | null;
-        };
-        CatalogResponseBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/CatalogResponseBody.json
-             */
-            readonly $schema?: string;
-            data: components["schemas"]["CatalogData"];
-        };
-        Category: {
-            accentColor: string;
-            coverImage?: string;
-            description?: string;
-            iconImage: string;
-            id: string;
-            image: string;
-            /** Format: int64 */
-            index: number;
-            name: string;
-            overviewPoints: string[] | null;
-            shortLabel: string;
-        };
-        ChatData: {
-            appointmentThreads: components["schemas"]["ChatThread"][] | null;
-            directThreads: components["schemas"]["ChatThread"][] | null;
-        };
-        ChatMessage: {
-            /** Format: int64 */
-            id: number;
-            isRead: boolean;
-            sender: string;
-            text: string;
-            time: string;
-        };
-        ChatResponseBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ChatResponseBody.json
-             */
-            readonly $schema?: string;
-            data: components["schemas"]["ChatData"];
-        };
-        ChatThread: {
-            appointmentId?: string;
-            autoReplyText?: string;
-            dayLabel: string;
-            id: string;
-            /** Format: int64 */
-            index: number;
-            inputPlaceholder: string;
-            messages: components["schemas"]["ChatMessage"][] | null;
-            professionalSlug: string;
-        };
-        ConsumerPreferencesData: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ConsumerPreferencesData.json
-             */
-            readonly $schema?: string;
-            consumerId?: string;
-            favoriteProfessionalIds: string[] | null;
-            resolvedLocation: components["schemas"]["ResolvedLocationData"];
-            selectedAreaId?: string;
-            userLocation: components["schemas"]["GeoPointData"];
-        };
-        ConsumerPreferencesResponseBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ConsumerPreferencesResponseBody.json
-             */
-            readonly $schema?: string;
-            data: components["schemas"]["ConsumerPreferencesData"];
-        };
-        ConsumerProfile: {
-            avatar: string;
-            id: string;
-            /** Format: int64 */
-            index: number;
-            name: string;
-            phone: string;
-        };
-        CoverageResponseBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/CoverageResponseBody.json
-             */
-            readonly $schema?: string;
-            data: components["schemas"]["ProfessionalPortalCoverageData"];
-        };
-        CreateAppointmentInputData: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/CreateAppointmentInputData.json
-             */
-            readonly $schema?: string;
-            professionalId: string;
-            requestNote: string;
-            requestedMode: string;
-            scheduleSnapshot: components["schemas"]["AppointmentScheduleInputData"];
-            serviceId: string;
-            serviceOfferingId: string;
-        };
-        CreateAppointmentResponseBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/CreateAppointmentResponseBody.json
-             */
-            readonly $schema?: string;
-            data: components["schemas"]["AppointmentCommandData"];
-        };
-        CreatePaymentRequestInputData: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/CreatePaymentRequestInputData.json
-             */
-            readonly $schema?: string;
-            failureRedirectUrl?: string;
-            successRedirectUrl?: string;
-        };
-        CreateSupportTicketData: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/CreateSupportTicketData.json
-             */
-            readonly $schema?: string;
-            categoryId: string;
-            contactValue: string;
-            details: string;
-            preferredChannel: string;
-            referenceCode?: string;
-            relatedAppointmentId?: string;
-            relatedProfessionalId?: string;
-            reporterName: string;
-            reporterPhone: string;
-            sourceSurface: string;
-            summary: string;
-            urgency: string;
-        };
-        CustomerAuthCreateSessionRequest: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/CustomerAuthCreateSessionRequest.json
-             */
-            readonly $schema?: string;
-            password: string;
-            phone: string;
-        };
-        CustomerAuthRegisterRequest: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/CustomerAuthRegisterRequest.json
-             */
-            readonly $schema?: string;
-            city?: string;
+            createdAt: string;
             displayName: string;
-            password: string;
-            phone: string;
+            primaryPhone: string;
+            userId: string;
         };
-        CustomerAuthSessionData: {
-            city?: string;
-            consumerId: string;
-            displayName?: string;
-            expiresAt?: string;
-            isAuthenticated: boolean;
-            lastLoginAt?: string;
-            phone: string;
-            registeredAt?: string;
+        AdminCustomerList: {
+            customers: components["schemas"]["AdminCustomer"][] | null;
         };
-        CustomerAuthSessionResponseBody: {
+        AdminCustomerListResponseBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/CustomerAuthSessionResponseBody.json
+             * @example https://example.com/schemas/AdminCustomerListResponseBody.json
              */
             readonly $schema?: string;
-            data: components["schemas"]["CustomerAuthSessionData"];
+            data: components["schemas"]["AdminCustomerList"];
         };
-        CustomerAuthUpdateAccountRequest: {
+        AdminOrder: {
+            createdAt: string;
+            currency: string;
+            customerUserId: string;
+            id: string;
+            offeringTitle: string;
+            orderType: string;
+            paymentStatus: string;
+            platformId: string;
+            professionalUserId: string;
+            status: string;
+            /** Format: int64 */
+            totalAmount: number;
+        };
+        AdminOrderList: {
+            orders: components["schemas"]["AdminOrder"][] | null;
+        };
+        AdminOrderListResponseBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/CustomerAuthUpdateAccountRequest.json
+             * @example https://example.com/schemas/AdminOrderListResponseBody.json
              */
             readonly $schema?: string;
-            city?: string;
-            displayName: string;
-            phone: string;
+            data: components["schemas"]["AdminOrderList"];
         };
-        CustomerAuthUpdatePasswordRequest: {
+        AdminOrderResponseBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/CustomerAuthUpdatePasswordRequest.json
+             * @example https://example.com/schemas/AdminOrderResponseBody.json
              */
             readonly $schema?: string;
-            currentPassword: string;
-            newPassword: string;
+            data: components["schemas"]["AdminOrder"];
         };
-        CustomerNotificationStateData: {
+        AdminOverview: {
+            /** Format: int64 */
+            activeOrders: number;
+            /** Format: int64 */
+            openSupportTickets: number;
+            /** Format: int64 */
+            pendingApplications: number;
+            /** Format: int64 */
+            pendingPayouts: number;
+            /** Format: int64 */
+            pendingRefunds: number;
+            /** Format: int64 */
+            totalCustomers: number;
+            /** Format: int64 */
+            totalProfessionals: number;
+        };
+        AdminOverviewResponseBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/CustomerNotificationStateData.json
+             * @example https://example.com/schemas/AdminOverviewResponseBody.json
              */
             readonly $schema?: string;
-            readIds: string[] | null;
+            data: components["schemas"]["AdminOverview"];
         };
-        CustomerNotificationsResponseBody: {
+        AdminPayoutListResponseBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/CustomerNotificationsResponseBody.json
+             * @example https://example.com/schemas/AdminPayoutListResponseBody.json
              */
             readonly $schema?: string;
-            data: components["schemas"]["CustomerNotificationStateData"];
+            data: components["schemas"]["PayoutList"];
         };
-        CustomerPushSubscriptionData: {
+        AdminPayoutResponseBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/CustomerPushSubscriptionData.json
+             * @example https://example.com/schemas/AdminPayoutResponseBody.json
              */
             readonly $schema?: string;
-            endpoint: string;
-            keys: components["schemas"]["CustomerPushSubscriptionKeysData"];
-            locale?: string;
+            data: components["schemas"]["PayoutRecord"];
+        };
+        AdminRefundListResponseBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/AdminRefundListResponseBody.json
+             */
+            readonly $schema?: string;
+            data: components["schemas"]["RefundList"];
+        };
+        AdminRefundResponseBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/AdminRefundResponseBody.json
+             */
+            readonly $schema?: string;
+            data: components["schemas"]["RefundRecord"];
+        };
+        AdminStudioResponseBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/AdminStudioResponseBody.json
+             */
+            readonly $schema?: string;
+            data: components["schemas"]["AdminStudioSnapshot"];
+        };
+        AdminStudioSnapshot: {
+            /** Format: int64 */
+            grossRevenueAmount: number;
+            /** Format: int64 */
+            paidOrders: number;
+            /** Format: int64 */
+            pendingPayoutAmount: number;
+            /** Format: int64 */
+            pendingRefundAmount: number;
+            /** Format: int64 */
+            supportTickets: number;
+        };
+        AuthChallenge: {
+            challengeId: string;
+            channel: string;
+            destinationMasked: string;
+            expiresAt: string;
+            purpose: string;
+            status: string;
+            verifiedAt?: string;
+        };
+        AuthDeviceSession: {
+            createdAt: string;
+            current: boolean;
+            expiresAt: string;
+            id: string;
+            ipAddress?: string;
+            lastLoginAt: string;
+            lastSeenAt: string;
+            lastVisitedRoute?: string;
+            revokedAt?: string;
+            sessionLabel?: string;
             userAgent?: string;
         };
-        CustomerPushSubscriptionKeysData: {
-            auth: string;
-            p256dh: string;
+        AuthRecoveryRequest: {
+            challenge: components["schemas"]["AuthChallenge"];
+            message: string;
         };
-        CustomerPushSubscriptionResponseBody: {
+        AuthSessionList: {
+            items: components["schemas"]["AuthDeviceSession"][] | null;
+        };
+        AuthSessionMutationResult: {
+            currentSessionExpired: boolean;
+            /** Format: int64 */
+            revokedCount: number;
+        };
+        ChatMessageRecord: {
+            body: string;
+            id: string;
+            senderId: string;
+            senderKind: string;
+            senderName: string;
+            sentAt: string;
+            threadId: string;
+        };
+        ChatThreadDetail: {
+            messages: components["schemas"]["ChatMessageRecord"][] | null;
+            thread: components["schemas"]["ChatThreadSummary"];
+        };
+        ChatThreadList: {
+            threads: components["schemas"]["ChatThreadSummary"][] | null;
+        };
+        ChatThreadSummary: {
+            createdAt: string;
+            id: string;
+            orderId?: string;
+            platformId?: string;
+            threadType: string;
+            title: string;
+            updatedAt: string;
+        };
+        CreateAdminPayoutRequest: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/CustomerPushSubscriptionResponseBody.json
+             * @example https://example.com/schemas/CreateAdminPayoutRequest.json
              */
             readonly $schema?: string;
-            data: components["schemas"]["CustomerPushSubscriptionData"];
+            /** Format: int64 */
+            amount: number;
+            professionalProfileId: string;
+            provider?: string;
+        };
+        CreateAdminRefundRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/CreateAdminRefundRequest.json
+             */
+            readonly $schema?: string;
+            /** Format: int64 */
+            amount: number;
+            orderId: string;
+            paymentId?: string;
+            reason?: string;
+        };
+        CreateChatMessageRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/CreateChatMessageRequest.json
+             */
+            readonly $schema?: string;
+            body: string;
+            senderName?: string;
+        };
+        CreateChatThreadRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/CreateChatThreadRequest.json
+             */
+            readonly $schema?: string;
+            initialMessage?: string;
+            orderId?: string;
+            platformId?: string;
+            threadType: string;
+            title: string;
+        };
+        CreateOrderPaymentSessionRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/CreateOrderPaymentSessionRequest.json
+             */
+            readonly $schema?: string;
+            provider?: string;
+            returnUrl?: string;
+        };
+        CreatePlatformOfferingRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/CreatePlatformOfferingRequest.json
+             */
+            readonly $schema?: string;
+            deliveryMode: string;
+            description?: string;
+            fulfillmentTemplate?: {
+                [key: string]: unknown;
+            };
+            offeringType: string;
+            /** Format: int64 */
+            priceAmount: number;
+            title: string;
+        };
+        CreatePlatformOrderRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/CreatePlatformOrderRequest.json
+             */
+            readonly $schema?: string;
+            fulfillmentDetails?: {
+                [key: string]: unknown;
+            };
+            offeringId: string;
+        };
+        CreateSupportTicketRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/CreateSupportTicketRequest.json
+             */
+            readonly $schema?: string;
+            chatThreadId?: string;
+            details: string;
+            orderId?: string;
+            platformId: string;
+            priority?: string;
+            subject: string;
+        };
+        CustomerPlatformOrder: {
+            currency: string;
+            fulfillmentDetails: {
+                [key: string]: unknown;
+            };
+            id: string;
+            offeringId: string;
+            offeringTitle: string;
+            orderType: string;
+            paymentStatus: string;
+            platformId: string;
+            professionalUserId?: string;
+            status: string;
+            /** Format: int64 */
+            totalAmount: number;
+        };
+        CustomerPlatformOrderList: {
+            orders: components["schemas"]["CustomerPlatformOrder"][] | null;
+        };
+        DirectoryOffering: {
+            currency: string;
+            deliveryMode: string;
+            description: string;
+            id: string;
+            offeringType: string;
+            platformId: string;
+            /** Format: int64 */
+            priceAmount: number;
+            professionalDisplayName: string;
+            professionalId: string;
+            professionalSlug: string;
+            professionalUserId: string;
+            slug: string;
+            title: string;
+        };
+        DirectoryOfferingDetail: {
+            offering: components["schemas"]["DirectoryOffering"];
+            related: components["schemas"]["DirectoryOffering"][] | null;
+        };
+        DirectoryOfferingDetailResponseBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/DirectoryOfferingDetailResponseBody.json
+             */
+            readonly $schema?: string;
+            data: components["schemas"]["DirectoryOfferingDetail"];
+        };
+        DirectoryOfferingList: {
+            offerings: components["schemas"]["DirectoryOffering"][] | null;
+        };
+        DirectoryOfferingListResponseBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/DirectoryOfferingListResponseBody.json
+             */
+            readonly $schema?: string;
+            data: components["schemas"]["DirectoryOfferingList"];
+        };
+        DirectoryProfessional: {
+            attributes: {
+                [key: string]: unknown;
+            };
+            city: string;
+            coverageAreas: string[] | null;
+            displayName: string;
+            id: string;
+            /** Format: int64 */
+            offeringCount: number;
+            platformId: string;
+            slug: string;
+            /** Format: int64 */
+            startingPrice: number;
+            userId: string;
+        };
+        DirectoryProfessionalAvailabilitySummary: {
+            slots: string[] | null;
+            text: string;
+        };
+        DirectoryProfessionalCoverageSummary: {
+            areas: string[] | null;
+            cities: string[] | null;
+            practiceLocation: string;
+        };
+        DirectoryProfessionalDetail: {
+            availability: components["schemas"]["DirectoryProfessionalAvailabilitySummary"];
+            coverage: components["schemas"]["DirectoryProfessionalCoverageSummary"];
+            credentials: components["schemas"]["DirectoryTrustCredential"][] | null;
+            gallery: components["schemas"]["DirectoryProfessionalGalleryItem"][] | null;
+            offerings: components["schemas"]["DirectoryOffering"][] | null;
+            portfolio: components["schemas"]["DirectoryProfessionalPortfolioItem"][] | null;
+            professional: components["schemas"]["DirectoryProfessional"];
+            profile: components["schemas"]["DirectoryProfessionalPublicProfile"];
+            stories: components["schemas"]["DirectoryStory"][] | null;
+            trustMetrics: components["schemas"]["DirectoryProfessionalTrustMetric"][] | null;
+        };
+        DirectoryProfessionalDetailResponseBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/DirectoryProfessionalDetailResponseBody.json
+             */
+            readonly $schema?: string;
+            data: components["schemas"]["DirectoryProfessionalDetail"];
+        };
+        DirectoryProfessionalGalleryItem: {
+            assetUrl: string;
+            caption: string;
+            fileName: string;
+            id: string;
+            /** Format: int64 */
+            sortOrder: number;
+        };
+        DirectoryProfessionalList: {
+            professionals: components["schemas"]["DirectoryProfessional"][] | null;
+        };
+        DirectoryProfessionalListResponseBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/DirectoryProfessionalListResponseBody.json
+             */
+            readonly $schema?: string;
+            data: components["schemas"]["DirectoryProfessionalList"];
+        };
+        DirectoryProfessionalPortfolioItem: {
+            assetUrl: string;
+            description: string;
+            id: string;
+            /** Format: int64 */
+            sortOrder: number;
+            title: string;
+        };
+        DirectoryProfessionalPublicProfile: {
+            bio: string;
+            educationHistory: string;
+            headline: string;
+            languages: string[] | null;
+            licenseText: string;
+            specialties: string[] | null;
+            /** Format: int64 */
+            yearsExperience: number;
+        };
+        DirectoryProfessionalTrustMetric: {
+            id: string;
+            label: string;
+            value: string;
+        };
+        DirectoryStory: {
+            body: string;
+            id: string;
+            isPublished: boolean;
+            /** Format: int64 */
+            sortOrder: number;
+            title: string;
+        };
+        DirectoryTrustCredential: {
+            credentialCode: string;
+            issuer: string;
+            label: string;
         };
         ErrorPayload: {
             code: string;
             message: string;
         };
-        GalleryResponseBody: {
+        GetPlatformResponseBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/GalleryResponseBody.json
+             * @example https://example.com/schemas/GetPlatformResponseBody.json
              */
             readonly $schema?: string;
-            data: components["schemas"]["ProfessionalPortalGalleryData"];
+            data: components["schemas"]["PlatformDefinition"];
         };
-        GeoPoint: {
-            /** Format: double */
-            latitude: number;
-            /** Format: double */
-            longitude: number;
-        };
-        GeoPointData: {
-            /** Format: double */
-            latitude: number;
-            /** Format: double */
-            longitude: number;
-        };
-        GeoPointInput: {
-            /** Format: double */
-            latitude: number;
-            /** Format: double */
-            longitude: number;
-        };
-        GlobalService: {
-            badge: string;
-            categoryId: string;
-            coverImage: string;
-            defaultMode: string;
-            description: string;
-            highlights: string[] | null;
-            id: string;
-            image: string;
-            /** Format: int64 */
-            index: number;
-            name: string;
-            serviceModes: components["schemas"]["ServiceMode"];
-            shortDescription: string;
-            slug: string;
-            tags: string[] | null;
-            type: string;
-        };
-        HomeFeedAppointmentSummary: {
-            id: string;
-            status: string;
-        };
-        HomeFeedFeaturedAppointment: {
-            appointment: components["schemas"]["HomeFeedAppointmentSummary"];
-            dateLabel: string;
-            professional: components["schemas"]["Professional"];
-            timeLabel: string;
-        };
-        HomeFeedSnapshot: {
-            currentUser: components["schemas"]["ConsumerProfile"];
-            featuredAppointment?: components["schemas"]["HomeFeedFeaturedAppointment"];
-            id: string;
-            nearbyProfessionals: components["schemas"]["Professional"][] | null;
-            popularServices: components["schemas"]["GlobalService"][] | null;
-            sharedContext: components["schemas"]["UserContext"];
-            title: string;
+        GetSchemaResponseBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/GetSchemaResponseBody.json
+             */
+            readonly $schema?: string;
+            data: components["schemas"]["PlatformProfessionalSchema"];
         };
         Info: {
             environment: string;
@@ -1690,601 +1539,574 @@ export interface components {
             status: string;
             version: string;
         };
-        PortfolioResponseBody: {
+        IssueProfessionalDocumentUploadRequest: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/PortfolioResponseBody.json
+             * @example https://example.com/schemas/IssueProfessionalDocumentUploadRequest.json
              */
             readonly $schema?: string;
-            data: components["schemas"]["ProfessionalPortalPortfolioData"];
+            contentType?: string;
+            documentKey: string;
+            fileName: string;
         };
-        Professional: {
-            about: string;
-            activityStories: components["schemas"]["ProfessionalStory"][] | null;
-            addressLines: string[] | null;
-            availability: components["schemas"]["ProfessionalAvailability"];
-            availabilityLabel: string;
-            availabilityRulesByMode?: {
-                [key: string]: components["schemas"]["ProfessionalAvailabilityRules"];
-            };
-            badgeLabel: string;
-            cancellationPoliciesByMode?: {
-                [key: string]: components["schemas"]["ProfessionalCancellationPolicy"];
-            };
-            categoryId: string;
-            clientsServed: string;
-            coverImage?: string;
-            coverage: components["schemas"]["ProfessionalCoverage"];
-            credentials: components["schemas"]["ProfessionalCredential"][] | null;
-            experience: string;
-            feedbackBreakdown: components["schemas"]["ProfessionalFeedbackBreakdown"][] | null;
-            feedbackMetrics: components["schemas"]["ProfessionalFeedbackMetric"][] | null;
-            feedbackSummary: components["schemas"]["ProfessionalFeedbackSummary"];
-            gallery: components["schemas"]["ProfessionalGalleryItem"][] | null;
-            gender: string;
+        ListPlatformsResponseBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/ListPlatformsResponseBody.json
+             */
+            readonly $schema?: string;
+            data: components["schemas"]["ListPlatformsResponseBodyDataStruct"];
+        };
+        ListPlatformsResponseBodyDataStruct: {
+            platforms: components["schemas"]["PlatformDefinition"][] | null;
+        };
+        NotificationItem: {
+            createdAt: string;
+            entityId: string;
             id: string;
-            image: string;
-            /** Format: int64 */
-            index: number;
-            languages: string[] | null;
-            location: string;
-            name: string;
-            portfolioEntries: components["schemas"]["ProfessionalPortfolioEntry"][] | null;
-            practiceLocation?: components["schemas"]["ProfessionalPracticeLocation"];
-            /** Format: double */
-            rating: number;
-            recentActivities: components["schemas"]["ProfessionalRecentActivity"][] | null;
-            responseTime: string;
-            reviews: string;
-            services: components["schemas"]["ProfessionalService"][] | null;
-            slug: string;
-            specialties: string[] | null;
-            testimonials: components["schemas"]["ProfessionalTestimonial"][] | null;
+            kind: string;
+            message: string;
+            platformId: string;
             title: string;
         };
-        ProfessionalAuthCreateSessionRequest: {
+        NotificationList: {
+            items: components["schemas"]["NotificationItem"][] | null;
+        };
+        NotificationsResponseBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ProfessionalAuthCreateSessionRequest.json
+             * @example https://example.com/schemas/NotificationsResponseBody.json
              */
             readonly $schema?: string;
-            password: string;
-            phone: string;
-            professionalId: string;
+            data: components["schemas"]["NotificationList"];
         };
-        ProfessionalAuthPasswordRecoveryData: {
-            accepted: boolean;
-            requestedAt: string;
-        };
-        ProfessionalAuthPasswordRecoveryResponseBody: {
+        OfferingListResponseBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ProfessionalAuthPasswordRecoveryResponseBody.json
+             * @example https://example.com/schemas/OfferingListResponseBody.json
              */
             readonly $schema?: string;
-            data: components["schemas"]["ProfessionalAuthPasswordRecoveryData"];
+            data: components["schemas"]["PlatformOfferingList"];
         };
-        ProfessionalAuthRegisterRequest: {
+        OfferingResponseBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ProfessionalAuthRegisterRequest.json
+             * @example https://example.com/schemas/OfferingResponseBody.json
              */
             readonly $schema?: string;
-            city?: string;
-            credentialNumber: string;
-            displayName: string;
-            password: string;
-            phone: string;
-            professionalId?: string;
+            data: components["schemas"]["PlatformOffering"];
         };
-        ProfessionalAuthRequestPasswordRecoveryRequest: {
+        OrderListResponseBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ProfessionalAuthRequestPasswordRecoveryRequest.json
+             * @example https://example.com/schemas/OrderListResponseBody.json
              */
             readonly $schema?: string;
-            phone: string;
-            professionalId: string;
+            data: components["schemas"]["CustomerPlatformOrderList"];
         };
-        ProfessionalAuthSessionData: {
-            city?: string;
-            credentialNumber?: string;
-            displayName?: string;
-            expiresAt?: string;
-            isAuthenticated: boolean;
-            lastLoginAt?: string;
-            phone: string;
-            professionalId: string;
-            registeredAt?: string;
+        OrderPaymentSession: {
+            /** Format: int64 */
+            amount: number;
+            checkoutUrl: string;
+            currency: string;
+            orderId: string;
+            paymentId: string;
+            provider: string;
+            providerReference: string;
+            status: string;
         };
-        ProfessionalAuthSessionResponseBody: {
+        OrderResponseBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ProfessionalAuthSessionResponseBody.json
+             * @example https://example.com/schemas/OrderResponseBody.json
              */
             readonly $schema?: string;
-            data: components["schemas"]["ProfessionalAuthSessionData"];
+            data: components["schemas"]["CustomerPlatformOrder"];
         };
-        ProfessionalAuthUpdateAccountRequest: {
+        PaymentSessionResponseBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ProfessionalAuthUpdateAccountRequest.json
+             * @example https://example.com/schemas/PaymentSessionResponseBody.json
              */
             readonly $schema?: string;
-            city?: string;
-            credentialNumber: string;
-            displayName: string;
-            phone: string;
+            data: components["schemas"]["OrderPaymentSession"];
         };
-        ProfessionalAuthUpdatePasswordRequest: {
+        PaymentWebhookRequest: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ProfessionalAuthUpdatePasswordRequest.json
+             * @example https://example.com/schemas/PaymentWebhookRequest.json
              */
             readonly $schema?: string;
-            currentPassword: string;
-            newPassword: string;
+            orderId?: string;
+            paymentId?: string;
+            providerReference?: string;
+            status: string;
         };
-        ProfessionalAvailability: {
-            isAvailable: boolean;
+        PayoutList: {
+            payouts: components["schemas"]["PayoutRecord"][] | null;
         };
-        ProfessionalAvailabilityDateOverride: {
-            dateIso: string;
-            endTime?: string;
+        PayoutRecord: {
+            /** Format: int64 */
+            amount: number;
+            currency: string;
             id: string;
+            professionalProfileId: string;
+            provider: string;
+            providerReference?: string;
+            status: string;
+            updatedAt: string;
+        };
+        PlatformDefinition: {
             /** Format: int64 */
-            index: number;
-            isClosed: boolean;
-            note?: string;
-            /** Format: int64 */
-            slotIntervalMinutes?: number;
-            startTime?: string;
-        };
-        ProfessionalAvailabilityRules: {
-            dateOverrides: components["schemas"]["ProfessionalAvailabilityDateOverride"][] | null;
-            /** Format: int64 */
-            minimumNoticeHours: number;
-            weeklyHours: components["schemas"]["ProfessionalWeeklyAvailabilityWindow"][] | null;
-        };
-        ProfessionalCancellationPolicy: {
-            afterCutoffOutcome: string;
-            beforeCutoffOutcome: string;
-            /** Format: int64 */
-            customerPaidCancelCutoffHours: number;
-            professionalCancelOutcome: string;
-        };
-        ProfessionalCoverage: {
-            areaIds: string[] | null;
-            center: components["schemas"]["GeoPoint"];
-            /** Format: int64 */
-            homeVisitRadiusKm: number;
-        };
-        ProfessionalCredential: {
-            /** Format: int64 */
-            index: number;
-            issuer: string;
-            note: string;
-            title: string;
-            year: string;
-        };
-        ProfessionalFeedbackBreakdown: {
-            /** Format: int64 */
-            index: number;
-            label: string;
-            /** Format: double */
-            percentage: number;
-            total: string;
-        };
-        ProfessionalFeedbackMetric: {
-            detail: string;
-            /** Format: int64 */
-            index: number;
-            label: string;
-            value: string;
-        };
-        ProfessionalFeedbackSummary: {
-            recommendationRate: string;
-            repeatClientRate: string;
-        };
-        ProfessionalGalleryItem: {
-            alt: string;
-            id: string;
-            image: string;
-            /** Format: int64 */
-            index: number;
-            label: string;
-        };
-        ProfessionalNotificationStateData: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ProfessionalNotificationStateData.json
-             */
-            readonly $schema?: string;
-            readIdsByProfessional: {
-                [key: string]: string[] | null;
-            };
-        };
-        ProfessionalNotificationsResponseBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ProfessionalNotificationsResponseBody.json
-             */
-            readonly $schema?: string;
-            data: components["schemas"]["ProfessionalNotificationStateData"];
-        };
-        ProfessionalPortalActivityStory: {
-            capturedAt: string;
-            id: string;
-            image: string;
-            /** Format: int64 */
-            index: number;
-            location: string;
-            note: string;
-            title: string;
-        };
-        ProfessionalPortalAdminReviewStateData: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ProfessionalPortalAdminReviewStateData.json
-             */
-            readonly $schema?: string;
-            acceptingNewClients?: boolean;
-            professionalId: string;
-            reviewState: components["schemas"]["ProfessionalPortalReviewState"];
-        };
-        ProfessionalPortalAdminReviewStatesData: {
-            profilesByProfessionalId?: {
-                [key: string]: components["schemas"]["ProfessionalPortalProfileData"];
-            };
-            reviewStatesByProfessionalId: {
-                [key: string]: components["schemas"]["ProfessionalPortalReviewState"];
-            };
-        };
-        ProfessionalPortalAppointmentCancellationResolution: {
-            cancellationReason: string;
-            cancelledAt: string;
-            cancelledBy: string;
-            financialOutcome: string;
-        };
-        ProfessionalPortalAppointmentScheduleSnapshot: {
-            dateIso?: string;
-            requiresSchedule: boolean;
-            scheduleDayId?: string;
-            scheduleDayLabel?: string;
-            scheduledTimeLabel: string;
-            timeSlotId?: string;
-            timeSlotLabel?: string;
-        };
-        ProfessionalPortalAppointmentServiceSnapshot: {
-            bookingFlow: string;
-            categoryId: string;
-            coverImage: string;
-            defaultMode: string;
+            activeSchemaVersion: number;
+            defaultLocale: string;
             description: string;
-            durationLabel: string;
-            highlights: string[] | null;
-            image: string;
+            domains: string[] | null;
+            featureFlags: components["schemas"]["PlatformFeatureFlags"];
+            id: string;
             name: string;
+            seo: components["schemas"]["PlatformSEOData"];
+            slug: string;
+            status: string;
+            summary: string;
+            supportedLocales: string[] | null;
+            theme: components["schemas"]["PlatformThemeData"];
+        };
+        PlatformFeatureFlags: {
+            adminReview: boolean;
+            payments: boolean;
+            professionalDocuments: boolean;
+            professionalOnboarding: boolean;
+        };
+        PlatformOffering: {
+            currency: string;
+            deliveryMode: string;
+            description: string;
+            fulfillmentTemplate?: {
+                [key: string]: unknown;
+            };
+            id: string;
+            offeringType: string;
+            platformId: string;
             /** Format: int64 */
             priceAmount: number;
-            priceLabel: string;
-            serviceId: string;
-            serviceModes: components["schemas"]["ServiceMode"];
-            serviceOfferingId: string;
-            shortDescription: string;
+            professionalProfileId: string;
+            professionalUserId: string;
             slug: string;
-            summary: string;
-            tags: string[] | null;
+            status: string;
+            title: string;
         };
-        ProfessionalPortalAppointmentTimelineEvent: {
-            actor: string;
-            createdAt: string;
-            createdAtLabel: string;
-            customerSummary?: string;
-            evidenceUrl?: string;
-            fromStatus?: string;
-            id: string;
-            internalNote?: string;
-            toStatus: string;
+        PlatformOfferingList: {
+            offerings: components["schemas"]["PlatformOffering"][] | null;
         };
-        ProfessionalPortalCoverageData: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ProfessionalPortalCoverageData.json
-             */
-            readonly $schema?: string;
-            acceptingNewClients: boolean;
-            autoApproveInstantBookings: boolean;
-            availabilityRulesByMode?: {
-                [key: string]: components["schemas"]["ProfessionalAvailabilityRules"];
+        PlatformProfessionalSchema: {
+            description: string;
+            fields: components["schemas"]["ProfessionalSchemaField"][] | null;
+            platformId: string;
+            title: string;
+            /** Format: int64 */
+            version: number;
+        };
+        PlatformSEOData: {
+            description: string;
+            ogDescription: string;
+            ogTitle: string;
+            title: string;
+        };
+        PlatformThemeData: {
+            accent: string;
+            background: string;
+            border: string;
+            borderStrong: string;
+            danger: string;
+            focusRing: string;
+            heroGradient: string;
+            heroOverlay: string;
+            info: string;
+            muted: string;
+            navActiveBackground: string;
+            navActiveText: string;
+            pillBackground: string;
+            pillText: string;
+            primary: string;
+            secondary: string;
+            success: string;
+            surface: string;
+            surfaceElevated: string;
+            surfaceMuted: string;
+            text: string;
+            textMuted: string;
+            textStrong: string;
+            warning: string;
+        };
+        ProfessionalApplicationReviewItem: {
+            applicationId: string;
+            applicationStatus: string;
+            attributes: {
+                [key: string]: unknown;
             };
-            city: string;
-            coverageAreaIds: string[] | null;
-            coverageCenter: components["schemas"]["GeoPoint"];
-            /** Format: int64 */
-            homeVisitRadiusKm: number;
-            practiceAddress: string;
-            practiceLabel: string;
-            professionalId: string;
-            publicBio: string;
-            responseTimeGoal: string;
-        };
-        ProfessionalPortalCredential: {
-            id: string;
-            /** Format: int64 */
-            index: number;
-            issuer: string;
-            note: string;
-            title: string;
-            year: string;
-        };
-        ProfessionalPortalGalleryData: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ProfessionalPortalGalleryData.json
-             */
-            readonly $schema?: string;
-            galleryItems: components["schemas"]["ProfessionalPortalGalleryItem"][] | null;
-            professionalId: string;
-        };
-        ProfessionalPortalGalleryItem: {
-            alt: string;
-            id: string;
-            image: string;
-            /** Format: int64 */
-            index: number;
-            isFeatured: boolean;
-            label: string;
-        };
-        ProfessionalPortalManagedAppointmentRecord: {
-            areaId: string;
-            bookingFlow: string;
-            cancellationPolicySnapshot: components["schemas"]["ProfessionalCancellationPolicy"];
-            cancellationResolution?: components["schemas"]["ProfessionalPortalAppointmentCancellationResolution"];
-            consumerId: string;
-            id: string;
-            /** Format: int64 */
-            index: number;
-            professionalId: string;
-            requestNote: string;
-            requestedAt: string;
-            requestedMode: string;
-            scheduleSnapshot: components["schemas"]["ProfessionalPortalAppointmentScheduleSnapshot"];
-            serviceId: string;
-            serviceOfferingId: string;
-            serviceSnapshot: components["schemas"]["ProfessionalPortalAppointmentServiceSnapshot"];
-            status: string;
-            timeline: components["schemas"]["ProfessionalPortalAppointmentTimelineEvent"][] | null;
-        };
-        ProfessionalPortalManagedService: {
-            bookingFlow: string;
-            defaultMode: string;
-            duration: string;
-            featured: boolean;
-            id: string;
-            /** Format: int64 */
-            index: number;
-            isActive: boolean;
-            price: string;
-            serviceId: string;
-            serviceModes: components["schemas"]["ServiceMode"];
-            source: string;
-            summary: string;
-        };
-        ProfessionalPortalPortfolioData: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ProfessionalPortalPortfolioData.json
-             */
-            readonly $schema?: string;
-            portfolioEntries: components["schemas"]["ProfessionalPortalPortfolioEntry"][] | null;
-            professionalId: string;
-        };
-        ProfessionalPortalPortfolioEntry: {
-            id: string;
-            image: string;
-            /** Format: int64 */
-            index: number;
-            outcomes: string[] | null;
-            periodLabel: string;
-            serviceId?: string;
-            summary: string;
-            title: string;
-            visibility: string;
-        };
-        ProfessionalPortalProfileData: {
-            acceptingNewClients: boolean;
-            autoApproveInstantBookings: boolean;
-            city: string;
-            credentialNumber: string;
-            displayName: string;
-            phone: string;
-            professionalId: string;
-            publicBio: string;
-            responseTimeGoal: string;
-            reviewState: components["schemas"]["ProfessionalPortalReviewState"];
-            yearsExperience: string;
-        };
-        ProfessionalPortalRequestsData: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ProfessionalPortalRequestsData.json
-             */
-            readonly $schema?: string;
-            appointmentRecords: components["schemas"]["ProfessionalPortalManagedAppointmentRecord"][] | null;
-            professionalId: string;
-        };
-        ProfessionalPortalReviewState: {
-            adminNote?: string;
-            publishedAt?: string;
+            city?: string;
+            displayName?: string;
+            documents: components["schemas"]["ProfessionalDocumentSummary"][] | null;
+            platformId: string;
+            profileId?: string;
+            profileStatus?: string;
+            reviewNotes?: string;
+            reviewStatus?: string;
             reviewedAt?: string;
-            reviewerName?: string;
-            status: string;
+            slug?: string;
             submittedAt?: string;
+            userId: string;
         };
-        ProfessionalPortalServicesData: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ProfessionalPortalServicesData.json
-             */
-            readonly $schema?: string;
-            professionalId: string;
-            serviceConfigurations: components["schemas"]["ProfessionalPortalManagedService"][] | null;
+        ProfessionalApplicationReviewList: {
+            applications: components["schemas"]["ProfessionalApplicationReviewItem"][] | null;
         };
-        ProfessionalPortalSessionData: {
-            availableProfessionalIds?: string[] | null;
-            hasSnapshot: boolean;
-            lastActiveProfessionalId?: string;
-            professionalId?: string;
-            savedAt?: string;
-            snapshot?: {
+        ProfessionalAvailabilityRule: {
+            endTime: string;
+            id: string;
+            isUnavailable: boolean;
+            metadata?: {
+                [key: string]: unknown;
+            };
+            startTime: string;
+            /** Format: int64 */
+            weekday: number;
+        };
+        ProfessionalAvailabilityRuleInput: {
+            endTime: string;
+            id?: string;
+            isUnavailable: boolean;
+            metadata?: {
+                [key: string]: unknown;
+            };
+            startTime: string;
+            /** Format: int64 */
+            weekday: number;
+        };
+        ProfessionalCoverageArea: {
+            areaLabel: string;
+            city: string;
+            id: string;
+            metadata?: {
                 [key: string]: unknown;
             };
         };
-        ProfessionalPortalTrustData: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ProfessionalPortalTrustData.json
-             */
-            readonly $schema?: string;
-            activityStories: components["schemas"]["ProfessionalPortalActivityStory"][] | null;
-            credentials: components["schemas"]["ProfessionalPortalCredential"][] | null;
-            professionalId: string;
-        };
-        ProfessionalPortfolioEntry: {
-            id: string;
-            image: string;
-            /** Format: int64 */
-            index: number;
-            outcomes: string[] | null;
-            periodLabel: string;
-            serviceId?: string;
-            summary: string;
-            title: string;
-        };
-        ProfessionalPracticeLocation: {
-            address: string;
-            areaId: string;
-            coordinates: components["schemas"]["GeoPoint"];
-            label: string;
-        };
-        ProfessionalRecentActivity: {
-            channel: string;
-            dateLabel: string;
-            /** Format: int64 */
-            index: number;
-            summary: string;
-            title: string;
-        };
-        ProfessionalResponseBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ProfessionalResponseBody.json
-             */
-            readonly $schema?: string;
-            data: components["schemas"]["Professional"];
-        };
-        ProfessionalService: {
-            bookingFlow: string;
-            defaultMode: string;
-            duration: string;
-            id: string;
-            /** Format: int64 */
-            index: number;
-            price: string;
-            serviceId: string;
-            serviceModes: components["schemas"]["ServiceMode"];
-            summary?: string;
-        };
-        ProfessionalStory: {
-            capturedAt: string;
-            image: string;
-            /** Format: int64 */
-            index: number;
-            location: string;
-            note: string;
-            title: string;
-        };
-        ProfessionalTestimonial: {
-            author: string;
-            dateLabel: string;
-            image: string;
-            /** Format: int64 */
-            index: number;
-            quote: string;
-            /** Format: double */
-            rating: number;
-            role: string;
-            serviceId?: string;
-        };
-        ProfessionalWeeklyAvailabilityWindow: {
-            endTime: string;
-            id: string;
-            /** Format: int64 */
-            index: number;
-            isEnabled: boolean;
-            /** Format: int64 */
-            slotIntervalMinutes: number;
-            startTime: string;
-            weekday: string;
-        };
-        ProfessionalsResponseBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ProfessionalsResponseBody.json
-             */
-            readonly $schema?: string;
-            data: components["schemas"]["Professional"][] | null;
-        };
-        ProfileResponseBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ProfileResponseBody.json
-             */
-            readonly $schema?: string;
-            data: components["schemas"]["ProfessionalPortalProfileData"];
-        };
-        RequestsResponseBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/RequestsResponseBody.json
-             */
-            readonly $schema?: string;
-            data: components["schemas"]["ProfessionalPortalRequestsData"];
-        };
-        ResolvedLocationData: {
-            areaId: string;
+        ProfessionalCoverageAreaInput: {
             areaLabel: string;
             city: string;
-            country: string;
-            district: string;
-            formattedAddress: string;
-            point: components["schemas"]["GeoPointData"];
-            postalCode: string;
-            precision: string;
-            province: string;
-            source: string;
+            id?: string;
+            metadata?: {
+                [key: string]: unknown;
+            };
+        };
+        ProfessionalCredential: {
+            credentialCode: string;
+            expiresAt?: string;
+            id: string;
+            issuedAt?: string;
+            issuer: string;
+            label: string;
+            metadata?: {
+                [key: string]: unknown;
+            };
+        };
+        ProfessionalCredentialInput: {
+            credentialCode: string;
+            expiresAt?: string;
+            id?: string;
+            issuedAt?: string;
+            issuer: string;
+            label: string;
+            metadata?: {
+                [key: string]: unknown;
+            };
+        };
+        ProfessionalDocumentSummary: {
+            documentKey: string;
+            documentUrl: string;
+            fileName: string;
+            id: string;
+            metadata?: unknown;
+        };
+        ProfessionalDocumentUploadToken: {
+            documentId: string;
+            documentUrl: string;
+            expiresAt: string;
+            method: string;
+            uploadUrl: string;
+        };
+        ProfessionalGalleryAsset: {
+            assetUrl: string;
+            caption: string;
+            fileName: string;
+            id: string;
+            metadata?: {
+                [key: string]: unknown;
+            };
+            /** Format: int64 */
+            sortOrder: number;
+        };
+        ProfessionalGalleryAssetInput: {
+            assetUrl: string;
+            caption: string;
+            fileName: string;
+            id?: string;
+            metadata?: {
+                [key: string]: unknown;
+            };
+            /** Format: int64 */
+            sortOrder: number;
+        };
+        ProfessionalNotificationPreferences: {
+            emailEnabled: boolean;
+            metadata?: {
+                [key: string]: unknown;
+            };
+            profileId: string;
+            webEnabled: boolean;
+            whatsappEnabled: boolean;
+        };
+        ProfessionalOrderSummary: {
+            currency: string;
+            id: string;
+            offeringTitle: string;
+            orderType: string;
+            paymentStatus: string;
+            status: string;
+            /** Format: int64 */
+            totalAmount: number;
+        };
+        ProfessionalPlatformApplication: {
+            attributes: {
+                [key: string]: unknown;
+            };
+            documents: components["schemas"]["ProfessionalPlatformDocument"][] | null;
+            id: string;
+            platformId: string;
+            reviewNotes?: string;
+            status: string;
+            submittedAt?: string;
+            userId: string;
+        };
+        ProfessionalPlatformDocument: {
+            documentKey: string;
+            documentUrl: string;
+            fileName: string;
+            id: string;
+            metadata?: {
+                [key: string]: unknown;
+            };
+        };
+        ProfessionalPlatformProfile: {
+            attributes: {
+                [key: string]: unknown;
+            };
+            city: string;
+            displayName: string;
+            id: string;
+            platformId: string;
+            reviewStatus: string;
+            slug: string;
+            status: string;
+            updatedAt: string;
+            userId: string;
+        };
+        ProfessionalPlatformWorkspace: {
+            application?: components["schemas"]["ProfessionalPlatformApplication"];
+            platform: components["schemas"]["PlatformDefinition"];
+            profile?: components["schemas"]["ProfessionalPlatformProfile"];
+            schema: components["schemas"]["PlatformProfessionalSchema"];
+        };
+        ProfessionalPortfolioEntry: {
+            assetUrl: string;
+            description: string;
+            id: string;
+            metadata?: {
+                [key: string]: unknown;
+            };
+            /** Format: int64 */
+            sortOrder: number;
+            title: string;
+        };
+        ProfessionalPortfolioEntryInput: {
+            assetUrl: string;
+            description: string;
+            id?: string;
+            metadata?: {
+                [key: string]: unknown;
+            };
+            /** Format: int64 */
+            sortOrder: number;
+            title: string;
+        };
+        ProfessionalSchemaField: {
+            helperText?: string;
+            key: string;
+            label: string;
+            placeholder?: string;
+            required: boolean;
+            type: string;
+        };
+        ProfessionalStory: {
+            body: string;
+            id: string;
+            isPublished: boolean;
+            metadata?: {
+                [key: string]: unknown;
+            };
+            /** Format: int64 */
+            sortOrder: number;
+            title: string;
+        };
+        ProfessionalStoryInput: {
+            body: string;
+            id?: string;
+            isPublished: boolean;
+            metadata?: {
+                [key: string]: unknown;
+            };
+            /** Format: int64 */
+            sortOrder: number;
+            title: string;
+        };
+        ProfessionalWorkspaceApplication: {
+            attributes: {
+                [key: string]: unknown;
+            };
+            documents: components["schemas"]["ProfessionalWorkspaceDocument"][] | null;
+            id: string;
+            platformId: string;
+            reviewNotes?: string;
+            status: string;
+            userId: string;
+        };
+        ProfessionalWorkspaceDocument: {
+            documentKey: string;
+            documentUrl: string;
+            fileName: string;
+            id: string;
+            metadata?: {
+                [key: string]: unknown;
+            };
+        };
+        ProfessionalWorkspaceOffering: {
+            currency: string;
+            deliveryMode: string;
+            id: string;
+            offeringType: string;
+            /** Format: int64 */
+            priceAmount: number;
+            slug: string;
+            status: string;
+            title: string;
+        };
+        ProfessionalWorkspaceOrdersResponseBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/ProfessionalWorkspaceOrdersResponseBody.json
+             */
+            readonly $schema?: string;
+            data: components["schemas"]["ProfessionalWorkspaceOrdersResponseBodyDataStruct"];
+        };
+        ProfessionalWorkspaceOrdersResponseBodyDataStruct: {
+            orders: components["schemas"]["ProfessionalOrderSummary"][] | null;
+        };
+        ProfessionalWorkspaceProfile: {
+            attributes: {
+                [key: string]: unknown;
+            };
+            city: string;
+            displayName: string;
+            id: string;
+            platformId: string;
+            reviewStatus: string;
+            slug: string;
+            status: string;
+            userId: string;
+        };
+        ProfessionalWorkspaceResponseBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/ProfessionalWorkspaceResponseBody.json
+             */
+            readonly $schema?: string;
+            data: components["schemas"]["ProfessionalWorkspaceSnapshot"];
+        };
+        ProfessionalWorkspaceSnapshot: {
+            application?: components["schemas"]["ProfessionalWorkspaceApplication"];
+            availabilityRules: components["schemas"]["ProfessionalAvailabilityRule"][] | null;
+            coverageAreas: components["schemas"]["ProfessionalCoverageArea"][] | null;
+            credentials: components["schemas"]["ProfessionalCredential"][] | null;
+            galleryAssets: components["schemas"]["ProfessionalGalleryAsset"][] | null;
+            notificationPreferences: components["schemas"]["ProfessionalNotificationPreferences"];
+            offerings: components["schemas"]["ProfessionalWorkspaceOffering"][] | null;
+            portfolioEntries: components["schemas"]["ProfessionalPortfolioEntry"][] | null;
+            profile?: components["schemas"]["ProfessionalWorkspaceProfile"];
+            recentOrders: components["schemas"]["ProfessionalOrderSummary"][] | null;
+            stories: components["schemas"]["ProfessionalStory"][] | null;
+        };
+        RefundList: {
+            refunds: components["schemas"]["RefundRecord"][] | null;
+        };
+        RefundRecord: {
+            /** Format: int64 */
+            amount: number;
+            currency: string;
+            id: string;
+            orderId: string;
+            paymentId?: string;
+            reason: string;
+            status: string;
+            updatedAt: string;
+        };
+        ReplaceProfessionalAvailabilityRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/ReplaceProfessionalAvailabilityRequest.json
+             */
+            readonly $schema?: string;
+            rules: components["schemas"]["ProfessionalAvailabilityRuleInput"][] | null;
+        };
+        ReplaceProfessionalCoverageRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/ReplaceProfessionalCoverageRequest.json
+             */
+            readonly $schema?: string;
+            areas: components["schemas"]["ProfessionalCoverageAreaInput"][] | null;
+        };
+        ReplaceProfessionalPortfolioRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/ReplaceProfessionalPortfolioRequest.json
+             */
+            readonly $schema?: string;
+            entries: components["schemas"]["ProfessionalPortfolioEntryInput"][] | null;
+            gallery: components["schemas"]["ProfessionalGalleryAssetInput"][] | null;
+        };
+        ReplaceProfessionalTrustRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/ReplaceProfessionalTrustRequest.json
+             */
+            readonly $schema?: string;
+            credentials: components["schemas"]["ProfessionalCredentialInput"][] | null;
+            stories: components["schemas"]["ProfessionalStoryInput"][] | null;
         };
         ResponseBody: {
             /**
@@ -2295,183 +2117,351 @@ export interface components {
             readonly $schema?: string;
             data: components["schemas"]["Info"];
         };
-        ScopedAppointmentsResponseBody: {
+        ReviewListResponseBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ScopedAppointmentsResponseBody.json
+             * @example https://example.com/schemas/ReviewListResponseBody.json
              */
             readonly $schema?: string;
-            data: components["schemas"]["AppointmentData"];
+            data: components["schemas"]["ProfessionalApplicationReviewList"];
         };
-        ServiceMode: {
-            homeVisit: boolean;
-            online: boolean;
-            onsite: boolean;
-        };
-        ServicesResponseBody: {
+        ReviewProfessionalApplicationRequest: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ServicesResponseBody.json
+             * @example https://example.com/schemas/ReviewProfessionalApplicationRequest.json
              */
             readonly $schema?: string;
-            data: components["schemas"]["ProfessionalPortalServicesData"];
+            decision: string;
+            reviewNotes?: string;
         };
-        SessionResponseBody: {
+        ReviewResponseBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/SessionResponseBody.json
+             * @example https://example.com/schemas/ReviewResponseBody.json
              */
             readonly $schema?: string;
-            data: components["schemas"]["ProfessionalPortalSessionData"];
+            data: components["schemas"]["ProfessionalApplicationReviewItem"];
         };
-        SubmitAppointmentFeedbackInputData: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/SubmitAppointmentFeedbackInputData.json
-             */
-            readonly $schema?: string;
-            /** Format: double */
-            rating: number;
-            text: string;
-        };
-        SupportDeskData: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/SupportDeskData.json
-             */
-            readonly $schema?: string;
-            commandCenter: components["schemas"]["AdminCommandCenterStateData"];
-            savedAt?: string;
-            /** Format: int64 */
-            schemaVersion: number;
-            tickets: components["schemas"]["SupportTicketData"][] | null;
-        };
-        SupportDeskResponseBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/SupportDeskResponseBody.json
-             */
-            readonly $schema?: string;
-            data: components["schemas"]["SupportDeskData"];
-        };
-        SupportTicketData: {
+        SupportTicket: {
             assignedAdminId?: string;
-            categoryId: string;
-            contactValue: string;
+            chatThreadId?: string;
             createdAt: string;
             details: string;
-            etaKey: string;
+            events: components["schemas"]["SupportTicketEvent"][] | null;
             id: string;
-            preferredChannel: string;
-            referenceCode?: string;
-            relatedAppointmentId?: string;
-            relatedProfessionalId?: string;
-            reporterId?: string;
-            reporterName: string;
-            reporterPhone: string;
-            reporterRole: string;
-            sourceSurface: string;
+            orderId?: string;
+            platformId: string;
+            priority: string;
+            reporterUserId: string;
             status: string;
-            summary: string;
+            subject: string;
             updatedAt: string;
-            urgency: string;
         };
-        SupportTicketResponseBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/SupportTicketResponseBody.json
-             */
-            readonly $schema?: string;
-            data: components["schemas"]["SupportTicketData"];
-        };
-        SupportTicketsData: {
-            savedAt?: string;
-            /** Format: int64 */
-            schemaVersion: number;
-            tickets: components["schemas"]["SupportTicketData"][] | null;
-        };
-        SupportTicketsResponseBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/SupportTicketsResponseBody.json
-             */
-            readonly $schema?: string;
-            data: components["schemas"]["SupportTicketsData"];
-        };
-        TrustResponseBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/TrustResponseBody.json
-             */
-            readonly $schema?: string;
-            data: components["schemas"]["ProfessionalPortalTrustData"];
-        };
-        UpsertProfessionalPortalProfileData: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/UpsertProfessionalPortalProfileData.json
-             */
-            readonly $schema?: string;
-            acceptingNewClients: boolean;
-            autoApproveInstantBookings: boolean;
-            city: string;
-            credentialNumber: string;
-            displayName: string;
-            phone: string;
-            professionalId: string;
-            publicBio: string;
-            responseTimeGoal: string;
-            yearsExperience: string;
-        };
-        UpsertProfessionalPortalSessionRequest: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/UpsertProfessionalPortalSessionRequest.json
-             */
-            readonly $schema?: string;
-            professionalId?: string;
-            snapshot: {
+        SupportTicketEvent: {
+            actorId: string;
+            actorKind: string;
+            createdAt: string;
+            eventType: string;
+            id: string;
+            internalNote?: string;
+            payload?: {
                 [key: string]: unknown;
             };
+            publicNote?: string;
         };
-        UserContext: {
-            area: components["schemas"]["Area"];
-            currentArea: string;
-            id: string;
-            /** Format: int64 */
-            index: number;
-            onlineStatusLabel: string;
-            userLocation: components["schemas"]["GeoPoint"];
+        SupportTicketList: {
+            tickets: components["schemas"]["SupportTicket"][] | null;
         };
-        ViewerSessionData: {
+        ThreadListResponseBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ViewerSessionData.json
+             * @example https://example.com/schemas/ThreadListResponseBody.json
              */
             readonly $schema?: string;
-            /** @description Viewer mode: visitor, customer, or professional */
-            mode: string;
+            data: components["schemas"]["ChatThreadList"];
         };
-        ViewerSessionResponseBody: {
+        ThreadResponseBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ViewerSessionResponseBody.json
+             * @example https://example.com/schemas/ThreadResponseBody.json
              */
             readonly $schema?: string;
-            data: components["schemas"]["ViewerSessionData"];
+            data: components["schemas"]["ChatThreadDetail"];
+        };
+        TicketListResponseBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/TicketListResponseBody.json
+             */
+            readonly $schema?: string;
+            data: components["schemas"]["SupportTicketList"];
+        };
+        TicketResponseBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/TicketResponseBody.json
+             */
+            readonly $schema?: string;
+            data: components["schemas"]["SupportTicket"];
+        };
+        TriageSupportTicketRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/TriageSupportTicketRequest.json
+             */
+            readonly $schema?: string;
+            assignToAdminId?: string;
+            internalNote?: string;
+            priority?: string;
+            publicNote?: string;
+            status?: string;
+        };
+        UpdateAdminOrderRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/UpdateAdminOrderRequest.json
+             */
+            readonly $schema?: string;
+            paymentStatus?: string;
+            status?: string;
+        };
+        UpdatePayoutStatusRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/UpdatePayoutStatusRequest.json
+             */
+            readonly $schema?: string;
+            providerReference?: string;
+            status: string;
+        };
+        UpdateProfessionalNotificationPreferencesRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/UpdateProfessionalNotificationPreferencesRequest.json
+             */
+            readonly $schema?: string;
+            emailEnabled: boolean;
+            metadata?: {
+                [key: string]: unknown;
+            };
+            webEnabled: boolean;
+            whatsappEnabled: boolean;
+        };
+        UpdateRefundStatusRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/UpdateRefundStatusRequest.json
+             */
+            readonly $schema?: string;
+            status: string;
+        };
+        UpdateViewerCustomerProfileRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/UpdateViewerCustomerProfileRequest.json
+             */
+            readonly $schema?: string;
+            city?: string;
+            displayName: string;
+        };
+        UploadTokenResponseBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/UploadTokenResponseBody.json
+             */
+            readonly $schema?: string;
+            data: components["schemas"]["ProfessionalDocumentUploadToken"];
+        };
+        UpsertProfessionalPlatformApplicationRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/UpsertProfessionalPlatformApplicationRequest.json
+             */
+            readonly $schema?: string;
+            attributes: {
+                [key: string]: unknown;
+            };
+            city: string;
+            displayName: string;
+            slug?: string;
+        };
+        UpsertProfessionalWorkspaceProfileRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/UpsertProfessionalWorkspaceProfileRequest.json
+             */
+            readonly $schema?: string;
+            attributes: {
+                [key: string]: unknown;
+            };
+            city: string;
+            displayName: string;
+            slug?: string;
+        };
+        ViewerAuthChallengeResponseBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/ViewerAuthChallengeResponseBody.json
+             */
+            readonly $schema?: string;
+            data: components["schemas"]["AuthChallenge"];
+        };
+        ViewerAuthCreateChallengeRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/ViewerAuthCreateChallengeRequest.json
+             */
+            readonly $schema?: string;
+            phone: string;
+            purpose: string;
+        };
+        ViewerAuthCreateSessionRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/ViewerAuthCreateSessionRequest.json
+             */
+            readonly $schema?: string;
+            password: string;
+            phone: string;
+        };
+        ViewerAuthForgotPasswordRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/ViewerAuthForgotPasswordRequest.json
+             */
+            readonly $schema?: string;
+            phone: string;
+        };
+        ViewerAuthRecoveryResponseBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/ViewerAuthRecoveryResponseBody.json
+             */
+            readonly $schema?: string;
+            data: components["schemas"]["AuthRecoveryRequest"];
+        };
+        ViewerAuthRegisterRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/ViewerAuthRegisterRequest.json
+             */
+            readonly $schema?: string;
+            city?: string;
+            displayName: string;
+            password: string;
+            phone: string;
+        };
+        ViewerAuthResetPasswordRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/ViewerAuthResetPasswordRequest.json
+             */
+            readonly $schema?: string;
+            challengeId: string;
+            code: string;
+            newPassword: string;
+        };
+        ViewerAuthSessionData: {
+            adminGrants: string[] | null;
+            customerProfile?: components["schemas"]["ViewerCustomerProfile"];
+            expiresAt?: string;
+            identities: components["schemas"]["ViewerIdentity"][] | null;
+            isAuthenticated: boolean;
+            lastLoginAt?: string;
+            phone?: string;
+            platformMemberships: components["schemas"]["ViewerPlatformMembership"][] | null;
+            registeredAt?: string;
+            userId?: string;
+        };
+        ViewerAuthSessionListResponseBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/ViewerAuthSessionListResponseBody.json
+             */
+            readonly $schema?: string;
+            data: components["schemas"]["AuthSessionList"];
+        };
+        ViewerAuthSessionMutationResponseBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/ViewerAuthSessionMutationResponseBody.json
+             */
+            readonly $schema?: string;
+            data: components["schemas"]["AuthSessionMutationResult"];
+        };
+        ViewerAuthSessionResponseBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/ViewerAuthSessionResponseBody.json
+             */
+            readonly $schema?: string;
+            data: components["schemas"]["ViewerAuthSessionData"];
+        };
+        ViewerAuthVerifyChallengeRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/ViewerAuthVerifyChallengeRequest.json
+             */
+            readonly $schema?: string;
+            challengeId: string;
+            code: string;
+        };
+        ViewerCustomerProfile: {
+            city?: string;
+            displayName?: string;
+            primaryPhone?: string;
+        };
+        ViewerIdentity: {
+            identityType: string;
+            provider: string;
+            value: string;
+            verifiedAt?: string;
+        };
+        ViewerPlatformMembership: {
+            applicationId?: string;
+            applicationStatus?: string;
+            displayName?: string;
+            platformId: string;
+            profileId?: string;
+            profileStatus?: string;
+            reviewStatus?: string;
+            slug?: string;
+        };
+        WorkspaceResponseBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/WorkspaceResponseBody.json
+             */
+            readonly $schema?: string;
+            data: components["schemas"]["ProfessionalPlatformWorkspace"];
         };
     };
     responses: never;
@@ -2698,794 +2688,10 @@ export interface operations {
             };
         };
     };
-    "get-admin-console": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AdminConsoleResponseBody"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "upsert-admin-console": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AdminConsoleData"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AdminConsoleResponseBody"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "get-admin-console-table": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Admin console table name */
-                table_name: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AdminConsoleTableResponseBody"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "upsert-admin-console-table": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Admin console table name */
-                table_name: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AdminConsoleTableUpsertData"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AdminConsoleTableResponseBody"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "upsert-admin-professional-portal-review-state": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ProfessionalPortalAdminReviewStateData"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProfileResponseBody"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "get-admin-professional-portal-review-states": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AdminReviewStatesResponseBody"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "get-admin-session": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AdminSessionResponseBody"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "upsert-admin-session": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AdminSessionData"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AdminSessionResponseBody"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "get-admin-support-desk": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SupportDeskResponseBody"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "upsert-admin-support-desk": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SupportDeskData"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SupportDeskResponseBody"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "get-appointments": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AppointmentsResponseBody"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "upsert-appointment-record": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Appointment record identifier */
-                appointment_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AppointmentRecordUpsertData"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AppointmentRequestsResponseBody"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "depart-home-visit-appointment": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Appointment record identifier */
-                appointment_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AppointmentDepartInputData"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AppointmentHomeVisitStatusResponseBody"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "get-bootstrap": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BootstrapResponseBody"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "get-catalog": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CatalogResponseBody"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "get-chat": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ChatResponseBody"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "get-consumer-preferences": {
+    "list-admin-customers": {
         parameters: {
             query?: {
-                /** @description Optional consumer id to scope consumer preference state */
-                consumer_id?: string;
+                platform_id?: string;
             };
             header?: never;
             path?: never;
@@ -3499,20 +2705,11 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ConsumerPreferencesResponseBody"];
+                    "application/json": components["schemas"]["AdminCustomerListResponseBody"];
                 };
             };
             /** @description Unauthorized */
             401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3540,81 +2737,11 @@ export interface operations {
             };
         };
     };
-    "upsert-consumer-preferences": {
+    "list-admin-orders": {
         parameters: {
             query?: {
-                /** @description Optional consumer id to scope consumer preference state */
-                consumer_id?: string;
+                platform_id?: string;
             };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ConsumerPreferencesData"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ConsumerPreferencesResponseBody"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "list-customer-appointments": {
-        parameters: {
-            query?: never;
             header?: never;
             path?: never;
             cookie?: never;
@@ -3627,71 +2754,11 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ScopedAppointmentsResponseBody"];
+                    "application/json": components["schemas"]["AdminOrderListResponseBody"];
                 };
             };
             /** @description Unauthorized */
             401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "create-customer-appointment": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateAppointmentInputData"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CreateAppointmentResponseBody"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Conflict */
-            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3719,18 +2786,18 @@ export interface operations {
             };
         };
     };
-    "cancel-customer-appointment": {
+    "update-admin-order-status": {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                appointment_id: string;
+                order_id: string;
             };
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["AppointmentActionInputData"];
+                "application/json": components["schemas"]["UpdateAdminOrderRequest"];
             };
         };
         responses: {
@@ -3740,7 +2807,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AppointmentCommandResponseBody"];
+                    "application/json": components["schemas"]["AdminOrderResponseBody"];
                 };
             };
             /** @description Bad Request */
@@ -3754,163 +2821,6 @@ export interface operations {
             };
             /** @description Unauthorized */
             401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "submit-appointment-feedback": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                appointment_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SubmitAppointmentFeedbackInputData"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AppointmentCommandResponseBody"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "get-customer-home-visit-status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Appointment record identifier */
-                appointment_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AppointmentHomeVisitStatusResponseBody"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3947,18 +2857,176 @@ export interface operations {
             };
         };
     };
-    "create-appointment-payment-request": {
+    "get-admin-overview": {
+        parameters: {
+            query?: {
+                platform_id?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminOverviewResponseBody"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "list-admin-payouts": {
+        parameters: {
+            query?: {
+                platform_id?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminPayoutListResponseBody"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "create-admin-payout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateAdminPayoutRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminPayoutResponseBody"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "update-admin-payout-status": {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                appointment_id: string;
+                payout_id: string;
             };
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CreatePaymentRequestInputData"];
+                "application/json": components["schemas"]["UpdatePayoutStatusRequest"];
             };
         };
         responses: {
@@ -3968,7 +3036,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AppointmentCommandResponseBody"];
+                    "application/json": components["schemas"]["AdminPayoutResponseBody"];
                 };
             };
             /** @description Bad Request */
@@ -3989,17 +3057,8 @@ export interface operations {
                     "application/json": components["schemas"]["APIError"];
                 };
             };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Conflict */
-            409: {
+            /** @description Not Found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4027,18 +3086,16 @@ export interface operations {
             };
         };
     };
-    "update-customer-auth-account": {
+    "list-platform-professional-applications": {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                platform_id: string;
+            };
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CustomerAuthUpdateAccountRequest"];
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description OK */
             200: {
@@ -4046,29 +3103,11 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CustomerAuthSessionResponseBody"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
+                    "application/json": components["schemas"]["ReviewListResponseBody"];
                 };
             };
             /** @description Unauthorized */
             401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Conflict */
-            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4096,16 +3135,19 @@ export interface operations {
             };
         };
     };
-    "update-customer-auth-password": {
+    "review-platform-professional-application": {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                application_id: string;
+                platform_id: string;
+            };
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CustomerAuthUpdatePasswordRequest"];
+                "application/json": components["schemas"]["ReviewProfessionalApplicationRequest"];
             };
         };
         responses: {
@@ -4115,7 +3157,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CustomerAuthSessionResponseBody"];
+                    "application/json": components["schemas"]["ReviewResponseBody"];
                 };
             };
             /** @description Bad Request */
@@ -4156,7 +3198,56 @@ export interface operations {
             };
         };
     };
-    "register-customer-auth-account": {
+    "list-admin-refunds": {
+        parameters: {
+            query?: {
+                platform_id?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminRefundListResponseBody"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "create-admin-refund": {
         parameters: {
             query?: never;
             header?: never;
@@ -4165,18 +3256,17 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CustomerAuthRegisterRequest"];
+                "application/json": components["schemas"]["CreateAdminRefundRequest"];
             };
         };
         responses: {
             /** @description OK */
             200: {
                 headers: {
-                    "Set-Cookie"?: string;
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CustomerAuthSessionResponseBody"];
+                    "application/json": components["schemas"]["AdminRefundResponseBody"];
                 };
             };
             /** @description Bad Request */
@@ -4188,8 +3278,368 @@ export interface operations {
                     "application/json": components["schemas"]["APIError"];
                 };
             };
-            /** @description Conflict */
-            409: {
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "update-admin-refund-status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                refund_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateRefundStatusRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminRefundResponseBody"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "get-admin-studio": {
+        parameters: {
+            query?: {
+                platform_id?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminStudioResponseBody"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "list-admin-support-tickets": {
+        parameters: {
+            query?: {
+                platform_id?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TicketListResponseBody"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "triage-admin-support-ticket": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ticket_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TriageSupportTicketRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TicketResponseBody"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "create-viewer-auth-sms-challenge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ViewerAuthCreateChallengeRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ViewerAuthChallengeResponseBody"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "verify-viewer-auth-challenge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ViewerAuthVerifyChallengeRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ViewerAuthChallengeResponseBody"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Not Found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4224,56 +3674,9 @@ export interface operations {
                     "application/json": components["schemas"]["APIError"];
                 };
             };
-            /** @description Service Unavailable */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
         };
     };
-    "get-customer-auth-session": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CustomerAuthSessionResponseBody"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "create-customer-auth-session": {
+    "create-viewer-auth-session": {
         parameters: {
             query?: never;
             header?: never;
@@ -4282,7 +3685,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CustomerAuthCreateSessionRequest"];
+                "application/json": components["schemas"]["ViewerAuthCreateSessionRequest"];
             };
         };
         responses: {
@@ -4293,7 +3696,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CustomerAuthSessionResponseBody"];
+                    "application/json": components["schemas"]["ViewerAuthSessionResponseBody"];
                 };
             };
             /** @description Bad Request */
@@ -4323,8 +3726,50 @@ export interface operations {
                     "application/json": components["schemas"]["APIError"];
                 };
             };
-            /** @description Too Many Requests */
-            429: {
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "request-viewer-password-reset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ViewerAuthForgotPasswordRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ViewerAuthRecoveryResponseBody"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4352,27 +3797,48 @@ export interface operations {
             };
         };
     };
-    "delete-customer-auth-session": {
+    "reset-viewer-password": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ViewerAuthResetPasswordRequest"];
+            };
+        };
         responses: {
             /** @description OK */
             200: {
                 headers: {
-                    "Set-Cookie"?: string;
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CustomerAuthSessionResponseBody"];
+                    "application/json": components["schemas"]["ViewerAuthRecoveryResponseBody"];
                 };
             };
-            /** @description Unauthorized */
-            401: {
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4389,18 +3855,29 @@ export interface operations {
                     "application/json": components["schemas"]["APIError"];
                 };
             };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
         };
     };
-    "complete-test-payment-request": {
+    "update-viewer-customer-profile": {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                payment_request_id: string;
-            };
+            path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateViewerCustomerProfileRequest"];
+            };
+        };
         responses: {
             /** @description OK */
             200: {
@@ -4408,7 +3885,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AppointmentCommandResponseBody"];
+                    "application/json": components["schemas"]["ViewerAuthSessionResponseBody"];
                 };
             };
             /** @description Bad Request */
@@ -4429,8 +3906,51 @@ export interface operations {
                     "application/json": components["schemas"]["APIError"];
                 };
             };
-            /** @description Forbidden */
-            403: {
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "register-viewer-auth-account": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ViewerAuthRegisterRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "Set-Cookie"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ViewerAuthSessionResponseBody"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4467,7 +3987,7 @@ export interface operations {
             };
         };
     };
-    "list-customer-support-tickets": {
+    "get-viewer-auth-session": {
         parameters: {
             query?: never;
             header?: never;
@@ -4482,7 +4002,66 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SupportTicketsResponseBody"];
+                    "application/json": components["schemas"]["ViewerAuthSessionResponseBody"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "delete-viewer-auth-session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "Set-Cookie"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ViewerAuthSessionResponseBody"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "list-viewer-auth-sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ViewerAuthSessionListResponseBody"];
                 };
             };
             /** @description Unauthorized */
@@ -4505,7 +4084,154 @@ export interface operations {
             };
         };
     };
-    "create-customer-support-ticket": {
+    "logout-all-other-viewer-auth-sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ViewerAuthSessionMutationResponseBody"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "revoke-viewer-auth-session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "Set-Cookie"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ViewerAuthSessionMutationResponseBody"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "list-chat-threads": {
+        parameters: {
+            query?: {
+                order_id?: string;
+                platform_id?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ThreadListResponseBody"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "create-chat-thread": {
         parameters: {
             query?: never;
             header?: never;
@@ -4514,7 +4240,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CreateSupportTicketData"];
+                "application/json": components["schemas"]["CreateChatThreadRequest"];
             };
         };
         responses: {
@@ -4524,7 +4250,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SupportTicketResponseBody"];
+                    "application/json": components["schemas"]["ThreadResponseBody"];
                 };
             };
             /** @description Bad Request */
@@ -4538,6 +4264,135 @@ export interface operations {
             };
             /** @description Unauthorized */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "get-chat-thread": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                thread_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ThreadResponseBody"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "create-chat-message": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                thread_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateChatMessageRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ThreadResponseBody"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Not Found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4594,7 +4449,69 @@ export interface operations {
             };
         };
     };
-    "get-customer-notifications-state": {
+    "create-order-payment-session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                order_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateOrderPaymentSessionRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentSessionResponseBody"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "list-platforms": {
         parameters: {
             query?: never;
             header?: never;
@@ -4609,16 +4526,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CustomerNotificationsResponseBody"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
+                    "application/json": components["schemas"]["ListPlatformsResponseBody"];
                 };
             };
             /** @description Internal Server Error */
@@ -4632,189 +4540,10 @@ export interface operations {
             };
         };
     };
-    "upsert-customer-notifications-state": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CustomerNotificationStateData"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CustomerNotificationsResponseBody"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "upsert-customer-push-subscription": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CustomerPushSubscriptionData"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CustomerPushSubscriptionResponseBody"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "delete-customer-push-subscription": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CustomerPushSubscriptionData"];
-            };
-        };
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "get-professional-notifications-state": {
+    "resolve-platform-by-host": {
         parameters: {
             query?: {
-                /** @description Optional professional id to scope professional notification read state */
-                professional_id?: string;
+                host?: string;
             };
             header?: never;
             path?: never;
@@ -4828,525 +4557,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ProfessionalNotificationsResponseBody"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "upsert-professional-notifications-state": {
-        parameters: {
-            query?: {
-                /** @description Optional professional id to scope professional notification read state */
-                professional_id?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ProfessionalNotificationStateData"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProfessionalNotificationsResponseBody"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "handle-xendit-payment-webhook": {
-        parameters: {
-            query?: never;
-            header?: {
-                "x-callback-token"?: string;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    [key: string]: unknown;
-                };
-            };
-        };
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "list-professionals": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProfessionalsResponseBody"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "list-professional-appointments": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ScopedAppointmentsResponseBody"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "approve-appointment": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                appointment_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AppointmentActionInputData"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AppointmentCommandResponseBody"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "cancel-professional-appointment": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                appointment_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AppointmentActionInputData"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AppointmentCommandResponseBody"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "complete-appointment": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                appointment_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AppointmentActionInputData"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AppointmentCommandResponseBody"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "get-professional-home-visit-status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Appointment record identifier */
-                appointment_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AppointmentHomeVisitStatusResponseBody"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
+                    "application/json": components["schemas"]["GetPlatformResponseBody"];
                 };
             };
             /** @description Not Found */
@@ -5378,20 +4589,16 @@ export interface operations {
             };
         };
     };
-    "reject-appointment": {
+    "get-platform-by-id": {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                appointment_id: string;
+                platform_id: string;
             };
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AppointmentActionInputData"];
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description OK */
             200: {
@@ -5399,38 +4606,11 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AppointmentCommandResponseBody"];
+                    "application/json": components["schemas"]["GetPlatformResponseBody"];
                 };
             };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Conflict */
-            409: {
+            /** @description Not Found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -5458,350 +4638,13 @@ export interface operations {
             };
         };
     };
-    "start-appointment-service": {
+    "list-customer-platform-orders": {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                appointment_id: string;
+                platform_id: string;
             };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AppointmentActionInputData"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AppointmentCommandResponseBody"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "update-professional-auth-account": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ProfessionalAuthUpdateAccountRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProfessionalAuthSessionResponseBody"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "update-professional-auth-password": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ProfessionalAuthUpdatePasswordRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProfessionalAuthSessionResponseBody"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "request-professional-password-recovery": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ProfessionalAuthRequestPasswordRecoveryRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProfessionalAuthPasswordRecoveryResponseBody"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "register-professional-auth-account": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ProfessionalAuthRegisterRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    "Set-Cookie"?: string;
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProfessionalAuthSessionResponseBody"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Too Many Requests */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Service Unavailable */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "get-professional-auth-session": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -5812,235 +4655,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ProfessionalAuthSessionResponseBody"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "create-professional-auth-session": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ProfessionalAuthCreateSessionRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    "Set-Cookie"?: string;
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProfessionalAuthSessionResponseBody"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Too Many Requests */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Service Unavailable */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "delete-professional-auth-session": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    "Set-Cookie"?: string;
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProfessionalAuthSessionResponseBody"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "get-professional-portal-coverage": {
-        parameters: {
-            query?: {
-                /** @description Optional professional id to load a specific coverage resource */
-                professional_id?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CoverageResponseBody"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "upsert-professional-portal-coverage": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ProfessionalPortalCoverageData"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CoverageResponseBody"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
+                    "application/json": components["schemas"]["OrderListResponseBody"];
                 };
             };
             /** @description Unauthorized */
@@ -6072,1020 +4687,111 @@ export interface operations {
             };
         };
     };
-    "get-professional-portal-gallery": {
-        parameters: {
-            query?: {
-                /** @description Optional professional id to load a specific gallery resource */
-                professional_id?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["GalleryResponseBody"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "upsert-professional-portal-gallery": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ProfessionalPortalGalleryData"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["GalleryResponseBody"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "get-professional-portal-portfolio": {
-        parameters: {
-            query?: {
-                /** @description Optional professional id to load a specific portfolio resource */
-                professional_id?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PortfolioResponseBody"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "upsert-professional-portal-portfolio": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ProfessionalPortalPortfolioData"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PortfolioResponseBody"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "get-professional-portal-profile": {
-        parameters: {
-            query?: {
-                /** @description Optional professional id to load a specific profile resource */
-                professional_id?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProfileResponseBody"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "upsert-professional-portal-profile": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpsertProfessionalPortalProfileData"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProfileResponseBody"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "submit-professional-portal-profile-for-review": {
-        parameters: {
-            query?: {
-                /** @description Optional professional id to load a specific profile resource */
-                professional_id?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProfileResponseBody"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "get-professional-portal-requests": {
-        parameters: {
-            query?: {
-                /** @description Optional professional id to load a specific requests resource */
-                professional_id?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RequestsResponseBody"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "upsert-professional-portal-requests": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ProfessionalPortalRequestsData"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RequestsResponseBody"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "get-professional-portal-services": {
-        parameters: {
-            query?: {
-                /** @description Optional professional id to load a specific services resource */
-                professional_id?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ServicesResponseBody"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "upsert-professional-portal-services": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ProfessionalPortalServicesData"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ServicesResponseBody"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "get-professional-portal-trust": {
-        parameters: {
-            query?: {
-                /** @description Optional professional id to load a specific trust resource */
-                professional_id?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TrustResponseBody"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "upsert-professional-portal-trust": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ProfessionalPortalTrustData"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TrustResponseBody"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "get-professional-portal-session": {
-        parameters: {
-            query?: {
-                /** @description Optional professional id to load a specific portal snapshot */
-                professional_id?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SessionResponseBody"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "upsert-professional-portal-session": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpsertProfessionalPortalSessionRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SessionResponseBody"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "list-professional-support-tickets": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SupportTicketsResponseBody"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "create-professional-support-ticket": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateSupportTicketData"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SupportTicketResponseBody"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["APIError"];
-                };
-            };
-        };
-    };
-    "get-professional": {
+    "get-customer-platform-order": {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                /** @description Professional slug */
+                order_id: string;
+                platform_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderResponseBody"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "list-directory-offerings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                platform_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DirectoryOfferingListResponseBody"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "get-directory-offering-by-slug": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                platform_id: string;
                 slug: string;
             };
             cookie?: never;
@@ -7098,11 +4804,523 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ProfessionalResponseBody"];
+                    "application/json": components["schemas"]["DirectoryOfferingDetailResponseBody"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "list-directory-professionals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                platform_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DirectoryProfessionalListResponseBody"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "get-directory-professional-by-slug": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                platform_id: string;
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DirectoryProfessionalDetailResponseBody"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "list-platform-notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                platform_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationsResponseBody"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "list-platform-offerings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                platform_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfferingListResponseBody"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "create-platform-order": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                platform_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePlatformOrderRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderResponseBody"];
                 };
             };
             /** @description Bad Request */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "get-professional-schema-by-platform": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                platform_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GetSchemaResponseBody"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "issue-professional-document-upload-token": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                platform_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IssueProfessionalDocumentUploadRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadTokenResponseBody"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "list-professional-platform-offerings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                platform_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfferingListResponseBody"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "create-professional-platform-offering": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                platform_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePlatformOfferingRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfferingResponseBody"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "get-professional-platform-workspace": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                platform_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceResponseBody"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -7139,14 +5357,20 @@ export interface operations {
             };
         };
     };
-    "get-viewer-session": {
+    "upsert-professional-platform-workspace": {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                platform_id: string;
+            };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpsertProfessionalPlatformApplicationRequest"];
+            };
+        };
         responses: {
             /** @description OK */
             200: {
@@ -7154,7 +5378,43 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ViewerSessionResponseBody"];
+                    "application/json": components["schemas"]["WorkspaceResponseBody"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
                 };
             };
             /** @description Internal Server Error */
@@ -7168,16 +5428,67 @@ export interface operations {
             };
         };
     };
-    "upsert-viewer-session": {
+    "get-professional-workspace-snapshot": {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                platform_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfessionalWorkspaceResponseBody"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "replace-professional-workspace-availability": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                platform_id: string;
+            };
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ViewerSessionData"];
+                "application/json": components["schemas"]["ReplaceProfessionalAvailabilityRequest"];
             };
         };
         responses: {
@@ -7187,7 +5498,595 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ViewerSessionResponseBody"];
+                    "application/json": components["schemas"]["ProfessionalWorkspaceResponseBody"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "replace-professional-workspace-coverage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                platform_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReplaceProfessionalCoverageRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfessionalWorkspaceResponseBody"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "update-professional-workspace-notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                platform_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateProfessionalNotificationPreferencesRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfessionalWorkspaceResponseBody"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "list-professional-workspace-orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                platform_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfessionalWorkspaceOrdersResponseBody"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "replace-professional-workspace-portfolio": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                platform_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReplaceProfessionalPortfolioRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfessionalWorkspaceResponseBody"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "upsert-professional-workspace-profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                platform_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpsertProfessionalWorkspaceProfileRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfessionalWorkspaceResponseBody"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "replace-professional-workspace-trust": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                platform_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReplaceProfessionalTrustRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfessionalWorkspaceResponseBody"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "list-viewer-support-tickets": {
+        parameters: {
+            query?: {
+                platform_id?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TicketListResponseBody"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "create-viewer-support-ticket": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSupportTicketRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TicketResponseBody"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "get-viewer-support-ticket": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ticket_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TicketResponseBody"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIError"];
+                };
+            };
+        };
+    };
+    "handle-payment-webhook": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                provider: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PaymentWebhookRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentSessionResponseBody"];
                 };
             };
             /** @description Bad Request */

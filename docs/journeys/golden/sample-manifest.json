@@ -1,0 +1,71 @@
+{
+  "meta": {
+    "runId": "sample-run",
+    "createdAt": "2026-04-08T00:00:00.000Z",
+    "completedAt": "2026-04-08T00:04:00.000Z",
+    "baseUrl": "http://bidan.lvh.me:3002",
+    "command": "npm run e2e:journey",
+    "environment": "local",
+    "artifactRoot": "artifacts/journeys/latest",
+    "reportRoot": "artifacts/playwright-report/latest",
+    "reportHref": "/Users/adi/Code/startup/bidanapp/artifacts/playwright-report/latest/index.html"
+  },
+  "coverage": {
+    "admin": ["admin-login-overview"],
+    "auth": ["customer-auth-sso"],
+    "customer": ["customer-order-payment"],
+    "payments": ["customer-order-payment"],
+    "professional": ["professional-workspace-approved"],
+    "public": ["public-visitor-browse"],
+    "support": ["customer-support-ticket"]
+  },
+  "useCases": [
+    {
+      "id": "customer-auth-sso",
+      "title": "Customer login and native account security",
+      "category": "auth",
+      "persona": "customer",
+      "status": "passed",
+      "sourceSpec": "tests/e2e/journey/auth-and-recovery.spec.ts",
+      "preconditions": ["Bidan demo seed aktif."],
+      "steps": [
+        {
+          "id": "customer-auth-sso-step-01",
+          "title": "Login screen is ready",
+          "actionKind": "navigate",
+          "actionLabel": "Buka halaman login Bidan",
+          "screenId": "customer-login-screen",
+          "routeId": "/id/login",
+          "expectedResult": "Form login customer tampil di Bidan.",
+          "url": "http://bidan.lvh.me:3002/id/login",
+          "screenshotPath": "docs/journeys/golden/customer-auth-login.png",
+          "startedAt": "2026-04-08T00:00:00.000Z",
+          "endedAt": "2026-04-08T00:00:02.000Z",
+          "durationMs": 2000,
+          "offsetMsFromJourneyStart": 0,
+          "viewport": {
+            "width": 1280,
+            "height": 720
+          },
+          "status": "passed",
+          "assertions": ["Form login customer tampil di Bidan."],
+          "entityRefs": [],
+          "attachments": []
+        }
+      ],
+      "nodes": [
+        {
+          "id": "customer-auth-sso-step-01",
+          "label": "Login screen is ready",
+          "screenshotPath": "docs/journeys/golden/customer-auth-login.png",
+          "stepIndex": 1,
+          "title": "Login screen is ready",
+          "url": "http://bidan.lvh.me:3002/id/login"
+        }
+      ],
+      "edges": [],
+      "expectations": [],
+      "attachments": []
+    }
+  ]
+}
