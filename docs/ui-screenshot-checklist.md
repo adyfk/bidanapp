@@ -3,7 +3,7 @@
 ## Run Meta
 
 - Tanggal validasi: `2026-04-10`
-- Run id: `2026-04-10T01-43-22-526Z`
+- Run id: `2026-04-10T02-55-11-105Z`
 - Command: `npm run e2e:journey`
 - Hasil: `18/18 use case passed`
 - Jumlah screenshot step: `56`
@@ -107,22 +107,22 @@
 
 ## UI Findings
 
-- `P1` Visual language `bidan` masih campur aduk. Onboarding sudah bergeser ke biru-slate yang lebih sehat, tetapi home publik, modal profile customer, CTA support, dan beberapa surface professional masih memakai magenta kuat. Ini membuat brand terasa tidak konsisten dan mengurangi trust medis.
-- `P1` Onboarding terlalu pucat. Screenshot onboarding menunjukkan kontras heading, helper text, progress card, dan CTA masih terlalu rendah sehingga impresi pertama terasa wash-out, bukan premium atau tenang.
-- `P1` Home publik masih belum punya hierarchy yang tajam. Kartu hero customer, bottom nav, tile layanan, dan card professional saling berebut perhatian. CTA utama masih tampak seperti promo commerce, belum seperti layanan kesehatan tepercaya.
-- `P1` Detail order dan support center belum cukup “task-first”. Informasi penting seperti status, jadwal, dan total justru kalah tegas dari area chat dan tombol magenta di bawah. Untuk kasus urgent, user perlu bisa memindai inti order dalam 2 sampai 3 detik.
-- `P1` Workspace professional masih terlalu ringan untuk data yang padat. Metric cards, tabs, dan card isi belum membentuk hirarki scan yang kuat. Nama panjang dan ringkasan profile memang muat, tetapi area kerja masih terasa seperti kumpulan kartu kecil, bukan console profesional yang meyakinkan.
-- `P2` Feed panjang seperti notifications, support queue, dan professional detail masih terlalu repetitif. Card shape, stroke, dan spacing hampir sama dari atas ke bawah, jadi pengguna cepat lelah dan sulit menemukan prioritas.
-- `P2` Admin adalah baseline visual terbaik saat ini. Sidebar gelap, canvas terang, dan KPI cards sudah paling jelas, tetapi queue detail dengan JSON panjang masih perlu treatment tipografi dan code-block yang lebih serius.
+- `P1` Customer home, order flow, dan workspace professional sekarang sudah jauh lebih koheren secara warna dan hierarchy. Problem utama yang tersisa bukan lagi bentrok brand, tetapi density layar panjang yang masih melelahkan untuk discan cepat.
+- `P1` Notifications feed masih terlalu repetitif. Card hampir identik dari atas ke bawah, jadi prioritas order, support, dan reminder akun belum langsung terbaca meskipun copy-nya sudah lebih rapi.
+- `P1` Support center sudah lebih baik karena tiket aktif muncul lebih dulu, tetapi vertical rhythm-nya masih terlalu tinggi di mobile portrait. Hero, summary tiles, dan list card pertama masih menyisakan banyak ruang kosong sebelum user melihat detail tiket secara utuh.
+- `P1` Professional apply flow sudah lebih bersih dan realistis, tetapi masih sangat vertikal. Section identitas, dokumen, dan readiness bercampur dalam satu arus panjang sehingga proses review belum terasa seperti milestone yang jelas.
+- `P2` Customer profile modal sudah lebih tenang dan tombol logout tidak lagi terlalu agresif, tetapi hierarchy action di area bawah masih bisa dipadatkan agar kartu profesional dan utility action tidak terasa seperti stack terpisah yang sangat panjang.
+- `P2` Public home visitor lebih rapi dari sebelumnya, namun state non-login masih terasa datar dibanding authenticated customer home. Area atas belum cukup membangun trust melalui proof, urgency, atau social reassurance.
+- `P2` Long-data handling sudah membaik signifikan. Nama panjang, coverage area, subject support, dan offering title sudah wrap dengan aman, tetapi daftar yang sangat panjang masih butuh grouping dan sticky anchors.
 
 ## Recommendations
 
-- Bekukan satu arah visual untuk `bidan`: `slate + sky + teal` sebagai warna inti, lalu hapus magenta dari CTA primer, form submit, dan cards umum. Jika pink tetap dipakai, batasi hanya untuk status khusus atau accent kecil.
-- Angkat pola admin yang paling berhasil ke surface `bidan`: heading lebih tegas, card density lebih disiplin, spacing antar section lebih jelas, dan tombol primer tidak boleh kalah dari secondary meta.
-- Ubah halaman feed panjang menjadi grouped timeline. Notifications perlu pengelompokan per hari dan per severity. Support queue perlu status rail yang lebih tegas. Professional detail perlu section anchors atau sticky summary.
-- Terapkan aturan tahan-data untuk semua card penting: `line-clamp` yang konsisten, `overflow-wrap:anywhere` untuk slug/code, max-width pada metadata chips, dan layout dua kolom yang turun rapi ke satu kolom saat teks memanjang.
-- Untuk order detail, jadikan blok status, jadwal, total, dan contact action sebagai summary sticky ringkas di atas. Chat dan support form sebaiknya menjadi section kedua, bukan menenggelamkan informasi transaksi utama.
-- Untuk workspace professional, bedakan jelas mode `overview`, `edit`, dan `review`. Saat ini semuanya terasa sama. Console yang baik harus punya density tinggi, indikator readiness, dan CTA utama yang langsung terbaca.
+- Pertahankan arah visual `teal + slate + soft cyan` sebagai fondasi tetap untuk `bidan`; jangan kembali ke aksen magenta besar di CTA utama atau card umum.
+- Ubah notifications menjadi grouped timeline dengan heading seperti `Hari ini`, `Perlu aksi`, dan `Sudah selesai` agar user bisa scanning berdasarkan urgency, bukan membaca satu per satu.
+- Pertahankan pola support yang kini queue-first, lalu lanjutkan dengan kompresi tinggi section atas: kecilkan hero copy, rapatkan summary tiles, dan pertimbangkan form tiket baru sebagai sheet terpisah agar viewport pertama lebih informatif.
+- Pecah professional apply menjadi milestone yang eksplisit: `Identitas`, `Dokumen`, `Kesiapan layanan`, `Review notes`. Tambahkan progress rail atau sticky mini-summary agar form panjang terasa lebih terarah.
+- Terus jaga action sekunder seperti logout dan utility links tetap low-emphasis. Langkah berikutnya adalah memadatkan stack action di profile agar jalur `edit profile`, `support`, dan `professional path` terasa satu sistem, bukan tiga blok terpisah.
+- Tambahkan audit khusus tablet dan desktop untuk surface `bidan`, terutama workspace professional dan support queue, supaya density layout tidak hanya aman di mobile portrait.
 
 ## Coverage Gaps
 

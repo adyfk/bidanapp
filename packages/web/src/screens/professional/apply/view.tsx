@@ -16,7 +16,7 @@ import {
   getServicePlatformConfig,
   type ServicePlatformId,
 } from '@marketplace/platform-config';
-import { MarketplaceMobileShell, MessageBanner } from '@marketplace/ui';
+import { MarketplaceMobileShell } from '@marketplace/ui';
 import { useEffect, useMemo, useState } from 'react';
 import { createLocaleSwitcherItems } from '../../../layout/navigation';
 import { getApiBaseUrl, getApiOrigin } from '../../../lib/env';
@@ -33,7 +33,6 @@ import {
 import { GuestAccessSection, GuestPreviewSection, PathSeparationCard } from './parts/guest-access';
 import { ProfessionalApplyNotReadyState } from './parts/not-ready-state';
 import { ProfessionalApplyPageHeader } from './parts/page-header';
-import { PreviewAvatar } from './parts/profile-preview';
 import { fallbackPreviewProfessionals, stringifyApplyValue } from './utils';
 
 const apiBaseUrl = getApiBaseUrl();
@@ -175,7 +174,7 @@ export function ProfessionalApplyPage({
     return () => {
       isActive = false;
     };
-  }, [locale, platformId, schemaFields, localizedSchema.fields]);
+  }, [platformId, schemaFields, localizedSchema.fields]);
 
   const currentStatus = workspace?.application?.status || 'draft';
   const isAuthenticated = Boolean(session?.isAuthenticated);
@@ -260,7 +259,10 @@ export function ProfessionalApplyPage({
 
   return (
     <MarketplaceMobileShell showNav={false}>
-      <div className="flex h-full flex-col overflow-y-auto bg-[#fff8fb] pb-10 custom-scrollbar">
+      <div
+        className="flex h-full flex-col overflow-y-auto pb-10 custom-scrollbar"
+        style={{ backgroundColor: 'var(--ui-background)' }}
+      >
         <ProfessionalApplyPageHeader homeHref={homeHref} locale={locale} localeItems={localeItems} />
 
         <div className="space-y-6 px-5 py-6">
@@ -341,7 +343,6 @@ export function ProfessionalApplyPage({
                 onSave={handleSubmit}
                 onSlugChange={(value) => setApplicationForm((current) => ({ ...current, slug: value }))}
                 onUpload={(key, file) => void handleDocumentUpload(key, file)}
-                profileHref={profileHref}
                 schemaFields={schemaFields}
                 uploadingFieldKey={uploadingFieldKey}
               />

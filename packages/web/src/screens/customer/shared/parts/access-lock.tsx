@@ -19,7 +19,10 @@ export function CustomerAccessLock({
 }) {
   return (
     <MarketplaceSurfaceCard tone="white" className="p-6">
-      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#fff1f7] text-[var(--ui-primary)]">
+      <div
+        className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl"
+        style={{ backgroundColor: 'var(--ui-surface-muted)', color: 'var(--ui-primary)' }}
+      >
         {icon}
       </div>
       <div className="text-[18px] font-bold text-gray-900">{title}</div>

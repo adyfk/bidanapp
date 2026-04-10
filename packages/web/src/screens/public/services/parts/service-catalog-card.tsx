@@ -9,19 +9,26 @@ import { InitialPortrait } from '../../shared/parts/portrait';
 export function ServiceCatalogCard({ locale, offering }: { locale: string; offering: DirectoryOffering }) {
   return (
     <a
-      className="block cursor-pointer rounded-[28px] border bg-[linear-gradient(180deg,#FFFFFF_0%,#FFF9FC_100%)] p-5 shadow-[0_18px_42px_-36px_rgba(15,23,42,0.24)] transition-all hover:shadow-[0_24px_48px_-34px_rgba(15,23,42,0.28)] active:scale-[0.98]"
+      className="block cursor-pointer rounded-[28px] border p-5 shadow-[0_18px_42px_-36px_rgba(15,23,42,0.24)] transition-all hover:shadow-[0_24px_48px_-34px_rgba(15,23,42,0.28)] active:scale-[0.98]"
       href={`/${locale}/s/${offering.slug}`}
-      style={{ borderColor: '#f0f1f4' }}
+      style={{
+        background: 'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 48%, white) 100%)',
+        borderColor: 'var(--ui-border)',
+      }}
     >
       <div className="mb-3 flex items-start justify-between gap-3">
         <div className="flex flex-1 gap-3">
           <InitialPortrait label={offering.title} size="small" />
           <div className="min-w-0">
-            <h3 className="text-[16px] font-bold text-gray-900">{offering.title}</h3>
+            <h3 className="text-[16px] font-bold break-words text-gray-900 [overflow-wrap:anywhere]">
+              {offering.title}
+            </h3>
             <p className="mt-0.5 text-[11px] font-bold uppercase tracking-wide" style={{ color: 'var(--ui-primary)' }}>
               {offeringTypeLabel(offering.offeringType, locale)}
             </p>
-            <p className="mt-2 text-[12px] font-medium text-gray-500">{offering.professionalDisplayName}</p>
+            <p className="mt-2 break-words text-[12px] font-medium text-gray-500 [overflow-wrap:anywhere]">
+              {offering.professionalDisplayName}
+            </p>
           </div>
         </div>
         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-50">
@@ -29,7 +36,9 @@ export function ServiceCatalogCard({ locale, offering }: { locale: string; offer
         </div>
       </div>
 
-      <p className="line-clamp-2 text-[13px] leading-6 text-gray-600">{offering.description}</p>
+      <p className="line-clamp-2 break-words text-[13px] leading-6 text-gray-600 [overflow-wrap:anywhere]">
+        {offering.description}
+      </p>
 
       <div className="mt-4 flex flex-wrap gap-2">
         <StatusPill tone="neutral">{deliveryModeLabel(offering.deliveryMode, locale)}</StatusPill>

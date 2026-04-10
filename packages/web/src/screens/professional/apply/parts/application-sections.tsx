@@ -1,7 +1,7 @@
 'use client';
 
 import type { ProfessionalPlatformWorkspace, ViewerSession } from '@marketplace/marketplace-core';
-import type { ProfessionalRegistrationField, ServicePlatformConfig } from '@marketplace/platform-config';
+import type { ProfessionalRegistrationField } from '@marketplace/platform-config';
 import {
   DocumentList,
   MarketplaceAccessHero,
@@ -21,12 +21,18 @@ export function NotReadyStateCard({ locale }: { locale: string }) {
   return (
     <section className="rounded-[28px] border border-gray-100 bg-white p-5 shadow-sm">
       <div className="flex items-center gap-4">
-        <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full border-2 border-white bg-pink-50 text-pink-500 shadow-sm">
+        <div
+          className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full border-2 border-white shadow-sm"
+          style={{ backgroundColor: 'var(--ui-surface-muted)', color: 'var(--ui-primary)' }}
+        >
           <ShieldCheck className="h-7 w-7" />
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full bg-pink-50 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-pink-600">
+            <span
+              className="rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em]"
+              style={{ backgroundColor: 'var(--ui-surface-muted)', color: 'var(--ui-primary)' }}
+            >
               {isEnglishLocale(locale) ? 'Professional access' : 'Akses profesional'}
             </span>
           </div>
@@ -101,15 +107,18 @@ export function ApplicationStatusCard({
         <PreviewAvatar label={displayName} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full bg-pink-50 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-pink-600">
+            <span
+              className="rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em]"
+              style={{ backgroundColor: 'var(--ui-surface-muted)', color: 'var(--ui-primary)' }}
+            >
               {isEnglishLocale(locale) ? 'Application status' : 'Status aplikasi'}
             </span>
             <span className="rounded-full bg-gray-100 px-3 py-1 text-[11px] font-semibold text-gray-500">
               {localizedStatus}
             </span>
           </div>
-          <p className="mt-3 text-[18px] font-bold text-gray-900">{displayName}</p>
-          <p className="mt-1 text-[13px] leading-relaxed text-gray-500">
+          <p className="mt-3 text-[18px] font-bold break-words text-gray-900 [overflow-wrap:anywhere]">{displayName}</p>
+          <p className="mt-1 break-words text-[13px] leading-relaxed text-gray-500 [overflow-wrap:anywhere]">
             {message ||
               (isEnglishLocale(locale)
                 ? 'Keep your profile tidy, upload the requested proof, and we will review it before publishing.'
@@ -131,12 +140,33 @@ export function ApplicationStatusCard({
         </div>
       </div>
 
+      {reviewNotes ? (
+        <div
+          className="mt-4 rounded-[20px] border px-4 py-4"
+          style={{
+            background:
+              'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 56%, white) 100%)',
+            borderColor: 'var(--ui-border)',
+          }}
+        >
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em]" style={{ color: 'var(--ui-primary)' }}>
+            {isEnglishLocale(locale) ? 'Reviewer note' : 'Catatan reviewer'}
+          </p>
+          <p className="mt-2 break-words text-[13px] leading-6 text-slate-600 [overflow-wrap:anywhere]">
+            {reviewNotes}
+          </p>
+        </div>
+      ) : null}
+
       <div className="mt-5 flex flex-col gap-3">
         <a href={profileHref}>
           <button
             type="button"
-            className="flex w-full items-center justify-center gap-2 rounded-full py-4 text-[14px] font-bold text-white shadow-lg shadow-pink-500/20 transition-transform active:scale-[0.99]"
-            style={{ backgroundColor: 'var(--ui-primary)' }}
+            className="flex w-full items-center justify-center gap-2 rounded-full py-4 text-[14px] font-bold text-white shadow-lg shadow-slate-900/10 transition-transform active:scale-[0.99]"
+            style={{
+              background:
+                'linear-gradient(180deg, var(--ui-primary) 0%, color-mix(in srgb, var(--ui-primary) 66%, var(--ui-secondary)) 100%)',
+            }}
           >
             {isEnglishLocale(locale) ? 'Open my profile' : 'Buka profil saya'}
             <ArrowRight className="h-4 w-4" />
@@ -169,7 +199,6 @@ export function ApplicationFormSection({
   onSave,
   onSlugChange,
   onUpload,
-  profileHref,
   schemaFields,
   uploadingFieldKey,
 }: {
@@ -190,14 +219,16 @@ export function ApplicationFormSection({
   onSave: () => void;
   onSlugChange: (value: string) => void;
   onUpload: (key: string, file: File | null) => void;
-  profileHref: string;
   schemaFields: ProfessionalRegistrationField[];
   uploadingFieldKey: string;
 }) {
   return (
     <section className="rounded-[28px] border border-gray-100 bg-white p-5 shadow-sm">
       <div className="flex items-center gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-pink-50 text-pink-500">
+        <div
+          className="flex h-11 w-11 items-center justify-center rounded-full"
+          style={{ backgroundColor: 'var(--ui-surface-muted)', color: 'var(--ui-primary)' }}
+        >
           <CheckCircle2 className="h-5 w-5" />
         </div>
         <div>

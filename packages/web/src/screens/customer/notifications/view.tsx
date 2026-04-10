@@ -89,22 +89,22 @@ export function CustomerNotificationsPage({
     if (kind === 'support') {
       return {
         icon: <LifeBuoy className="h-5 w-5" />,
-        iconClassName: 'bg-blue-50 text-blue-600',
-        tagClassName: 'bg-blue-50 text-blue-700',
+        iconClassName: 'bg-teal-50 text-teal-700',
+        tagClassName: 'bg-teal-50 text-teal-700',
       };
     }
     if (kind === 'message') {
       return {
         icon: <MessageCircleMore className="h-5 w-5" />,
-        iconClassName: 'bg-violet-50 text-violet-600',
-        tagClassName: 'bg-violet-50 text-violet-700',
+        iconClassName: 'bg-sky-50 text-sky-700',
+        tagClassName: 'bg-sky-50 text-sky-700',
       };
     }
     if (kind === 'order') {
       return {
         icon: <CalendarClock className="h-5 w-5" />,
-        iconClassName: 'bg-pink-50 text-pink-600',
-        tagClassName: 'bg-pink-50 text-pink-700',
+        iconClassName: 'bg-cyan-50 text-cyan-700',
+        tagClassName: 'bg-cyan-50 text-cyan-700',
       };
     }
     return {
@@ -120,8 +120,14 @@ export function CustomerNotificationsPage({
       <a href={resolveNotificationHref(locale, item)} key={item.id}>
         <article
           className={`rounded-[26px] border bg-white p-4 shadow-sm transition-all hover:bg-gray-50/70 ${
-            emphasized ? 'border-pink-100 shadow-pink-100/40' : 'border-gray-100'
+            emphasized ? 'shadow-[0_18px_36px_-30px_rgba(18,59,74,0.18)]' : ''
           }`}
+          style={{
+            background: emphasized
+              ? 'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 28%, white) 100%)'
+              : '#ffffff',
+            borderColor: emphasized ? 'var(--ui-border-strong)' : 'var(--ui-border)',
+          }}
         >
           <div className="flex items-start gap-3">
             <div
@@ -136,8 +142,12 @@ export function CustomerNotificationsPage({
                 </span>
                 <span className="text-[11px] font-medium text-gray-400">{formatDateTime(item.createdAt, locale)}</span>
               </div>
-              <h3 className="mt-3 text-[15px] font-bold text-gray-900">{item.title}</h3>
-              <p className="mt-2 text-[13px] leading-6 text-gray-500">{item.message}</p>
+              <h3 className="mt-3 text-[15px] font-bold break-words text-gray-900 [overflow-wrap:anywhere]">
+                {item.title}
+              </h3>
+              <p className="mt-2 break-words text-[13px] leading-6 text-gray-500 [overflow-wrap:anywhere]">
+                {item.message}
+              </p>
             </div>
           </div>
         </article>

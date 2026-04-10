@@ -475,12 +475,12 @@ export function ViewerAuthPage({
             <section
               className="rounded-[26px] border px-5 py-4"
               style={{
-                borderColor: '#dbeafe',
-                background: 'linear-gradient(135deg,#eff6ff 0%,#ffffff 55%,#ecfeff 100%)',
+                borderColor: '#FFD6E5',
+                background: 'linear-gradient(135deg,#FFF0F5 0%,#ffffff 55%,#FFE8F0 100%)',
               }}
             >
               <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-blue-600 shadow-sm">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-pink-500 shadow-sm">
                   <UserPlus className="h-5 w-5" />
                 </div>
                 <div className="min-w-0 flex-1">

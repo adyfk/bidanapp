@@ -50,14 +50,24 @@ export function ProfessionalSchemaField({
 
   if (field.type === 'document') {
     return (
-      <div className="rounded-[24px] border border-pink-100/80 bg-[linear-gradient(180deg,#FFF7FB_0%,#FFFFFF_100%)] p-4 shadow-[0_18px_40px_-28px_rgba(17,24,39,0.18)]">
+      <div
+        className="rounded-[24px] border p-4 shadow-[0_18px_40px_-28px_rgba(17,24,39,0.18)]"
+        style={{
+          background:
+            'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 56%, white) 100%)',
+          borderColor: 'var(--ui-border)',
+        }}
+      >
         <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-pink-500 shadow-sm">
+          <div
+            className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white shadow-sm"
+            style={{ color: 'var(--ui-primary)' }}
+          >
             <UploadCloud className="h-5 w-5" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-[14px] font-bold text-gray-900">{field.label}</p>
-            <p className="mt-1 text-[12px] leading-5 text-gray-500">
+            <p className="text-[14px] font-bold break-words text-gray-900 [overflow-wrap:anywhere]">{field.label}</p>
+            <p className="mt-1 break-words text-[12px] leading-5 text-gray-500 [overflow-wrap:anywhere]">
               {field.helperText ||
                 (isEnglishLocale(locale)
                   ? 'Upload the proof requested for this review step.'

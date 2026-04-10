@@ -7,8 +7,8 @@ import type {
 } from 'react';
 import { cx, type StatusTone, toneStyle } from './foundations';
 
-const focusRingStyle: CSSProperties = {
-  ['--tw-ring-color' as any]: 'var(--ui-focus-ring)',
+const focusRingStyle: CSSProperties & Record<'--tw-ring-color', string> = {
+  '--tw-ring-color': 'var(--ui-focus-ring)',
 };
 
 export function PrimaryButton({ className, ...props }: ButtonHTMLAttributes<HTMLButtonElement>) {
@@ -20,8 +20,9 @@ export function PrimaryButton({ className, ...props }: ButtonHTMLAttributes<HTML
         className,
       )}
       style={{
-        background: 'linear-gradient(180deg,#F7259B 0%,#E11D87 100%)',
-        boxShadow: '0 18px 28px -18px rgba(233,30,140,0.42)',
+        background:
+          'linear-gradient(180deg, var(--ui-primary) 0%, color-mix(in srgb, var(--ui-primary) 66%, var(--ui-secondary)) 100%)',
+        boxShadow: '0 20px 32px -22px rgba(18,59,74,0.34)',
         color: '#ffffff',
         ...focusRingStyle,
       }}
@@ -39,9 +40,9 @@ export function SecondaryButton({ className, ...props }: ButtonHTMLAttributes<HT
       )}
       style={{
         backgroundColor: '#ffffff',
-        borderColor: '#e2e8f0',
-        boxShadow: '0 10px 26px -22px rgba(15,23,42,0.35)',
-        color: '#475569',
+        borderColor: 'var(--ui-border)',
+        boxShadow: '0 10px 26px -22px rgba(15,23,42,0.24)',
+        color: 'var(--ui-text-muted)',
         ...focusRingStyle,
       }}
     />
@@ -109,7 +110,7 @@ export function Badge({ children }: { children: ReactNode }) {
 }
 
 export function TextField({
-  accent = 'pink',
+  accent = 'blue',
   surface = 'muted',
   label,
   helperText,
@@ -122,11 +123,9 @@ export function TextField({
   surface?: 'muted' | 'soft';
 }) {
   const accentClass =
-    accent === 'blue'
-      ? 'focus:border-blue-300 focus:ring-2 focus:ring-blue-100'
-      : accent === 'slate'
-        ? 'focus:border-slate-400 focus:ring-2 focus:ring-slate-200 focus:bg-white'
-        : 'focus:border-pink-300 focus:ring-2 focus:ring-pink-100';
+    accent === 'slate'
+      ? 'focus:border-slate-400 focus:ring-2 focus:ring-slate-200 focus:bg-white'
+      : 'focus:border-[var(--ui-primary)] focus:ring-2 focus:bg-white';
   const surfaceClass = surface === 'soft' ? 'border-slate-200 bg-white' : 'border-slate-200 bg-slate-50';
 
   return (
@@ -156,7 +155,7 @@ export function TextField({
 }
 
 export function TextAreaField({
-  accent = 'pink',
+  accent = 'blue',
   surface = 'muted',
   label,
   helperText,
@@ -169,11 +168,9 @@ export function TextAreaField({
   surface?: 'muted' | 'soft';
 }) {
   const accentClass =
-    accent === 'blue'
-      ? 'focus:border-blue-300 focus:ring-2 focus:ring-blue-100'
-      : accent === 'slate'
-        ? 'focus:border-slate-400 focus:ring-2 focus:ring-slate-200 focus:bg-white'
-        : 'focus:border-pink-300 focus:ring-2 focus:ring-pink-100';
+    accent === 'slate'
+      ? 'focus:border-slate-400 focus:ring-2 focus:ring-slate-200 focus:bg-white'
+      : 'focus:border-[var(--ui-primary)] focus:ring-2 focus:bg-white';
   const surfaceClass = surface === 'soft' ? 'border-slate-200 bg-white' : 'border-slate-200 bg-slate-50';
 
   return (
@@ -248,7 +245,7 @@ export function EmptyState({ title, description, action }: { action?: ReactNode;
       className="rounded-[28px] border border-dashed px-5 py-8 text-center shadow-sm"
       style={{
         backgroundColor: '#ffffff',
-        borderColor: '#e5e7eb',
+        borderColor: 'var(--ui-border)',
       }}
     >
       <h3 className="text-[18px] font-bold tracking-[-0.02em]" style={{ color: 'var(--ui-text-strong)' }}>

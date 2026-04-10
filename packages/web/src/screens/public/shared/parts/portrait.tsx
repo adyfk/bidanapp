@@ -26,9 +26,9 @@ export function currentCity(session?: ViewerSession | null, professionals?: Dire
 }
 
 const portraitBackgrounds = [
-  'linear-gradient(180deg,#E0F2FE 0%,#F8FCFE 100%)',
-  'linear-gradient(180deg,#DBEAFE 0%,#F8FAFC 100%)',
-  'linear-gradient(180deg,#CCFBF1 0%,#F7FFFD 100%)',
+  'linear-gradient(180deg,#FFE0EC 0%,#FFF5F8 100%)',
+  'linear-gradient(180deg,#FFD6E5 0%,#FFFAFC 100%)',
+  'linear-gradient(180deg,#FFEEF4 0%,#FFFFFF 100%)',
 ];
 
 function portraitTone(seed: string) {
@@ -69,7 +69,7 @@ export function InitialPortrait({
       }}
     >
       <div className="absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-white/55 to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-[#E6F4FB] via-[#E6F4FB]/72 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-[#FFE0EC] via-[#FFE0EC]/72 to-transparent" />
       <span className="relative z-10 font-bold tracking-[-0.04em]" style={{ color: 'var(--ui-primary)' }}>
         {firstName(label).charAt(0) || 'B'}
       </span>

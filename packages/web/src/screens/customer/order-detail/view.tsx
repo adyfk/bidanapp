@@ -23,11 +23,10 @@ import {
   MessageBanner,
   PrimaryButton,
   SecondaryButton,
-  StatusPill,
   TextAreaField,
 } from '@marketplace/ui';
-import { BookHeart, Image as ImageIcon, LifeBuoy, MoreVertical, Phone, Plus, Send, Smile } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { BookHeart, ImageIcon, MoreVertical, Phone, Plus, Send, Smile } from 'lucide-react';
+import { useEffect, useEffectEvent, useMemo, useState } from 'react';
 import { getApiBaseUrl } from '../../../lib/env';
 import { formatCurrency, isEnglishLocale, orderStatusLabel, paymentStatusLabel } from '../../../lib/marketplace-copy';
 import { createLocalizedPath } from '../../../lib/platform';
@@ -83,7 +82,7 @@ export function CustomerOrderDetailPage({
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
 
-  const load = async () => {
+  const load = useEffectEvent(async (currentPlatformId: ServicePlatformId, currentOrderId: string) => {
     try {
       setLoading(true);
       const sessionPayload = await customerController.viewerAuth.fetchSession(client);
@@ -95,8 +94,8 @@ export function CustomerOrderDetailPage({
       }
 
       const [orderPayload, threadsPayload] = await Promise.all([
-        customerController.orders.fetchOrder(client, platformId, orderId),
-        fetchChatThreads(client, { orderId, platformId }),
+        customerController.orders.fetchOrder(client, currentPlatformId, currentOrderId),
+        fetchChatThreads(client, { orderId: currentOrderId, platformId: currentPlatformId }),
       ]);
       setOrder(orderPayload);
       if (threadsPayload.threads[0]) {
@@ -112,11 +111,11 @@ export function CustomerOrderDetailPage({
     } finally {
       setLoading(false);
     }
-  };
+  });
 
   useEffect(() => {
-    void load();
-  }, [customerController.orders, customerController.viewerAuth, orderId, platformId]);
+    void load(platformId, orderId);
+  }, [orderId, platformId]);
 
   const handleCreateOrSimulatePayment = async () => {
     if (!order) {
@@ -133,7 +132,7 @@ export function CustomerOrderDetailPage({
         paymentId: paymentSession.paymentId,
         status: 'paid',
       });
-      await load();
+      await load(platformId, orderId);
       setFeedback(en ? 'Payment completed for this order.' : 'Pembayaran untuk order ini sudah selesai.');
     } catch (error) {
       setFeedback(
@@ -192,6 +191,7 @@ export function CustomerOrderDetailPage({
       });
       setFeedback(en ? `Support ticket ${ticket.id} created.` : `Tiket support ${ticket.id} berhasil dibuat.`);
       setSupportMessage('');
+      await load(platformId, orderId);
     } catch (error) {
       setFeedback(
         error instanceof Error
@@ -228,15 +228,26 @@ export function CustomerOrderDetailPage({
     })) ?? [];
 
   const statusStrip = order ? (
-    <div className="mx-auto w-full max-w-[92%] rounded-[22px] border border-blue-100 bg-white px-4 py-4 shadow-sm">
+    <div
+      className="mx-auto w-full rounded-[22px] border bg-white px-4 py-4 shadow-sm"
+      style={{
+        background: 'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 34%, white) 100%)',
+        borderColor: 'var(--ui-border)',
+      }}
+    >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-blue-500">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--ui-primary)' }}>
             {en ? 'Order update' : 'Update order'}
           </p>
-          <p className="mt-1 text-[14px] font-bold text-slate-900">{order.offeringTitle}</p>
+          <p className="mt-1 text-[14px] font-bold break-words text-slate-900 [overflow-wrap:anywhere]">
+            {order.offeringTitle}
+          </p>
         </div>
-        <span className="rounded-full bg-blue-50 px-3 py-1.5 text-[11px] font-semibold text-blue-700">
+        <span
+          className="rounded-full px-3 py-1.5 text-[11px] font-semibold"
+          style={{ backgroundColor: 'var(--ui-surface-muted)', color: 'var(--ui-primary)' }}
+        >
           {orderStatusLabel(order.status, locale)}
         </span>
       </div>
@@ -246,7 +257,10 @@ export function CustomerOrderDetailPage({
           {paymentStatusLabel(order.paymentStatus, locale)}
         </span>
         {orderSchedule ? (
-          <span className="rounded-full bg-blue-50 px-3 py-1.5 text-[10px] font-semibold text-blue-700">
+          <span
+            className="rounded-full px-3 py-1.5 text-[10px] font-semibold"
+            style={{ backgroundColor: 'var(--ui-surface-muted)', color: 'var(--ui-primary)' }}
+          >
             {orderSchedule}
           </span>
         ) : null}
@@ -263,7 +277,7 @@ export function CustomerOrderDetailPage({
 
   return (
     <MarketplaceMobileShell showNav={false}>
-      <div className="min-h-full bg-[#f8f9fa] pb-32">
+      <div className="min-h-full pb-32" style={{ backgroundColor: 'var(--ui-background)' }}>
         <MarketplacePageHeader
           backHref={createLocalizedPath(locale, '/orders')}
           title={en ? 'Order detail' : 'Detail order'}
@@ -303,12 +317,21 @@ export function CustomerOrderDetailPage({
               <MarketplaceSurfaceCard className="p-5" tone="white">
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex min-w-0 items-center gap-4">
-                    <div className="relative flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border border-gray-100 bg-gray-100 text-[16px] font-bold text-pink-600">
+                    <div
+                      className="relative flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border text-[16px] font-bold"
+                      style={{
+                        backgroundColor: 'var(--ui-surface-muted)',
+                        borderColor: 'var(--ui-border)',
+                        color: 'var(--ui-primary)',
+                      }}
+                    >
                       {counterpartyName.charAt(0).toUpperCase()}
                       <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-[2px] border-white bg-green-500" />
                     </div>
                     <div className="min-w-0">
-                      <h2 className="truncate text-[15px] font-bold text-gray-900">{counterpartyName}</h2>
+                      <h2 className="text-[15px] font-bold break-words text-gray-900 [overflow-wrap:anywhere]">
+                        {counterpartyName}
+                      </h2>
                       <p className="mt-0.5 text-[12px] font-bold text-green-500">
                         {en ? 'Available in this order thread' : 'Siap dihubungi dari thread ini'}
                       </p>
@@ -328,6 +351,26 @@ export function CustomerOrderDetailPage({
               <MarketplaceSurfaceCard tone="white">
                 <MarketplaceSectionHeader title={en ? 'Order summary' : 'Ringkasan order'} />
                 <div className="space-y-3">
+                  <div
+                    className="rounded-[20px] border px-4 py-4"
+                    style={{
+                      background:
+                        'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 52%, white) 100%)',
+                      borderColor: 'var(--ui-border)',
+                    }}
+                  >
+                    <div
+                      className="text-[11px] font-semibold uppercase tracking-[0.16em]"
+                      style={{ color: 'var(--ui-primary)' }}
+                    >
+                      {en ? 'Service' : 'Layanan'}
+                    </div>
+                    <div className="mt-2 text-[17px] font-bold leading-snug break-words text-slate-900 [overflow-wrap:anywhere]">
+                      {order.offeringTitle}
+                    </div>
+                    <div className="mt-2 text-[12.5px] leading-6 text-slate-500">{counterpartyName}</div>
+                  </div>
+
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div className="rounded-[18px] bg-slate-50 px-4 py-3">
                       <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
@@ -367,11 +410,16 @@ export function CustomerOrderDetailPage({
                   </div>
 
                   {orderNotes ? (
-                    <div className="rounded-[18px] bg-[#fff7fb] px-4 py-3">
-                      <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-pink-500">
+                    <div className="rounded-[18px] px-4 py-3" style={{ backgroundColor: 'var(--ui-surface-muted)' }}>
+                      <div
+                        className="text-[11px] font-semibold uppercase tracking-[0.16em]"
+                        style={{ color: 'var(--ui-primary)' }}
+                      >
                         {en ? 'Request note' : 'Catatan order'}
                       </div>
-                      <div className="mt-1 text-[13px] leading-6 text-slate-600">{orderNotes}</div>
+                      <div className="mt-1 break-words text-[13px] leading-6 text-slate-600 [overflow-wrap:anywhere]">
+                        {orderNotes}
+                      </div>
                     </div>
                   ) : null}
 
@@ -393,7 +441,7 @@ export function CustomerOrderDetailPage({
                 </div>
               </MarketplaceSurfaceCard>
 
-              <MarketplaceSurfaceCard className="bg-[#F8F9FA] p-4" tone="ghost">
+              <MarketplaceSurfaceCard className="p-4" tone="ghost">
                 <MarketplaceSectionHeader title={en ? 'Order chat' : 'Chat order'} />
                 <MarketplaceChatThread
                   dayLabel={en ? 'Today' : 'Hari ini'}
@@ -438,7 +486,7 @@ export function CustomerOrderDetailPage({
 
         {session?.isAuthenticated && order ? (
           <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center px-4 pb-4">
-            <div className="pointer-events-auto w-full max-w-[400px] border-t border-gray-100 bg-white px-4 py-3 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.05)]">
+            <div className="pointer-events-auto w-full max-w-[480px] border-t border-gray-100 bg-white px-4 py-3 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.05)]">
               <MarketplaceChatComposer
                 disabled={busy}
                 inputLeadingAccessory={

@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { cx, type StatusTone } from './foundations';
-import { MessageBanner, SectionHeading, StatusPill } from './primitives';
+import { MessageBanner, SectionHeading } from './primitives';
 
 export function HeroPanel({
   eyebrow,
@@ -87,8 +87,8 @@ export function SectionPanel({
     <section
       className={cx('rounded-[30px] border p-5 shadow-[0_22px_50px_-40px_rgba(15,23,42,0.25)]', className)}
       style={{
-        background: 'linear-gradient(180deg,#FFFFFF 0%,#F8FAFC 100%)',
-        borderColor: 'rgba(226,232,240,0.8)',
+        background: 'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 52%, white) 100%)',
+        borderColor: 'var(--ui-border)',
       }}
     >
       {title ? <SectionHeading action={action} description={description} title={title} /> : null}
@@ -101,8 +101,9 @@ export function MetricTile({ label, value, tone = 'neutral' }: { label: string; 
   const tileStyle: CSSProperties =
     tone === 'accent'
       ? {
-          background: 'linear-gradient(180deg,#FFF7FB 0%,#FFFFFF 100%)',
-          borderColor: 'rgba(244,114,182,0.18)',
+          background:
+            'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 76%, white) 100%)',
+          borderColor: 'var(--ui-border-strong)',
         }
       : {
           backgroundColor: 'var(--ui-surface-elevated)',
@@ -142,13 +143,16 @@ export function EntityCard({
     <article
       className="rounded-[28px] border p-4 shadow-[0_18px_42px_-36px_rgba(15,23,42,0.24)]"
       style={{
-        background: 'linear-gradient(180deg,#FFFFFF 0%,#F8FAFC 100%)',
-        borderColor: 'rgba(226,232,240,0.8)',
+        background: 'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 44%, white) 100%)',
+        borderColor: 'var(--ui-border)',
       }}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[16px] font-bold tracking-[-0.03em]" style={{ color: 'var(--ui-text-strong)' }}>
+          <p
+            className="break-words text-[16px] font-bold tracking-[-0.03em] [overflow-wrap:anywhere]"
+            style={{ color: 'var(--ui-text-strong)' }}
+          >
             {title}
           </p>
           {subtitle ? (
@@ -193,8 +197,8 @@ export function JsonPreviewBlock({ label, value }: { label: string; value: unkno
     <div
       className="rounded-[24px] border p-4 shadow-[0_12px_32px_-28px_rgba(15,23,42,0.24)]"
       style={{
-        background: 'linear-gradient(180deg,#FFF9FC 0%,#FFFFFF 100%)',
-        borderColor: 'rgba(244,114,182,0.18)',
+        background: 'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 56%, white) 100%)',
+        borderColor: 'var(--ui-border)',
       }}
     >
       <p className="text-[11px] font-semibold uppercase tracking-[0.16em]" style={{ color: 'var(--ui-text-subtle)' }}>
@@ -279,7 +283,7 @@ export function TimelineBlock({ items, title = 'Timeline' }: { items: TimelineIt
     <div
       className="rounded-[28px] border p-4 shadow-[0_22px_50px_-40px_rgba(15,23,42,0.25)]"
       style={{
-        background: 'linear-gradient(180deg,#FFFFFF 0%,#F8FAFC 100%)',
+        background: 'linear-gradient(180deg,#FFFFFF 0%,#FFFAFC 100%)',
         borderColor: 'rgba(226,232,240,0.8)',
       }}
     >
@@ -347,9 +351,12 @@ export function DocumentList({
             color: 'var(--ui-text)',
           }}
         >
-          <span className="block">{item.label}</span>
+          <span className="block break-words [overflow-wrap:anywhere]">{item.label}</span>
           {item.meta ? (
-            <span className="mt-1 block text-xs" style={{ color: 'var(--ui-text-muted)' }}>
+            <span
+              className="mt-1 block break-words text-xs [overflow-wrap:anywhere]"
+              style={{ color: 'var(--ui-text-muted)' }}
+            >
               {item.meta}
             </span>
           ) : null}
@@ -473,7 +480,7 @@ export function EditableItemCard({
       className="rounded-[24px] border p-4 shadow-[0_18px_36px_-32px_rgba(17,24,39,0.25)]"
       style={{
         backgroundColor: '#ffffff',
-        borderColor: 'rgba(226,232,240,0.8)',
+        borderColor: 'var(--ui-border)',
       }}
     >
       <div className="mb-4 flex items-center justify-between gap-3">

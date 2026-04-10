@@ -208,10 +208,10 @@ export function CustomerProfilePage({
                 onClick={() => {
                   window.location.href = createLocalizedPath(locale, '/professionals/apply');
                 }}
-                className="flex w-full items-center justify-between rounded-[28px] border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-cyan-50 p-5 text-left shadow-sm transition-all hover:shadow-md active:scale-[0.99]"
+                className="flex w-full items-center justify-between rounded-[28px] border border-pink-100 bg-gradient-to-br from-pink-50 via-white to-rose-50 p-5 text-left shadow-sm transition-all hover:shadow-md active:scale-[0.99]"
               >
                 <div className="flex items-start gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-blue-600 shadow-sm">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-pink-500 shadow-sm">
                     <BriefcaseMedical className="h-5 w-5" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -295,7 +295,10 @@ export function CustomerProfilePage({
               </SecondaryButton>
             }
           />
-          <div className="rounded-[22px] bg-[#fff7fb] px-4 py-3 text-[12.5px] leading-6 text-slate-500">
+          <div
+            className="rounded-[22px] px-4 py-3 text-[12.5px] leading-6 text-slate-500"
+            style={{ backgroundColor: 'var(--ui-surface-muted)' }}
+          >
             Gunakan halaman keamanan saat Anda ingin memperbarui password, lalu buka sesi aktif untuk meninjau perangkat
             yang masih tersambung.
           </div>

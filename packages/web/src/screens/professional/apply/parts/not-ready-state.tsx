@@ -17,7 +17,10 @@ export function ProfessionalApplyNotReadyState({
 }) {
   return (
     <MarketplaceMobileShell showNav={false}>
-      <div className="flex h-full flex-col overflow-y-auto bg-gray-50 pb-10 custom-scrollbar">
+      <div
+        className="flex h-full flex-col overflow-y-auto pb-10 custom-scrollbar"
+        style={{ backgroundColor: 'var(--ui-background)' }}
+      >
         <ProfessionalApplyPageHeader homeHref={homeHref} locale={locale} localeItems={localeItems} />
 
         <div className="space-y-6 px-5 py-6">

@@ -23,15 +23,13 @@ import {
   MarketplaceTopPill,
 } from '@marketplace/ui/marketplace-lite';
 import { EmptyState, MessageBanner } from '@marketplace/ui/primitives';
-import { ArrowRight, Bell, BriefcaseMedical, Compass, Layers3, MapPin, Star, UserRound, Wallet } from 'lucide-react';
+import { ArrowRight, Bell, BriefcaseMedical, Compass, MapPin, UserRound } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getApiBaseUrl } from '../../../lib/env';
 import { createLocalizedPath } from '../../../lib/platform';
 import { type ProfessionalDashboardSection, professionalConsoleSections } from '../../../screen-config/sections';
 import { WorkspaceActionButton } from './parts/action-button';
-import { WorkspaceInfoChip } from './parts/info-chip';
-import { WorkspaceMetricCard } from './parts/metric-card';
 import { ProfessionalTabGrid } from './parts/tab-grid';
 import { OverviewSection } from './sections/overview';
 import type {
@@ -434,6 +432,9 @@ export function ProfessionalWorkspacePage({
     (typeof snapshot?.profile?.attributes?.responseTimeGoal === 'string' &&
       snapshot.profile.attributes.responseTimeGoal) ||
     '≤ 30 menit';
+  const workspaceHeadline =
+    (typeof snapshot?.profile?.attributes?.headline === 'string' && snapshot.profile.attributes.headline) ||
+    'Rapikan layanan, jadwal, dan profil publik agar customer bisa langsung memahami readiness Anda.';
   const publicProfileHref = snapshot?.profile?.slug
     ? createLocalizedPath(locale, `/p/${snapshot.profile.slug}`)
     : createLocalizedPath(locale, '/profile');
@@ -441,7 +442,7 @@ export function ProfessionalWorkspacePage({
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--ui-background)' }}>
       <div className="mx-auto flex min-h-screen justify-center">
-        <div className="relative flex min-h-[100dvh] w-full max-w-md flex-col overflow-hidden bg-white shadow-[0_18px_50px_-26px_rgba(15,23,42,0.28)]">
+        <div className="relative flex min-h-[100dvh] w-full max-w-[480px] flex-col overflow-hidden bg-white shadow-[0_18px_50px_-26px_rgba(15,23,42,0.28)]">
           {!session?.isAuthenticated ? (
             <div
               className="flex min-h-full flex-col overflow-y-auto pb-10 custom-scrollbar"
@@ -621,32 +622,67 @@ export function ProfessionalWorkspacePage({
               <div className="space-y-5 px-5 py-6">
                 {feedback ? <MessageBanner tone="info">{feedback}</MessageBanner> : null}
 
-                <div className="flex flex-wrap gap-2">
-                  <WorkspaceInfoChip label="Kelengkapan" value={`${completionScore}%`} />
-                  <WorkspaceInfoChip label="Respons" value={responseTimeGoal} />
-                </div>
+                <section
+                  className="overflow-hidden rounded-[32px] border p-5 text-white"
+                  style={{
+                    background: 'var(--ui-hero-gradient)',
+                    borderColor: 'color-mix(in srgb, var(--ui-border-strong) 42%, white)',
+                    boxShadow: 'var(--ui-shadow-hero)',
+                  }}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="rounded-full border border-white/18 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/90">
+                          {currentSection.label}
+                        </span>
+                        <span className="rounded-full border border-white/18 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white/82">
+                          {snapshot.profile?.reviewStatus || 'draft'}
+                        </span>
+                      </div>
+                      <h1 className="mt-4 text-[24px] font-bold leading-tight text-white">
+                        {snapshot.profile?.displayName ||
+                          session.customerProfile?.displayName ||
+                          'Dashboard profesional'}
+                      </h1>
+                      <p className="mt-2 break-words text-[13px] leading-relaxed text-white/82 [overflow-wrap:anywhere]">
+                        {workspaceHeadline}
+                      </p>
+                    </div>
+                    <a
+                      className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-white/22 bg-white/12 text-[15px] font-bold text-white shadow-sm"
+                      href={createLocalizedPath(locale, '/profile')}
+                    >
+                      {(snapshot.profile?.displayName || session.customerProfile?.displayName || 'B')
+                        .charAt(0)
+                        .toUpperCase()}
+                    </a>
+                  </div>
 
-                <section className="grid grid-cols-2 gap-3">
-                  <WorkspaceMetricCard
-                    icon={<Star className="h-4 w-4" />}
-                    label="Peninjauan"
-                    value={snapshot.profile?.reviewStatus || 'draft'}
-                  />
-                  <WorkspaceMetricCard
-                    icon={<Wallet className="h-4 w-4" />}
-                    label="Rata-rata harga"
-                    value={formatWorkspaceCurrency(averagePriceValue, 'IDR')}
-                  />
-                  <WorkspaceMetricCard
-                    icon={<Layers3 className="h-4 w-4" />}
-                    label="Layanan aktif"
-                    value={String((snapshot.offerings ?? []).length)}
-                  />
-                  <WorkspaceMetricCard
-                    icon={<MapPin className="h-4 w-4" />}
-                    label="Jangkauan"
-                    value={`${(snapshot.coverageAreas ?? []).length} area`}
-                  />
+                  <div className="mt-5 grid grid-cols-2 gap-3">
+                    <div className="rounded-[20px] border border-white/16 bg-white/12 px-4 py-4 backdrop-blur-sm">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">Kelengkapan</p>
+                      <p className="mt-2 text-[22px] font-bold text-white">{completionScore}%</p>
+                    </div>
+                    <div className="rounded-[20px] border border-white/16 bg-white/12 px-4 py-4 backdrop-blur-sm">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">Respons</p>
+                      <p className="mt-2 text-[16px] font-bold leading-snug text-white">{responseTimeGoal}</p>
+                    </div>
+                    <div className="rounded-[20px] border border-white/16 bg-white/12 px-4 py-4 backdrop-blur-sm">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">
+                        Rata-rata harga
+                      </p>
+                      <p className="mt-2 text-[18px] font-bold text-white">
+                        {formatWorkspaceCurrency(averagePriceValue, 'IDR')}
+                      </p>
+                    </div>
+                    <div className="rounded-[20px] border border-white/16 bg-white/12 px-4 py-4 backdrop-blur-sm">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">
+                        Layanan aktif
+                      </p>
+                      <p className="mt-2 text-[22px] font-bold text-white">{(snapshot.offerings ?? []).length}</p>
+                    </div>
+                  </div>
                 </section>
 
                 <div className="grid grid-cols-2 gap-3">

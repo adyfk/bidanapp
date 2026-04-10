@@ -11,15 +11,20 @@ export function OfferingCard({ locale, offering }: { locale: string; offering: D
 
   return (
     <a
-      className="block cursor-pointer rounded-[28px] border bg-[linear-gradient(180deg,#FFFFFF_0%,#F8FAFC_100%)] p-5 shadow-[0_18px_42px_-36px_rgba(15,23,42,0.24)] transition-all hover:shadow-[0_24px_48px_-34px_rgba(15,23,42,0.28)] active:scale-[0.98]"
+      className="block cursor-pointer rounded-[28px] border p-5 shadow-[0_18px_42px_-36px_rgba(15,23,42,0.24)] transition-all hover:shadow-[0_24px_48px_-34px_rgba(15,23,42,0.28)] active:scale-[0.98]"
       href={`/${locale}/s/${offering.slug}`}
-      style={{ borderColor: '#f0f1f4' }}
+      style={{
+        background: 'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 42%, white) 100%)',
+        borderColor: 'var(--ui-border)',
+      }}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 flex-1 gap-3">
           <InitialPortrait label={offering.title} size="small" />
           <div className="min-w-0">
-            <div className="text-[16px] font-bold leading-tight text-gray-900">{offering.title}</div>
+            <div className="text-[16px] font-bold leading-tight break-words text-gray-900 [overflow-wrap:anywhere]">
+              {offering.title}
+            </div>
             <p className="mt-1 text-[11px] font-bold uppercase tracking-wide" style={{ color: 'var(--ui-primary)' }}>
               {offering.professionalDisplayName}
             </p>
@@ -30,7 +35,9 @@ export function OfferingCard({ locale, offering }: { locale: string; offering: D
         </div>
       </div>
 
-      <p className="mt-3 line-clamp-2 text-[13px] leading-6 text-gray-600">{offering.description}</p>
+      <p className="mt-3 line-clamp-2 break-words text-[13px] leading-6 text-gray-600 [overflow-wrap:anywhere]">
+        {offering.description}
+      </p>
 
       <div className="mt-4 flex flex-wrap gap-2">
         <StatusPill tone="accent">{offeringTypeLabel(offering.offeringType, locale)}</StatusPill>

@@ -51,29 +51,29 @@ type demoDocument struct {
 
 var demoViewerAccounts = map[string]demoViewerAccount{
 	"customer": {
-		City:        "Jakarta Selatan",
-		DisplayName: "Alya Pratama Nugraheni",
+		City:        "Jakarta Selatan, Mampang Prapatan",
+		DisplayName: "Alya Pratama Nugraheni Wibisono",
 		IdentityID:  "seed_ident_customer",
 		Phone:       "+628111111001",
 		UserID:      "usr_demo_customer",
 	},
 	"approved_professional": {
-		City:        "Jakarta Selatan",
+		City:        "Jakarta Selatan, Kebayoran Baru",
 		DisplayName: "Bidan Nabila Lestari, S.Tr.Keb.",
 		IdentityID:  "seed_ident_professional_approved",
 		Phone:       "+628111111002",
 		UserID:      "usr_demo_professional_approved",
 	},
 	"submitted_professional": {
-		City:        "Depok",
-		DisplayName: "Bidan Rahma Pertiwi, S.Tr.Keb.",
+		City:        "Depok, Pancoran Mas",
+		DisplayName: "Bidan Rahma Pertiwi Anggraini, S.Tr.Keb.",
 		IdentityID:  "seed_ident_professional_submitted",
 		Phone:       "+628111111003",
 		UserID:      "usr_demo_professional_submitted",
 	},
 	"draft_professional": {
-		City:        "Bekasi",
-		DisplayName: "Bidan Sari Maheswari, A.Md.Keb.",
+		City:        "Bekasi, Jatiasih",
+		DisplayName: "Bidan Sari Maheswari Putri, A.Md.Keb.",
 		IdentityID:  "seed_ident_professional_draft",
 		Phone:       "+628111111004",
 		UserID:      "usr_demo_professional_draft",
@@ -303,14 +303,14 @@ func seedApprovedProfessional(
 	profileID := "seed_profile_approved_midwife"
 	applicationID := "seed_application_approved_midwife"
 	profileAttributes := map[string]any{
-		"headline":              "Bidan pendamping ibu baru lahir untuk kunjungan rumah, konseling laktasi, dan pemulihan pascamelahirkan yang butuh follow-up jelas.",
-		"bio":                   "Saya mendampingi ibu baru dan keluarga inti pada masa 14 hari pertama setelah persalinan, mulai dari evaluasi pemulihan, perlekatan menyusui, pumping plan malam, sampai catatan tindak lanjut yang mudah dipahami di rumah.",
+		"headline":              "Bidan pendamping ibu baru lahir untuk kunjungan rumah, konseling laktasi, dan pemulihan pascamelahirkan yang butuh follow-up jelas, tenang, dan mudah dijalankan keluarga di rumah.",
+		"bio":                   "Saya mendampingi ibu baru dan keluarga inti pada masa 14 hari pertama setelah persalinan, mulai dari evaluasi pemulihan, perlekatan menyusui, pumping plan malam, sampai catatan tindak lanjut yang mudah dipahami pasangan, nenek, maupun caregiver yang ikut membantu di rumah.",
 		"languages":             []string{"Bahasa Indonesia", "English"},
 		"responseTimeGoal":      "< 20 menit pada jam kerja",
 		"seeded":                true,
 		"yearsExperience":       8,
 		"certified_lactation":   true,
-		"education_history":     "D3 Kebidanan Poltekkes Jakarta, sertifikasi konselor menyusui, dan pelatihan pendampingan keluarga pascapersalinan berbasis home visit.",
+		"education_history":     "D3 Kebidanan Poltekkes Jakarta, sertifikasi konselor menyusui, pelatihan pendampingan keluarga pascapersalinan berbasis home visit, serta workshop komunikasi klinis untuk menjelaskan rencana tindak lanjut tanpa istilah medis yang membingungkan.",
 		"str_number":            "STR-BDN-2026-0001",
 	}
 	documents := []demoDocument{
@@ -402,8 +402,8 @@ func seedSubmittedProfessional(
 	applicationID := "seed_application_submitted_midwife"
 	attributes := map[string]any{
 		"certified_lactation": false,
-		"education_history":   "D4 Kebidanan Universitas Indonesia dengan fokus layanan ibu hamil risiko rendah dan edukasi persiapan menyusui.",
-		"headline":            "Sedang menunggu review akhir untuk membuka layanan kunjungan rumah dan konsultasi laktasi terjadwal.",
+		"education_history":   "D4 Kebidanan Universitas Indonesia dengan fokus layanan ibu hamil risiko rendah, edukasi persiapan menyusui, dan kelas antenatal untuk keluarga yang ingin rencana persalinan lebih tenang.",
+		"headline":            "Sedang menunggu review akhir untuk membuka layanan kunjungan rumah, konsultasi laktasi terjadwal, dan edukasi pascamelahirkan dengan catatan follow-up yang rapi.",
 		"seeded":              true,
 		"sipb_document_url":   "/api/v1/professional-documents/seed_document_submitted_sipb",
 		"str_number":          "STR-BDN-2026-0002",
@@ -472,8 +472,8 @@ func seedDraftProfessional(
 	applicationID := "seed_application_draft_midwife"
 	attributes := map[string]any{
 		"certified_lactation": false,
-		"education_history":   "Akademi Kebidanan Bekasi, masih melengkapi berkas SIPB aktif dan preferensi area layanan.",
-		"headline":            "Draft profil untuk layanan edukasi nifas dan konsultasi dasar pascamelahirkan.",
+		"education_history":   "Akademi Kebidanan Bekasi, masih melengkapi berkas SIPB aktif, preferensi area layanan, dan contoh materi edukasi yang ingin ditampilkan di halaman profesional.",
+		"headline":            "Draft profil untuk layanan edukasi nifas, konsultasi dasar pascamelahirkan, dan ringkasan panduan keluarga minggu pertama di rumah.",
 		"seeded":              true,
 		"sipb_document_url":   "/api/v1/professional-documents/seed_document_draft_sipb",
 		"str_number":          "STR-BDN-2026-0003",
@@ -537,14 +537,14 @@ func seedApprovedWorkspace(ctx context.Context, tx *sql.Tx, profileID string, ts
 		{
 			id:          "seed_portfolio_postpartum_class",
 			title:       "Kelas persiapan menyusui untuk 7 hari pertama di rumah",
-			description: "Workshop hybrid untuk ibu baru dengan simulasi posisi menyusui, pumping plan malam, dan panduan sederhana yang bisa langsung dipraktikkan keluarga inti.",
+			description: "Workshop hybrid untuk ibu baru dengan simulasi posisi menyusui, pumping plan malam, dan panduan sederhana yang bisa langsung dipraktikkan pasangan maupun caregiver selama minggu pertama di rumah.",
 			assetURL:    "https://images.unsplash.com/photo-1516627145497-ae6968895b74?auto=format&fit=crop&w=1200&q=80",
 			sortOrder:   0,
 		},
 		{
 			id:          "seed_portfolio_home_visit_pack",
 			title:       "Home visit pascamelahirkan dengan catatan tindak lanjut keluarga",
-			description: "Pendampingan 7 hari pertama dengan observasi pemulihan ibu, evaluasi bayi, dan catatan follow-up yang dirancang agar mudah dibaca pasangan maupun pengasuh di rumah.",
+			description: "Pendampingan 7 hari pertama dengan observasi pemulihan ibu, evaluasi bayi, dan catatan follow-up yang dirancang agar mudah dibaca pasangan, pengasuh, maupun anggota keluarga yang ikut berjaga malam.",
 			assetURL:    "https://images.unsplash.com/photo-1511174511562-5f7f18b874f8?auto=format&fit=crop&w=1200&q=80",
 			sortOrder:   1,
 		},
@@ -580,7 +580,7 @@ func seedApprovedWorkspace(ctx context.Context, tx *sql.Tx, profileID string, ts
 			id:        "seed_gallery_home_visit",
 			fileName:  "home-visit.jpg",
 			assetURL:  "https://images.unsplash.com/photo-1526256262350-7da7584cf5eb?auto=format&fit=crop&w=1200&q=80",
-			caption:   "Checklist home visit masa nifas awal dengan ringkasan kondisi ibu, bayi, dan rekomendasi tindak lanjut.",
+			caption:   "Checklist home visit masa nifas awal dengan ringkasan kondisi ibu, bayi, dan rekomendasi tindak lanjut yang dibagikan ke keluarga inti.",
 			sortOrder: 1,
 		},
 	}
@@ -638,13 +638,13 @@ func seedApprovedWorkspace(ctx context.Context, tx *sql.Tx, profileID string, ts
 		{
 			id:        "seed_story_postpartum",
 			title:     "Mendampingi 7 hari pertama ibu baru dengan tenang dan terstruktur",
-			body:      "Saya fokus pada fase kritis setelah persalinan: pemantauan luka, pola menyusui, ritme istirahat, dan edukasi keluarga agar keputusan harian tidak terasa membingungkan.",
+			body:      "Saya fokus pada fase kritis setelah persalinan: pemantauan luka, pola menyusui, ritme istirahat, dan edukasi keluarga agar keputusan harian tidak terasa membingungkan saat ibu sedang sangat lelah.",
 			sortOrder: 0,
 		},
 		{
 			id:        "seed_story_lactation",
 			title:     "Membantu ibu kembali percaya diri saat menyusui dan pumping",
-			body:      "Setiap kunjungan membawa action plan sederhana: apa yang dipantau hari ini, apa yang diubah besok, dan kapan keluarga perlu meminta bantuan lebih lanjut.",
+			body:      "Setiap kunjungan membawa action plan sederhana: apa yang dipantau hari ini, apa yang diubah besok, kapan keluarga perlu meminta bantuan lebih lanjut, dan siapa yang perlu membaca catatan follow-up itu di rumah.",
 			sortOrder: 1,
 		},
 	}
@@ -665,8 +665,8 @@ func seedApprovedWorkspace(ctx context.Context, tx *sql.Tx, profileID string, ts
 	coverageAreas := []struct {
 		id, city, areaLabel string
 	}{
-		{id: "seed_coverage_jaksel", city: "Jakarta Selatan", areaLabel: "Kebayoran Baru, Senopati, Cipete, dan area radius 8 km dari klinik pendamping"},
-		{id: "seed_coverage_jaktim", city: "Jakarta Timur", areaLabel: "Duren Sawit, Rawamangun, dan kunjungan terjadwal untuk area keluarga muda"},
+		{id: "seed_coverage_jaksel", city: "Jakarta Selatan", areaLabel: "Kebayoran Baru, Senopati, Cipete, Dharmawangsa, dan area radius 8 km dari klinik pendamping untuk keluarga yang butuh jadwal kunjungan fleksibel"},
+		{id: "seed_coverage_jaktim", city: "Jakarta Timur", areaLabel: "Duren Sawit, Rawamangun, Kayu Putih, dan kunjungan terjadwal untuk area keluarga muda dengan kebutuhan follow-up laktasi"},
 	}
 	for _, area := range coverageAreas {
 		if _, err := tx.ExecContext(ctx, `
@@ -778,7 +778,7 @@ func seedCommerce(ctx context.Context, tx *sql.Tx, ts func(int) time.Time) error
 
 	offerings := []offeringSeed{
 		{
-			Description:  "Kunjungan rumah 90 menit untuk asesmen ibu dan bayi, evaluasi menyusui, pemulihan pascamelahirkan, dan catatan tindak lanjut yang bisa dibagikan ke pasangan atau caregiver.",
+			Description:  "Kunjungan rumah 90 menit untuk asesmen ibu dan bayi, evaluasi menyusui, pemulihan pascamelahirkan, dan catatan tindak lanjut yang bisa dibagikan ke pasangan, pengasuh, atau anggota keluarga lain yang ikut mendampingi.",
 			DeliveryMode: "home_visit",
 			Fulfillment: map[string]any{
 				"coverageNote":     "Jakarta Selatan dan Jakarta Timur",
@@ -793,7 +793,7 @@ func seedCommerce(ctx context.Context, tx *sql.Tx, ts func(int) time.Time) error
 			Title:        "Kunjungan rumah pascamelahirkan intensif 90 menit",
 		},
 		{
-			Description:  "Sesi video 45 menit untuk konsultasi laktasi, audit pumping plan malam, troubleshooting pelekatan, dan penyusunan langkah praktis selama 3 hari berikutnya.",
+			Description:  "Sesi video 45 menit untuk konsultasi laktasi, audit pumping plan malam, troubleshooting pelekatan, dan penyusunan langkah praktis selama 3 hari berikutnya dengan target yang realistis untuk ibu bekerja.",
 			DeliveryMode: "online",
 			Fulfillment: map[string]any{
 				"estimatedMinutes": 45,
@@ -808,7 +808,7 @@ func seedCommerce(ctx context.Context, tx *sql.Tx, ts func(int) time.Time) error
 			Title:        "Konsultasi laktasi online untuk pumping plan malam",
 		},
 		{
-			Description:  "Workbook digital untuk 14 hari pertama menyusui, lengkap dengan checklist harian, tracker feeding, dan ringkasan pertanyaan yang bisa dibawa ke sesi konsultasi berikutnya.",
+			Description:  "Workbook digital untuk 14 hari pertama menyusui, lengkap dengan checklist harian, tracker feeding, ringkasan pertanyaan untuk tenaga kesehatan, dan halaman catatan keluarga yang mudah dibaca ulang.",
 			DeliveryMode: "digital",
 			Fulfillment: map[string]any{
 				"assetType":       "pdf",
@@ -869,7 +869,7 @@ func seedCommerce(ctx context.Context, tx *sql.Tx, ts func(int) time.Time) error
 		{
 			EventTypes: []string{"created"},
 			FulfillmentDetails: map[string]any{
-				"notes":             "Butuh kunjungan sore untuk evaluasi nyeri jahitan, pola menyusui malam, dan ringkasan tindakan yang bisa diikuti pasangan saat mendampingi di rumah.",
+				"notes":             "Butuh kunjungan sore untuk evaluasi nyeri jahitan, pola menyusui malam, dan ringkasan tindakan yang bisa diikuti pasangan saat mendampingi di rumah. Keluarga juga meminta checklist singkat yang mudah ditempel di kulkas agar semua orang tahu langkah berikutnya.",
 				"preferredSchedule": "2026-04-09T16:00:00+07:00",
 				"serviceAddress":    "Jl. Bangka Raya No. 18, Bangka, Mampang Prapatan, Jakarta Selatan",
 			},
@@ -888,7 +888,7 @@ func seedCommerce(ctx context.Context, tx *sql.Tx, ts func(int) time.Time) error
 			EventTypes: []string{"created", "payment_marked_paid"},
 			FulfillmentDetails: map[string]any{
 				"meetingLink":       "https://meet.bidanapp.local/demo-laktasi",
-				"notes":             "Ibu ingin review pumping plan, jadwal menyusui malam, dan strategi menyimpan ASI saat kembali bekerja minggu depan.",
+				"notes":             "Ibu ingin review pumping plan, jadwal menyusui malam, dan strategi menyimpan ASI saat kembali bekerja minggu depan. Jika memungkinkan, mohon sekalian dibahas kapan botol hasil pumping sebaiknya mulai diperkenalkan.",
 				"preferredSchedule": "2026-04-08T20:00:00+07:00",
 			},
 			ID:                  "seed_order_pending_fulfillment",
@@ -922,7 +922,7 @@ func seedCommerce(ctx context.Context, tx *sql.Tx, ts func(int) time.Time) error
 		{
 			EventTypes: []string{"created", "payment_marked_paid", "refunded"},
 			FulfillmentDetails: map[string]any{
-				"notes":             "Kondisi ibu membaik, jadwal keluarga berubah total, dan kunjungan diganti ke pekan berikutnya sehingga customer meminta refund penuh.",
+				"notes":             "Kondisi ibu membaik, jadwal keluarga berubah total, dan kunjungan diganti ke pekan berikutnya sehingga customer meminta refund penuh. Catatan keluarga menyebut ayah akan kembali dinas luar kota selama 5 hari sehingga reschedule saat ini belum memungkinkan.",
 				"preferredSchedule": "2026-04-06T10:00:00+07:00",
 				"serviceAddress":    "Jl. Haji Nawi No. 7, Gandaria Utara, Kebayoran Baru, Jakarta Selatan",
 			},
@@ -1017,7 +1017,7 @@ func seedChatAndSupport(ctx context.Context, tx *sql.Tx, ts func(int) time.Time)
 			senderKind: "viewer",
 			senderID:   customerUser.UserID,
 			senderName: customerUser.DisplayName,
-			body:       "Halo kak, apakah sesi online bisa fokus ke pumping plan malam hari dan evaluasi stok ASI untuk tiga hari ke depan?",
+			body:       "Halo kak, apakah sesi online bisa fokus ke pumping plan malam hari dan evaluasi stok ASI untuk tiga hari ke depan? Saya juga ingin tahu apakah perlu ada penyesuaian jadwal karena minggu depan mulai masuk kerja lagi.",
 			sentAt:     ts(6),
 		},
 		{
@@ -1026,7 +1026,7 @@ func seedChatAndSupport(ctx context.Context, tx *sql.Tx, ts func(int) time.Time)
 			senderKind: "professional",
 			senderID:   approvedUser.UserID,
 			senderName: approvedUser.DisplayName,
-			body:       "Bisa. Biasanya saya bantu audit jadwal, durasi pumping, target supply 7 hari, lalu kita pecah jadi langkah yang lebih realistis untuk ritme tidur ibu.",
+			body:       "Bisa. Biasanya saya bantu audit jadwal, durasi pumping, target supply 7 hari, lalu kita pecah jadi langkah yang lebih realistis untuk ritme tidur ibu, bantuan pasangan, dan jam kerja yang akan dimulai kembali.",
 			sentAt:     ts(6).Add(12 * time.Minute),
 		},
 		{
@@ -1035,7 +1035,7 @@ func seedChatAndSupport(ctx context.Context, tx *sql.Tx, ts func(int) time.Time)
 			senderKind: "viewer",
 			senderID:   customerUser.UserID,
 			senderName: customerUser.DisplayName,
-			body:       "Saya sudah bayar. Mohon kirim link sesi malam ini ya, sekalian kalau ada checklist yang perlu saya siapkan sebelum konsultasi.",
+			body:       "Saya sudah bayar. Mohon kirim link sesi malam ini ya, sekalian kalau ada checklist yang perlu saya siapkan sebelum konsultasi. Saya sudah catat feeding 24 jam terakhir dan ingin memastikan formatnya sudah cukup.",
 			sentAt:     ts(11),
 		},
 		{
@@ -1044,7 +1044,7 @@ func seedChatAndSupport(ctx context.Context, tx *sql.Tx, ts func(int) time.Time)
 			senderKind: "professional",
 			senderID:   approvedUser.UserID,
 			senderName: approvedUser.DisplayName,
-			body:       "Siap, link Zoom sudah saya masukkan ke catatan order dan akan saya kirim ulang 10 menit sebelum sesi. Siapkan juga catatan feeding 24 jam terakhir agar pembahasannya lebih cepat.",
+			body:       "Siap, link Zoom sudah saya masukkan ke catatan order dan akan saya kirim ulang 10 menit sebelum sesi. Siapkan juga catatan feeding 24 jam terakhir, waktu pumping, dan foto posisi latch jika ada agar pembahasannya lebih cepat.",
 			sentAt:     ts(11).Add(15 * time.Minute),
 		},
 	}
@@ -1065,9 +1065,9 @@ func seedChatAndSupport(ctx context.Context, tx *sql.Tx, ts func(int) time.Time)
 			($1, $2, NULL, $3, NULL, $4, 'new', 'normal', $5, $6, '{"seeded":true}'::jsonb, $7, $7),
 			($8, $2, $9, $3, 'adm-01', $10, 'triaged', 'high', $11, $12, '{"seeded":true}'::jsonb, $13, $14),
 			($15, $2, $16, $3, 'adm-03', NULL, 'resolved', 'normal', $17, $18, '{"seeded":true}'::jsonb, $19, $20)
-	`, "seed_support_ticket_new", bidanPlatformID, customerUser.UserID, "seed_chat_thread_preorder", "Butuh konfirmasi ruang lingkup sesi online sebelum booking", "Minta ringkasan topik yang dibahas pada sesi online pertama, termasuk apakah pumping plan malam dan evaluasi pelekatan bisa dibahas sekaligus.", ts(6),
-		"seed_support_ticket_triaged", "seed_order_pending_fulfillment", "seed_chat_thread_order_followup", "Link meeting belum muncul di detail order malam ini", "Customer sudah bayar tetapi belum melihat link sesi dan khawatir persiapan konsultasi jadi terlalu mepet.", ts(11), ts(12),
-		"seed_support_ticket_resolved", "seed_order_refunded", "Konfirmasi refund home visit yang dijadwal ulang", "Refund diminta karena jadwal kunjungan berubah total dan keluarga memilih reschedule di batch berikutnya.", ts(13), ts(14)); err != nil {
+	`, "seed_support_ticket_new", bidanPlatformID, customerUser.UserID, "seed_chat_thread_preorder", "Butuh konfirmasi ruang lingkup sesi online sebelum booking pertama", "Minta ringkasan topik yang dibahas pada sesi online pertama, termasuk apakah pumping plan malam, evaluasi pelekatan, dan review catatan feeding bisa dibahas sekaligus dalam satu sesi.", ts(6),
+		"seed_support_ticket_triaged", "seed_order_pending_fulfillment", "seed_chat_thread_order_followup", "Link meeting belum muncul di detail order untuk sesi malam ini", "Customer sudah bayar tetapi belum melihat link sesi dan khawatir persiapan konsultasi jadi terlalu mepet karena bayi biasanya mulai rewel menjelang jam tidur malam.", ts(11), ts(12),
+		"seed_support_ticket_resolved", "seed_order_refunded", "Konfirmasi refund home visit yang dijadwal ulang oleh keluarga", "Refund diminta karena jadwal kunjungan berubah total dan keluarga memilih reschedule di batch berikutnya setelah ayah kembali dari perjalanan kerja.", ts(13), ts(14)); err != nil {
 		return err
 	}
 
@@ -1083,7 +1083,7 @@ func seedChatAndSupport(ctx context.Context, tx *sql.Tx, ts func(int) time.Time)
 			actorKind:  "viewer",
 			actorID:    customerUser.UserID,
 			eventType:  "created",
-			publicNote: "Customer menanyakan ruang lingkup sesi sebelum checkout agar tidak salah memilih layanan.",
+			publicNote: "Customer menanyakan ruang lingkup sesi sebelum checkout agar tidak salah memilih layanan dan bisa menyiapkan catatan yang relevan.",
 			createdAt:  ts(6),
 			payload:    map[string]any{"seeded": true},
 		},
@@ -1093,7 +1093,7 @@ func seedChatAndSupport(ctx context.Context, tx *sql.Tx, ts func(int) time.Time)
 			actorKind:    "viewer",
 			actorID:      customerUser.UserID,
 			eventType:    "created",
-			publicNote:   "Link sesi belum terlihat di detail order padahal customer sudah menyiapkan konsultasi malam ini.",
+			publicNote:   "Link sesi belum terlihat di detail order padahal customer sudah menyiapkan konsultasi malam ini dan ingin memastikan sesi tidak molor.",
 			createdAt:    ts(11),
 			payload:      map[string]any{"seeded": true, "slaHint": "respond_within_15m"},
 		},
@@ -1103,8 +1103,8 @@ func seedChatAndSupport(ctx context.Context, tx *sql.Tx, ts func(int) time.Time)
 			actorKind:    "admin",
 			actorID:      "adm-01",
 			eventType:    "status_changed",
-			publicNote:   "Tim support sedang menghubungi profesional untuk memastikan link meeting aktif dan terkirim ulang ke customer.",
-			internalNote: "Perlu follow up SLA 15 menit sebelum sesi dimulai dan cek apakah link Zoom juga tercatat di order timeline.",
+			publicNote:   "Tim support sedang menghubungi profesional untuk memastikan link meeting aktif dan terkirim ulang ke customer sebelum sesi dimulai.",
+			internalNote: "Perlu follow up SLA 15 menit sebelum sesi dimulai, cek apakah link Zoom juga tercatat di order timeline, dan konfirmasi apakah customer sudah menerima reminder WhatsApp.",
 			createdAt:    ts(12),
 			payload:      map[string]any{"assignedAdminId": "adm-01", "status": "triaged"},
 		},
@@ -1114,7 +1114,7 @@ func seedChatAndSupport(ctx context.Context, tx *sql.Tx, ts func(int) time.Time)
 			actorKind:    "viewer",
 			actorID:      customerUser.UserID,
 			eventType:    "created",
-			publicNote:   "Customer meminta refund penuh untuk kunjungan rumah karena perubahan jadwal keluarga.",
+			publicNote:   "Customer meminta refund penuh untuk kunjungan rumah karena perubahan jadwal keluarga dan pendamping utama sedang dinas luar kota.",
 			createdAt:    ts(13),
 			payload:      map[string]any{"seeded": true},
 		},
@@ -1125,7 +1125,7 @@ func seedChatAndSupport(ctx context.Context, tx *sql.Tx, ts func(int) time.Time)
 			actorID:      "adm-03",
 			eventType:    "status_changed",
 			publicNote:   "Refund diproses penuh, customer menerima konfirmasi, dan ticket ditutup.",
-			internalNote: "Payout terkait dikeluarkan dari batch minggu ini dan order diberi catatan refund final.",
+			internalNote: "Payout terkait dikeluarkan dari batch minggu ini, order diberi catatan refund final, dan keluarga diarahkan untuk rebook saat jadwal rumah tangga lebih stabil.",
 			createdAt:    ts(14),
 			payload:      map[string]any{"status": "resolved"},
 		},

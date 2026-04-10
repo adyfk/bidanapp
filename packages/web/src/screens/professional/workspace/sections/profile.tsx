@@ -55,7 +55,7 @@ export function ProfileSection({
   const responseTimeGoal = readAttribute(attributes, 'responseTimeGoal');
   const publicHref = form.slug
     ? createLocalizedPath(locale, `/p/${form.slug}`)
-    : createLocalizedPath(locale, '/professionals/dashboard/overview');
+    : createLocalizedPath(locale, '/professionals/dashboard');
 
   return (
     <WorkspaceSurfaceCard
@@ -77,7 +77,7 @@ export function ProfileSection({
             description="Kembali ke overview untuk melihat ringkasan order dan status kerja."
             icon={<LayoutDashboard className="h-5 w-5" />}
             onClick={() => {
-              window.location.href = createLocalizedPath(locale, '/professionals/dashboard/overview');
+              window.location.href = createLocalizedPath(locale, '/professionals/dashboard');
             }}
             title="Dashboard"
           />
@@ -208,7 +208,7 @@ export function ProfileSection({
             accessory={
               <a
                 className="text-[12px] font-semibold text-slate-500"
-                href={createLocalizedPath(locale, '/professionals/dashboard/overview')}
+                href={createLocalizedPath(locale, '/professionals/dashboard')}
               >
                 Buka
               </a>

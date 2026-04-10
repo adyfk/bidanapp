@@ -20,7 +20,10 @@ export function GuestPreviewSection({
   return (
     <section className="rounded-[28px] border border-gray-100 bg-white p-5 shadow-sm">
       <div className="flex items-center gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-pink-50 text-pink-500">
+        <div
+          className="flex h-11 w-11 items-center justify-center rounded-full"
+          style={{ backgroundColor: 'var(--ui-surface-muted)', color: 'var(--ui-primary)' }}
+        >
           <UserRound className="h-5 w-5" />
         </div>
         <div>
@@ -92,8 +95,11 @@ export function GuestAccessSection({
         <a href={loginHref} className="block">
           <button
             type="button"
-            className="flex w-full items-center justify-center gap-2 rounded-full py-4 text-[14px] font-bold text-white shadow-lg shadow-pink-500/20 transition-transform active:scale-[0.99]"
-            style={{ backgroundColor: 'var(--ui-primary)' }}
+            className="flex w-full items-center justify-center gap-2 rounded-full py-4 text-[14px] font-bold text-white shadow-lg shadow-slate-900/10 transition-transform active:scale-[0.99]"
+            style={{
+              background:
+                'linear-gradient(180deg, var(--ui-primary) 0%, color-mix(in srgb, var(--ui-primary) 66%, var(--ui-secondary)) 100%)',
+            }}
           >
             {isEnglishLocale(locale) ? 'Sign in as professional' : 'Masuk sebagai profesional'}
             <ArrowRight className="h-4 w-4" />
@@ -110,7 +116,11 @@ export function GuestAccessSection({
           </button>
         </a>
 
-        <a href={forgotPasswordHref} className="inline-flex items-center gap-2 text-[13px] font-semibold text-pink-600">
+        <a
+          href={forgotPasswordHref}
+          className="inline-flex items-center gap-2 text-[13px] font-semibold"
+          style={{ color: 'var(--ui-primary)' }}
+        >
           <KeyRound className="h-4 w-4" />
           {isEnglishLocale(locale) ? 'Forgot password' : 'Lupa password'}
         </a>
@@ -153,7 +163,10 @@ export function PathSeparationCard({
           <button
             type="button"
             className="w-full rounded-full py-4 text-[14px] font-bold text-white"
-            style={{ backgroundColor: 'var(--ui-primary)' }}
+            style={{
+              background:
+                'linear-gradient(180deg, var(--ui-primary) 0%, color-mix(in srgb, var(--ui-primary) 66%, var(--ui-secondary)) 100%)',
+            }}
           >
             {isEnglishLocale(locale) ? 'Open customer home' : 'Buka beranda customer'}
           </button>

@@ -14,7 +14,10 @@ export function ProfessionalApplyPageHeader({
   localeItems: ApplyLocaleItem[];
 }) {
   return (
-    <div className="sticky top-0 z-20 flex items-center justify-between border-b border-rose-100/80 bg-white/92 px-4 pb-4 pt-14 backdrop-blur-sm">
+    <div
+      className="sticky top-0 z-20 flex items-center justify-between border-b bg-white/92 px-4 pb-4 pt-14 backdrop-blur-sm"
+      style={{ borderColor: 'var(--ui-border)' }}
+    >
       <MarketplaceHeaderIconButton href={homeHref}>
         <span aria-hidden="true">‹</span>
       </MarketplaceHeaderIconButton>

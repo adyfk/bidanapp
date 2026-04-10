@@ -72,8 +72,8 @@ function ProfessionalRequestPreparationCard({
   const en = isEnglishLocale(locale);
 
   return (
-    <section className="rounded-[28px] border border-blue-100 bg-white/95 p-5 shadow-[0_20px_45px_-30px_rgba(37,99,235,0.35)]">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-blue-500">
+    <section className="rounded-[28px] border border-pink-100 bg-white/95 p-5 shadow-[0_20px_45px_-30px_rgba(232,88,138,0.35)]">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-pink-500">
         {en ? 'Request flow' : 'Alur request'}
       </p>
       <div className="mt-2 flex items-start justify-between gap-4">
@@ -97,7 +97,7 @@ function ProfessionalRequestPreparationCard({
                 : 'Anda bisa melihat-lihat dulu, tetapi login akan menyimpan order, pembayaran, dan support dalam satu akun.'}
           </p>
         </div>
-        <div className="rounded-full bg-blue-50 px-3 py-1.5 text-[12px] font-semibold text-blue-700">
+        <div className="rounded-full bg-pink-50 px-3 py-1.5 text-[12px] font-semibold text-pink-700">
           {selectedOffering ? offeringTypeLabel(selectedOffering.offeringType, locale) : en ? 'Browse' : 'Jelajah'}
         </div>
       </div>
@@ -263,15 +263,15 @@ export function MarketplaceProfessionalDetailView({
 
   return (
     <MarketplaceMobileShell showNav={false}>
-      <div className="relative min-h-full overflow-y-auto bg-[linear-gradient(180deg,#F4F8FB_0%,#FFFFFF_20%,#F8FAFC_100%)] pb-40">
+      <div className="relative min-h-full overflow-y-auto bg-[linear-gradient(180deg,#FFF5F8_0%,#FFFFFF_20%,#FFFAFC_100%)] pb-40">
         <div className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[520px] overflow-hidden">
           <div
             className="absolute -left-20 top-6 h-48 w-48 rounded-full blur-3xl"
-            style={{ backgroundColor: 'rgba(59,130,246,0.14)' }}
+            style={{ backgroundColor: 'rgba(232,88,138,0.14)' }}
           />
           <div
             className="absolute -right-12 top-24 h-40 w-40 rounded-full blur-3xl"
-            style={{ backgroundColor: 'rgba(14,165,233,0.14)' }}
+            style={{ backgroundColor: 'rgba(255,126,179,0.14)' }}
           />
         </div>
 
@@ -280,7 +280,7 @@ export function MarketplaceProfessionalDetailView({
           style={{ background: 'var(--ui-hero-gradient)' }}
         >
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.26)_0%,rgba(255,255,255,0)_42%)]" />
-          <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-b from-transparent to-[#F4F8FB]" />
+          <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-b from-transparent to-[#FFF5F8]" />
         </div>
 
         <div className="relative z-10 px-6 pb-4 pt-10">
@@ -462,7 +462,7 @@ export function MarketplaceProfessionalDetailView({
                     key={entry.id}
                     className="overflow-hidden rounded-[24px] bg-white shadow-[0_18px_34px_-24px_rgba(17,24,39,0.24)]"
                   >
-                    <div className="relative h-[180px] bg-[linear-gradient(135deg,#E6F4FB_0%,#F8FCFE_55%,#FFFFFF_100%)]">
+                    <div className="relative h-[180px] bg-[linear-gradient(135deg,#FFE8F0_0%,#FFF5F8_55%,#FFFFFF_100%)]">
                       {entry.assetUrl ? (
                         <img
                           alt={entry.title}
@@ -514,8 +514,8 @@ export function MarketplaceProfessionalDetailView({
                     key={story.id}
                     className="overflow-hidden rounded-[24px] bg-white shadow-[0_18px_34px_-24px_rgba(17,24,39,0.24)]"
                   >
-                    <div className="relative h-[180px] bg-[linear-gradient(135deg,#E6F4FB_0%,#F8FCFE_55%,#FFFFFF_100%)]">
-                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(14,165,233,0.16)_0%,rgba(255,255,255,0)_45%)]" />
+                    <div className="relative h-[180px] bg-[linear-gradient(135deg,#FFE8F0_0%,#FFF5F8_55%,#FFFFFF_100%)]">
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(232,88,138,0.16)_0%,rgba(255,255,255,0)_45%)]" />
                       <div className="absolute inset-x-0 bottom-0 p-4">
                         <div className="flex flex-wrap items-center gap-2">
                           <span

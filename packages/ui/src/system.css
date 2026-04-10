@@ -78,6 +78,6 @@ select {
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--ui-primary, #e11d87) 24%, white);
+  background: color-mix(in srgb, var(--ui-primary, #E8588A) 24%, white);
   color: var(--ui-text-strong, #1c1323);
 }

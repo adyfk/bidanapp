@@ -24,7 +24,7 @@ import {
   TextField,
 } from '@marketplace/ui';
 import { Bell, Calendar, ChevronRight, Clock3, CreditCard, Search, Tag } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useEffectEvent, useMemo, useState } from 'react';
 import { createPrimaryMarketplaceNav } from '../../../layout/navigation';
 import { getApiBaseUrl } from '../../../lib/env';
 import {
@@ -97,17 +97,23 @@ function ActivitySummaryHero({
   const en = isEnglishLocale(locale);
 
   return (
-    <section className="overflow-hidden rounded-[30px] border border-pink-100/80 bg-[linear-gradient(180deg,#FFF7FB_0%,#FFFFFF_100%)] p-5 shadow-[0_18px_40px_-28px_rgba(17,24,39,0.18)]">
+    <section
+      className="overflow-hidden rounded-[30px] border p-5 text-white shadow-[var(--ui-shadow-hero)]"
+      style={{
+        background: 'var(--ui-hero-gradient)',
+        borderColor: 'color-mix(in srgb, var(--ui-border-strong) 42%, white)',
+      }}
+    >
       <div className="flex items-start justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-700 shadow-[inset_0_0_0_1px_rgba(229,231,235,1)]">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/92">
             <Calendar className="h-3.5 w-3.5" />
             {en ? 'Activity' : 'Aktivitas'}
           </div>
-          <h1 className="mt-4 text-[22px] font-bold leading-tight text-slate-900">
+          <h1 className="mt-4 text-[22px] font-bold leading-tight text-white">
             {en ? 'Orders and follow-up' : 'Order dan tindak lanjut'}
           </h1>
-          <p className="mt-2 text-[13px] leading-relaxed text-slate-500">
+          <p className="mt-2 text-[13px] leading-relaxed text-white/82">
             {en
               ? 'See the active order flow first, then continue to history after the visit is done.'
               : 'Lihat order yang sedang berjalan lebih dulu, lalu lanjut ke riwayat setelah layanan selesai.'}
@@ -116,17 +122,17 @@ function ActivitySummaryHero({
       </div>
 
       <div className="mt-5 grid grid-cols-2 gap-3">
-        <div className="rounded-[22px] border border-pink-100 bg-white p-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+        <div className="rounded-[22px] border border-white/16 bg-white/12 p-4 backdrop-blur-sm">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">
             {en ? 'Active' : 'Berjalan'}
           </p>
-          <p className="mt-2 text-[28px] font-bold text-slate-900">{activeCount}</p>
+          <p className="mt-2 text-[28px] font-bold text-white">{activeCount}</p>
         </div>
-        <div className="rounded-[22px] border border-pink-100 bg-white p-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+        <div className="rounded-[22px] border border-white/16 bg-white/12 p-4 backdrop-blur-sm">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">
             {en ? 'History' : 'Riwayat'}
           </p>
-          <p className="mt-2 text-[28px] font-bold text-slate-900">{historyCount}</p>
+          <p className="mt-2 text-[28px] font-bold text-white">{historyCount}</p>
         </div>
       </div>
     </section>
@@ -148,20 +154,31 @@ function ActivityOrderCard({
 
   return (
     <a href={createLocalizedPath(locale, `/orders/${order.id}`)}>
-      <article className="rounded-[26px] border border-gray-100 bg-white p-4 shadow-sm transition-all hover:shadow-[0_18px_36px_-30px_rgba(17,24,39,0.22)] active:scale-[0.99]">
+      <article
+        className="rounded-[26px] border bg-white p-4 shadow-sm transition-all hover:shadow-[0_18px_36px_-30px_rgba(17,24,39,0.22)] active:scale-[0.99]"
+        style={{ borderColor: 'var(--ui-border)' }}
+      >
         <div className="flex items-start gap-3">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full bg-pink-50 px-2.5 py-1 text-[10px] font-semibold text-pink-700">
+              <span
+                className="rounded-full px-2.5 py-1 text-[10px] font-semibold"
+                style={{
+                  backgroundColor: 'var(--ui-surface-muted)',
+                  color: 'var(--ui-primary)',
+                }}
+              >
                 {paymentStatusLabel(order.paymentStatus, locale)}
               </span>
-              <span className="rounded-full bg-gray-100 px-2.5 py-1 text-[10px] font-semibold text-gray-600">
+              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-600">
                 {orderStatusLabel(order.status, locale)}
               </span>
             </div>
 
-            <h3 className="mt-3 text-[16px] font-bold leading-snug text-gray-900">{order.offeringTitle}</h3>
-            <p className="mt-1 text-[13px] text-gray-500">
+            <h3 className="mt-3 text-[16px] font-bold leading-snug break-words text-gray-900 [overflow-wrap:anywhere]">
+              {order.offeringTitle}
+            </h3>
+            <p className="mt-1 break-words text-[13px] text-gray-500 [overflow-wrap:anywhere]">
               {offering?.professionalDisplayName || (en ? 'Assigned professional' : 'Profesional terkait')}
             </p>
 
@@ -172,7 +189,7 @@ function ActivityOrderCard({
                 </span>
               ) : null}
               {schedule ? (
-                <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-semibold text-blue-700">
+                <span className="rounded-full bg-pink-50 px-2.5 py-1 text-[10px] font-semibold text-pink-700">
                   {schedule}
                 </span>
               ) : null}
@@ -200,7 +217,11 @@ function ActivityOrderCard({
               </div>
             </div>
 
-            {note ? <p className="mt-3 line-clamp-2 text-[12.5px] leading-6 text-gray-500">{note}</p> : null}
+            {note ? (
+              <p className="mt-3 line-clamp-2 break-words text-[12.5px] leading-6 text-gray-500 [overflow-wrap:anywhere]">
+                {note}
+              </p>
+            ) : null}
           </div>
 
           <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gray-50">
@@ -230,13 +251,14 @@ function QuickOrderOptionCard({
       style={
         active
           ? {
-              background: 'linear-gradient(180deg,#FFF7FB 0%,#FFFFFF 100%)',
-              borderColor: 'rgba(244,114,182,0.36)',
-              boxShadow: '0 18px 36px -30px rgba(233,30,140,0.16)',
+              background:
+                'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 64%, white) 100%)',
+              borderColor: 'var(--ui-border-strong)',
+              boxShadow: '0 18px 36px -30px rgba(18,59,74,0.16)',
             }
           : {
               backgroundColor: '#ffffff',
-              borderColor: '#f0f1f4',
+              borderColor: 'var(--ui-border)',
             }
       }
       type="button"
@@ -247,8 +269,8 @@ function QuickOrderOptionCard({
             <span
               className="rounded-full px-2.5 py-1 text-[10px] font-semibold"
               style={{
-                backgroundColor: active ? '#fdf2f8' : '#f8fafc',
-                color: active ? 'var(--ui-primary)' : '#64748b',
+                backgroundColor: active ? 'var(--ui-surface-muted)' : '#fff5f8',
+                color: active ? 'var(--ui-primary)' : '#999999',
               }}
             >
               {offeringTypeLabel(offering.offeringType, locale)}
@@ -258,9 +280,15 @@ function QuickOrderOptionCard({
             </span>
           </div>
 
-          <div className="mt-3 text-[15px] font-bold text-gray-900">{offering.title}</div>
-          <div className="mt-1 text-[12px] text-gray-500">{offering.professionalDisplayName}</div>
-          <p className="mt-3 line-clamp-2 text-[13px] leading-6 text-gray-500">{offering.description}</p>
+          <div className="mt-3 text-[15px] font-bold break-words text-gray-900 [overflow-wrap:anywhere]">
+            {offering.title}
+          </div>
+          <div className="mt-1 break-words text-[12px] text-gray-500 [overflow-wrap:anywhere]">
+            {offering.professionalDisplayName}
+          </div>
+          <p className="mt-3 line-clamp-2 break-words text-[13px] leading-6 text-gray-500 [overflow-wrap:anywhere]">
+            {offering.description}
+          </p>
         </div>
 
         <div className="rounded-full bg-slate-950 px-3 py-2 text-[11px] font-bold text-white">
@@ -304,15 +332,15 @@ export function OrdersPage({
 
   const selectedOffering = offerings.find((offering) => offering.id === form.offeringId) ?? null;
 
-  const load = async () => {
+  const load = useEffectEvent(async (currentPlatformId: ServicePlatformId) => {
     try {
       setLoading(true);
       setFeedback('');
 
       const [directoryOfferingResult, sessionResult, orderResult] = await Promise.allSettled([
-        customerController.directory.fetchOfferings(client, platformId),
+        customerController.directory.fetchOfferings(client, currentPlatformId),
         customerController.viewerAuth.fetchSession(client),
-        customerController.orders.fetchOrders(client, platformId),
+        customerController.orders.fetchOrders(client, currentPlatformId),
       ]);
 
       if (directoryOfferingResult.status === 'fulfilled') {
@@ -341,11 +369,11 @@ export function OrdersPage({
     } finally {
       setLoading(false);
     }
-  };
+  });
 
   useEffect(() => {
-    void load();
-  }, [customerController, platformId]);
+    void load(platformId);
+  }, [platformId]);
 
   const filteredOrders = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -394,7 +422,7 @@ export function OrdersPage({
         fulfillmentNotes: '',
         fulfillmentSchedule: '',
       }));
-      await load();
+      await load(platformId);
       setFeedback(
         en
           ? 'Order created. Continue to payment to finish this request.'
@@ -419,7 +447,7 @@ export function OrdersPage({
         paymentId: latestPaymentSession.paymentId,
         status: 'paid',
       });
-      await load();
+      await load(platformId);
       setFeedback(
         en
           ? 'Payment marked as completed. This order is now ready for follow-up.'
@@ -449,13 +477,16 @@ export function OrdersPage({
       navItems={createPrimaryMarketplaceNav(platform, locale)}
       showNav={Boolean(session?.isAuthenticated)}
     >
-      <div className="min-h-full bg-[#f9fafb] pb-24">
+      <div className="min-h-full pb-24" style={{ backgroundColor: 'var(--ui-background)' }}>
         <LegacyActivityHeader locale={locale} onQueryChange={setQuery} query={query} />
 
         <div className="space-y-5 px-5 py-5">
           {!session?.isAuthenticated ? (
             <MarketplaceSurfaceCard tone="white" className="p-6">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#fff1f7] text-[var(--ui-primary)]">
+              <div
+                className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl"
+                style={{ backgroundColor: 'var(--ui-surface-muted)', color: 'var(--ui-primary)' }}
+              >
                 <Calendar className="h-5 w-5" />
               </div>
               <div className="text-[18px] font-bold text-gray-900">
@@ -548,13 +579,30 @@ export function OrdersPage({
                 </div>
               </MarketplaceSurfaceCard>
 
-              <section className="rounded-[28px] border border-pink-100/80 bg-[linear-gradient(180deg,#FFF7FB_0%,#FFFFFF_100%)] p-5 shadow-[0_18px_40px_-28px_rgba(17,24,39,0.18)]">
+              <section
+                className="rounded-[28px] border p-5 shadow-[0_18px_40px_-28px_rgba(17,24,39,0.18)]"
+                style={{
+                  background:
+                    'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 58%, white) 100%)',
+                  borderColor: 'var(--ui-border)',
+                }}
+              >
                 <div className="flex items-start gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-pink-50 text-pink-500">
+                  <div
+                    className="flex h-12 w-12 items-center justify-center rounded-2xl"
+                    style={{ backgroundColor: 'var(--ui-surface-muted)', color: 'var(--ui-primary)' }}
+                  >
                     <Tag className="h-5 w-5" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-700 shadow-[inset_0_0_0_1px_rgba(229,231,235,1)]">
+                    <div
+                      className="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em]"
+                      style={{
+                        backgroundColor: 'rgba(255,255,255,0.88)',
+                        borderColor: 'var(--ui-border)',
+                        color: 'var(--ui-primary)',
+                      }}
+                    >
                       {en ? 'Quick order' : 'Order cepat'}
                     </div>
                     <h2 className="mt-4 text-[22px] font-bold leading-tight text-slate-900">

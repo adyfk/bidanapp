@@ -35,7 +35,7 @@ export function MarketplaceMobileShell({
     <MarketplaceMotionProvider>
       <div className="min-h-screen" style={{ backgroundColor: 'var(--ui-background)' }}>
         <div className="mx-auto flex min-h-screen justify-center">
-          <div className="relative flex min-h-[100dvh] w-full max-w-[400px] flex-col overflow-hidden bg-[var(--ui-background)] shadow-[0_18px_50px_-26px_rgba(15,23,42,0.24)]">
+          <div className="relative flex min-h-[100dvh] w-full max-w-[480px] flex-col overflow-hidden bg-[var(--ui-background)] shadow-[0_18px_50px_-26px_rgba(15,23,42,0.24)]">
             <main className="flex flex-1 flex-col overflow-y-auto">{children}</main>
           </div>
         </div>
@@ -47,7 +47,7 @@ export function MarketplaceMobileShell({
 
 export function MarketplaceBottomNav({ activeId, items }: { activeId?: string; items: MarketplaceNavItem[] }) {
   return (
-    <div className="pointer-events-none fixed bottom-6 left-1/2 z-50 flex w-full max-w-[400px] -translate-x-1/2 justify-center px-6">
+    <div className="pointer-events-none fixed bottom-6 left-1/2 z-50 flex w-full max-w-[480px] -translate-x-1/2 justify-center px-6">
       <div
         className="pointer-events-auto flex w-full items-center justify-between rounded-full p-2 shadow-2xl"
         style={{ backgroundColor: '#1E1E1E' }}
@@ -118,8 +118,8 @@ export function MarketplaceTopPill({
   const style =
     tone === 'solid'
       ? {
-          backgroundColor: 'rgba(69, 24, 46, 0.78)',
-          color: '#fff7fb',
+          backgroundColor: 'color-mix(in srgb, var(--ui-secondary) 84%, black)',
+          color: '#ffffff',
         }
       : tone === 'soft'
         ? {
@@ -353,7 +353,7 @@ export function MarketplaceStickyActionBar({
 }) {
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center px-5 pb-5">
-      <div className="pointer-events-auto w-full max-w-[400px] rounded-[28px] border border-white/70 bg-white/95 p-4 shadow-[0_24px_56px_-34px_rgba(15,23,42,0.32)] backdrop-blur-xl">
+      <div className="pointer-events-auto w-full max-w-[480px] rounded-[28px] border border-white/70 bg-white/95 p-4 shadow-[0_24px_56px_-34px_rgba(15,23,42,0.32)] backdrop-blur-xl">
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
             {eyebrow ? (
@@ -557,7 +557,10 @@ export function MarketplacePageHeader({
   trailing?: ReactNode;
 }) {
   return (
-    <div className="sticky top-0 z-20 border-b border-rose-100/80 bg-white/90 px-4 pb-4 pt-14 backdrop-blur-sm">
+    <div
+      className="sticky top-0 z-20 border-b bg-white/90 px-4 pb-4 pt-14 backdrop-blur-sm"
+      style={{ borderColor: 'var(--ui-border)' }}
+    >
       <div className="flex items-center justify-between">
         <div className="w-10 shrink-0">
           {backHref ? (
@@ -686,10 +689,10 @@ export function MarketplaceSegmentedTabs({
               style={
                 active
                   ? {
-                      color: '#0f172a',
+                      color: 'var(--ui-text-strong)',
                     }
                   : {
-                      color: '#64748b',
+                      color: 'var(--ui-text-muted)',
                     }
               }
               type="button"
@@ -697,7 +700,7 @@ export function MarketplaceSegmentedTabs({
               {active ? (
                 <MarketplaceActivePill
                   className="rounded-full"
-                  style={{ backgroundColor: '#ffffff', boxShadow: '0 6px 18px -14px rgba(15,23,42,0.34)' }}
+                  style={{ backgroundColor: '#ffffff', boxShadow: '0 6px 18px -14px rgba(15,23,42,0.24)' }}
                 />
               ) : null}
               <span className="relative z-10">{item.label}</span>
@@ -727,8 +730,9 @@ export function MarketplaceAccessOptionCard({
   const toneStyle: CSSProperties =
     tone === 'accent'
       ? {
-          background: 'linear-gradient(180deg,#F7259B 0%,#E11D87 100%)',
-          boxShadow: '0 22px 42px -28px rgba(194,23,122,0.78)',
+          background:
+            'linear-gradient(180deg, var(--ui-primary) 0%, color-mix(in srgb, var(--ui-primary) 66%, var(--ui-secondary)) 100%)',
+          boxShadow: '0 22px 42px -28px rgba(18,59,74,0.52)',
           color: '#ffffff',
         }
       : tone === 'dark'
@@ -738,9 +742,10 @@ export function MarketplaceAccessOptionCard({
             color: '#ffffff',
           }
         : {
-            background: 'linear-gradient(180deg,#FFF9FC 0%,#FFFFFF 100%)',
-            border: '1px solid #fce7f3',
-            color: '#111827',
+            background:
+              'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 42%, white) 100%)',
+            border: '1px solid var(--ui-border)',
+            color: 'var(--ui-text-strong)',
             boxShadow: '0 16px 30px -28px rgba(15,23,42,0.35)',
           };
 
@@ -834,8 +839,14 @@ export function MarketplaceListCard({
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <div className="truncate text-[16px] font-bold leading-tight text-gray-900">{title}</div>
-              {subtitle ? <div className="mt-1 text-[13px] font-medium text-gray-500">{subtitle}</div> : null}
+              <div className="text-[16px] font-bold leading-tight break-words text-gray-900 [overflow-wrap:anywhere]">
+                {title}
+              </div>
+              {subtitle ? (
+                <div className="mt-1 break-words text-[13px] font-medium text-gray-500 [overflow-wrap:anywhere]">
+                  {subtitle}
+                </div>
+              ) : null}
             </div>
             {accessory ? (
               <div className="shrink-0">{accessory}</div>
@@ -855,7 +866,7 @@ export function MarketplaceListCard({
       <MotionButton
         className="w-full rounded-[24px] border bg-white p-4 text-left shadow-[0_14px_40px_-28px_rgba(15,23,42,0.18)]"
         onClick={onClick}
-        style={{ borderColor: 'rgba(226,232,240,0.8)' }}
+        style={{ borderColor: 'var(--ui-border)' }}
         type="button"
       >
         {content}
@@ -866,7 +877,7 @@ export function MarketplaceListCard({
   return (
     <MarketplaceAnimatedCard
       className="w-full rounded-[24px] border bg-white p-4 text-left shadow-[0_14px_40px_-28px_rgba(15,23,42,0.18)]"
-      style={{ borderColor: 'rgba(226,232,240,0.8)' }}
+      style={{ borderColor: 'var(--ui-border)' }}
     >
       {content}
     </MarketplaceAnimatedCard>
@@ -906,7 +917,7 @@ export function MarketplaceQuickActionCard({
         style={{
           background:
             'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 42%, white) 100%)',
-          borderColor: 'rgba(226,232,240,0.8)',
+          borderColor: 'var(--ui-border)',
         }}
         onClick={onClick}
         type="button"
@@ -921,7 +932,7 @@ export function MarketplaceQuickActionCard({
       className="flex min-h-[172px] w-full flex-col rounded-[28px] border p-5 text-left shadow-[0_14px_40px_-28px_rgba(15,23,42,0.18)]"
       style={{
         background: 'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 42%, white) 100%)',
-        borderColor: 'rgba(226,232,240,0.8)',
+        borderColor: 'var(--ui-border)',
       }}
     >
       {content}
@@ -970,8 +981,9 @@ export function MarketplaceIdentityCard({
     action ||
     (actionLabel && onAction ? (
       <MotionButton
-        className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-[12px] font-semibold text-slate-600 shadow-[0_10px_26px_-22px_rgba(15,23,42,0.35)] transition-colors hover:bg-slate-50"
+        className="inline-flex items-center gap-1 rounded-full border bg-white px-3.5 py-2 text-[12px] font-semibold text-slate-600 shadow-[0_10px_26px_-22px_rgba(15,23,42,0.35)] transition-colors hover:bg-slate-50"
         onClick={onAction}
+        style={{ borderColor: 'var(--ui-border)' }}
         type="button"
       >
         {actionLabel}
@@ -986,6 +998,7 @@ export function MarketplaceIdentityCard({
         style={{
           background:
             'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 48%, white) 100%)',
+          borderColor: 'var(--ui-border)',
         }}
       >
         <div className="flex items-start gap-4">
@@ -998,8 +1011,14 @@ export function MarketplaceIdentityCard({
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <div className="text-[17px] font-bold leading-tight text-slate-900">{title}</div>
-                {subtitle ? <div className="mt-1 text-[13px] font-medium text-slate-500">{subtitle}</div> : null}
+                <div className="text-[17px] font-bold leading-tight break-words text-slate-900 [overflow-wrap:anywhere]">
+                  {title}
+                </div>
+                {subtitle ? (
+                  <div className="mt-1 break-words text-[13px] font-medium text-slate-500 [overflow-wrap:anywhere]">
+                    {subtitle}
+                  </div>
+                ) : null}
               </div>
               {resolvedAction ? <div className="shrink-0">{resolvedAction}</div> : null}
             </div>
@@ -1039,7 +1058,7 @@ export function MarketplaceSupportEntryCard({
       style={
         amberTone
           ? {
-              background: 'linear-gradient(135deg,#FFF8E8 0%,#FFFFFF 48%,#FFF5F7 100%)',
+              background: 'linear-gradient(135deg,#FFF8E8 0%,#FFFFFF 48%,#F3FBFF 100%)',
               borderColor: 'rgba(254,215,170,0.8)',
             }
           : {
@@ -1088,7 +1107,7 @@ export function MarketplaceSupportEntryCard({
       <div
         className="mt-5 flex items-center justify-between border-t pt-4 text-[14px] font-semibold"
         style={{
-          borderColor: amberTone ? 'rgba(254,215,170,0.7)' : 'rgba(252,231,243,0.7)',
+          borderColor: amberTone ? 'rgba(254,215,170,0.7)' : 'var(--ui-border)',
           color: amberTone ? '#b45309' : 'var(--ui-primary)',
         }}
       >
@@ -1148,14 +1167,14 @@ export function MarketplaceSettingsRow({
 
   if (onClick) {
     return (
-      <MotionButton className={className} onClick={onClick} style={{ borderColor: '#f1f5f9' }} type="button">
+      <MotionButton className={className} onClick={onClick} style={{ borderColor: 'var(--ui-border)' }} type="button">
         {content}
       </MotionButton>
     );
   }
 
   return (
-    <div className={className} style={{ borderColor: '#f1f5f9' }}>
+    <div className={className} style={{ borderColor: 'var(--ui-border)' }}>
       {content}
     </div>
   );
@@ -1264,7 +1283,7 @@ export function MarketplaceModalSheet({
         aria-describedby={description ? descriptionId : undefined}
         aria-labelledby={titleId}
         aria-modal="true"
-        className="relative w-full max-w-[400px] overflow-hidden rounded-t-[32px] border border-slate-200 bg-white shadow-[0_-28px_60px_-34px_rgba(15,23,42,0.42)]"
+        className="relative w-full max-w-[480px] overflow-hidden rounded-t-[32px] border border-slate-200 bg-white shadow-[0_-28px_60px_-34px_rgba(15,23,42,0.42)]"
         role="dialog"
       >
         <div className="sticky top-0 z-10 border-b border-slate-100 bg-white/96 px-5 pb-4 pt-4 backdrop-blur">

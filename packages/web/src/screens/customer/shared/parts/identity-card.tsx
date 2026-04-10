@@ -19,9 +19,12 @@ export function MarketplaceIdentityCard({
   title: string;
 }) {
   return (
-    <div className="rounded-[30px] border border-slate-200/80 bg-[linear-gradient(180deg,#FFFFFF_0%,#F8FAFC_100%)] p-5 shadow-[0_22px_50px_-38px_rgba(15,23,42,0.28)]">
+    <div className="rounded-[30px] border border-slate-200/80 bg-[linear-gradient(180deg,#FFFFFF_0%,#FFFAFC_100%)] p-5 shadow-[0_22px_50px_-38px_rgba(15,23,42,0.28)]">
       <div className="flex items-start gap-4">
-        <div className="flex h-[72px] w-[72px] flex-shrink-0 items-center justify-center rounded-full border-2 border-white bg-slate-100 text-[18px] font-bold text-pink-600 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.4)]">
+        <div
+          className="flex h-[72px] w-[72px] flex-shrink-0 items-center justify-center rounded-full border-2 border-white text-[18px] font-bold shadow-[0_12px_24px_-18px_rgba(15,23,42,0.4)]"
+          style={{ backgroundColor: 'var(--ui-surface-muted)', color: 'var(--ui-primary)' }}
+        >
           {title.charAt(0).toUpperCase() || 'B'}
         </div>
         <div className="min-w-0 flex-1">
@@ -41,7 +44,14 @@ export function MarketplaceIdentityCard({
           </div>
 
           {chipLabel ? (
-            <div className="mt-3 inline-flex max-w-full items-center gap-1.5 rounded-full border border-pink-100 bg-pink-50/80 px-3 py-1.5 text-[11px] font-semibold text-pink-600">
+            <div
+              className="mt-3 inline-flex max-w-full items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-semibold"
+              style={{
+                backgroundColor: 'var(--ui-surface-muted)',
+                borderColor: 'var(--ui-border)',
+                color: 'var(--ui-primary)',
+              }}
+            >
               {chipIcon}
               <span className="truncate">{chipLabel}</span>
             </div>

@@ -18,10 +18,19 @@ export function WorkspaceActionButton({
     <a
       className={`flex min-h-[78px] items-start justify-between gap-3 rounded-[24px] border px-4 py-3.5 text-left transition-all active:scale-[0.99] ${
         variant === 'primary'
-          ? 'border-pink-200/80 bg-[linear-gradient(180deg,#F7259B_0%,#E11D87_100%)] text-white shadow-[0_22px_34px_-22px_rgba(233,30,140,0.42)]'
+          ? 'text-white shadow-[0_22px_34px_-22px_rgba(18,59,74,0.38)]'
           : 'border-slate-200 bg-white text-slate-900 shadow-[0_18px_34px_-28px_rgba(15,23,42,0.22)] hover:bg-slate-50'
       }`}
       href={href}
+      style={
+        variant === 'primary'
+          ? {
+              background:
+                'linear-gradient(180deg, var(--ui-primary) 0%, color-mix(in srgb, var(--ui-primary) 66%, var(--ui-secondary)) 100%)',
+              borderColor: 'color-mix(in srgb, var(--ui-primary) 22%, white)',
+            }
+          : undefined
+      }
     >
       <div className="flex min-w-0 items-start gap-3">
         <div

@@ -13,16 +13,21 @@ export function ProfessionalCard({ locale, professional }: { locale: string; pro
 
   return (
     <a
-      className="block cursor-pointer rounded-[28px] border bg-[linear-gradient(180deg,#FFFFFF_0%,#FFF9FC_100%)] p-4 shadow-[0_18px_42px_-36px_rgba(15,23,42,0.24)] transition-all hover:shadow-[0_24px_48px_-34px_rgba(15,23,42,0.28)] active:scale-[0.98]"
+      className="block cursor-pointer rounded-[28px] border p-4 shadow-[0_18px_42px_-36px_rgba(15,23,42,0.24)] transition-all hover:shadow-[0_24px_48px_-34px_rgba(15,23,42,0.28)] active:scale-[0.98]"
       href={`/${locale}/p/${professional.slug}`}
-      style={{ borderColor: '#f0f1f4' }}
+      style={{
+        background: 'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 46%, white) 100%)',
+        borderColor: 'var(--ui-border)',
+      }}
     >
       <div className="flex gap-4">
         <InitialPortrait label={professional.displayName} size="list" />
         <div className="flex min-w-0 flex-1 flex-col justify-center">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <h3 className="truncate text-[16px] font-bold leading-tight text-gray-900">{professional.displayName}</h3>
+              <h3 className="text-[16px] font-bold leading-tight break-words text-gray-900 [overflow-wrap:anywhere]">
+                {professional.displayName}
+              </h3>
               <div className="mt-1 flex flex-wrap items-center gap-2 text-[13px] font-medium">
                 <span style={{ color: 'var(--ui-primary)' }}>
                   {professional.city || (isEnglishLocale(locale) ? 'Selected area' : 'Area pilihan')}
@@ -38,7 +43,9 @@ export function ProfessionalCard({ locale, professional }: { locale: string; pro
             </div>
           </div>
 
-          <p className="mt-3 line-clamp-2 text-[12px] leading-6 text-gray-500">{coverageLabel}</p>
+          <p className="mt-3 line-clamp-2 break-words text-[12px] leading-6 text-gray-500 [overflow-wrap:anywhere]">
+            {coverageLabel}
+          </p>
 
           <div className="mt-3 flex flex-wrap gap-2">
             <StatusPill tone="accent">

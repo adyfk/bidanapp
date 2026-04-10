@@ -59,9 +59,13 @@ export function MarketplaceHomeView({
         >
           <div className="flex items-center justify-between">
             <a
-              className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border-2 shadow-sm"
+              className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border shadow-sm"
               href={session?.isAuthenticated ? profileHref : loginHref}
-              style={{ backgroundColor: '#f1f5f9', borderColor: '#ffffff', color: 'var(--ui-primary)' }}
+              style={{
+                backgroundColor: 'var(--ui-surface-muted)',
+                borderColor: 'var(--ui-border)',
+                color: 'var(--ui-primary)',
+              }}
             >
               <span className="text-sm font-bold">{profileInitial(session)}</span>
             </a>
@@ -73,9 +77,9 @@ export function MarketplaceHomeView({
               </div>
             </div>
             <a
-              className="relative flex h-11 w-11 items-center justify-center rounded-full shadow-sm"
+              className="relative flex h-11 w-11 items-center justify-center rounded-full border shadow-sm"
               href={notificationsHref}
-              style={{ backgroundColor: '#ffffff', color: '#1f2937' }}
+              style={{ backgroundColor: '#ffffff', borderColor: 'var(--ui-border)', color: '#1f2937' }}
             >
               <Bell className="h-5 w-5" />
             </a>
@@ -126,12 +130,19 @@ export function MarketplaceHomeView({
                   boxShadow: 'var(--ui-shadow-hero)',
                 }}
               >
-                <div className="mb-4 flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-[13px] font-medium backdrop-blur-sm">
-                      {en ? 'Customer activity' : 'Aktivitas customer'}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/92">
+                      {en ? 'Customer console' : 'Ruang customer'}
                     </div>
-                    <div className="text-[13px] font-medium text-white/82">{viewerLabel(session, locale)}</div>
+                    <h2 className="mt-4 text-[24px] font-bold leading-tight text-white">
+                      {en ? 'Keep family care easy to scan' : 'Pantau kebutuhan keluarga lebih mudah'}
+                    </h2>
+                    <p className="mt-2 text-[13px] leading-relaxed text-white/84">
+                      {en
+                        ? 'Track active orders, reminders, and support from one calm workspace.'
+                        : 'Pantau order aktif, pengingat, dan bantuan dari satu workspace yang lebih tenang dibaca.'}
+                    </p>
                   </div>
                   <a
                     className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md transition-transform hover:scale-105"
@@ -142,7 +153,44 @@ export function MarketplaceHomeView({
                   </a>
                 </div>
 
-                <div className="rounded-[20px] bg-white p-3 text-gray-800">
+                <div className="mt-5 grid grid-cols-2 gap-3">
+                  <div className="rounded-[22px] border border-white/16 bg-white/12 p-4 backdrop-blur-sm">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/72">
+                      {en ? 'Viewer' : 'Akun aktif'}
+                    </p>
+                    <p className="mt-2 text-[16px] font-bold leading-snug text-white">
+                      {session?.customerProfile?.displayName || (en ? 'Customer account' : 'Akun customer')}
+                    </p>
+                    <p className="mt-2 text-[12px] leading-5 text-white/72">{viewerLabel(session, locale)}</p>
+                  </div>
+                  <div className="rounded-[22px] border border-white/16 bg-white/12 p-4 backdrop-blur-sm">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/72">
+                      {en ? 'Fast lane' : 'Akses cepat'}
+                    </p>
+                    <div className="mt-2 space-y-2 text-[12px] font-semibold text-white">
+                      <p>{en ? 'Orders and payment follow-up' : 'Order dan tindak lanjut pembayaran'}</p>
+                      <p>{en ? 'Support and account reminders' : 'Support dan pengingat akun'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  <a
+                    className="inline-flex min-h-11 items-center justify-center rounded-full border border-white/18 bg-white/12 px-4 py-3 text-[13px] font-semibold text-white transition-colors hover:bg-white/16"
+                    href={ordersHref}
+                  >
+                    {en ? 'Open activity' : 'Buka aktivitas'}
+                  </a>
+                  <a
+                    className="inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 py-3 text-[13px] font-semibold transition-colors hover:bg-slate-50"
+                    href={supportHref}
+                    style={{ color: 'var(--ui-primary)' }}
+                  >
+                    {en ? 'Open support' : 'Buka support'}
+                  </a>
+                </div>
+
+                <div className="mt-4 rounded-[20px] bg-white/94 p-4 text-gray-800">
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                       <div
@@ -225,7 +273,7 @@ export function MarketplaceHomeView({
             </div>
           </section>
 
-          <MarketplaceSurfaceCard tone="blush" className="p-6">
+          <MarketplaceSurfaceCard tone="white" className="p-6">
             <div className="flex items-start gap-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-[var(--ui-primary)] shadow-sm">
                 <ShieldCheck className="h-5 w-5" />
