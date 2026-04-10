@@ -219,18 +219,6 @@ export default async function LocalizedHomePage(props: {
 `,
   ],
   [
-    path.join(appDir, 'src/app/[locale]/home/page.tsx'),
-    `import { PlatformMarketplaceHomePage } from '@marketplace/web/public/marketplace-home-page';
-
-export default async function MarketplaceHomePageRoute(props: {
-  params: Promise<{ locale: string }>;
-}) {
-  const { locale } = await props.params;
-  return <PlatformMarketplaceHomePage locale={locale} platformId={'${slug}' as never} />;
-}
-`,
-  ],
-  [
     path.join(appDir, 'src/app/[locale]/explore/page.tsx'),
     `import { PlatformExplorePage } from '@marketplace/web/public/explore-page';
 
@@ -296,7 +284,7 @@ export default async function LoginPage(props: {
 
   return (
     <ViewerAuthPage
-      defaultNextPath={searchParams.next || createLocalizedPath(locale, '/home')}
+      defaultNextPath={searchParams.next || createLocalizedPath(locale)}
       initialSession={session}
       locale={locale}
       mode="login"
@@ -324,7 +312,7 @@ export default async function RegisterPage(props: {
 
   return (
     <ViewerAuthPage
-      defaultNextPath={searchParams.next || createLocalizedPath(locale, '/home')}
+      defaultNextPath={searchParams.next || createLocalizedPath(locale)}
       initialSession={session}
       locale={locale}
       mode="register"
@@ -352,7 +340,7 @@ export default async function ForgotPasswordPage(props: {
 
   return (
     <ViewerAuthPage
-      defaultNextPath={searchParams.next || createLocalizedPath(locale, '/home')}
+      defaultNextPath={searchParams.next || createLocalizedPath(locale)}
       initialSession={session}
       locale={locale}
       mode="forgot-password"

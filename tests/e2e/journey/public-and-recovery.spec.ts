@@ -1,13 +1,13 @@
 import { expect, test } from '@playwright/test';
 import { beginJourney, captureJourneyStep, completeJourney } from '../journey';
 
-test('journey: visitor can browse public Bidan surfaces from onboarding to detail pages', async ({
+test('journey: visitor can browse public Bidan surfaces from the live home feed to detail pages', async ({
   page,
 }, testInfo) => {
   const journey = await beginJourney(testInfo, {
     category: 'public',
     description:
-      'A visitor starts from onboarding, enters the public marketplace, and reaches professional and service detail pages.',
+      'A visitor starts from the public Bidan home feed, then reaches professional and service detail pages without login.',
     id: 'public-visitor-browse',
     persona: 'visitor',
     preconditions: ['Bidan demo seed aktif.', 'Approved professional dan seeded offerings tersedia di katalog publik.'],
@@ -26,36 +26,17 @@ test('journey: visitor can browse public Bidan surfaces from onboarding to detai
       page,
       {
         actionKind: 'navigate',
-        actionLabel: 'Buka root onboarding Bidan',
-        assertions: ['Splash onboarding tampil.', 'Status redirect dan CTA manual ke home terlihat.'],
-        expectedResult: 'Visitor melihat intro singkat sebelum diarahkan ke home publik Bidan.',
+        actionLabel: 'Buka root public home Bidan',
+        assertions: ['Home publik langsung tampil di /id.', 'Aktivitas, layanan, dan profesional tepercaya terlihat.'],
+        expectedResult: 'Visitor masuk langsung ke home publik canonical.',
         routeId: '/id',
-        screenId: 'bidan-onboarding',
-        title: 'Onboarding screen is ready',
+        screenId: 'public-home-root',
+        title: 'Public home root is ready',
       },
       async () => {
         await page.goto('/id');
-        await expect(page.getByText(/BidanCare/)).toBeVisible();
-        await expect(page.getByRole('link', { name: /Enter now|Masuk sekarang/i })).toBeVisible();
-      },
-    );
-
-    await captureJourneyStep(
-      journey,
-      page,
-      {
-        actionKind: 'navigate',
-        actionLabel: 'Masuk ke jalur visitor',
-        assertions: ['Visitor diarahkan ke /id/home.', 'Home public menampilkan aktivitas, layanan, dan profesional.'],
-        expectedResult: 'Visitor masuk ke home publik tanpa perlu login.',
-        routeId: '/id/home',
-        screenId: 'public-home',
-        title: 'Visitor enters the public home feed',
-      },
-      async () => {
-        await page.getByRole('link', { name: /Enter now|Masuk sekarang/i }).click();
-        await page.waitForURL(/\/id\/home/);
         await expect(page.getByRole('heading', { name: /Aktivitas|Activity/i })).toBeVisible();
+        await expect(page.getByRole('heading', { name: /Layanan populer|Popular services/i })).toBeVisible();
       },
     );
 
@@ -124,6 +105,14 @@ test('journey: visitor can browse public Bidan surfaces from onboarding to detai
   } finally {
     await completeJourney(journey, { status });
   }
+});
+
+test('journey: removed localized home alias no longer renders the Bidan home', async ({ page }) => {
+  const removedHomePath = ['', 'id', 'home'].join('/');
+  const response = await page.goto(removedHomePath);
+
+  expect(response?.status()).toBe(404);
+  await expect(page.getByRole('heading', { name: /Aktivitas|Activity/i })).toHaveCount(0);
 });
 
 test('journey: localhost local auth routes redirect to the .lvh.me family', async ({ page }, testInfo) => {

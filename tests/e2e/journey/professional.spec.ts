@@ -37,6 +37,7 @@ test('journey: draft professional can open the apply flow and see the editable d
       async () => {
         await page.goto('/id/professionals/apply');
         await expect(page.getByText(/Lengkapi aplikasi Anda|Complete your application/i)).toBeVisible();
+        await expect(page.getByText(/4 milestone tetap untuk form profesional/i)).toBeVisible();
         await expect(page.getByRole('button', { name: /Simpan|Kirim|Submit/i }).first()).toBeVisible();
       },
     );
@@ -161,7 +162,7 @@ test('journey: approved professional can operate the workspace and publish an of
   });
 
   let status: 'passed' | 'failed' = 'passed';
-  const title = `Journey report layanan ${Date.now()}`;
+  const title = `Paket nifas sore ${Date.now().toString().slice(-5)}`;
 
   try {
     await loginViewer(page, viewerAccounts.approvedProfessional.phone, viewerAccounts.approvedProfessional.password);
@@ -176,7 +177,7 @@ test('journey: approved professional can operate the workspace and publish an of
       },
       async () => {
         await page.goto('/id/professionals/dashboard');
-        await expect(page.getByText(/Ringkasan profil/i)).toBeVisible();
+        await expect(page.getByText(/Kontrol kesiapan/i)).toBeVisible();
       },
     );
 
@@ -190,7 +191,7 @@ test('journey: approved professional can operate the workspace and publish an of
       },
       async () => {
         await page.goto('/id/professionals/dashboard/offerings');
-        await expect(page.getByText(/Tambah layanan/i)).toBeVisible();
+        await expect(page.getByText(/Composer layanan/i)).toBeVisible();
       },
     );
 
@@ -291,6 +292,167 @@ test('journey: approved professional can operate the workspace and publish an of
         },
       );
     }
+  } catch (error) {
+    status = 'failed';
+    throw error;
+  } finally {
+    await completeJourney(journey, { status });
+  }
+});
+
+test('journey: empty professional sees milestone draft state and calm workspace empties', async ({
+  page,
+}, testInfo) => {
+  const journey = await beginJourney(testInfo, {
+    category: 'professional',
+    description:
+      'A newly seeded professional with a minimal draft profile can open both apply and workspace without the UI collapsing into empty chaos.',
+    id: 'professional-empty-state-audit',
+    preconditions: ['Bidan demo seed aktif.', 'Akun empty professional tersedia dengan profil draft minimal.'],
+    seed: {
+      actor: 'professional',
+      credentialLabel: `${viewerAccounts.emptyProfessional.phone} / ${viewerAccounts.emptyProfessional.password}`,
+    },
+    title: 'Empty professional state audit',
+  });
+
+  let status: 'passed' | 'failed' = 'passed';
+
+  try {
+    await loginViewer(page, viewerAccounts.emptyProfessional.phone, viewerAccounts.emptyProfessional.password);
+
+    await captureJourneyStep(
+      journey,
+      page,
+      {
+        actionKind: 'navigate',
+        actionLabel: 'Buka apply flow professional empty state',
+        assertions: ['Rail milestone draft tampil.', 'Form identitas dan dokumen tetap rapi walau baru mulai.'],
+        expectedResult: 'Professional baru bisa membaca progres onboarding dengan jelas sejak state paling kosong.',
+        routeId: '/id/professionals/apply',
+        screenId: 'professional-empty-apply',
+        title: 'Empty professional apply state is readable',
+      },
+      async () => {
+        await page.goto('/id/professionals/apply');
+        await expect(page.getByText(/Progress aplikasi/i)).toBeVisible();
+        await expect(page.getByText(/Identitas/i).first()).toBeVisible();
+      },
+    );
+
+    await captureJourneyStep(
+      journey,
+      page,
+      {
+        actionKind: 'navigate',
+        actionLabel: 'Buka workspace overview empty professional',
+        assertions: ['Dashboard tetap tampil.', 'Section overview menunjukkan checkpoint yang masih kosong.'],
+        expectedResult:
+          'Workspace profesional baru tetap terasa intentional walau belum punya offering, coverage, atau order.',
+        routeId: '/id/professionals/dashboard',
+        screenId: 'professional-empty-workspace',
+        title: 'Empty professional workspace stays intentional',
+      },
+      async () => {
+        await page.goto('/id/professionals/dashboard');
+        await expect(page.getByText(/Kontrol kesiapan/i)).toBeVisible();
+        await expect(page.getByText(/Aksi berikutnya/i)).toBeVisible();
+      },
+    );
+  } catch (error) {
+    status = 'failed';
+    throw error;
+  } finally {
+    await completeJourney(journey, { status });
+  }
+});
+
+test('journey: empty professional sees a readable apply validation state', async ({ page }, testInfo) => {
+  const journey = await beginJourney(testInfo, {
+    category: 'professional',
+    description:
+      'A newly seeded professional submits an incomplete application and sees a controlled validation state instead of a broken form.',
+    id: 'professional-apply-validation-state',
+    preconditions: ['Bidan demo seed aktif.', 'Akun empty professional tersedia dan belum melengkapi dokumen wajib.'],
+    seed: {
+      actor: 'professional',
+      credentialLabel: `${viewerAccounts.emptyProfessional.phone} / ${viewerAccounts.emptyProfessional.password}`,
+    },
+    title: 'Professional apply validation state',
+  });
+
+  let status: 'passed' | 'failed' = 'passed';
+
+  try {
+    await loginViewer(page, viewerAccounts.emptyProfessional.phone, viewerAccounts.emptyProfessional.password);
+
+    await captureJourneyStep(
+      journey,
+      page,
+      {
+        actionKind: 'submit',
+        actionLabel: 'Kirim aplikasi profesional yang belum lengkap',
+        assertions: ['Banner validasi muncul.', 'Form tetap bisa dibaca dan tidak kehilangan progress rail.'],
+        expectedResult: 'Professional baru mendapat error validasi yang jelas ketika field wajib belum dilengkapi.',
+        routeId: '/id/professionals/apply',
+        screenId: 'professional-apply-validation',
+        title: 'Incomplete professional application shows validation feedback',
+      },
+      async () => {
+        await page.goto('/id/professionals/apply');
+        await page.getByRole('button', { name: /Kirim aplikasi|Save application/i }).click();
+        await expect(page.getByText(/Nomor STR wajib diisi|STR license number is required/i)).toBeVisible();
+        await expect(page.getByText(/Progress aplikasi/i)).toBeVisible();
+      },
+    );
+  } catch (error) {
+    status = 'failed';
+    throw error;
+  } finally {
+    await completeJourney(journey, { status });
+  }
+});
+
+test('journey: approved professional desktop smoke stays centered inside the mobile shell', async ({
+  page,
+}, testInfo) => {
+  const journey = await beginJourney(testInfo, {
+    category: 'professional',
+    description:
+      'An approved professional opens the workspace at desktop width and confirms the centered mobile shell still looks intentional.',
+    id: 'professional-desktop-shell-smoke',
+    preconditions: ['Bidan demo seed aktif.', 'Akun professional approved tersedia.'],
+    seed: {
+      actor: 'professional',
+      credentialLabel: `${viewerAccounts.approvedProfessional.phone} / ${viewerAccounts.approvedProfessional.password}`,
+    },
+    title: 'Professional desktop shell smoke',
+  });
+
+  let status: 'passed' | 'failed' = 'passed';
+
+  try {
+    await page.setViewportSize({ width: 1280, height: 960 });
+    await loginViewer(page, viewerAccounts.approvedProfessional.phone, viewerAccounts.approvedProfessional.password);
+
+    await captureJourneyStep(
+      journey,
+      page,
+      {
+        actionKind: 'verify',
+        actionLabel: 'Audit workspace professional di viewport desktop 1280px',
+        assertions: ['Hero workspace terlihat.', 'Rail section tetap centered dan mudah dipindai.'],
+        expectedResult: 'Shell mobile tetap intentional saat centered di layar desktop lebar.',
+        routeId: '/id/professionals/dashboard',
+        screenId: 'professional-desktop-shell',
+        title: 'Desktop mobile shell remains intentional',
+      },
+      async () => {
+        await page.goto('/id/professionals/dashboard');
+        await expect(page.getByText(/Kontrol kesiapan/i)).toBeVisible();
+        await expect(page.getByText(/Profil publik/i)).toBeVisible();
+      },
+    );
   } catch (error) {
     status = 'failed';
     throw error;

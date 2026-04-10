@@ -49,8 +49,8 @@ test('journey: customer login and native device control', async ({ browser, page
         await page.getByLabel(/Nomor ponsel|Phone number/i).fill(viewerAccounts.customer.phone);
         await page.getByLabel(/^Password$/i).fill(viewerAccounts.customer.password);
         await page.getByRole('button', { name: /Masuk|Sign in/i }).click();
-        await page.waitForURL(/\/id\/home/);
-        await expect(page).toHaveURL(/\/id\/home/);
+        await page.waitForURL(/\/id$/);
+        await expect(page).toHaveURL(/\/id$/);
       },
     );
 
@@ -225,10 +225,10 @@ test('journey: new customer can register from the native Bidan screen', async ({
       {
         actionKind: 'submit',
         actionLabel: 'Isi identitas customer baru lalu submit',
-        assertions: ['Akun baru dibuat.', 'Viewer langsung diarahkan ke /id/home.'],
+        assertions: ['Akun baru dibuat.', 'Viewer langsung diarahkan ke /id.'],
         entityRefs: [uniquePhone],
         expectedResult: 'Customer berhasil membuat akun baru dan masuk ke halaman utama Bidan.',
-        routeId: '/id/home',
+        routeId: '/id',
         screenId: 'customer-home-screen',
         title: 'Customer registers successfully',
       },
@@ -238,7 +238,7 @@ test('journey: new customer can register from the native Bidan screen', async ({
         await page.getByLabel(/Kota/i).fill('Jakarta');
         await page.getByLabel(/Password/i).fill('JourneyReg#2026');
         await page.getByRole('button', { name: /Buat akun|Create account/i }).click();
-        await page.waitForURL(/\/id\/home/);
+        await page.waitForURL(/\/id$/);
         await expect(page.getByRole('heading', { name: /Aktivitas|Activity/i })).toBeVisible();
       },
     );

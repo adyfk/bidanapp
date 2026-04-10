@@ -147,7 +147,7 @@ test('journey: admin can move across the remaining console sections', async ({ p
       async () => {
         await page.goto('http://admin.lvh.me:3005/orders');
         await expect(page.getByRole('heading', { name: 'Order desk', exact: true })).toBeVisible();
-        await expect(page.getByRole('button', { name: /Mark paid/i }).first()).toBeVisible();
+        await expect(page.getByRole('button', { name: /^Paid$/i }).first()).toBeVisible();
       },
     );
 
@@ -234,7 +234,7 @@ test('journey: admin can triage a newly created support ticket', async ({ browse
         await ticketCard.getByLabel(/Status/i).fill('triaged');
         await ticketCard.getByLabel(/Catatan ke customer/i).fill('Tim support sedang meninjau laporan Anda.');
         await ticketCard.getByLabel(/Catatan internal/i).fill('Journey report triage pass.');
-        await ticketCard.getByRole('button', { name: /Simpan triage/i }).click();
+        await ticketCard.getByRole('button', { name: /^Simpan$/i }).click();
         await expect(page.getByText(/triaged/i).first()).toBeVisible();
       },
     );
@@ -293,11 +293,11 @@ test('journey: admin can create refund and payout records from seeded queues', a
       },
       async () => {
         await page
-          .getByRole('button', { name: /Pakai order ini/i })
+          .getByRole('button', { name: /^Pakai$/i })
           .first()
           .click();
         await page.getByLabel(/Alasan/i).fill(refundReason);
-        await page.getByRole('button', { name: /^Buat refund$/i }).click();
+        await page.getByRole('button', { name: /^Buat$/i }).click();
         await expect(page.getByText(refundReason)).toBeVisible();
       },
     );
@@ -325,7 +325,7 @@ test('journey: admin can create refund and payout records from seeded queues', a
         title: 'Admin advances a seeded payout record',
       },
       async () => {
-        const processingButton = page.getByRole('button', { name: /^Processing$/i });
+        const processingButton = page.getByRole('button', { name: /^Process$/i });
         const pendingCards = page
           .getByRole('article')
           .filter({ hasText: /pending/i })
@@ -333,7 +333,7 @@ test('journey: admin can create refund and payout records from seeded queues', a
 
         if ((await pendingCards.count()) === 0) {
           await page
-            .getByRole('button', { name: /Pakai profil ini/i })
+            .getByRole('button', { name: /^Pakai$/i })
             .first()
             .click();
           await page.getByLabel(/Nominal/i).fill(payoutAmount);
@@ -341,7 +341,7 @@ test('journey: admin can create refund and payout records from seeded queues', a
             page.waitForResponse(
               (response) => response.request().method() === 'POST' && /\/api\/v1\/admin\/payouts$/.test(response.url()),
             ),
-            page.getByRole('button', { name: /^Buat payout$/i }).click(),
+            page.getByRole('button', { name: /^Buat$/i }).click(),
           ]);
           expect(createResponse.ok()).toBeTruthy();
           await expect(pendingCards.first()).toBeVisible();
@@ -357,7 +357,7 @@ test('journey: admin can create refund and payout records from seeded queues', a
             (response) =>
               response.request().method() === 'POST' && /\/api\/v1\/admin\/payouts\/.+\/status$/.test(response.url()),
           ),
-          pendingCard.getByRole('button', { name: /^Processing$/i }).click(),
+          pendingCard.getByRole('button', { name: /^Process$/i }).click(),
         ]);
         expect(updateResponse.ok()).toBeTruthy();
         await expect(page.getByText(/processing/i).first()).toBeVisible();

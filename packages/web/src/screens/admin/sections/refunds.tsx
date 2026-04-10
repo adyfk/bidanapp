@@ -56,7 +56,7 @@ export function RefundsSection({
                       }
                       type="button"
                     >
-                      Pakai order ini
+                      Pakai
                     </SecondaryButton>
                   }
                 />
@@ -89,7 +89,7 @@ export function RefundsSection({
         </div>
         <div className="mt-6">
           <PrimaryButton disabled={busy || !form.orderId.trim()} onClick={() => void onCreate()} type="button">
-            {busy ? 'Menyimpan...' : 'Buat refund'}
+            {busy ? 'Simpan...' : 'Buat'}
           </PrimaryButton>
         </div>
       </SurfaceCard>
@@ -118,7 +118,7 @@ export function RefundsSection({
                       onClick={() => void onStatusChange(refund.id, 'processed')}
                       type="button"
                     >
-                      Mark processed
+                      Processed
                     </PrimaryButton>
                   </>
                 }

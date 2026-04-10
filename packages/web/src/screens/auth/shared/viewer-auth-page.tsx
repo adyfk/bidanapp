@@ -65,7 +65,7 @@ export function ViewerAuthPage({
   const registerHref = createPlatformRegisterPath(locale, defaultNextPath);
   const forgotPasswordHref = createPlatformForgotPasswordPath(locale, defaultNextPath);
   const securityHref = createViewerSecurityHref(locale, platformId);
-  const visitorHref = createLocalizedPath(locale, '/home');
+  const visitorHref = createLocalizedPath(locale);
   const professionalHref = createLocalizedPath(locale, '/professionals/apply');
 
   useEffect(() => {
@@ -126,7 +126,7 @@ export function ViewerAuthPage({
           ? await viewerAuth.registerAccount(viewerAuthClient, registerForm)
           : await viewerAuth.createSession(viewerAuthClient, loginForm);
       setSession(payload);
-      redirectToTarget(defaultNextPath || createLocalizedPath(locale, '/home'));
+      redirectToTarget(defaultNextPath || createLocalizedPath(locale));
     } catch (error) {
       setFeedbackMessage(getFriendlyAuthError(error), 'danger');
     } finally {
@@ -315,7 +315,14 @@ export function ViewerAuthPage({
         title={headerTitle}
       />
 
-      <section className="rounded-[28px] border border-gray-100 bg-white p-5 shadow-sm">
+      <section
+        className="rounded-[30px] border p-5 shadow-[0_24px_48px_-34px_rgba(88,49,66,0.16)]"
+        style={{
+          background:
+            'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 42%, white) 100%)',
+          borderColor: 'var(--ui-border)',
+        }}
+      >
         {session?.isAuthenticated ? (
           <>
             <MarketplaceSectionHeader
@@ -325,14 +332,14 @@ export function ViewerAuthPage({
               }
             />
             <div className="space-y-3">
-              <a href={defaultNextPath || createLocalizedPath(locale, '/home')}>
+              <a href={defaultNextPath || createLocalizedPath(locale)}>
                 <PrimaryButton className="w-full" type="button">
                   {en ? 'Continue to app' : 'Lanjut ke aplikasi'}
                 </PrimaryButton>
               </a>
               <a href={securityHref}>
                 <SecondaryButton className="w-full" type="button">
-                  {en ? 'Open account settings' : 'Buka pengaturan akun'}
+                  {en ? 'Account' : 'Akun'}
                 </SecondaryButton>
               </a>
               <SecondaryButton className="w-full" disabled={busy} onClick={() => void handleLogout()} type="button">
@@ -453,55 +460,73 @@ export function ViewerAuthPage({
       </section>
 
       {!session?.isAuthenticated && mode !== 'forgot-password' ? (
-        <>
-          <div className="rounded-[28px] bg-slate-950 px-5 py-4 text-white shadow-[0_22px_40px_-30px_rgba(15,23,42,0.88)]">
-            <p className="text-[15px] font-bold">{en ? 'Continue as visitor' : 'Lanjut sebagai visitor'}</p>
-            <p className="mt-2 text-[12px] leading-5 text-white/72">
-              {en
-                ? 'Explore services and professionals without signing in.'
-                : 'Jelajahi layanan dan profesional tanpa harus masuk.'}
-            </p>
-            <a href={visitorHref}>
-              <SecondaryButton
-                className="mt-4 w-full border-white/10 bg-white/10 text-white hover:bg-white/12"
-                type="button"
-              >
-                {en ? 'Open visitor mode' : 'Buka mode visitor'}
-              </SecondaryButton>
-            </a>
-          </div>
+        <section
+          className="rounded-[28px] border p-5 shadow-[0_24px_48px_-36px_rgba(88,49,66,0.14)]"
+          style={{
+            background:
+              'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 34%, white) 100%)',
+            borderColor: 'var(--ui-border)',
+          }}
+        >
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em]" style={{ color: 'var(--ui-primary)' }}>
+            {en ? 'Other paths' : 'Jalur lain'}
+          </p>
+          <h2 className="mt-3 text-[18px] font-bold text-slate-900">
+            {en ? 'Keep browsing without clutter' : 'Tetap lanjut tanpa terasa berat'}
+          </h2>
+          <p className="mt-2 text-[13px] leading-6 text-slate-500">
+            {en
+              ? 'Visitor and professional paths stay available, but they now sit as calmer secondary options.'
+              : 'Jalur visitor dan profesional tetap tersedia, tetapi sengaja diturunkan sebagai opsi sekunder yang lebih tenang.'}
+          </p>
 
-          {!isHub ? (
-            <section
-              className="rounded-[26px] border px-5 py-4"
+          <div className={`mt-4 grid gap-3 ${isHub ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2'}`}>
+            <a
+              className="rounded-[24px] border p-4 shadow-[0_18px_36px_-30px_rgba(88,49,66,0.12)] transition-all hover:-translate-y-0.5 active:scale-[0.99]"
+              href={visitorHref}
               style={{
-                borderColor: '#FFD6E5',
-                background: 'linear-gradient(135deg,#FFF0F5 0%,#ffffff 55%,#FFE8F0 100%)',
+                background:
+                  'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 56%, white) 100%)',
+                borderColor: 'var(--ui-border)',
               }}
             >
-              <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-pink-500 shadow-sm">
-                  <UserPlus className="h-5 w-5" />
+              <p className="text-[15px] font-bold text-slate-900">{en ? 'Visitor mode' : 'Mode visitor'}</p>
+              <p className="mt-2 text-[12px] leading-5 text-slate-500">
+                {en
+                  ? 'Explore services and professionals first.'
+                  : 'Jelajahi layanan dan profesional lebih dulu tanpa login.'}
+              </p>
+            </a>
+
+            {!isHub ? (
+              <a
+                className="rounded-[24px] border p-4 shadow-[0_18px_36px_-30px_rgba(88,49,66,0.12)] transition-all hover:-translate-y-0.5 active:scale-[0.99]"
+                href={professionalHref}
+                style={{
+                  background:
+                    'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 56%, white) 100%)',
+                  borderColor: 'var(--ui-border)',
+                }}
+              >
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-pink-500 shadow-sm">
+                    <UserPlus className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[15px] font-bold text-slate-900">
+                      {en ? 'Professional path' : 'Jalur profesional'}
+                    </p>
+                    <p className="mt-2 text-[12px] leading-5 text-slate-500">
+                      {en
+                        ? 'Manage services, review state, and work readiness.'
+                        : 'Kelola layanan, status review, dan kesiapan kerja dari jalur profesional.'}
+                    </p>
+                  </div>
                 </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-[15px] font-bold text-gray-900">
-                    {en ? 'Continue as a professional' : 'Lanjut sebagai profesional'}
-                  </p>
-                  <p className="mt-1 text-[12px] leading-relaxed text-gray-500">
-                    {en
-                      ? 'Open the professional path to manage services, review, and your work schedule.'
-                      : 'Buka jalur profesional untuk mengelola layanan, review, dan jadwal kerja Anda.'}
-                  </p>
-                </div>
-              </div>
-              <a href={professionalHref}>
-                <SecondaryButton className="mt-4 w-full" type="button">
-                  {en ? 'Open professional path' : 'Buka jalur profesional'}
-                </SecondaryButton>
               </a>
-            </section>
-          ) : null}
-        </>
+            ) : null}
+          </div>
+        </section>
       ) : null}
     </MarketplaceAuthShell>
   );

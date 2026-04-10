@@ -10,33 +10,35 @@ export type {
 export { cx, MASTER_DESIGN_TOKENS, MASTER_MOTION_TOKENS, themeStyleVariables, toneStyle } from './foundations';
 export type { MarketplaceNavItem } from './marketplace';
 export {
-  MarketplaceAccessHero,
   MarketplaceAccessOptionCard,
-  MarketplaceAccessTabs,
   MarketplaceActivityHeader,
-  MarketplaceBottomNav,
   MarketplaceCategoryTile,
   MarketplaceChatComposer,
   MarketplaceChatThread,
+  MarketplaceGlassPanel,
+  MarketplaceGradientStage,
+  MarketplaceLocalePills,
+  MarketplacePageHeader,
+  MarketplaceSegmentedTabs,
+} from './marketplace';
+export {
+  MarketplaceAccessHero,
+  MarketplaceAccessTabs,
+  MarketplaceBottomNav,
   MarketplaceDangerButton,
   MarketplaceEmptyCard,
   MarketplaceFeaturePill,
   MarketplaceFilterChip,
-  MarketplaceGlassPanel,
-  MarketplaceGradientStage,
   MarketplaceHeaderIconButton,
   MarketplaceHeroBanner,
   MarketplaceIdentityCard,
   MarketplaceListCard,
-  MarketplaceLocalePills,
   MarketplaceMobileShell,
   MarketplaceNotificationGroup,
-  MarketplacePageHeader,
   MarketplaceProfileSettingsSheet,
   MarketplaceQuickActionCard,
   MarketplaceSearchField,
   MarketplaceSectionHeader,
-  MarketplaceSegmentedTabs,
   MarketplaceSettingsCard,
   MarketplaceSettingsRow,
   MarketplaceStatTile,
@@ -46,7 +48,7 @@ export {
   MarketplaceSupportSheet,
   MarketplaceSurfaceCard,
   MarketplaceTopPill,
-} from './marketplace';
+} from './marketplace-lite';
 export {
   MarketplaceActivePill,
   MarketplaceAnimatedCard,

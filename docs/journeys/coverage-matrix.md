@@ -17,6 +17,7 @@ Dokumen ini merangkum coverage resmi untuk Playwright-only journey proof.
 ## Customer
 
 - `customer-home-profile-notifications`
+- `customer-empty-state-surfaces`
 - `customer-order-payment`
 - `customer-support-ticket`
 
@@ -24,6 +25,9 @@ Dokumen ini merangkum coverage resmi untuk Playwright-only journey proof.
 
 - `professional-draft-apply-state`
 - `professional-apply-review-state`
+- `professional-apply-validation-state`
+- `professional-empty-state-audit`
+- `professional-desktop-shell-smoke`
 - `professional-submitted-offerings-gated`
 - `professional-workspace-approved`
 
@@ -39,9 +43,9 @@ Dokumen ini merangkum coverage resmi untuk Playwright-only journey proof.
 
 Setiap route aktif harus minimal tersentuh oleh satu journey:
 
-- public Bidan: onboarding, home, explore, services, professional detail, service detail
+- public Bidan: root home `/{locale}`, removed-home guard, explore, services, professional detail, service detail
 - auth and account routes di `bidan`: login, register, forgot-password, sessions, security
-- customer: home, profile, notifications, orders, order detail, support
+- customer: home, profile, notifications, orders, order detail, support, empty-state support, empty-state notifications
 - professional: apply, dashboard overview, orders, offerings, portfolio, trust, coverage, availability, notifications, profile
 - admin: login, overview, customers, orders, professionals, support, refunds, payouts, studio
 
@@ -65,5 +69,9 @@ Mutasi penting yang harus tetap punya proof:
 
 - localhost ke `.lvh.me`
 - invalid login
+- empty customer surfaces
 - submitted professional publish gate
 - submitted professional review state
+- professional apply validation state
+- empty professional workspace/apply state
+- desktop centered mobile-shell smoke di workspace professional

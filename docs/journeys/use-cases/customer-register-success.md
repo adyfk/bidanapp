@@ -18,7 +18,7 @@ Membuktikan bahwa customer baru dapat mendaftar langsung dari layar native Bidan
 1. Buka `/id/register`.
 2. Isi nama, nomor, kota, dan password.
 3. Submit register.
-4. Verifikasi redirect ke `/id/home`.
+4. Verifikasi redirect ke `/id`.
 
 ## Review links
 

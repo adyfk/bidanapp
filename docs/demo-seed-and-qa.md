@@ -54,6 +54,8 @@ Viewer accounts:
 - approved professional: `+628111111002`
 - submitted professional: `+628111111003`
 - draft professional: `+628111111004`
+- empty customer: `+628111111005`
+- empty professional: `+628111111006`
 
 Admin password:
 
@@ -77,6 +79,7 @@ Professional:
 - approved professional storefront
 - submitted application waiting review
 - draft application
+- empty professional draft workspace
 - uploaded documents nyata
 - portfolio, credentials, stories, coverage, availability, notification preferences
 - nama, headline, bio, education history, dan notes yang lebih panjang untuk stress test UI realistis
@@ -96,6 +99,7 @@ Conversation and support:
 - order-linked thread
 - support tickets `new`, `triaged`, `resolved`
 - order notes, support subject/detail, fulfillment notes, dan public/admin notes dengan copy multi-baris yang lebih realistis
+- empty customer tanpa order, notifikasi, dan tiket untuk audit empty-state
 
 ## Minimum QA Scenarios
 
@@ -114,6 +118,8 @@ Professional:
 2. cek state onboarding dan dokumen
 3. login sebagai approved professional
 4. cek dashboard, offerings, dan publish gating
+5. login sebagai empty professional
+6. cek apply milestone rail dan workspace empty-state
 
 Admin:
 
@@ -141,5 +147,9 @@ Admin:
 `npm run e2e:journey` memverifikasi:
 
 - journey public, auth, customer, support, payments, professional, dan admin
+- root locale `/{locale}` sebagai canonical public/customer home tanpa route home lama
+- empty-state customer dan professional
+- validation state apply profesional saat field wajib belum lengkap
+- desktop smoke `1280px` untuk centered mobile-shell profesional
 - screenshot full-page per langkah journey untuk audit UI
 - artefak report HTML yang siap dipakai untuk checklist manual dan handoff review

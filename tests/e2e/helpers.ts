@@ -5,6 +5,8 @@ export const viewerAccounts = {
   approvedProfessional: { password: 'BidanDemo#2026', phone: '+628111111002' },
   customer: { password: 'BidanDemo#2026', phone: '+628111111001' },
   draftProfessional: { password: 'BidanDemo#2026', phone: '+628111111004' },
+  emptyCustomer: { password: 'BidanDemo#2026', phone: '+628111111005' },
+  emptyProfessional: { password: 'BidanDemo#2026', phone: '+628111111006' },
   submittedProfessional: { password: 'BidanDemo#2026', phone: '+628111111003' },
 };
 
@@ -19,8 +21,8 @@ export async function loginViewer(page: Page, phone: string, password: string) {
   await form.getByLabel(/Nomor ponsel|Phone number/i).fill(phone);
   await form.getByLabel(/^Password$/i).fill(password);
   await form.getByRole('button', { name: /Masuk|Sign in/i }).click();
-  await page.waitForURL(/\/id\/home/);
-  await expect(page).toHaveURL(/\/id\/home/);
+  await page.waitForURL(/\/id$/);
+  await expect(page).toHaveURL(/\/id$/);
 }
 
 export async function loginAdmin(page: Page, email: string, password: string) {
@@ -80,9 +82,18 @@ export async function createSupportTicket(
 ) {
   await page.goto('/id/support');
   await expect(page.getByRole('heading', { name: /Support/i })).toBeVisible();
+  const composerTrigger = page
+    .getByRole('button', { name: /Buat tiket baru|Buat tiket|Buka composer support/i })
+    .first();
+  if (await composerTrigger.isVisible()) {
+    await composerTrigger.click();
+  }
   await page.getByLabel(/Subjek|Subject/i).fill(input.subject ?? 'Journey report support ticket');
   await page
     .getByLabel(/Detail/i)
     .fill(input.details ?? 'Tiket support demo untuk memvalidasi alur visual customer dan admin.');
-  await page.getByRole('button', { name: /Buat tiket|Create ticket/i }).click();
+  await page
+    .getByRole('button', { name: /^Buat tiket$|^Create ticket$/i })
+    .last()
+    .click();
 }

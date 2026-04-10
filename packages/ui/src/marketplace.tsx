@@ -47,36 +47,44 @@ export function MarketplaceMobileShell({
 
 export function MarketplaceBottomNav({ activeId, items }: { activeId?: string; items: MarketplaceNavItem[] }) {
   return (
-    <div className="pointer-events-none fixed bottom-6 left-1/2 z-50 flex w-full max-w-[480px] -translate-x-1/2 justify-center px-6">
+    <div className="pointer-events-none fixed bottom-5 left-1/2 z-50 flex w-full max-w-[480px] -translate-x-1/2 justify-center px-5">
       <div
-        className="pointer-events-auto flex w-full items-center justify-between rounded-full p-2 shadow-2xl"
-        style={{ backgroundColor: '#1E1E1E' }}
+        className="pointer-events-auto w-full rounded-[26px] border p-1.5 shadow-[0_24px_44px_-30px_rgba(74,46,58,0.24)]"
+        style={{
+          backgroundColor: 'rgba(255,255,255,0.96)',
+          borderColor: 'color-mix(in srgb, var(--ui-border) 88%, white)',
+        }}
       >
-        <div className="flex items-center justify-between">
+        <div
+          className="grid items-stretch gap-1"
+          style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}
+        >
           {items.map((item) => {
             const active = item.id === activeId;
 
             return (
               <MotionAnchor
+                aria-current={active ? 'page' : undefined}
                 key={item.id}
                 className={cx(
-                  'relative flex items-center justify-center rounded-full transition-all duration-300',
-                  active ? 'px-5 py-3 text-white' : 'h-12 w-12 text-gray-400 hover:text-white',
+                  'relative flex min-h-[54px] min-w-0 flex-col items-center justify-center gap-1 rounded-[20px] px-1.5 py-2 text-center transition-colors duration-200',
+                  active ? 'text-white' : 'text-[var(--ui-text-muted)] hover:bg-[var(--ui-surface-muted)]',
                 )}
                 href={item.href}
                 style={
                   active
                     ? {
-                        backgroundColor: 'var(--ui-primary)',
+                        background:
+                          'linear-gradient(180deg, var(--ui-nav-active-background) 0%, color-mix(in srgb, var(--ui-nav-active-background) 82%, #7B2A47) 100%)',
                         color: '#ffffff',
                       }
                     : {
-                        color: '#9ca3af',
+                        color: 'var(--ui-text-muted)',
                       }
                 }
               >
                 <span className="flex h-5 w-5 items-center justify-center">{item.icon}</span>
-                {active ? <span className="ml-2.5 text-[13px] font-bold">{item.label}</span> : null}
+                <span className="max-w-full truncate text-[10.5px] font-bold leading-none">{item.label}</span>
               </MotionAnchor>
             );
           })}
@@ -153,7 +161,11 @@ export function MarketplaceLocalePills({
   return (
     <div
       className="inline-flex items-center gap-1 rounded-full p-1 backdrop-blur-md"
-      style={{ backgroundColor: 'rgba(30,30,30,0.24)' }}
+      style={{
+        background:
+          'linear-gradient(180deg, rgba(255,255,255,0.96) 0%, color-mix(in srgb, var(--ui-surface-muted) 72%, white) 100%)',
+        border: '1px solid color-mix(in srgb, var(--ui-border) 88%, white)',
+      }}
     >
       {items.map((item) => {
         const active = item.value === activeValue;
@@ -165,11 +177,11 @@ export function MarketplaceLocalePills({
             style={
               active
                 ? {
-                    backgroundColor: 'rgba(255,255,255,0.22)',
+                    backgroundColor: 'var(--ui-primary)',
                     color: '#ffffff',
                   }
                 : {
-                    color: 'rgba(255,255,255,0.8)',
+                    color: 'var(--ui-text-muted)',
                   }
             }
           >
@@ -419,7 +431,7 @@ export function MarketplaceAccessHero({
       </div>
 
       <h1 className="mt-5 text-[28px] font-bold leading-tight">{title}</h1>
-      <p className="mt-3 max-w-[28rem] text-[14px] leading-relaxed text-white/85">{description}</p>
+      <p className="mt-3 max-w-[28rem] text-[14px] leading-relaxed text-white/92">{description}</p>
 
       {benefits?.length ? (
         <div className="mt-5 grid gap-3">
@@ -1031,7 +1043,7 @@ export function MarketplaceIdentityCard({
 }
 
 export function MarketplaceSupportEntryCard({
-  actionLabel = 'Buka bantuan',
+  actionLabel = 'Bantuan',
   badges,
   description,
   icon,

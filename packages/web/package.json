@@ -78,10 +78,6 @@
       "types": "./src/route-adapters/public/home-page.tsx",
       "default": "./src/route-adapters/public/home-page.tsx"
     },
-    "./public/marketplace-home-page": {
-      "types": "./src/route-adapters/public/marketplace-home-page.tsx",
-      "default": "./src/route-adapters/public/marketplace-home-page.tsx"
-    },
     "./public/offering-detail-page": {
       "types": "./src/route-adapters/public/offering-detail-page.tsx",
       "default": "./src/route-adapters/public/offering-detail-page.tsx"

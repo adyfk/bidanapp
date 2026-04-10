@@ -5,6 +5,7 @@ import { createMarketplaceApiClient } from '@marketplace/marketplace-core';
 import { getServicePlatformConfig, type ServicePlatformId } from '@marketplace/platform-config';
 import {
   MarketplaceDangerButton,
+  MarketplaceFilterChip,
   MarketplaceIdentityCard,
   MarketplaceListCard,
   MarketplaceMobileShell,
@@ -12,6 +13,7 @@ import {
   MarketplaceQuickActionCard,
   MarketplaceSettingsCard,
   MarketplaceSettingsRow,
+  MarketplaceStatusFilters,
   MarketplaceSupportEntryCard,
   MarketplaceSupportSheet,
 } from '@marketplace/ui/marketplace-lite';
@@ -23,7 +25,7 @@ import {
   TextAreaField,
   TextField,
 } from '@marketplace/ui/primitives';
-import { BookHeart, BriefcaseMedical, KeyRound, LifeBuoy, LogOut, MapPin, User } from 'lucide-react';
+import { Bell, BookHeart, BriefcaseMedical, Compass, KeyRound, LifeBuoy, LogOut, MapPin, User } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { createPrimaryMarketplaceNav } from '../../../layout/navigation';
 import { getApiBaseUrl } from '../../../lib/env';
@@ -35,6 +37,7 @@ import { useCustomerMarketplaceController } from '../shared/use-customer-marketp
 
 const apiBaseUrl = getApiBaseUrl();
 const client = createMarketplaceApiClient(apiBaseUrl);
+const supportQuickSubjects = ['Perubahan jadwal', 'Kendala pembayaran', 'Butuh refund', 'Masalah akun'];
 
 export function CustomerProfilePage({
   authHref,
@@ -126,7 +129,7 @@ export function CustomerProfilePage({
       showNav={Boolean(session?.isAuthenticated)}
     >
       <div className="min-h-full bg-[var(--ui-background)] pb-24">
-        <MarketplaceStickyPageHeader backHref={createLocalizedPath(locale, '/home')} title="Profil" />
+        <MarketplaceStickyPageHeader backHref={createLocalizedPath(locale)} title="Profil" />
 
         <div className="space-y-6 px-5 py-6">
           {!session?.isAuthenticated ? (
@@ -151,7 +154,7 @@ export function CustomerProfilePage({
 
               <div className="grid grid-cols-2 gap-3">
                 <MarketplaceQuickActionCard
-                  description="Lihat order yang sedang berjalan, riwayat, dan tindak lanjutnya."
+                  description="Lihat order aktif, riwayat, dan tindak lanjut terbaru."
                   icon={<BookHeart className="h-5 w-5" />}
                   onClick={() => {
                     window.location.href = createLocalizedPath(locale, '/orders');
@@ -159,69 +162,106 @@ export function CustomerProfilePage({
                   title="Aktivitas"
                 />
                 <MarketplaceQuickActionCard
-                  description="Cari profesional dan layanan yang paling cocok untuk kebutuhan Anda."
-                  icon={<MapPin className="h-5 w-5" />}
+                  description="Pantau pesan penting, update pembayaran, dan support."
+                  icon={<Bell className="h-5 w-5" />}
                   onClick={() => {
-                    window.location.href = createLocalizedPath(locale, '/explore');
+                    window.location.href = createLocalizedPath(locale, '/notifications');
                   }}
-                  title="Explore"
+                  title="Notifikasi"
                 />
               </div>
 
-              <MarketplaceSupportEntryCard
-                actionLabel="Buka support"
-                badges={['Order', 'Pembayaran', 'Akun']}
-                description="Sampaikan kendala order, pembayaran, atau akses akun dari satu tempat."
-                icon={<LifeBuoy className="h-5 w-5" />}
-                onClick={() => setSupportOpen(true)}
-                responseBadge="Respon cepat"
-                title="Butuh bantuan?"
+              <MarketplaceQuickActionCard
+                description="Jelajahi profesional dan layanan yang paling cocok untuk kebutuhan Anda."
+                icon={<Compass className="h-5 w-5" />}
+                onClick={() => {
+                  window.location.href = createLocalizedPath(locale, '/explore');
+                }}
+                title="Explore"
               />
 
               <MarketplaceSettingsCard>
                 <MarketplaceSettingsRow
                   description="Perbarui nama tampil dan kota agar profil tetap rapi."
                   icon={<User className="h-4 w-4" />}
-                  iconClassName="bg-sky-50 text-sky-600"
+                  iconClassName="bg-rose-50 text-rose-600"
                   onClick={() => setActiveSheet('account')}
                   title="Akun"
                 />
                 <MarketplaceSettingsRow
                   description="Kelola password dan perangkat yang sedang aktif."
                   icon={<KeyRound className="h-4 w-4" />}
-                  iconClassName="bg-teal-50 text-teal-700"
+                  iconClassName="bg-pink-50 text-pink-700"
                   onClick={() => setActiveSheet('security')}
                   title="Keamanan"
                 />
                 <MarketplaceSettingsRow
-                  description="Lihat tiket yang sudah berjalan atau buat bantuan baru."
+                  description="Buat tiket baru atau cek tindak lanjut yang masih aktif."
                   icon={<LifeBuoy className="h-4 w-4" />}
-                  iconClassName="bg-amber-50 text-amber-600"
-                  isLast
+                  iconClassName="bg-rose-100 text-rose-700"
                   onClick={() => setSupportOpen(true)}
                   title="Support"
                 />
+                <MarketplaceSettingsRow
+                  description="Lanjutkan jalur profesional untuk mengelola layanan dan dashboard kerja."
+                  icon={<BriefcaseMedical className="h-4 w-4" />}
+                  iconClassName="bg-fuchsia-50 text-fuchsia-700"
+                  isLast
+                  onClick={() => {
+                    window.location.href = createLocalizedPath(locale, '/professionals/apply');
+                  }}
+                  title="Mode profesional"
+                />
               </MarketplaceSettingsCard>
 
-              <button
-                type="button"
-                onClick={() => {
-                  window.location.href = createLocalizedPath(locale, '/professionals/apply');
-                }}
-                className="flex w-full items-center justify-between rounded-[28px] border border-pink-100 bg-gradient-to-br from-pink-50 via-white to-rose-50 p-5 text-left shadow-sm transition-all hover:shadow-md active:scale-[0.99]"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-pink-500 shadow-sm">
-                    <BriefcaseMedical className="h-5 w-5" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[15px] font-bold text-gray-900">Masuk sebagai profesional</p>
-                    <p className="mt-2 text-[12px] leading-5 text-gray-500">
-                      Lanjutkan pengajuan profesional dan kelola layanan dari dashboard kerja.
-                    </p>
-                  </div>
+              <MarketplaceSupportEntryCard
+                actionLabel="Buka composer support"
+                badges={['Order', 'Pembayaran', 'Akun']}
+                description="Kalau ada kendala, cukup buka composer support dari profil ini dan lanjutkan tanpa pindah jalur."
+                icon={<LifeBuoy className="h-5 w-5" />}
+                onClick={() => setSupportOpen(true)}
+                responseBadge={`${tickets.filter((ticket) => ticket.status !== 'resolved').length} aktif`}
+                title="Butuh bantuan cepat?"
+                tone="pink"
+              />
+
+              <MarketplaceSettingsCard>
+                <div className="px-5 pb-1 pt-5">
+                  <h2 className="text-[15px] font-bold text-slate-900">Bantuan terbaru</h2>
+                  <p className="mt-1 text-[12.5px] leading-6 text-slate-500">
+                    Ringkasan tiket terakhir dan jalur cepat menuju support center penuh.
+                  </p>
                 </div>
-              </button>
+                <div className="space-y-3 px-5 pb-5 pt-3">
+                  {tickets.slice(0, 2).length ? (
+                    tickets
+                      .slice(0, 2)
+                      .map((ticket) => (
+                        <MarketplaceListCard
+                          key={ticket.id}
+                          badge={<StatusPill tone="accent">{supportStatusLabel(ticket.status, locale)}</StatusPill>}
+                          description={ticket.details}
+                          subtitle={`${ticket.priority} • ${ticket.id}`}
+                          title={ticket.subject}
+                        />
+                      ))
+                  ) : (
+                    <MarketplaceListCard
+                      description="Tiket bantuan yang Anda buat akan muncul di sini."
+                      title="Belum ada tiket aktif"
+                    />
+                  )}
+                  <SecondaryButton
+                    className="w-full"
+                    onClick={() => {
+                      window.location.href = createLocalizedPath(locale, '/support');
+                    }}
+                    type="button"
+                  >
+                    Support
+                  </SecondaryButton>
+                </div>
+              </MarketplaceSettingsCard>
 
               <MarketplaceDangerButton
                 icon={<LogOut className="h-5 w-5" />}
@@ -313,6 +353,17 @@ export function CustomerProfilePage({
       >
         <div className="space-y-5">
           <div className="space-y-4">
+            <MarketplaceStatusFilters>
+              {supportQuickSubjects.map((subject) => (
+                <MarketplaceFilterChip
+                  active={supportForm.subject === subject}
+                  key={subject}
+                  onClick={() => setSupportForm((current) => ({ ...current, subject }))}
+                >
+                  {subject}
+                </MarketplaceFilterChip>
+              ))}
+            </MarketplaceStatusFilters>
             <TextField
               label="Subjek"
               value={supportForm.subject}
@@ -365,7 +416,7 @@ export function CustomerProfilePage({
             }}
             type="button"
           >
-            Buka halaman support penuh
+            Support penuh
           </SecondaryButton>
         </div>
       </MarketplaceSupportSheet>

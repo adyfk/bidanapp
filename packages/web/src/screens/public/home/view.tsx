@@ -5,13 +5,14 @@ import type { ViewerSession } from '@marketplace/marketplace-core/viewer-auth';
 import type { ServicePlatformConfig } from '@marketplace/platform-config';
 import {
   MarketplaceCategoryTile,
+  MarketplaceFeaturePill,
   MarketplaceMobileShell,
   MarketplaceSearchField,
   MarketplaceSectionHeader,
   MarketplaceSurfaceCard,
 } from '@marketplace/ui/marketplace-lite';
 import { PrimaryButton, SecondaryButton } from '@marketplace/ui/primitives';
-import { ArrowRight, Bell, Calendar, MapPin, Search, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Bell, Calendar, HeartHandshake, MapPin, Search, ShieldCheck, Sparkles } from 'lucide-react';
 import { createPrimaryMarketplaceNav } from '../../../layout/navigation';
 import { isEnglishLocale } from '../../../lib/marketplace-copy';
 import { currentCity, profileInitial, viewerLabel } from '../shared/parts/portrait';
@@ -49,44 +50,51 @@ export function MarketplaceHomeView({
   const en = isEnglishLocale(locale);
   const isAuthenticated = Boolean(session?.isAuthenticated);
   const presentation = platform.presentation;
+  const trustPills = en ? ['Home visit', 'Lactation', 'Follow-up'] : ['Home visit', 'Laktasi', 'Follow-up'];
 
   return (
     <MarketplaceMobileShell activeNavId="home" navItems={createPrimaryMarketplaceNav(platform, locale)}>
       <div className="flex min-h-full flex-col pb-24" style={{ backgroundColor: 'var(--ui-background)' }}>
         <div
-          className="sticky top-0 z-20 px-6 pb-6 pt-14 backdrop-blur-sm"
-          style={{ backgroundColor: 'color-mix(in srgb, var(--ui-background) 94%, white)' }}
+          className="sticky top-0 z-20 px-5 pb-4 pt-12 backdrop-blur-xl"
+          style={{
+            background:
+              'linear-gradient(180deg, color-mix(in srgb, var(--ui-background) 94%, white) 0%, rgba(255,252,254,0.76) 78%, rgba(255,252,254,0) 100%)',
+          }}
         >
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between rounded-[28px] border bg-white/88 px-4 py-3 shadow-[0_18px_42px_-34px_rgba(88,49,66,0.16)] backdrop-blur-xl">
             <a
-              className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border shadow-sm"
+              className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border text-sm font-bold"
               href={session?.isAuthenticated ? profileHref : loginHref}
               style={{
-                backgroundColor: 'var(--ui-surface-muted)',
+                background:
+                  'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 72%, white) 100%)',
                 borderColor: 'var(--ui-border)',
                 color: 'var(--ui-primary)',
               }}
             >
-              <span className="text-sm font-bold">{profileInitial(session)}</span>
+              <span>{profileInitial(session)}</span>
             </a>
-            <div className="text-center">
-              <div className="text-[11px] font-medium tracking-wide text-gray-400">{en ? 'Location' : 'Lokasi'}</div>
-              <div className="flex items-center text-[14px] font-bold text-gray-900">
-                <MapPin className="mr-1 h-4 w-4" style={{ color: 'var(--ui-primary)' }} />
-                {currentCity(session, professionals, locale)}
+            <div className="min-w-0 flex-1 px-3 text-center">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+                {en ? 'BidanCare home' : 'Home BidanCare'}
+              </p>
+              <div className="mt-1 flex items-center justify-center text-[14px] font-bold text-slate-900">
+                <MapPin className="mr-1 h-4 w-4 flex-shrink-0" style={{ color: 'var(--ui-primary)' }} />
+                <span className="truncate">{currentCity(session, professionals, locale)}</span>
               </div>
             </div>
             <a
-              className="relative flex h-11 w-11 items-center justify-center rounded-full border shadow-sm"
+              className="relative flex h-11 w-11 items-center justify-center rounded-full border bg-white text-slate-700"
               href={notificationsHref}
-              style={{ backgroundColor: '#ffffff', borderColor: 'var(--ui-border)', color: '#1f2937' }}
+              style={{ borderColor: 'var(--ui-border)' }}
             >
               <Bell className="h-5 w-5" />
             </a>
           </div>
         </div>
 
-        <div className="px-6">
+        <div className="px-5">
           <a href={servicesHref}>
             <MarketplaceSearchField
               leading={<Search className="h-5 w-5" />}
@@ -96,43 +104,89 @@ export function MarketplaceHomeView({
           </a>
         </div>
 
-        <div className="space-y-7 px-6 pb-12 pt-7">
+        <div className="-mx-5 mt-4 flex gap-2 overflow-x-auto px-5 pb-1">
+          {trustPills.map((pill) => (
+            <MarketplaceFeaturePill key={pill} tone="soft">
+              <Sparkles className="h-3.5 w-3.5" />
+              <span>{pill}</span>
+            </MarketplaceFeaturePill>
+          ))}
+        </div>
+
+        <div className="space-y-6 px-5 pb-12 pt-5">
           <section>
             <MarketplaceSectionHeader title={presentation.activityTitle} />
+
             {!isAuthenticated ? (
-              <MarketplaceSurfaceCard tone="white" className="p-6">
-                <div
-                  className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl"
-                  style={{ backgroundColor: 'var(--ui-surface-muted)', color: 'var(--ui-primary)' }}
-                >
-                  <Calendar className="h-5 w-5" />
+              <MarketplaceSurfaceCard tone="blush" className="p-5">
+                <div className="flex items-start gap-4">
+                  <div
+                    className="flex h-12 w-12 items-center justify-center rounded-[18px]"
+                    style={{ backgroundColor: 'var(--ui-surface-muted)', color: 'var(--ui-primary)' }}
+                  >
+                    <HeartHandshake className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--ui-primary)]">
+                      <ShieldCheck className="h-3.5 w-3.5" />
+                      {en ? 'Visitor entry' : 'Jalur visitor'}
+                    </div>
+                    <div className="mt-3 text-[20px] font-bold leading-tight text-slate-900">
+                      {en ? 'Browse first, sign in only when you are ready' : 'Jelajahi dulu, masuk saat Anda siap'}
+                    </div>
+                    <div className="mt-2 text-[13px] leading-6 text-slate-500">
+                      {en
+                        ? 'Find trusted professionals, compare services, then keep orders and support in one account.'
+                        : 'Temukan profesional tepercaya, bandingkan layanan, lalu simpan order dan support dalam satu akun.'}
+                    </div>
+                  </div>
                 </div>
-                <div className="text-[18px] font-bold text-gray-900">{presentation.activityTitle}</div>
-                <div className="mt-2 text-[14px] leading-relaxed text-gray-500">{presentation.activityDescription}</div>
+
+                <div className="mt-5 grid grid-cols-2 gap-3">
+                  <div className="rounded-[20px] border px-4 py-3" style={{ borderColor: 'var(--ui-border)' }}>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                      {en ? 'Ready now' : 'Siap sekarang'}
+                    </p>
+                    <p className="mt-2 text-[15px] font-bold text-slate-900">
+                      {en ? 'Explore professionals and services' : 'Jelajahi profesional dan layanan'}
+                    </p>
+                  </div>
+                  <div className="rounded-[20px] border px-4 py-3" style={{ borderColor: 'var(--ui-border)' }}>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                      {en ? 'Saved later' : 'Tersimpan nanti'}
+                    </p>
+                    <p className="mt-2 text-[15px] font-bold text-slate-900">
+                      {en ? 'Orders, payment, and follow-up' : 'Order, pembayaran, dan tindak lanjut'}
+                    </p>
+                  </div>
+                </div>
+
                 <div className="mt-5 flex flex-col gap-3">
                   <a href={loginHref}>
                     <PrimaryButton className="w-full" type="button">
                       {en ? 'Sign in / register' : 'Masuk / daftar'}
                     </PrimaryButton>
                   </a>
-                  <a href={`/${locale}/professionals/apply`}>
+                  <a href={`/${locale}/explore`}>
                     <SecondaryButton className="w-full" type="button">
-                      {en ? 'Open professional path' : 'Buka jalur profesional'}
+                      {en ? 'Browse professionals' : 'Lihat profesional'}
                     </SecondaryButton>
                   </a>
                 </div>
               </MarketplaceSurfaceCard>
             ) : (
-              <div
-                className="rounded-[28px] p-5 text-white"
+              <section
+                className="overflow-hidden rounded-[30px] border p-5 text-white"
                 style={{
                   background: 'var(--ui-hero-gradient)',
+                  borderColor: 'color-mix(in srgb, var(--ui-border-strong) 42%, white)',
                   boxShadow: 'var(--ui-shadow-hero)',
                 }}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
-                    <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/92">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/12 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/90">
+                      <Calendar className="h-3.5 w-3.5" />
                       {en ? 'Customer console' : 'Ruang customer'}
                     </div>
                     <h2 className="mt-4 text-[24px] font-bold leading-tight text-white">
@@ -140,21 +194,20 @@ export function MarketplaceHomeView({
                     </h2>
                     <p className="mt-2 text-[13px] leading-relaxed text-white/84">
                       {en
-                        ? 'Track active orders, reminders, and support from one calm workspace.'
-                        : 'Pantau order aktif, pengingat, dan bantuan dari satu workspace yang lebih tenang dibaca.'}
+                        ? 'Orders, reminders, and support stay tidy in one calm feed.'
+                        : 'Order, pengingat, dan support tetap rapi dalam satu feed yang tenang dibaca.'}
                     </p>
                   </div>
                   <a
-                    className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md transition-transform hover:scale-105"
+                    className="flex h-11 w-11 items-center justify-center rounded-full border border-white/24 bg-white/14 text-white"
                     href={ordersHref}
-                    style={{ color: 'var(--ui-primary)' }}
                   >
                     <ArrowRight className="h-4 w-4" />
                   </a>
                 </div>
 
                 <div className="mt-5 grid grid-cols-2 gap-3">
-                  <div className="rounded-[22px] border border-white/16 bg-white/12 p-4 backdrop-blur-sm">
+                  <div className="rounded-[20px] border border-white/16 bg-white/12 px-4 py-3 backdrop-blur-sm">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/72">
                       {en ? 'Viewer' : 'Akun aktif'}
                     </p>
@@ -163,62 +216,32 @@ export function MarketplaceHomeView({
                     </p>
                     <p className="mt-2 text-[12px] leading-5 text-white/72">{viewerLabel(session, locale)}</p>
                   </div>
-                  <div className="rounded-[22px] border border-white/16 bg-white/12 p-4 backdrop-blur-sm">
+                  <div className="rounded-[20px] border border-white/16 bg-white/12 px-4 py-3 backdrop-blur-sm">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/72">
-                      {en ? 'Fast lane' : 'Akses cepat'}
+                      {en ? 'Next actions' : 'Aksi cepat'}
                     </p>
-                    <div className="mt-2 space-y-2 text-[12px] font-semibold text-white">
-                      <p>{en ? 'Orders and payment follow-up' : 'Order dan tindak lanjut pembayaran'}</p>
-                      <p>{en ? 'Support and account reminders' : 'Support dan pengingat akun'}</p>
-                    </div>
+                    <p className="mt-2 text-[15px] font-bold leading-snug text-white">
+                      {en ? 'Orders and support' : 'Order dan support'}
+                    </p>
                   </div>
                 </div>
 
                 <div className="mt-4 grid grid-cols-2 gap-3">
-                  <a
-                    className="inline-flex min-h-11 items-center justify-center rounded-full border border-white/18 bg-white/12 px-4 py-3 text-[13px] font-semibold text-white transition-colors hover:bg-white/16"
-                    href={ordersHref}
-                  >
-                    {en ? 'Open activity' : 'Buka aktivitas'}
-                  </a>
-                  <a
-                    className="inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 py-3 text-[13px] font-semibold transition-colors hover:bg-slate-50"
-                    href={supportHref}
-                    style={{ color: 'var(--ui-primary)' }}
-                  >
-                    {en ? 'Open support' : 'Buka support'}
-                  </a>
-                </div>
-
-                <div className="mt-4 rounded-[20px] bg-white/94 p-4 text-gray-800">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="flex h-10 w-10 items-center justify-center rounded-full text-[14px] font-bold"
-                        style={{ backgroundColor: 'var(--ui-surface-muted)', color: 'var(--ui-primary)' }}
-                      >
-                        {profileInitial(session)}
-                      </div>
-                      <div>
-                        <h3 className="text-[15px] font-bold text-gray-900">
-                          {session?.customerProfile?.displayName || (en ? 'Customer account' : 'Akun customer')}
-                        </h3>
-                        <p className="text-[12px] text-gray-500">
-                          {en
-                            ? 'Open orders, reminders, and support from one place.'
-                            : 'Buka order, pengingat, dan support dari satu tempat.'}
-                        </p>
-                      </div>
-                    </div>
-                    <a
-                      className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-700"
-                      href={notificationsHref}
+                  <a href={ordersHref}>
+                    <SecondaryButton
+                      className="w-full border-white/18 bg-white/14 text-white hover:bg-white/18"
+                      type="button"
                     >
-                      <Bell className="h-5 w-5" />
-                    </a>
-                  </div>
+                      {en ? 'Orders' : 'Order'}
+                    </SecondaryButton>
+                  </a>
+                  <a href={supportHref}>
+                    <SecondaryButton className="w-full" type="button">
+                      {en ? 'Support' : 'Support'}
+                    </SecondaryButton>
+                  </a>
                 </div>
-              </div>
+              </section>
             )}
           </section>
 
@@ -232,7 +255,7 @@ export function MarketplaceHomeView({
               description={presentation.homeServiceSection.description}
               title={presentation.homeServiceSection.title}
             />
-            <div className="-mx-6 flex gap-4 overflow-x-auto px-6 pb-4">
+            <div className="-mx-5 flex gap-4 overflow-x-auto px-5 pb-3">
               {offerings.slice(0, 3).map((offering) => (
                 <HomeServiceTile key={offering.id} locale={locale} offering={offering} />
               ))}
@@ -244,7 +267,7 @@ export function MarketplaceHomeView({
               title={presentation.homeCategorySection.title}
               description={presentation.homeCategorySection.description}
             />
-            <div className="-mx-6 flex gap-3 overflow-x-auto px-6 pb-2">
+            <div className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-1">
               {presentation.categories.map((category) => (
                 <MarketplaceCategoryTile
                   key={category.id}
@@ -266,24 +289,27 @@ export function MarketplaceHomeView({
               description={presentation.homeProfessionalSection.description}
               title={presentation.homeProfessionalSection.title}
             />
-            <div className="space-y-4">
+            <div className="space-y-3.5">
               {professionals.slice(0, 3).map((professional) => (
                 <ProfessionalCard key={professional.id} locale={locale} professional={professional} />
               ))}
             </div>
           </section>
 
-          <MarketplaceSurfaceCard tone="white" className="p-6">
+          <MarketplaceSurfaceCard tone="white" className="p-5">
             <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-[var(--ui-primary)] shadow-sm">
+              <div
+                className="flex h-12 w-12 items-center justify-center rounded-[18px]"
+                style={{ backgroundColor: 'var(--ui-surface-muted)', color: 'var(--ui-primary)' }}
+              >
                 <ShieldCheck className="h-5 w-5" />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="text-[16px] font-bold text-gray-900">{presentation.helpTitle}</div>
-                <div className="mt-2 text-[13px] leading-6 text-gray-500">{presentation.helpDescription}</div>
+                <div className="text-[17px] font-bold text-slate-900">{presentation.helpTitle}</div>
+                <div className="mt-2 text-[13px] leading-6 text-slate-500">{presentation.helpDescription}</div>
                 <div className="mt-4">
                   <a href={supportHref}>
-                    <SecondaryButton type="button">{en ? 'Open help' : 'Buka bantuan'}</SecondaryButton>
+                    <SecondaryButton type="button">{en ? 'Support' : 'Support'}</SecondaryButton>
                   </a>
                 </div>
               </div>

@@ -9,7 +9,7 @@ export default async function BidanForgotPasswordPage(props: {
 
   return (
     <ViewerAuthPage
-      defaultNextPath={searchParams.next || createLocalizedPath(locale, '/home')}
+      defaultNextPath={searchParams.next || createLocalizedPath(locale)}
       locale={locale}
       mode="forgot-password"
       platformId="bidan"

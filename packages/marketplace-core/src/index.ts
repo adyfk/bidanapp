@@ -172,12 +172,6 @@ export {
   type SupportTicket,
   type SupportTicketVM,
 } from './support';
-export type {
-  UiParityFlowCheck,
-  UiParityScreenSpec,
-  UiParitySectionCheck,
-  UiParityStatus,
-} from './ui-parity';
 export {
   createViewerAuthController,
   createViewerAuthSession,

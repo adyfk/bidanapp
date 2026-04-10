@@ -2,7 +2,7 @@
 
 ## Tujuan
 
-Membuktikan bahwa visitor dapat bergerak dari onboarding ke home publik, explore, professional detail, services, dan service detail tanpa login.
+Membuktikan bahwa visitor dapat bergerak dari home publik langsung di `/id`, lalu lanjut ke explore, professional detail, services, dan service detail tanpa login.
 
 ## Seed actor
 
@@ -15,12 +15,11 @@ Membuktikan bahwa visitor dapat bergerak dari onboarding ke home publik, explore
 
 ## Step summary
 
-1. Buka onboarding `/id`.
-2. Pilih jalur visitor.
-3. Buka explore.
-4. Buka detail profesional.
-5. Buka services.
-6. Buka detail layanan.
+1. Buka root public home `/id`.
+2. Buka explore.
+3. Buka detail profesional.
+4. Buka services.
+5. Buka detail layanan.
 
 ## Review links
 
@@ -29,6 +28,6 @@ Membuktikan bahwa visitor dapat bergerak dari onboarding ke home publik, explore
 
 ## Known assertions
 
-- onboarding access-first tampil
-- home publik tampil tanpa login
+- home publik tampil langsung di root locale
+- route home lama tidak lagi merender home publik
 - route explore, professional detail, services, dan service detail bisa dibuka

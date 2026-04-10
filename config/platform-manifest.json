@@ -33,30 +33,30 @@
         }
       },
       "theme": {
-        "primary": "#E8588A",
-        "secondary": "#D14477",
-        "accent": "#FF7EB3",
-        "background": "#FFFFFF",
+        "primary": "#C95076",
+        "secondary": "#E9A3BA",
+        "accent": "#FBE4EC",
+        "background": "#FFFBFD",
         "surface": "#FFFFFF",
-        "surfaceMuted": "#FFF0F5",
+        "surfaceMuted": "#FFF6F9",
         "surfaceElevated": "#FFFFFF",
-        "border": "#FFD6E5",
-        "borderStrong": "#FFB3D0",
-        "text": "#2D2D2D",
-        "textStrong": "#1A1A1A",
-        "textMuted": "#6B6B6B",
-        "muted": "#999999",
-        "success": "#34C77B",
-        "warning": "#FFB020",
-        "danger": "#EF4444",
-        "info": "#4A90E2",
-        "focusRing": "#FFB3D0",
-        "pillBackground": "#FFF0F5",
-        "pillText": "#D14477",
-        "navActiveBackground": "#E8588A",
+        "border": "#EED6DF",
+        "borderStrong": "#DDA7BA",
+        "text": "#3A2C33",
+        "textStrong": "#241A20",
+        "textMuted": "#66535C",
+        "muted": "#806B75",
+        "success": "#1F8E62",
+        "warning": "#B8741F",
+        "danger": "#B94761",
+        "info": "#8E5A74",
+        "focusRing": "#E8B7C7",
+        "pillBackground": "#FFF2F6",
+        "pillText": "#9F365D",
+        "navActiveBackground": "#C95076",
         "navActiveText": "#FFFFFF",
-        "heroGradient": "linear-gradient(180deg, #C73E6D 0%, #E8588A 38%, #FFB3D0 72%, #FFFFFF 100%)",
-        "heroOverlay": "linear-gradient(180deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.06) 38%, rgba(255,255,255,0.85) 72%, rgba(255,255,255,1) 100%)"
+        "heroGradient": "linear-gradient(145deg, #9F365D 0%, #C95076 54%, #D97795 100%)",
+        "heroOverlay": "linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.08) 44%, rgba(255,255,255,0.18) 100%)"
       },
       "featureFlags": {
         "adminReview": true,
@@ -77,7 +77,7 @@
         "authTitle": "Masuk ke BidanCare",
         "homeEyebrow": "Get started",
         "navigation": [
-          { "id": "home", "label": "Home", "href": "/home", "icon": "sparkles" },
+          { "id": "home", "label": "Home", "href": "/", "icon": "sparkles" },
           { "id": "services", "label": "Cari", "href": "/services", "icon": "search" },
           { "id": "explore", "label": "Ahli", "href": "/explore", "icon": "compass" },
           { "id": "orders", "label": "Aktivitas", "href": "/orders", "icon": "calendar" }
@@ -90,10 +90,10 @@
           "authTitle": "Masuk ke BidanCare",
           "homeEyebrow": "Get started",
           "navigation": [
-            { "id": "home", "label": "Home", "href": "/home", "icon": "sparkles" },
+            { "id": "home", "label": "Home", "href": "/", "icon": "sparkles" },
             { "id": "services", "label": "Cari", "href": "/services", "icon": "search" },
             { "id": "explore", "label": "Ahli", "href": "/explore", "icon": "compass" },
-            { "id": "orders", "label": "Aktivitas", "href": "/orders", "icon": "calendar" }
+            { "id": "orders", "label": "Order", "href": "/orders", "icon": "calendar" }
           ]
         },
         "en": {
@@ -102,22 +102,22 @@
           "authTitle": "Sign in to BidanCare",
           "homeEyebrow": "Get started",
           "navigation": [
-            { "id": "home", "label": "Home", "href": "/home", "icon": "sparkles" },
+            { "id": "home", "label": "Home", "href": "/", "icon": "sparkles" },
             { "id": "services", "label": "Search", "href": "/services", "icon": "search" },
             { "id": "explore", "label": "Experts", "href": "/explore", "icon": "compass" },
-            { "id": "orders", "label": "Activity", "href": "/orders", "icon": "calendar" }
+            { "id": "orders", "label": "Orders", "href": "/orders", "icon": "calendar" }
           ]
         }
       },
       "presentation": {
-        "activityTitle": "Aktivitas customer",
-        "activityDescription": "Pantau order, pembayaran, dan tindak lanjut dalam satu tempat.",
+        "activityTitle": "Aktivitas",
+        "activityDescription": "Pantau order dan tindak lanjut utama.",
         "exploreTitle": "Jelajahi profesional",
         "exploreDescription": "Cari profesional berdasarkan kebutuhan dan area yang paling relevan.",
         "servicesTitle": "Katalog layanan",
-        "servicesDescription": "Telusuri layanan yang sudah siap dibuka, lalu lanjutkan ke profil atau order.",
+        "servicesDescription": "Pilih layanan yang paling relevan.",
         "helpTitle": "Butuh bantuan cepat?",
-        "helpDescription": "Buka support bila Anda membutuhkan bantuan untuk order atau tindak lanjut.",
+        "helpDescription": "Hubungi support untuk bantuan order.",
         "homeCategorySection": {
           "id": "home-categories",
           "title": "Kategori pilihan",
@@ -126,12 +126,12 @@
         "homeServiceSection": {
           "id": "home-services",
           "title": "Layanan populer",
-          "description": "Layanan populer untuk konsultasi, kunjungan rumah, dan edukasi pendamping."
+          "description": "Pilihan cepat untuk kebutuhan paling umum."
         },
         "homeProfessionalSection": {
           "id": "home-professionals",
           "title": "Profesional tepercaya",
-          "description": "Buka profil profesional dan lanjutkan ke layanan yang paling cocok."
+          "description": "Profil ringkas untuk memilih dengan percaya."
         },
         "categories": [
           {

@@ -38,7 +38,7 @@ export async function saveProfessionalPlatformApplication(
   });
 
   if (result.error || !result.data?.data) {
-    throw new Error('Failed to save professional platform workspace');
+    throw new Error(result.error?.error?.message || 'Failed to save professional platform workspace');
   }
 
   return result.data.data;

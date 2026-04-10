@@ -8,30 +8,39 @@ export function ProfessionalTabGrid({
   value: string;
 }) {
   return (
-    <div className="rounded-[28px] border border-slate-200/80 bg-white/92 p-2 shadow-[0_20px_40px_-34px_rgba(15,23,42,0.18)]">
-      <div className="grid grid-cols-2 gap-1.5 rounded-[22px] bg-[linear-gradient(180deg,rgba(248,250,252,0.98)_0%,rgba(241,245,249,0.92)_100%)] p-1.5">
+    <div className="-mx-5 overflow-x-auto px-5 pb-1">
+      <div
+        className="inline-flex min-w-full gap-2 rounded-[24px] border border-white/80 p-2 shadow-[0_20px_42px_-34px_rgba(88,49,66,0.18)]"
+        style={{
+          background:
+            'linear-gradient(180deg, rgba(255,255,255,0.96) 0%, color-mix(in srgb, var(--ui-surface-muted) 48%, white) 100%)',
+          borderColor: 'var(--ui-border)',
+        }}
+      >
         {items.map((tab) => {
           const active = tab.id === value;
           return (
             <a
               key={tab.id}
               aria-current={active ? 'page' : undefined}
-              className={`flex min-h-[54px] items-center justify-center rounded-[16px] px-3.5 py-3 text-center text-[12.5px] font-semibold leading-[1.15rem] transition-all ${
+              className={`flex min-h-[48px] min-w-fit items-center justify-center rounded-[18px] px-4 py-3 text-center text-[12.5px] font-semibold leading-[1.15rem] transition-all ${
                 active
-                  ? 'bg-white shadow-[0_18px_28px_-24px_rgba(18,59,74,0.18)] ring-1'
+                  ? 'bg-white shadow-[0_18px_28px_-24px_rgba(88,49,66,0.18)] ring-1'
                   : 'text-slate-600 hover:bg-white/78 hover:text-slate-800'
               }`}
               href={tab.href}
               style={
                 active
                   ? {
+                      background:
+                        'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 32%, white) 100%)',
                       color: 'var(--ui-primary)',
                       borderColor: 'var(--ui-border)',
                     }
                   : undefined
               }
             >
-              <span className="whitespace-normal text-balance">{tab.label}</span>
+              <span className="whitespace-nowrap">{tab.label}</span>
             </a>
           );
         })}

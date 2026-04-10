@@ -366,7 +366,7 @@ function createDefaultCopy(platformName: string): PlatformCopyPack {
     authTitle: `Masuk ke ${platformName}`,
     homeEyebrow: 'Get started',
     navigation: [
-      { href: '/home', icon: 'sparkles', id: 'home', label: 'Home' },
+      { href: '/', icon: 'sparkles', id: 'home', label: 'Home' },
       { href: '/services', icon: 'search', id: 'services', label: 'Cari' },
       { href: '/explore', icon: 'compass', id: 'explore', label: 'Ahli' },
       { href: '/orders', icon: 'calendar', id: 'orders', label: 'Aktivitas' },

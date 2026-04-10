@@ -19,6 +19,7 @@ import {
   MarketplaceEmptyCard,
   MarketplaceHeaderIconButton,
   MarketplaceIdentityCard,
+  MarketplaceMobileShell,
   MarketplaceSurfaceCard,
   MarketplaceTopPill,
 } from '@marketplace/ui/marketplace-lite';
@@ -40,7 +41,6 @@ import type {
   PortfolioEntryForm,
   StoryForm,
 } from './types';
-import { formatWorkspaceCurrency } from './utils';
 
 const apiBaseUrl = getApiBaseUrl();
 const client = createMarketplaceApiClient(apiBaseUrl);
@@ -77,6 +77,18 @@ const ProfileSection = dynamic(() => import('./sections/profile').then((mod) => 
 const TrustSection = dynamic(() => import('./sections/trust').then((mod) => mod.TrustSection), {
   loading: WorkspaceSectionLoading,
 });
+
+function formatCompactIdrMetric(value: number, locale: string) {
+  if (!value) {
+    return locale.startsWith('en') ? 'IDR 0' : 'Rp 0';
+  }
+  if (value >= 1_000_000) {
+    const rawCompact = (value / 1_000_000).toFixed(value >= 10_000_000 ? 0 : 1);
+    const compact = locale.startsWith('en') ? rawCompact : rawCompact.replace('.', ',');
+    return locale.startsWith('en') ? `IDR ${compact}m` : `Rp ${compact} jt`;
+  }
+  return locale.startsWith('en') ? `IDR ${Math.round(value / 1000)}k` : `Rp ${Math.round(value / 1000)} rb`;
+}
 
 export function ProfessionalWorkspacePage({
   authHref,
@@ -440,17 +452,27 @@ export function ProfessionalWorkspacePage({
     : createLocalizedPath(locale, '/profile');
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--ui-background)' }}>
-      <div className="mx-auto flex min-h-screen justify-center">
-        <div className="relative flex min-h-[100dvh] w-full max-w-[480px] flex-col overflow-hidden bg-white shadow-[0_18px_50px_-26px_rgba(15,23,42,0.28)]">
-          {!session?.isAuthenticated ? (
+    <MarketplaceMobileShell showNav={false}>
+      <div className="min-h-screen" style={{ backgroundColor: 'var(--ui-background)' }}>
+        {!session?.isAuthenticated ? (
+          <div
+            className="flex min-h-full flex-col overflow-y-auto pb-10 custom-scrollbar"
+            style={{ backgroundColor: 'var(--ui-background)' }}
+          >
             <div
-              className="flex min-h-full flex-col overflow-y-auto pb-10 custom-scrollbar"
-              style={{ backgroundColor: 'var(--ui-background)' }}
+              className="sticky top-0 z-20 px-5 pb-4 pt-12"
+              style={{
+                background:
+                  'linear-gradient(180deg, color-mix(in srgb, var(--ui-background) 96%, white) 0%, rgba(255,252,254,0.94) 74%, rgba(255,252,254,0) 100%)',
+              }}
             >
               <div
-                className="sticky top-0 z-20 flex items-center justify-between border-b bg-white/92 px-4 pb-4 pt-14 backdrop-blur-sm"
-                style={{ borderColor: 'var(--ui-border)' }}
+                className="flex items-center justify-between rounded-[26px] border border-white/85 px-3 py-3 shadow-[0_24px_48px_-34px_rgba(88,49,66,0.22)] backdrop-blur-md"
+                style={{
+                  background:
+                    'linear-gradient(180deg, rgba(255,255,255,0.96) 0%, color-mix(in srgb, var(--ui-surface-muted) 42%, white) 100%)',
+                  borderColor: 'color-mix(in srgb, var(--ui-border) 92%, white)',
+                }}
               >
                 <MarketplaceHeaderIconButton href={createLocalizedPath(locale, '/')}>
                   <span aria-hidden="true">‹</span>
@@ -458,248 +480,238 @@ export function ProfessionalWorkspacePage({
                 <p className="text-[15px] font-bold text-gray-900">Akses profesional</p>
                 <div className="w-10" />
               </div>
-
-              <div className="space-y-5 px-5 py-6">
-                <section
-                  className="overflow-hidden rounded-[30px] border p-6 text-white"
-                  style={{
-                    background: 'var(--ui-hero-gradient)',
-                    borderColor: 'color-mix(in srgb, var(--ui-primary) 18%, white)',
-                    boxShadow: 'var(--ui-shadow-hero)',
-                  }}
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full border-2 border-white/70 bg-white/12 text-white shadow-sm">
-                      <BriefcaseMedical className="h-7 w-7" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="rounded-full bg-white/14 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-white/92">
-                          Jalur profesional
-                        </span>
-                        <span className="rounded-full border border-white/18 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white/84">
-                          {platform.name}
-                        </span>
-                      </div>
-                      <h1 className="mt-3 text-[26px] font-bold leading-tight text-white">
-                        Masuk dulu untuk membuka area kerja profesional
-                      </h1>
-                      <p className="mt-2 text-[13px] leading-relaxed text-white/82">
-                        Setelah masuk, Anda bisa mengatur layanan aktif, halaman profesional, dokumen, dan jadwal kerja.
-                      </p>
-                    </div>
-                  </div>
-                </section>
-
-                <section className="rounded-[28px] border border-gray-100 bg-white p-5 shadow-sm">
-                  <div className="grid grid-cols-2 gap-2 rounded-full bg-gray-100 p-1">
-                    <a
-                      href={loginHref}
-                      className="rounded-full bg-white px-4 py-3 text-center text-[13px] font-bold text-gray-900 shadow-sm transition-all"
-                    >
-                      Masuk
-                    </a>
-                    <a
-                      href={createLocalizedPath(locale, '/professionals/apply')}
-                      className="rounded-full px-4 py-3 text-center text-[13px] font-bold text-gray-500 transition-all hover:text-gray-700"
-                    >
-                      Daftar
-                    </a>
-                  </div>
-
-                  <div className="mt-5 rounded-[18px] bg-gray-50 px-4 py-3">
-                    <p className="text-[12px] font-semibold text-gray-500">Akses profesional</p>
-                    <p className="mt-1 text-[14px] font-bold text-gray-900">
-                      Kelola layanan dan halaman profesional Anda
-                    </p>
-                    <p className="mt-1 text-[12px] leading-relaxed text-gray-500">
-                      Satu jalur untuk review, portofolio, layanan aktif, dan permintaan pelanggan.
-                    </p>
-                  </div>
-
-                  <div className="mt-4 flex flex-col gap-3">
-                    <a href={loginHref}>
-                      <button
-                        type="button"
-                        className="flex w-full items-center justify-center gap-2 rounded-full py-4 text-[14px] font-bold text-white transition-transform active:scale-[0.99]"
-                        style={{ backgroundColor: 'var(--ui-primary)' }}
-                      >
-                        Masuk sebagai profesional
-                        <ArrowRight className="h-4 w-4" />
-                      </button>
-                    </a>
-                    <a href={authHref}>
-                      <button
-                        type="button"
-                        className="flex w-full items-center justify-center gap-2 rounded-full bg-gray-100 py-4 text-[14px] font-bold text-gray-700 transition-colors hover:bg-gray-200"
-                      >
-                        Keamanan akun
-                      </button>
-                    </a>
-                  </div>
-                </section>
-
-                <MarketplaceEmptyCard
-                  title="Masuk untuk membuka area kerja"
-                  description="Area kerja profesional akan muncul di sini setelah Anda menyelesaikan login."
-                />
-              </div>
             </div>
-          ) : loading ? (
-            <div
-              className="flex min-h-full flex-col px-5 pb-10 pt-6"
-              style={{ backgroundColor: 'var(--ui-background)' }}
-            >
-              <MarketplaceIdentityCard
-                chip={<MarketplaceTopPill tone="soft">Dashboard profesional</MarketplaceTopPill>}
-                subtitle="Sebentar ya, kami sedang menyiapkan profil dan aktivitas profesional Anda."
-                title="Memuat dashboard"
-              />
-              <MarketplaceSurfaceCard className="mt-5">
-                <p className="text-sm leading-6 text-gray-500">
-                  Mengambil data terbaru untuk halaman profesional Anda.
-                </p>
-              </MarketplaceSurfaceCard>
-            </div>
-          ) : !snapshot ? (
-            <div
-              className="flex min-h-full flex-col px-5 pb-10 pt-6"
-              style={{ backgroundColor: 'var(--ui-background)' }}
-            >
-              <MarketplaceIdentityCard
-                chip={<MarketplaceTopPill tone="soft">Dashboard profesional</MarketplaceTopPill>}
-                subtitle="Akun ini belum memiliki profil profesional yang siap digunakan."
-                title="Profil profesional belum siap"
-              />
-              <MarketplaceSurfaceCard className="mt-5">
-                <EmptyState
-                  title="Profil belum siap"
-                  description="Lengkapi pengajuan profesional Anda terlebih dahulu agar dashboard bisa dipakai."
-                />
-              </MarketplaceSurfaceCard>
-            </div>
-          ) : (
-            <div
-              className="flex h-full flex-col overflow-y-auto pb-10 custom-scrollbar"
-              style={{ backgroundColor: 'var(--ui-background)' }}
-            >
-              <div
-                className="sticky top-0 z-20 px-5 pb-5 pt-12 backdrop-blur-sm"
+
+            <div className="space-y-5 px-5 py-6">
+              <section
+                className="overflow-hidden rounded-[30px] border p-6 text-white"
                 style={{
-                  background:
-                    'linear-gradient(180deg, color-mix(in srgb, var(--ui-background) 96%, white) 0%, rgba(244,248,251,0.88) 72%, rgba(244,248,251,0) 100%)',
+                  background: 'var(--ui-hero-gradient)',
+                  borderColor: 'color-mix(in srgb, var(--ui-primary) 18%, white)',
+                  boxShadow: 'var(--ui-shadow-hero)',
                 }}
               >
-                <div className="flex items-center justify-between rounded-[28px] border border-white/80 bg-white/72 px-4 py-3 shadow-[0_22px_48px_-36px_rgba(15,23,42,0.22)] backdrop-blur-md">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full border-2 border-white/70 bg-white/12 text-white shadow-sm">
+                    <BriefcaseMedical className="h-7 w-7" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="rounded-full bg-white/14 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-white/92">
+                        Jalur profesional
+                      </span>
+                      <span className="rounded-full border border-white/18 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white/84">
+                        {platform.name}
+                      </span>
+                    </div>
+                    <h1 className="mt-3 text-[26px] font-bold leading-tight text-white">
+                      Masuk dulu untuk membuka area kerja profesional
+                    </h1>
+                    <p className="mt-2 text-[13px] leading-relaxed text-white/82">
+                      Setelah masuk, Anda bisa mengatur layanan aktif, halaman profesional, dokumen, dan jadwal kerja.
+                    </p>
+                  </div>
+                </div>
+              </section>
+
+              <section className="rounded-[28px] border border-gray-100 bg-white p-5 shadow-sm">
+                <div className="grid grid-cols-2 gap-2 rounded-full bg-gray-100 p-1">
                   <a
-                    className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border-2 border-white text-[13px] font-bold shadow-sm transition-opacity hover:opacity-80"
+                    href={loginHref}
+                    className="rounded-full bg-white px-4 py-3 text-center text-[13px] font-bold text-gray-900 shadow-sm transition-all"
+                  >
+                    Masuk
+                  </a>
+                  <a
+                    href={createLocalizedPath(locale, '/professionals/apply')}
+                    className="rounded-full px-4 py-3 text-center text-[13px] font-bold text-gray-500 transition-all hover:text-gray-700"
+                  >
+                    Daftar
+                  </a>
+                </div>
+
+                <div className="mt-5 rounded-[18px] bg-gray-50 px-4 py-3">
+                  <p className="text-[12px] font-semibold text-gray-500">Akses profesional</p>
+                  <p className="mt-1 text-[14px] font-bold text-gray-900">
+                    Kelola layanan dan halaman profesional Anda
+                  </p>
+                  <p className="mt-1 text-[12px] leading-relaxed text-gray-500">
+                    Satu jalur untuk review, portofolio, layanan aktif, dan permintaan pelanggan.
+                  </p>
+                </div>
+
+                <div className="mt-4 flex flex-col gap-3">
+                  <a href={loginHref}>
+                    <button
+                      type="button"
+                      className="flex w-full items-center justify-center gap-2 rounded-full py-4 text-[14px] font-bold text-white transition-transform active:scale-[0.99]"
+                      style={{ backgroundColor: 'var(--ui-primary)' }}
+                    >
+                      Masuk sebagai profesional
+                      <ArrowRight className="h-4 w-4" />
+                    </button>
+                  </a>
+                  <a href={authHref}>
+                    <button
+                      type="button"
+                      className="flex w-full items-center justify-center gap-2 rounded-full bg-gray-100 py-4 text-[14px] font-bold text-gray-700 transition-colors hover:bg-gray-200"
+                    >
+                      Keamanan akun
+                    </button>
+                  </a>
+                </div>
+              </section>
+
+              <MarketplaceEmptyCard
+                title="Masuk untuk membuka area kerja"
+                description="Area kerja profesional akan muncul di sini setelah Anda menyelesaikan login."
+              />
+            </div>
+          </div>
+        ) : loading ? (
+          <div className="flex min-h-full flex-col px-5 pb-10 pt-6" style={{ backgroundColor: 'var(--ui-background)' }}>
+            <MarketplaceIdentityCard
+              chip={<MarketplaceTopPill tone="soft">Dashboard profesional</MarketplaceTopPill>}
+              subtitle="Sebentar ya, kami sedang menyiapkan profil dan aktivitas profesional Anda."
+              title="Memuat dashboard"
+            />
+            <MarketplaceSurfaceCard className="mt-5">
+              <p className="text-sm leading-6 text-gray-500">Mengambil data terbaru untuk halaman profesional Anda.</p>
+            </MarketplaceSurfaceCard>
+          </div>
+        ) : !snapshot ? (
+          <div className="flex min-h-full flex-col px-5 pb-10 pt-6" style={{ backgroundColor: 'var(--ui-background)' }}>
+            <MarketplaceIdentityCard
+              chip={<MarketplaceTopPill tone="soft">Dashboard profesional</MarketplaceTopPill>}
+              subtitle="Akun ini belum memiliki profil profesional yang siap digunakan."
+              title="Profil profesional belum siap"
+            />
+            <MarketplaceSurfaceCard className="mt-5">
+              <EmptyState
+                title="Profil belum siap"
+                description="Lengkapi pengajuan profesional Anda terlebih dahulu agar dashboard bisa dipakai."
+              />
+            </MarketplaceSurfaceCard>
+          </div>
+        ) : (
+          <div
+            className="flex h-full flex-col overflow-y-auto pb-10 custom-scrollbar"
+            style={{ backgroundColor: 'var(--ui-background)' }}
+          >
+            <div
+              className="sticky top-0 z-20 px-5 pb-5 pt-12 backdrop-blur-sm"
+              style={{
+                background:
+                  'linear-gradient(180deg, color-mix(in srgb, var(--ui-background) 96%, white) 0%, rgba(255,252,254,0.9) 72%, rgba(255,252,254,0) 100%)',
+              }}
+            >
+              <div className="flex items-center justify-between rounded-[28px] border border-white/80 bg-white/72 px-4 py-3 shadow-[0_22px_48px_-36px_rgba(15,23,42,0.22)] backdrop-blur-md">
+                <a
+                  className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border-2 border-white text-[13px] font-bold shadow-sm transition-opacity hover:opacity-80"
+                  href={createLocalizedPath(locale, '/profile')}
+                  style={{ backgroundColor: 'var(--ui-surface-muted)', color: 'var(--ui-primary)' }}
+                >
+                  {(snapshot.profile?.displayName || session.customerProfile?.displayName || 'B')
+                    .charAt(0)
+                    .toUpperCase()}
+                </a>
+                <div className="flex min-w-0 flex-1 flex-col items-center px-3 text-center">
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+                    DASHBOARD PROFESIONAL
+                  </span>
+                  <div className="mt-1 flex max-w-full items-center text-[14px] font-bold text-gray-900">
+                    <MapPin className="mr-1 h-4 w-4 flex-shrink-0" style={{ color: 'var(--ui-primary)' }} />
+                    <span className="truncate">{locationLabel}</span>
+                  </div>
+                </div>
+                <a
+                  aria-label="Buka notifikasi"
+                  className="relative flex h-11 w-11 items-center justify-center rounded-full border border-white bg-white text-gray-800 shadow-sm transition-colors hover:bg-gray-50"
+                  href={createLocalizedPath(locale, '/notifications')}
+                >
+                  <Bell className="h-5 w-5" />
+                </a>
+              </div>
+            </div>
+
+            <div className="space-y-5 px-5 py-6">
+              {feedback ? <MessageBanner tone="info">{feedback}</MessageBanner> : null}
+
+              <section
+                className="overflow-hidden rounded-[32px] border p-5 text-white"
+                style={{
+                  background: 'var(--ui-hero-gradient)',
+                  borderColor: 'color-mix(in srgb, var(--ui-border-strong) 42%, white)',
+                  boxShadow: 'var(--ui-shadow-hero)',
+                }}
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="rounded-full border border-white/18 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/90">
+                        {currentSection.label}
+                      </span>
+                      <span className="rounded-full border border-white/18 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white/82">
+                        {snapshot.profile?.reviewStatus || 'draft'}
+                      </span>
+                    </div>
+                    <h1 className="mt-4 text-[24px] font-bold leading-tight text-white">
+                      {snapshot.profile?.displayName || session.customerProfile?.displayName || 'Dashboard profesional'}
+                    </h1>
+                    <p className="mt-2 break-words text-[13px] leading-relaxed text-white/82 [overflow-wrap:anywhere]">
+                      {workspaceHeadline}
+                    </p>
+                  </div>
+                  <a
+                    className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-white/22 bg-white/12 text-[15px] font-bold text-white shadow-sm"
                     href={createLocalizedPath(locale, '/profile')}
-                    style={{ backgroundColor: 'var(--ui-surface-muted)', color: 'var(--ui-primary)' }}
                   >
                     {(snapshot.profile?.displayName || session.customerProfile?.displayName || 'B')
                       .charAt(0)
                       .toUpperCase()}
                   </a>
-                  <div className="flex min-w-0 flex-1 flex-col items-center px-3 text-center">
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-                      DASHBOARD PROFESIONAL
-                    </span>
-                    <div className="mt-1 flex max-w-full items-center text-[14px] font-bold text-gray-900">
-                      <MapPin className="mr-1 h-4 w-4 flex-shrink-0" style={{ color: 'var(--ui-primary)' }} />
-                      <span className="truncate">{locationLabel}</span>
-                    </div>
-                  </div>
-                  <a
-                    aria-label="Buka notifikasi"
-                    className="relative flex h-11 w-11 items-center justify-center rounded-full border border-white bg-white text-gray-800 shadow-sm transition-colors hover:bg-gray-50"
-                    href={createLocalizedPath(locale, '/notifications')}
-                  >
-                    <Bell className="h-5 w-5" />
-                  </a>
                 </div>
+
+                <div className="mt-5 grid grid-cols-2 gap-3">
+                  <div className="rounded-[20px] border border-white/16 bg-white/12 px-4 py-4 backdrop-blur-sm">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/86">Kelengkapan</p>
+                    <p className="mt-2 text-[22px] font-bold text-white">{completionScore}%</p>
+                  </div>
+                  <div className="rounded-[20px] border border-white/16 bg-white/12 px-4 py-4 backdrop-blur-sm">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/86">Respons</p>
+                    <p className="mt-2 text-[16px] font-bold leading-snug text-white">{responseTimeGoal}</p>
+                  </div>
+                  <div className="rounded-[20px] border border-white/16 bg-white/12 px-4 py-4 backdrop-blur-sm">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/86">
+                      Rata-rata harga
+                    </p>
+                    <p className="mt-2 whitespace-nowrap text-[18px] font-bold tracking-[-0.02em] text-white">
+                      {formatCompactIdrMetric(averagePriceValue, locale)}
+                    </p>
+                  </div>
+                  <div className="rounded-[20px] border border-white/16 bg-white/12 px-4 py-4 backdrop-blur-sm">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/86">Layanan aktif</p>
+                    <p className="mt-2 text-[22px] font-bold text-white">{(snapshot.offerings ?? []).length}</p>
+                  </div>
+                </div>
+              </section>
+
+              <div className="grid grid-cols-2 gap-3">
+                <WorkspaceActionButton
+                  href={publicProfileHref}
+                  icon={<UserRound className="h-4 w-4" />}
+                  title="Profil publik"
+                  variant="primary"
+                />
+                <WorkspaceActionButton
+                  href={createLocalizedPath(locale, '/explore')}
+                  icon={<Compass className="h-4 w-4" />}
+                  title="Katalog"
+                  variant="secondary"
+                />
               </div>
 
-              <div className="space-y-5 px-5 py-6">
-                {feedback ? <MessageBanner tone="info">{feedback}</MessageBanner> : null}
-
-                <section
-                  className="overflow-hidden rounded-[32px] border p-5 text-white"
-                  style={{
-                    background: 'var(--ui-hero-gradient)',
-                    borderColor: 'color-mix(in srgb, var(--ui-border-strong) 42%, white)',
-                    boxShadow: 'var(--ui-shadow-hero)',
-                  }}
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="rounded-full border border-white/18 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/90">
-                          {currentSection.label}
-                        </span>
-                        <span className="rounded-full border border-white/18 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white/82">
-                          {snapshot.profile?.reviewStatus || 'draft'}
-                        </span>
-                      </div>
-                      <h1 className="mt-4 text-[24px] font-bold leading-tight text-white">
-                        {snapshot.profile?.displayName ||
-                          session.customerProfile?.displayName ||
-                          'Dashboard profesional'}
-                      </h1>
-                      <p className="mt-2 break-words text-[13px] leading-relaxed text-white/82 [overflow-wrap:anywhere]">
-                        {workspaceHeadline}
-                      </p>
-                    </div>
-                    <a
-                      className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-white/22 bg-white/12 text-[15px] font-bold text-white shadow-sm"
-                      href={createLocalizedPath(locale, '/profile')}
-                    >
-                      {(snapshot.profile?.displayName || session.customerProfile?.displayName || 'B')
-                        .charAt(0)
-                        .toUpperCase()}
-                    </a>
-                  </div>
-
-                  <div className="mt-5 grid grid-cols-2 gap-3">
-                    <div className="rounded-[20px] border border-white/16 bg-white/12 px-4 py-4 backdrop-blur-sm">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">Kelengkapan</p>
-                      <p className="mt-2 text-[22px] font-bold text-white">{completionScore}%</p>
-                    </div>
-                    <div className="rounded-[20px] border border-white/16 bg-white/12 px-4 py-4 backdrop-blur-sm">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">Respons</p>
-                      <p className="mt-2 text-[16px] font-bold leading-snug text-white">{responseTimeGoal}</p>
-                    </div>
-                    <div className="rounded-[20px] border border-white/16 bg-white/12 px-4 py-4 backdrop-blur-sm">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">
-                        Rata-rata harga
-                      </p>
-                      <p className="mt-2 text-[18px] font-bold text-white">
-                        {formatWorkspaceCurrency(averagePriceValue, 'IDR')}
-                      </p>
-                    </div>
-                    <div className="rounded-[20px] border border-white/16 bg-white/12 px-4 py-4 backdrop-blur-sm">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">
-                        Layanan aktif
-                      </p>
-                      <p className="mt-2 text-[22px] font-bold text-white">{(snapshot.offerings ?? []).length}</p>
-                    </div>
-                  </div>
-                </section>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <WorkspaceActionButton
-                    href={publicProfileHref}
-                    icon={<UserRound className="h-4 w-4" />}
-                    title="Lihat profil publik"
-                    variant="primary"
-                  />
-                  <WorkspaceActionButton
-                    href={createLocalizedPath(locale, '/explore')}
-                    icon={<Compass className="h-4 w-4" />}
-                    title="Lihat katalog"
-                    variant="secondary"
-                  />
-                </div>
-
+              <div className="sticky top-[104px] z-10">
                 <ProfessionalTabGrid
                   items={professionalConsoleSections.map((item) => ({
                     href: sectionHref(item.path),
@@ -708,78 +720,78 @@ export function ProfessionalWorkspacePage({
                   }))}
                   value={currentSection.id}
                 />
-
-                {currentSection.id === 'overview' ? <OverviewSection locale={locale} snapshot={snapshot} /> : null}
-                {currentSection.id === 'orders' ? <OrdersSection snapshot={snapshot} /> : null}
-                {currentSection.id === 'offerings' ? (
-                  <OfferingsSection
-                    busy={busy}
-                    form={offeringForm}
-                    isApproved={Boolean(isApproved)}
-                    onChange={setOfferingForm}
-                    onCreate={handleCreateOffering}
-                    snapshot={snapshot}
-                  />
-                ) : null}
-                {currentSection.id === 'portfolio' ? (
-                  <PortfolioSection
-                    busy={busy}
-                    galleryAssets={galleryAssets}
-                    onSave={savePortfolio}
-                    portfolioEntries={portfolioEntries}
-                    setGalleryAssets={setGalleryAssets}
-                    setPortfolioEntries={setPortfolioEntries}
-                  />
-                ) : null}
-                {currentSection.id === 'trust' ? (
-                  <TrustSection
-                    busy={busy}
-                    credentials={credentials}
-                    onSave={saveTrust}
-                    setCredentials={setCredentials}
-                    setStories={setStories}
-                    stories={stories}
-                  />
-                ) : null}
-                {currentSection.id === 'coverage' ? (
-                  <CoverageSection
-                    busy={busy}
-                    coverageAreas={coverageAreas}
-                    onSave={saveCoverage}
-                    setCoverageAreas={setCoverageAreas}
-                  />
-                ) : null}
-                {currentSection.id === 'availability' ? (
-                  <AvailabilitySection
-                    busy={busy}
-                    availabilityRules={availabilityRules}
-                    onSave={saveAvailability}
-                    setAvailabilityRules={setAvailabilityRules}
-                  />
-                ) : null}
-                {currentSection.id === 'notifications' ? (
-                  <NotificationSection
-                    busy={busy}
-                    form={notificationForm}
-                    onChange={setNotificationForm}
-                    onSave={saveNotifications}
-                  />
-                ) : null}
-                {currentSection.id === 'profile' ? (
-                  <ProfileSection
-                    busy={busy}
-                    form={profileForm}
-                    locale={locale}
-                    onChange={setProfileForm}
-                    onSave={saveProfile}
-                    snapshot={snapshot}
-                  />
-                ) : null}
               </div>
+
+              {currentSection.id === 'overview' ? <OverviewSection locale={locale} snapshot={snapshot} /> : null}
+              {currentSection.id === 'orders' ? <OrdersSection snapshot={snapshot} /> : null}
+              {currentSection.id === 'offerings' ? (
+                <OfferingsSection
+                  busy={busy}
+                  form={offeringForm}
+                  isApproved={Boolean(isApproved)}
+                  onChange={setOfferingForm}
+                  onCreate={handleCreateOffering}
+                  snapshot={snapshot}
+                />
+              ) : null}
+              {currentSection.id === 'portfolio' ? (
+                <PortfolioSection
+                  busy={busy}
+                  galleryAssets={galleryAssets}
+                  onSave={savePortfolio}
+                  portfolioEntries={portfolioEntries}
+                  setGalleryAssets={setGalleryAssets}
+                  setPortfolioEntries={setPortfolioEntries}
+                />
+              ) : null}
+              {currentSection.id === 'trust' ? (
+                <TrustSection
+                  busy={busy}
+                  credentials={credentials}
+                  onSave={saveTrust}
+                  setCredentials={setCredentials}
+                  setStories={setStories}
+                  stories={stories}
+                />
+              ) : null}
+              {currentSection.id === 'coverage' ? (
+                <CoverageSection
+                  busy={busy}
+                  coverageAreas={coverageAreas}
+                  onSave={saveCoverage}
+                  setCoverageAreas={setCoverageAreas}
+                />
+              ) : null}
+              {currentSection.id === 'availability' ? (
+                <AvailabilitySection
+                  busy={busy}
+                  availabilityRules={availabilityRules}
+                  onSave={saveAvailability}
+                  setAvailabilityRules={setAvailabilityRules}
+                />
+              ) : null}
+              {currentSection.id === 'notifications' ? (
+                <NotificationSection
+                  busy={busy}
+                  form={notificationForm}
+                  onChange={setNotificationForm}
+                  onSave={saveNotifications}
+                />
+              ) : null}
+              {currentSection.id === 'profile' ? (
+                <ProfileSection
+                  busy={busy}
+                  form={profileForm}
+                  locale={locale}
+                  onChange={setProfileForm}
+                  onSave={saveProfile}
+                  snapshot={snapshot}
+                />
+              ) : null}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
-    </div>
+    </MarketplaceMobileShell>
   );
 }

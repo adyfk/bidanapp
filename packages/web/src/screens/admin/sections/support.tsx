@@ -122,7 +122,7 @@ export function SupportSection({
                 </div>
                 <div className="mt-5">
                   <PrimaryButton disabled={busy} onClick={() => void onTriage(ticket.id)} type="button">
-                    {busy ? 'Menyimpan...' : 'Simpan triage'}
+                    {busy ? 'Simpan...' : 'Simpan'}
                   </PrimaryButton>
                 </div>
               </EntityCard>

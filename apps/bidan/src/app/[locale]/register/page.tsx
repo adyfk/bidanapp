@@ -14,7 +14,7 @@ export default async function BidanRegisterPage(props: {
 
   return (
     <ViewerAuthPage
-      defaultNextPath={searchParams.next || createLocalizedPath(locale, '/home')}
+      defaultNextPath={searchParams.next || createLocalizedPath(locale)}
       initialSession={session}
       locale={locale}
       mode="register"

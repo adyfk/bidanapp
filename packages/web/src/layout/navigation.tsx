@@ -6,6 +6,7 @@ import {
 import type { MarketplaceNavItem } from '@marketplace/ui/marketplace-lite';
 import { Calendar, Compass, Search, Sparkles } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { createLocalizedPath } from '../lib/platform';
 
 export function createLocaleSwitcherItems(currentPath: string, _locale: string) {
   const basePath = currentPath.replace(/^\/(id|en)/, '') || '';
@@ -21,7 +22,7 @@ export function createLocaleSwitcherItems(currentPath: string, _locale: string) 
 export function createPrimaryMarketplaceNav(platform: ServicePlatformConfig, locale: string): MarketplaceNavItem[] {
   const copy = getPlatformCopy(platform, locale);
   return copy.navigation.map((item) => ({
-    href: `/${locale}${item.href}`,
+    href: createLocalizedPath(locale, item.href),
     icon: renderNavigationIcon(item.icon),
     id: item.id,
     label: item.label,

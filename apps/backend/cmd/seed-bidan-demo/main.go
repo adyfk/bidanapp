@@ -37,8 +37,10 @@ func main() {
 	fmt.Println("[seed] Bidan demo workspace ready")
 	fmt.Println("[seed] Viewer password:", summary.ViewerPassword)
 	fmt.Println("[seed] Customer login:", summary.CustomerPhone)
+	fmt.Println("[seed] Empty customer login:", summary.EmptyCustomerPhone)
 	fmt.Println("[seed] Approved professional login:", summary.ApprovedProfessionalPhone, "(", summary.ApprovedProfessionalName, ")")
 	fmt.Println("[seed] Submitted professional login:", summary.SubmittedProfessionalPhone)
+	fmt.Println("[seed] Empty professional login:", summary.EmptyProfessionalPhone)
 	if len(summary.AdminEmails) > 0 {
 		fmt.Println("[seed] Admin password:", "AdminDemo#2026")
 		fmt.Println("[seed] Admin emails:", strings.Join(summary.AdminEmails, ", "))

@@ -28,7 +28,7 @@ Membuktikan bahwa login native Bidan langsung membuka account state yang sama di
 
 ## Known assertions
 
-- redirect ke `/id/home`
+- redirect ke `/id`
 - akun yang sama terbaca di `/id/security`
 - daftar device aktif tampil
 - logout device lain tidak memutus session saat ini

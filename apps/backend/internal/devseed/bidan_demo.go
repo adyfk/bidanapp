@@ -27,6 +27,8 @@ type SeedSummary struct {
 	ApprovedProfessionalName string
 	ApprovedProfessionalPhone string
 	CustomerPhone            string
+	EmptyCustomerPhone       string
+	EmptyProfessionalPhone   string
 	SubmittedProfessionalPhone string
 	ViewerPassword           string
 }
@@ -77,6 +79,20 @@ var demoViewerAccounts = map[string]demoViewerAccount{
 		IdentityID:  "seed_ident_professional_draft",
 		Phone:       "+628111111004",
 		UserID:      "usr_demo_professional_draft",
+	},
+	"empty_customer": {
+		City:        "Bogor, Tanah Sareal",
+		DisplayName: "Nadia Salma Putri",
+		IdentityID:  "seed_ident_customer_empty",
+		Phone:       "+628111111005",
+		UserID:      "usr_demo_customer_empty",
+	},
+	"empty_professional": {
+		City:        "Tangerang Selatan, BSD",
+		DisplayName: "Bidan Hana Kirana Putri, S.Tr.Keb.",
+		IdentityID:  "seed_ident_professional_empty",
+		Phone:       "+628111111006",
+		UserID:      "usr_demo_professional_empty",
 	},
 }
 
@@ -140,6 +156,9 @@ func SeedBidanDemo(ctx context.Context, db *sql.DB, cfg config.Config) (SeedSumm
 	if err := seedDraftProfessional(ctx, tx, cfg, schemaID, ts); err != nil {
 		return SeedSummary{}, fmt.Errorf("seed draft professional: %w", err)
 	}
+	if err := seedEmptyProfessional(ctx, tx, schemaID, ts); err != nil {
+		return SeedSummary{}, fmt.Errorf("seed empty professional: %w", err)
+	}
 	if err := seedCommerce(ctx, tx, ts); err != nil {
 		return SeedSummary{}, fmt.Errorf("seed commerce: %w", err)
 	}
@@ -164,6 +183,8 @@ func SeedBidanDemo(ctx context.Context, db *sql.DB, cfg config.Config) (SeedSumm
 		ApprovedProfessionalName:   demoViewerAccounts["approved_professional"].DisplayName,
 		ApprovedProfessionalPhone:  demoViewerAccounts["approved_professional"].Phone,
 		CustomerPhone:              demoViewerAccounts["customer"].Phone,
+		EmptyCustomerPhone:         demoViewerAccounts["empty_customer"].Phone,
+		EmptyProfessionalPhone:     demoViewerAccounts["empty_professional"].Phone,
 		SubmittedProfessionalPhone: demoViewerAccounts["submitted_professional"].Phone,
 		ViewerPassword:             viewerPassword,
 	}, nil
@@ -527,6 +548,73 @@ func seedDraftProfessional(
 		ProfileID:     profileID,
 		UserID:        account.UserID,
 	}, ts(5))
+}
+
+func seedEmptyProfessional(
+	ctx context.Context,
+	tx *sql.Tx,
+	schemaID string,
+	ts func(int) time.Time,
+) error {
+	account := demoViewerAccounts["empty_professional"]
+	profileID := "seed_profile_empty_midwife"
+	applicationID := "seed_application_empty_midwife"
+	attributes := map[string]any{
+		"headline":          "Draft baru untuk layanan home visit masa nifas dan konseling menyusui yang masih menunggu detail area, jadwal, dan bukti praktik.",
+		"responseTimeGoal":  "< 60 menit pada jam kerja",
+		"seeded":            true,
+		"str_number":        "",
+		"education_history": "D4 Kebidanan Tangerang Selatan, baru menyiapkan identitas profesional dan preferensi layanan sebelum melengkapi berkas legalitas.",
+	}
+	attributesJSON, err := json.Marshal(attributes)
+	if err != nil {
+		return err
+	}
+
+	if _, err := tx.ExecContext(ctx, `
+		INSERT INTO professional_platform_profiles (
+			id,
+			platform_id,
+			user_id,
+			slug,
+			display_name,
+			city,
+			status,
+			review_status,
+			attributes,
+			created_at,
+			updated_at
+		) VALUES ($1, $2, $3, $4, $5, $6, 'draft', 'draft', $7, $8, $9)
+	`, profileID, bidanPlatformID, account.UserID, "bidan-hana-kirana", account.DisplayName, account.City, attributesJSON, ts(2), ts(4)); err != nil {
+		return err
+	}
+
+	if _, err := tx.ExecContext(ctx, `
+		INSERT INTO professional_applications (
+			id,
+			platform_id,
+			profile_id,
+			user_id,
+			schema_id,
+			status,
+			attributes,
+			review_notes,
+			created_at,
+			updated_at
+		) VALUES ($1, $2, $3, $4, $5, 'draft', $6, 'Lengkapi identitas, SIPB, area jangkauan, dan jadwal praktik sebelum aplikasi dikirim.', $7, $8)
+	`, applicationID, bidanPlatformID, profileID, account.UserID, schemaID, attributesJSON, ts(2), ts(4)); err != nil {
+		return err
+	}
+
+	if _, err := tx.ExecContext(ctx, `
+		INSERT INTO professional_notification_preferences (
+			profile_id, platform_id, web_enabled, email_enabled, whatsapp_enabled, metadata, created_at, updated_at
+		) VALUES ($1, $2, true, false, false, '{"seeded":true,"emptyState":true}'::jsonb, $3, $3)
+	`, profileID, bidanPlatformID, ts(4)); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func seedApprovedWorkspace(ctx context.Context, tx *sql.Tx, profileID string, ts func(int) time.Time) error {

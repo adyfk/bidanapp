@@ -24,9 +24,18 @@ export function MarketplaceMobileShell({
   showNav?: boolean;
 }) {
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--ui-background)' }}>
-      <div className="mx-auto flex min-h-screen justify-center">
-        <div className="relative flex min-h-[100dvh] w-full max-w-[480px] flex-col overflow-hidden bg-[var(--ui-background)] shadow-[0_18px_50px_-26px_rgba(15,23,42,0.24)]">
+    <div
+      className="min-h-screen md:px-6 md:py-6"
+      style={{
+        background:
+          'radial-gradient(circle at top, color-mix(in srgb, var(--ui-surface-muted) 72%, white) 0%, var(--ui-background) 42%, color-mix(in srgb, var(--ui-surface-muted) 44%, white) 100%)',
+      }}
+    >
+      <div className="mx-auto flex min-h-screen justify-center md:min-h-0">
+        <div
+          className="relative flex min-h-[100dvh] w-full max-w-[480px] flex-col overflow-hidden bg-[var(--ui-background)] shadow-[0_26px_56px_-34px_rgba(88,49,66,0.22)] md:min-h-[calc(100vh-3rem)] md:rounded-[38px] md:border"
+          style={{ borderColor: 'color-mix(in srgb, var(--ui-border) 82%, white)' }}
+        >
           <main className="flex flex-1 flex-col overflow-y-auto">{children}</main>
         </div>
       </div>
@@ -37,36 +46,45 @@ export function MarketplaceMobileShell({
 
 export function MarketplaceBottomNav({ activeId, items }: { activeId?: string; items: MarketplaceNavItem[] }) {
   return (
-    <div className="pointer-events-none fixed bottom-6 left-1/2 z-50 flex w-full max-w-[480px] -translate-x-1/2 justify-center px-6">
+    <div className="pointer-events-none fixed bottom-5 left-1/2 z-50 flex w-full max-w-[480px] -translate-x-1/2 justify-center px-5 md:bottom-10">
       <div
-        className="pointer-events-auto flex w-full items-center justify-between rounded-full p-2 shadow-2xl"
-        style={{ backgroundColor: '#1E1E1E' }}
+        className="pointer-events-auto w-full rounded-[26px] border p-1.5 shadow-[0_24px_44px_-30px_rgba(74,46,58,0.24)] backdrop-blur-xl"
+        style={{
+          background: 'rgba(255,255,255,0.96)',
+          borderColor: 'color-mix(in srgb, var(--ui-border) 88%, white)',
+        }}
       >
-        <div className="flex items-center justify-between">
+        <div
+          className="grid items-stretch gap-1"
+          style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}
+        >
           {items.map((item) => {
             const active = item.id === activeId;
 
             return (
               <a
+                aria-current={active ? 'page' : undefined}
                 key={item.id}
                 className={cx(
-                  'relative flex items-center justify-center rounded-full transition-all duration-300',
-                  active ? 'px-5 py-3 text-white' : 'h-12 w-12 text-gray-400 hover:text-white',
+                  'relative flex min-h-[54px] min-w-0 flex-col items-center justify-center gap-1 rounded-[20px] px-1.5 py-2 text-center transition-colors duration-200',
+                  active ? 'text-white' : 'text-[var(--ui-text-muted)] hover:bg-[var(--ui-surface-muted)]',
                 )}
                 href={item.href}
                 style={
                   active
                     ? {
-                        backgroundColor: 'var(--ui-primary)',
+                        background:
+                          'linear-gradient(180deg, var(--ui-nav-active-background) 0%, color-mix(in srgb, var(--ui-nav-active-background) 82%, #7B2A47) 100%)',
                         color: '#ffffff',
+                        boxShadow: '0 16px 28px -22px rgba(117,48,76,0.28)',
                       }
                     : {
-                        color: '#9ca3af',
+                        color: 'var(--ui-text-muted)',
                       }
                 }
               >
                 <span className="flex h-5 w-5 items-center justify-center">{item.icon}</span>
-                {active ? <span className="ml-2.5 text-[13px] font-bold">{item.label}</span> : null}
+                <span className="max-w-full truncate text-[10.5px] font-bold leading-none">{item.label}</span>
               </a>
             );
           })}
@@ -91,8 +109,9 @@ export function MarketplaceTopPill({
         }
       : tone === 'soft'
         ? {
-            backgroundColor: 'rgba(255,255,255,0.92)',
-            borderColor: 'rgba(255,255,255,0.45)',
+            background:
+              'linear-gradient(180deg, rgba(255,255,255,0.96) 0%, color-mix(in srgb, var(--ui-surface-muted) 72%, white) 100%)',
+            borderColor: 'var(--ui-border)',
             color: 'var(--ui-text-strong)',
           }
         : {
@@ -103,7 +122,7 @@ export function MarketplaceTopPill({
 
   return (
     <span
-      className="inline-flex items-center rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] backdrop-blur-md"
+      className="inline-flex max-w-full items-center overflow-hidden truncate whitespace-nowrap rounded-[13px] border px-2.5 py-1.5 text-[10.5px] font-semibold uppercase tracking-[0.16em] backdrop-blur-md"
       style={style}
     >
       {children}
@@ -126,7 +145,7 @@ export function MarketplaceSurfaceCard({
           background:
             'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 72%, white) 100%)',
           borderColor: 'var(--ui-border)',
-          boxShadow: '0 18px 40px -28px rgba(17,24,39,0.18)',
+          boxShadow: '0 18px 40px -28px rgba(88,49,66,0.14)',
         }
       : tone === 'dark'
         ? {
@@ -139,12 +158,12 @@ export function MarketplaceSurfaceCard({
           ? {
               backgroundColor: 'rgba(255,255,255,0.92)',
               borderColor: 'rgba(255,255,255,0.55)',
-              boxShadow: '0 28px 60px -38px rgba(15,23,42,0.45)',
+              boxShadow: '0 28px 60px -38px rgba(88,49,66,0.26)',
             }
           : {
               backgroundColor: '#ffffff',
               borderColor: 'rgba(226,232,240,0.8)',
-              boxShadow: '0 14px 40px -28px rgba(15,23,42,0.18)',
+              boxShadow: '0 14px 40px -28px rgba(88,49,66,0.14)',
             };
 
   return (
@@ -189,29 +208,30 @@ export function MarketplaceAccessHero({
 }) {
   return (
     <section
-      className="overflow-hidden rounded-[30px] p-6 text-white shadow-[0_24px_60px_-32px_rgba(190,24,93,0.55)]"
+      className="overflow-hidden rounded-[30px] border p-6 text-white shadow-[var(--ui-shadow-hero)]"
       style={{
         background: 'linear-gradient(145deg, var(--ui-primary) 0%, var(--ui-secondary) 100%)',
+        borderColor: 'color-mix(in srgb, var(--ui-border-strong) 42%, white)',
       }}
     >
       <div className="flex flex-wrap items-center gap-2">
-        <span className="rounded-full bg-white/15 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-white/90">
+        <span className="rounded-[13px] bg-white/15 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-white/92">
           {badgeLabel}
         </span>
-        <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white/90">
+        <span className="rounded-[13px] border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white/92">
           {statusLabel}
         </span>
       </div>
 
       <h1 className="mt-5 text-[28px] font-bold leading-tight">{title}</h1>
-      <p className="mt-3 max-w-[28rem] text-[14px] leading-relaxed text-white/85">{description}</p>
+      <p className="mt-3 max-w-[28rem] text-[14px] leading-relaxed text-white/92">{description}</p>
 
       {benefits?.length ? (
-        <div className="mt-5 grid gap-3">
+        <div className="mt-5 flex flex-wrap gap-2.5">
           {benefits.map((item) => (
             <div
               key={item.label}
-              className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-2 text-[11px] font-semibold text-white/90"
+              className="inline-flex items-center gap-2 rounded-[13px] border border-white/18 bg-white/12 px-3 py-1.5 text-[11px] font-semibold text-white/92"
             >
               {item.icon}
               <span>{item.label}</span>
@@ -231,11 +251,11 @@ export function MarketplaceAccessTabs({
   value: string;
 }) {
   return (
-    <div className="grid grid-cols-2 gap-2 rounded-full bg-gray-100 p-1">
+    <div className="grid grid-cols-2 gap-2 rounded-[18px] bg-gray-100 p-1">
       {items.map((item) => {
         const active = item.value === value;
         const className = cx(
-          'rounded-full px-4 py-3 text-center text-[13px] font-bold transition-all',
+          'rounded-[14px] px-4 py-3 text-center text-[13px] font-bold transition-colors',
           active ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700',
         );
 
@@ -293,18 +313,34 @@ export function MarketplaceHeaderIconButton({
   onClick?: () => void;
 }) {
   const className =
-    'flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-600 transition-colors hover:bg-gray-200 active:scale-95';
+    'flex h-10 w-10 items-center justify-center rounded-full border text-gray-600 transition-colors hover:bg-rose-50/70 active:scale-95';
 
   if (href) {
     return (
-      <a className={className} href={href}>
+      <a
+        className={className}
+        href={href}
+        style={{
+          background:
+            'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 56%, white) 100%)',
+          borderColor: 'var(--ui-border)',
+        }}
+      >
         {children}
       </a>
     );
   }
 
   return (
-    <button className={className} onClick={onClick} type="button">
+    <button
+      className={className}
+      onClick={onClick}
+      style={{
+        background: 'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 56%, white) 100%)',
+        borderColor: 'var(--ui-border)',
+      }}
+      type="button"
+    >
       {children}
     </button>
   );
@@ -329,11 +365,12 @@ export function MarketplaceSearchField({
 }) {
   return (
     <div
-      className={cx('flex items-center rounded-full border px-4 py-3.5 shadow-sm', className)}
+      className={cx('flex items-center rounded-[20px] border px-4 py-3.5 shadow-sm', className)}
       style={{
-        backgroundColor: '#ffffff',
-        borderColor: '#f1f5f9',
-        boxShadow: '0 10px 26px -22px rgba(15,23,42,0.2)',
+        background:
+          'linear-gradient(180deg, rgba(255,255,255,0.98) 0%, color-mix(in srgb, var(--ui-surface-muted) 56%, white) 100%)',
+        borderColor: 'var(--ui-border)',
+        boxShadow: '0 14px 26px -22px rgba(88,49,66,0.14)',
       }}
     >
       <div className="flex w-full items-center gap-3">
@@ -364,20 +401,21 @@ export function MarketplaceFilterChip({
 }) {
   return (
     <button
-      className="rounded-full border px-4 py-2.5 text-[13px] font-bold transition-all"
+      className="rounded-[14px] border px-3 py-2 text-[12px] font-bold transition-colors"
       onClick={onClick}
       style={
         active
           ? {
-              backgroundColor: 'var(--ui-surface-muted)',
+              background:
+                'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 78%, white) 100%)',
               borderColor: 'var(--ui-border-strong)',
               color: 'var(--ui-primary)',
-              boxShadow: '0 14px 30px -24px rgba(3,105,161,0.18)',
+              boxShadow: '0 14px 30px -24px rgba(145,64,96,0.18)',
             }
           : {
               backgroundColor: '#ffffff',
-              borderColor: '#e2e8f0',
-              color: '#475569',
+              borderColor: 'var(--ui-border)',
+              color: 'var(--ui-text-muted)',
             }
       }
       type="button"
@@ -440,9 +478,13 @@ export function MarketplaceListCard({
   if (onClick) {
     return (
       <button
-        className="w-full rounded-[24px] border bg-white p-4 text-left shadow-[0_14px_40px_-28px_rgba(15,23,42,0.18)]"
+        className="w-full rounded-[24px] border p-4 text-left shadow-[0_14px_40px_-28px_rgba(88,49,66,0.14)]"
         onClick={onClick}
-        style={{ borderColor: 'rgba(226,232,240,0.8)' }}
+        style={{
+          background:
+            'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 42%, white) 100%)',
+          borderColor: 'var(--ui-border)',
+        }}
         type="button"
       >
         {content}
@@ -452,7 +494,7 @@ export function MarketplaceListCard({
 
   return (
     <div
-      className="w-full rounded-[24px] border bg-white p-4 text-left shadow-[0_14px_40px_-28px_rgba(15,23,42,0.18)]"
+      className="w-full rounded-[24px] border p-4 text-left shadow-[0_14px_40px_-28px_rgba(88,49,66,0.14)]"
       style={{ borderColor: 'var(--ui-border)' }}
     >
       {content}
@@ -485,7 +527,7 @@ export function MarketplaceIdentityCard({
     chip ||
     (chipLabel ? (
       <div
-        className="inline-flex max-w-full items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-semibold"
+        className="inline-flex max-w-full items-center gap-1.5 rounded-[12px] border px-2.5 py-1.5 text-[10.5px] font-semibold"
         style={{
           backgroundColor: 'var(--ui-surface-muted)',
           borderColor: 'var(--ui-border)',
@@ -501,9 +543,13 @@ export function MarketplaceIdentityCard({
     action ||
     (actionLabel && onAction ? (
       <button
-        className="inline-flex items-center gap-1 rounded-full border bg-white px-3.5 py-2 text-[12px] font-semibold text-slate-600 shadow-[0_10px_26px_-22px_rgba(15,23,42,0.35)] transition-colors hover:bg-slate-50"
+        className="inline-flex max-w-full items-center gap-1 rounded-[14px] border px-3 py-2 text-[12px] font-semibold text-slate-600 shadow-[0_10px_26px_-22px_rgba(88,49,66,0.14)] transition-colors hover:bg-rose-50/60"
         onClick={onAction}
-        style={{ borderColor: 'var(--ui-border)' }}
+        style={{
+          background:
+            'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 52%, white) 100%)',
+          borderColor: 'var(--ui-border)',
+        }}
         type="button"
       >
         {actionLabel}
@@ -559,7 +605,10 @@ export function MarketplaceEmptyCard({
   return (
     <div
       className="rounded-[28px] border border-dashed bg-white px-5 py-8 text-center shadow-sm"
-      style={{ borderColor: '#e5e7eb' }}
+      style={{
+        background: 'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 44%, white) 100%)',
+        borderColor: 'var(--ui-border)',
+      }}
     >
       <div className="text-[18px] font-bold text-gray-900">{title}</div>
       <div className="mt-2 text-[13px] leading-6 text-gray-500">{description}</div>
@@ -613,8 +662,8 @@ export function MarketplaceNotificationGroup({
   return (
     <section>
       <div className="mb-3 flex items-center justify-between px-1">
-        <h2 className="text-[12px] font-semibold uppercase tracking-[0.16em] text-gray-400">{title}</h2>
-        <span className="text-[12px] font-medium text-gray-400">{count}</span>
+        <h2 className="text-[12px] font-semibold uppercase tracking-[0.16em] text-slate-500">{title}</h2>
+        <span className="text-[12px] font-medium text-slate-400">{count}</span>
       </div>
       <div className="space-y-3">{children}</div>
     </section>
@@ -624,11 +673,11 @@ export function MarketplaceNotificationGroup({
 export function MarketplaceSettingsCard({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <div
-      className={cx(
-        'overflow-hidden rounded-[30px] border bg-white shadow-[0_22px_50px_-40px_rgba(15,23,42,0.18)]',
-        className,
-      )}
-      style={{ borderColor: 'var(--ui-border)' }}
+      className={cx('overflow-hidden rounded-[30px] border shadow-[0_22px_50px_-40px_rgba(88,49,66,0.14)]', className)}
+      style={{
+        background: 'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 34%, white) 100%)',
+        borderColor: 'var(--ui-border)',
+      }}
     >
       {children}
     </div>
@@ -646,12 +695,12 @@ export function MarketplaceDangerButton({
 }) {
   return (
     <button
-      className="mt-1 flex w-full items-center justify-center gap-2 rounded-[28px] border p-4 font-bold shadow-[0_18px_40px_-34px_rgba(180,83,9,0.12)] transition-colors hover:bg-amber-50/80 active:bg-amber-100"
+      className="mt-1 flex w-full items-center justify-center gap-2 rounded-[28px] border p-4 font-bold shadow-[0_18px_40px_-34px_rgba(88,49,66,0.08)] transition-colors hover:bg-rose-50/50 active:bg-rose-50"
       onClick={onClick}
       style={{
-        background: 'linear-gradient(180deg,#FFFDF7 0%,#FFF7E8 100%)',
-        borderColor: 'rgba(253,230,138,0.72)',
-        color: '#b45309',
+        background: 'linear-gradient(180deg,#FFFFFF 0%,#FFF7FA 100%)',
+        borderColor: 'var(--ui-border)',
+        color: 'var(--ui-text-muted)',
       }}
       type="button"
     >
@@ -664,13 +713,14 @@ export function MarketplaceDangerButton({
 export function MarketplaceFeaturePill({ children, tone = 'glass' }: { children: ReactNode; tone?: 'glass' | 'soft' }) {
   return (
     <div
-      className="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-[11px] font-semibold"
+      className="inline-flex max-w-full items-center gap-1.5 overflow-hidden truncate whitespace-nowrap rounded-[13px] border px-3 py-1.5 text-[10.5px] font-semibold leading-tight"
       style={
         tone === 'soft'
           ? {
-              backgroundColor: '#ffffff',
+              background:
+                'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 66%, white) 100%)',
               borderColor: 'var(--ui-border)',
-              color: '#475569',
+              color: 'var(--ui-text-muted)',
             }
           : {
               backgroundColor: 'rgba(255,255,255,0.1)',
@@ -705,7 +755,8 @@ export function MarketplaceStatTile({
             }
           : {
               borderColor: 'var(--ui-border)',
-              backgroundColor: '#fcfcfc',
+              background:
+                'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 52%, white) 100%)',
               color: '#0f172a',
             }
       }
@@ -750,7 +801,7 @@ export function MarketplaceQuickActionCard({
   if (onClick) {
     return (
       <button
-        className="flex min-h-[172px] w-full flex-col rounded-[28px] border p-5 text-left shadow-[0_14px_40px_-28px_rgba(15,23,42,0.18)]"
+        className="flex min-h-[148px] w-full flex-col rounded-[28px] border p-5 text-left shadow-[0_14px_40px_-28px_rgba(88,49,66,0.14)]"
         onClick={onClick}
         style={{
           background:
@@ -766,7 +817,7 @@ export function MarketplaceQuickActionCard({
 
   return (
     <div
-      className="flex min-h-[172px] w-full flex-col rounded-[28px] border p-5 text-left shadow-[0_14px_40px_-28px_rgba(15,23,42,0.18)]"
+      className="flex min-h-[148px] w-full flex-col rounded-[28px] border p-5 text-left shadow-[0_14px_40px_-28px_rgba(88,49,66,0.14)]"
       style={{
         background: 'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 42%, white) 100%)',
         borderColor: 'var(--ui-border)',
@@ -778,7 +829,7 @@ export function MarketplaceQuickActionCard({
 }
 
 export function MarketplaceSupportEntryCard({
-  actionLabel = 'Buka bantuan',
+  actionLabel = 'Bantuan',
   badges,
   description,
   icon,
@@ -800,7 +851,7 @@ export function MarketplaceSupportEntryCard({
 
   return (
     <button
-      className="w-full rounded-[30px] border p-5 text-left shadow-[0_18px_40px_-28px_rgba(15,23,42,0.18)] transition-all hover:-translate-y-0.5 active:scale-[0.99]"
+      className="w-full rounded-[30px] border p-5 text-left shadow-[0_18px_40px_-28px_rgba(88,49,66,0.14)] transition-all hover:-translate-y-0.5 active:scale-[0.99]"
       onClick={onClick}
       style={
         brandTone
@@ -810,8 +861,8 @@ export function MarketplaceSupportEntryCard({
               borderColor: 'var(--ui-border)',
             }
           : {
-              background: 'linear-gradient(135deg,#FFF8E8 0%,#FFFFFF 48%,#F3FBFF 100%)',
-              borderColor: 'rgba(251,191,36,0.35)',
+              background: 'linear-gradient(135deg,#FFF8EC 0%,#FFFFFF 48%,#FFF7FB 100%)',
+              borderColor: 'rgba(233,179,106,0.28)',
             }
       }
       type="button"
@@ -908,7 +959,7 @@ export function MarketplaceSettingsRow({
   const className = cx(
     'flex w-full items-center justify-between gap-3 px-5 py-4 text-left transition-colors',
     isLast ? '' : 'border-b',
-    onClick ? 'hover:bg-slate-50/80' : '',
+    onClick ? 'hover:bg-rose-50/45' : '',
   );
 
   if (onClick) {
@@ -947,13 +998,13 @@ function MarketplaceModalSheet({
   }
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-end justify-center bg-slate-950/35 px-4 pb-0 pt-10 backdrop-blur-[1px]">
+    <div className="fixed inset-0 z-[70] flex items-end justify-center bg-slate-950/30 px-4 pb-0 pt-10 backdrop-blur-[1px]">
       <button aria-label="Tutup modal" className="absolute inset-0" onClick={onClose} type="button" />
       <div
         aria-describedby={description ? descriptionId : undefined}
         aria-labelledby={titleId}
         aria-modal="true"
-        className="relative w-full max-w-[480px] overflow-hidden rounded-t-[32px] border bg-white shadow-[0_-28px_60px_-34px_rgba(15,23,42,0.42)]"
+        className="relative w-full max-w-[480px] overflow-hidden rounded-t-[32px] border bg-white shadow-[0_-28px_60px_-34px_rgba(88,49,66,0.24)]"
         style={{ borderColor: 'var(--ui-border)' }}
         role="dialog"
       >
@@ -1041,7 +1092,14 @@ export function MarketplaceStickyActionBar({
 }) {
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center px-5 pb-5">
-      <div className="pointer-events-auto w-full max-w-[480px] rounded-[28px] border border-white/70 bg-white/95 p-4 shadow-[0_24px_56px_-34px_rgba(15,23,42,0.32)] backdrop-blur-xl">
+      <div
+        className="pointer-events-auto w-full max-w-[480px] rounded-[28px] border border-white/70 p-4 shadow-[0_24px_56px_-34px_rgba(88,49,66,0.22)] backdrop-blur-xl"
+        style={{
+          background:
+            'linear-gradient(180deg, rgba(255,255,255,0.98) 0%, color-mix(in srgb, var(--ui-surface-muted) 56%, white) 100%)',
+          borderColor: 'color-mix(in srgb, var(--ui-border) 88%, white)',
+        }}
+      >
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
             {eyebrow ? (

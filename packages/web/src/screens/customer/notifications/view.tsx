@@ -7,6 +7,7 @@ import type { ServicePlatformId } from '@marketplace/platform-config';
 import { getServicePlatformConfig } from '@marketplace/platform-config';
 import {
   MarketplaceEmptyCard,
+  MarketplaceFeaturePill,
   MarketplaceFilterChip,
   MarketplaceMobileShell,
   MarketplaceNotificationGroup,
@@ -77,40 +78,45 @@ export function CustomerNotificationsPage({
   }, [activeFilter, items]);
 
   const sections = notificationSections(filteredItems);
+  const attentionCount = items.filter((item) => item.kind === 'payment' || item.kind === 'support').length;
+  const todayCount = items.filter(
+    (item) => new Date(item.createdAt).toDateString() === new Date().toDateString(),
+  ).length;
+  const archivedCount = Math.max(items.length - attentionCount - todayCount, 0);
 
   const iconForNotification = (kind: NotificationItem['kind']) => {
     if (kind === 'payment') {
       return {
         icon: <CreditCard className="h-5 w-5" />,
-        iconClassName: 'bg-amber-50 text-amber-600',
-        tagClassName: 'bg-amber-50 text-amber-700',
+        iconClassName: 'bg-rose-50 text-rose-600',
+        tagClassName: 'bg-rose-50 text-rose-700',
       };
     }
     if (kind === 'support') {
       return {
         icon: <LifeBuoy className="h-5 w-5" />,
-        iconClassName: 'bg-teal-50 text-teal-700',
-        tagClassName: 'bg-teal-50 text-teal-700',
+        iconClassName: 'bg-pink-50 text-pink-700',
+        tagClassName: 'bg-pink-50 text-pink-700',
       };
     }
     if (kind === 'message') {
       return {
         icon: <MessageCircleMore className="h-5 w-5" />,
-        iconClassName: 'bg-sky-50 text-sky-700',
-        tagClassName: 'bg-sky-50 text-sky-700',
+        iconClassName: 'bg-fuchsia-50 text-fuchsia-700',
+        tagClassName: 'bg-fuchsia-50 text-fuchsia-700',
       };
     }
     if (kind === 'order') {
       return {
         icon: <CalendarClock className="h-5 w-5" />,
-        iconClassName: 'bg-cyan-50 text-cyan-700',
-        tagClassName: 'bg-cyan-50 text-cyan-700',
+        iconClassName: 'bg-rose-100 text-rose-700',
+        tagClassName: 'bg-rose-100 text-rose-700',
       };
     }
     return {
       icon: <ShieldCheck className="h-5 w-5" />,
-      iconClassName: 'bg-slate-100 text-slate-600',
-      tagClassName: 'bg-slate-100 text-slate-700',
+      iconClassName: 'bg-rose-50 text-rose-600',
+      tagClassName: 'bg-rose-50 text-rose-700',
     };
   };
 
@@ -120,11 +126,11 @@ export function CustomerNotificationsPage({
       <a href={resolveNotificationHref(locale, item)} key={item.id}>
         <article
           className={`rounded-[26px] border bg-white p-4 shadow-sm transition-all hover:bg-gray-50/70 ${
-            emphasized ? 'shadow-[0_18px_36px_-30px_rgba(18,59,74,0.18)]' : ''
+            emphasized ? 'shadow-[0_18px_40px_-30px_rgba(88,49,66,0.16)]' : ''
           }`}
           style={{
             background: emphasized
-              ? 'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 28%, white) 100%)'
+              ? 'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 44%, white) 100%)'
               : '#ffffff',
             borderColor: emphasized ? 'var(--ui-border-strong)' : 'var(--ui-border)',
           }}
@@ -161,7 +167,7 @@ export function CustomerNotificationsPage({
       showNav={Boolean(session?.isAuthenticated)}
     >
       <div className="min-h-full pb-24" style={{ backgroundColor: 'var(--ui-background)' }}>
-        <MarketplaceStickyPageHeader backHref={createLocalizedPath(locale, '/home')} title="Notifikasi" />
+        <MarketplaceStickyPageHeader backHref={createLocalizedPath(locale)} title="Notifikasi" />
 
         <div className="space-y-5 px-5 py-5">
           {!session?.isAuthenticated ? (
@@ -174,34 +180,50 @@ export function CustomerNotificationsPage({
           ) : (
             <>
               <section
-                className="overflow-hidden rounded-[30px] p-5 text-white"
+                className="overflow-hidden rounded-[30px] border p-5 text-white"
                 style={{
                   background: 'var(--ui-hero-gradient)',
+                  borderColor: 'color-mix(in srgb, var(--ui-border-strong) 42%, white)',
                   boxShadow: 'var(--ui-shadow-hero)',
                 }}
               >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div className="min-w-0 flex-1">
                     <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/90">
                       <Bell className="h-3.5 w-3.5" />
                       Feed
                     </div>
-                    <h1 className="mt-4 text-[24px] font-bold leading-tight text-white">Update terbaru Anda</h1>
+                    <h1 className="mt-4 text-[24px] font-bold leading-tight text-white">
+                      Prioritas customer dalam satu layar
+                    </h1>
                     <p className="mt-2 text-[13px] leading-relaxed text-white/85">
-                      Order, pembayaran, support, dan pesan penting akan muncul di sini.
+                      Order, pembayaran, support, dan pesan penting dikelompokkan supaya lebih cepat dipindai.
                     </p>
+                  </div>
+                  <MarketplaceFeaturePill tone="soft">
+                    <ShieldCheck className="h-3.5 w-3.5" />
+                    <span>{activeFilter === 'all' ? 'Semua kanal' : `Filter ${activeFilter}`}</span>
+                  </MarketplaceFeaturePill>
+                </div>
+
+                <div className="mt-5 grid grid-cols-3 gap-3">
+                  <div className="rounded-[22px] border border-white/15 bg-white/12 p-4 backdrop-blur-sm">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/86">Perlu aksi</p>
+                    <p className="mt-2 text-[24px] font-bold text-white">{attentionCount}</p>
+                  </div>
+                  <div className="rounded-[22px] border border-white/15 bg-white/12 p-4 backdrop-blur-sm">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/86">Terbaru</p>
+                    <p className="mt-2 text-[24px] font-bold text-white">{todayCount}</p>
+                  </div>
+                  <div className="rounded-[22px] border border-white/15 bg-white/12 p-4 backdrop-blur-sm">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/86">Arsip</p>
+                    <p className="mt-2 text-[24px] font-bold text-white">{archivedCount}</p>
                   </div>
                 </div>
 
-                <div className="mt-5 grid grid-cols-2 gap-3">
-                  <div className="rounded-[22px] border border-white/15 bg-white/12 p-4 backdrop-blur-sm">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">Total</p>
-                    <p className="mt-2 text-[28px] font-bold text-white">{items.length}</p>
-                  </div>
-                  <div className="rounded-[22px] border border-white/15 bg-white/12 p-4 backdrop-blur-sm">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">Filter</p>
-                    <p className="mt-2 text-[22px] font-bold capitalize text-white">{activeFilter}</p>
-                  </div>
+                <div className="mt-4 rounded-[22px] border border-white/15 bg-white/10 px-4 py-3 text-[12px] leading-6 text-white/84">
+                  Fokus utama ada di pembayaran dan support, sementara update order dan pesan lain tetap tersusun rapi
+                  di bawahnya.
                 </div>
               </section>
 
@@ -227,17 +249,11 @@ export function CustomerNotificationsPage({
 
               {filteredItems.length ? (
                 <div className="space-y-5">
-                  {sections.today.length ? (
-                    <MarketplaceNotificationGroup count={sections.today.length} title="Hari ini">
-                      {sections.today.map((item) => renderNotificationCard(item, true))}
+                  {sections.map((section) => (
+                    <MarketplaceNotificationGroup count={section.items.length} key={section.key} title={section.title}>
+                      {section.items.map((item) => renderNotificationCard(item, section.emphasized))}
                     </MarketplaceNotificationGroup>
-                  ) : null}
-
-                  {sections.earlier.length ? (
-                    <MarketplaceNotificationGroup count={sections.earlier.length} title="Sebelumnya">
-                      {sections.earlier.map((item) => renderNotificationCard(item, false))}
-                    </MarketplaceNotificationGroup>
-                  ) : null}
+                  ))}
                 </div>
               ) : (
                 <MarketplaceEmptyCard

@@ -57,7 +57,7 @@ export function PayoutsSection({
                         }
                         type="button"
                       >
-                        Pakai profil ini
+                        Pakai
                       </SecondaryButton>
                     }
                   />
@@ -89,7 +89,7 @@ export function PayoutsSection({
             onClick={() => void onCreate()}
             type="button"
           >
-            {busy ? 'Menyimpan...' : 'Buat payout'}
+            {busy ? 'Simpan...' : 'Buat'}
           </PrimaryButton>
         </div>
       </SurfaceCard>
@@ -111,10 +111,10 @@ export function PayoutsSection({
                       onClick={() => void onStatusChange(payout.id, 'processing')}
                       type="button"
                     >
-                      Processing
+                      Process
                     </SecondaryButton>
                     <PrimaryButton disabled={busy} onClick={() => void onStatusChange(payout.id, 'paid')} type="button">
-                      Mark paid
+                      Paid
                     </PrimaryButton>
                   </>
                 }

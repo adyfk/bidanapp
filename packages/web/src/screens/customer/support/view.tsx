@@ -12,6 +12,7 @@ import {
   MarketplaceSettingsCard,
   MarketplaceStatusFilters,
   MarketplaceSupportEntryCard,
+  MarketplaceSupportSheet,
   MessageBanner,
   PrimaryButton,
   StatusPill,
@@ -19,7 +20,7 @@ import {
   TextField,
 } from '@marketplace/ui';
 import { LifeBuoy } from 'lucide-react';
-import { useEffect, useEffectEvent, useState } from 'react';
+import { useEffect, useEffectEvent, useMemo, useState } from 'react';
 import { createPrimaryMarketplaceNav } from '../../../layout/navigation';
 import { getApiBaseUrl } from '../../../lib/env';
 import { supportStatusLabel } from '../../../lib/marketplace-copy';
@@ -32,6 +33,7 @@ const apiBaseUrl = getApiBaseUrl();
 const client = createMarketplaceApiClient(apiBaseUrl);
 
 const quickSubjects = ['Kendala pembayaran', 'Jadwal layanan', 'Perlu refund', 'Masalah akun'];
+type TicketFilter = 'all' | 'open' | 'resolved';
 
 function humanizeSupportEvent(value: string) {
   return value.replaceAll('_', ' ').replace(/\b\w/g, (char) => char.toUpperCase());
@@ -54,6 +56,8 @@ export function CustomerSupportPage({
   const [form, setForm] = useState({ details: '', subject: '' });
   const [busy, setBusy] = useState(false);
   const [feedback, setFeedback] = useState('');
+  const [activeFilter, setActiveFilter] = useState<TicketFilter>('all');
+  const [composerOpen, setComposerOpen] = useState(false);
 
   const load = useEffectEvent(async (currentPlatformId: ServicePlatformId) => {
     const sessionPayload = await customerController.viewerAuth.fetchSession(client);
@@ -83,6 +87,7 @@ export function CustomerSupportPage({
       });
       setFeedback(`Tiket ${ticket.id} berhasil dibuat.`);
       setForm({ details: '', subject: '' });
+      setComposerOpen(false);
       await load(platformId);
     } catch (error) {
       setFeedback(error instanceof Error ? error.message : 'Gagal membuat tiket support.');
@@ -92,10 +97,19 @@ export function CustomerSupportPage({
   };
 
   const counts = {
-    new: tickets.filter((ticket) => ticket.status === 'new').length,
+    open: tickets.filter((ticket) => ticket.status === 'new' || ticket.status === 'triaged').length,
     resolved: tickets.filter((ticket) => ticket.status === 'resolved').length,
     triaged: tickets.filter((ticket) => ticket.status === 'triaged').length,
   };
+  const filteredTickets = useMemo(() => {
+    if (activeFilter === 'resolved') {
+      return tickets.filter((ticket) => ticket.status === 'resolved');
+    }
+    if (activeFilter === 'open') {
+      return tickets.filter((ticket) => ticket.status === 'new' || ticket.status === 'triaged');
+    }
+    return tickets;
+  }, [activeFilter, tickets]);
 
   return (
     <MarketplaceMobileShell
@@ -103,7 +117,7 @@ export function CustomerSupportPage({
       showNav={Boolean(session?.isAuthenticated)}
     >
       <div className="min-h-full pb-24" style={{ backgroundColor: 'var(--ui-background)' }}>
-        <MarketplaceStickyPageHeader backHref={createLocalizedPath(locale, '/home')} title="Support" />
+        <MarketplaceStickyPageHeader backHref={createLocalizedPath(locale)} title="Support" />
 
         <div className="space-y-5 px-5 py-5">
           {!session?.isAuthenticated ? (
@@ -116,10 +130,11 @@ export function CustomerSupportPage({
           ) : (
             <>
               <MarketplaceSupportEntryCard
-                actionLabel="Tulis bantuan"
+                actionLabel="Buat tiket baru"
                 badges={['Order', 'Pembayaran', 'Refund']}
-                description="Kirim kendala baru atau pantau bantuan yang sedang berjalan dari satu layar."
+                description="Queue tiket aktif muncul lebih dulu, sementara form bantuan baru kami pindahkan ke composer terpisah agar layar pertama tetap fokus."
                 icon={<LifeBuoy className="h-5 w-5" />}
+                onClick={() => setComposerOpen(true)}
                 responseBadge="Tim aktif"
                 title="Support center"
                 tone="pink"
@@ -134,8 +149,8 @@ export function CustomerSupportPage({
                 }}
               >
                 <div className="rounded-[20px] border border-white/80 bg-white/86 px-3 py-3">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Baru</p>
-                  <p className="mt-2 text-[20px] font-bold text-slate-900">{counts.new}</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Aktif</p>
+                  <p className="mt-2 text-[20px] font-bold text-slate-900">{counts.open}</p>
                 </div>
                 <div className="rounded-[20px] border border-white/80 bg-white/86 px-3 py-3">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Triaged</p>
@@ -151,19 +166,44 @@ export function CustomerSupportPage({
 
               <MarketplaceSettingsCard>
                 <div className="px-5 pb-1 pt-5">
-                  <h2 className="text-[15px] font-bold text-slate-900">Tiket saya</h2>
-                  <p className="mt-1 text-[12.5px] leading-6 text-slate-500">
-                    Lihat tiket yang sedang berjalan dan catatan tindak lanjut terbaru.
-                  </p>
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <h2 className="text-[15px] font-bold text-slate-900">Antrean bantuan saya</h2>
+                      <p className="mt-1 text-[12.5px] leading-6 text-slate-500">
+                        Lihat tiket yang sedang berjalan, catatan tindak lanjut, dan item yang sudah selesai.
+                      </p>
+                    </div>
+                    <PrimaryButton onClick={() => setComposerOpen(true)} type="button">
+                      Buat tiket
+                    </PrimaryButton>
+                  </div>
                 </div>
-                {tickets.length ? (
-                  <div className="space-y-4 px-5 pb-5 pt-3">
-                    {tickets.map((ticket) => (
+
+                <div className="px-5 pt-3">
+                  <MarketplaceStatusFilters>
+                    <MarketplaceFilterChip active={activeFilter === 'all'} onClick={() => setActiveFilter('all')}>
+                      Semua
+                    </MarketplaceFilterChip>
+                    <MarketplaceFilterChip active={activeFilter === 'open'} onClick={() => setActiveFilter('open')}>
+                      Aktif
+                    </MarketplaceFilterChip>
+                    <MarketplaceFilterChip
+                      active={activeFilter === 'resolved'}
+                      onClick={() => setActiveFilter('resolved')}
+                    >
+                      Resolved
+                    </MarketplaceFilterChip>
+                  </MarketplaceStatusFilters>
+                </div>
+
+                {filteredTickets.length ? (
+                  <div className="space-y-4 px-5 pb-5 pt-4">
+                    {filteredTickets.map((ticket) => (
                       <MarketplaceListCard
                         key={ticket.id}
                         badge={<StatusPill tone="accent">{supportStatusLabel(ticket.status, locale)}</StatusPill>}
                         description={<span className="break-words [overflow-wrap:anywhere]">{ticket.details}</span>}
-                        subtitle={ticket.priority}
+                        subtitle={`${ticket.priority} • ${ticket.id}`}
                         title={<span className="break-words [overflow-wrap:anywhere]">{ticket.subject}</span>}
                         meta={
                           (ticket.events ?? []).length ? (
@@ -193,10 +233,10 @@ export function CustomerSupportPage({
                     ))}
                   </div>
                 ) : (
-                  <div className="px-5 pb-5 pt-3">
+                  <div className="px-5 pb-5 pt-4">
                     <MarketplaceEmptyCard
-                      description="Tiket support yang Anda buat akan muncul di sini."
-                      title="Belum ada tiket"
+                      description="Belum ada tiket yang cocok dengan filter ini."
+                      title="Antrean masih kosong"
                     />
                   </div>
                 )}
@@ -204,49 +244,72 @@ export function CustomerSupportPage({
 
               <MarketplaceSettingsCard>
                 <div className="px-5 pb-1 pt-5">
-                  <h2 className="text-[15px] font-bold text-slate-900">Buat tiket baru</h2>
+                  <h2 className="text-[15px] font-bold text-slate-900">Topik bantuan cepat</h2>
                   <p className="mt-1 text-[12.5px] leading-6 text-slate-500">
-                    Tulis inti kendalanya dulu, lalu tambahkan detail yang perlu ditindaklanjuti.
+                    Pilih topik populer untuk membuka composer dengan subject yang sudah terisi.
                   </p>
                 </div>
-
                 <div className="space-y-4 px-5 pb-5 pt-3">
                   <MarketplaceStatusFilters>
                     {quickSubjects.map((subject) => (
                       <MarketplaceFilterChip
                         active={form.subject === subject}
                         key={subject}
-                        onClick={() => setForm((current) => ({ ...current, subject }))}
+                        onClick={() => {
+                          setForm((current) => ({ ...current, subject }));
+                          setComposerOpen(true);
+                        }}
                       >
                         {subject}
                       </MarketplaceFilterChip>
                     ))}
                   </MarketplaceStatusFilters>
-
-                  <TextField
-                    label="Subjek"
-                    value={form.subject}
-                    onChange={(event) => setForm((current) => ({ ...current, subject: event.target.value }))}
-                  />
-                  <TextAreaField
-                    label="Detail"
-                    value={form.details}
-                    onChange={(event) => setForm((current) => ({ ...current, details: event.target.value }))}
-                  />
-                  <PrimaryButton
-                    className="w-full"
-                    disabled={busy || !form.subject.trim() || !form.details.trim()}
-                    onClick={handleCreate}
-                    type="button"
-                  >
-                    {busy ? 'Mengirim...' : 'Buat tiket'}
-                  </PrimaryButton>
                 </div>
               </MarketplaceSettingsCard>
             </>
           )}
         </div>
       </div>
+      <MarketplaceSupportSheet
+        description="Mulai dari inti kendalanya dulu, lalu tulis konteks secukupnya agar tim support bisa langsung menindaklanjuti."
+        isOpen={composerOpen}
+        onClose={() => setComposerOpen(false)}
+        title="Buat tiket baru"
+      >
+        <div className="space-y-4">
+          <MarketplaceStatusFilters>
+            {quickSubjects.map((subject) => (
+              <MarketplaceFilterChip
+                active={form.subject === subject}
+                key={subject}
+                onClick={() => setForm((current) => ({ ...current, subject }))}
+              >
+                {subject}
+              </MarketplaceFilterChip>
+            ))}
+          </MarketplaceStatusFilters>
+          <TextField
+            label="Subjek"
+            value={form.subject}
+            onChange={(event) => setForm((current) => ({ ...current, subject: event.target.value }))}
+          />
+          <TextAreaField
+            label="Detail"
+            value={form.details}
+            onChange={(event) => setForm((current) => ({ ...current, details: event.target.value }))}
+          />
+          <PrimaryButton
+            className="w-full"
+            disabled={busy || !form.subject.trim() || !form.details.trim()}
+            onClick={() => {
+              void handleCreate();
+            }}
+            type="button"
+          >
+            {busy ? 'Mengirim...' : 'Buat tiket'}
+          </PrimaryButton>
+        </div>
+      </MarketplaceSupportSheet>
     </MarketplaceMobileShell>
   );
 }

@@ -10,7 +10,7 @@ export function OrdersSection({ snapshot }: { snapshot: ProfessionalWorkspaceSna
   return (
     <WorkspaceSurfaceCard
       title="Permintaan pelanggan"
-      description="Semua pesanan terbaru pelanggan tampil di sini agar mudah dipantau dan ditindaklanjuti."
+      description="Daftar order dipadatkan supaya nominal, status, dan konteks layanan tetap mudah dibaca meski judul atau notes panjang."
     >
       {(snapshot.recentOrders ?? []).length ? (
         <div className="space-y-4">
@@ -30,6 +30,12 @@ export function OrdersSection({ snapshot }: { snapshot: ProfessionalWorkspaceSna
                   <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-3 py-3 text-[12px] text-slate-500">
                     Order
                     <div className="mt-1 text-[14px] font-bold text-slate-900">{order.id}</div>
+                  </div>
+                  <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-3 py-3 text-[12px] leading-5 text-slate-500 sm:col-span-2">
+                    Ringkasan status
+                    <div className="mt-1 break-words text-[13px] font-semibold text-slate-900 [overflow-wrap:anywhere]">
+                      {`${order.orderType} • ${order.paymentStatus} • ${order.status}`}
+                    </div>
                   </div>
                 </div>
               }

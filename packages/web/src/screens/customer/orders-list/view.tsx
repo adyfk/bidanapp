@@ -110,26 +110,24 @@ function ActivitySummaryHero({
             <Calendar className="h-3.5 w-3.5" />
             {en ? 'Activity' : 'Aktivitas'}
           </div>
-          <h1 className="mt-4 text-[22px] font-bold leading-tight text-white">
-            {en ? 'Orders and follow-up' : 'Order dan tindak lanjut'}
-          </h1>
+          <h1 className="mt-4 text-[22px] font-bold leading-tight text-white">{en ? 'Orders' : 'Order'}</h1>
           <p className="mt-2 text-[13px] leading-relaxed text-white/82">
             {en
-              ? 'See the active order flow first, then continue to history after the visit is done.'
-              : 'Lihat order yang sedang berjalan lebih dulu, lalu lanjut ke riwayat setelah layanan selesai.'}
+              ? 'Track active requests first, then review history later.'
+              : 'Pantau permintaan aktif dulu, riwayat belakangan.'}
           </p>
         </div>
       </div>
 
       <div className="mt-5 grid grid-cols-2 gap-3">
         <div className="rounded-[22px] border border-white/16 bg-white/12 p-4 backdrop-blur-sm">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/86">
             {en ? 'Active' : 'Berjalan'}
           </p>
           <p className="mt-2 text-[28px] font-bold text-white">{activeCount}</p>
         </div>
         <div className="rounded-[22px] border border-white/16 bg-white/12 p-4 backdrop-blur-sm">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/86">
             {en ? 'History' : 'Riwayat'}
           </p>
           <p className="mt-2 text-[28px] font-bold text-white">{historyCount}</p>
@@ -265,33 +263,22 @@ function QuickOrderOptionCard({
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <span
-              className="rounded-full px-2.5 py-1 text-[10px] font-semibold"
-              style={{
-                backgroundColor: active ? 'var(--ui-surface-muted)' : '#fff5f8',
-                color: active ? 'var(--ui-primary)' : '#999999',
-              }}
-            >
-              {offeringTypeLabel(offering.offeringType, locale)}
-            </span>
-            <span className="rounded-full bg-gray-100 px-2.5 py-1 text-[10px] font-semibold text-gray-600">
-              {deliveryModeLabel(offering.deliveryMode, locale)}
-            </span>
+          <div
+            className="text-[10.5px] font-semibold uppercase tracking-[0.14em]"
+            style={{ color: 'var(--ui-primary)' }}
+          >
+            {offeringTypeLabel(offering.offeringType, locale)}
           </div>
 
-          <div className="mt-3 text-[15px] font-bold break-words text-gray-900 [overflow-wrap:anywhere]">
+          <div className="mt-2 line-clamp-2 break-words text-[15px] font-bold leading-snug text-gray-900 [overflow-wrap:anywhere]">
             {offering.title}
           </div>
-          <div className="mt-1 break-words text-[12px] text-gray-500 [overflow-wrap:anywhere]">
-            {offering.professionalDisplayName}
+          <div className="mt-2 truncate text-[12px] text-gray-500">
+            {offering.professionalDisplayName} • {deliveryModeLabel(offering.deliveryMode, locale)}
           </div>
-          <p className="mt-3 line-clamp-2 break-words text-[13px] leading-6 text-gray-500 [overflow-wrap:anywhere]">
-            {offering.description}
-          </p>
         </div>
 
-        <div className="rounded-full bg-slate-950 px-3 py-2 text-[11px] font-bold text-white">
+        <div className="rounded-[14px] bg-slate-950 px-3 py-2 text-[11px] font-bold text-white">
           {formatCurrency(offering.priceAmount, locale, offering.currency)}
         </div>
       </div>
@@ -543,7 +530,7 @@ export function OrdersPage({
                       active={paymentFilter === 'unpaid'}
                       onClick={() => setPaymentFilter('unpaid')}
                     >
-                      {en ? 'Need payment' : 'Perlu bayar'}
+                      {en ? 'Unpaid' : 'Belum bayar'}
                     </MarketplaceFilterChip>
                     <MarketplaceFilterChip active={paymentFilter === 'paid'} onClick={() => setPaymentFilter('paid')}>
                       {en ? 'Paid' : 'Sudah bayar'}
@@ -633,12 +620,12 @@ export function OrdersPage({
                         </p>
                         <p className="mt-1 text-[12px] leading-5 text-emerald-700">
                           {en
-                            ? 'Finish the latest order flow from here after reviewing the request details.'
-                            : 'Selesaikan alur order terbaru dari sini setelah meninjau detail permintaannya.'}
+                            ? 'Confirm the payment after reviewing the request.'
+                            : 'Konfirmasi setelah detail order sesuai.'}
                         </p>
                       </div>
                       <PrimaryButton disabled={isSimulatingPayment} onClick={handleSimulatePayment} type="button">
-                        {isSimulatingPayment ? 'Memproses...' : en ? 'Mark as paid' : 'Tandai sudah bayar'}
+                        {isSimulatingPayment ? (en ? 'Saving...' : 'Proses...') : en ? 'Paid' : 'Bayar'}
                       </PrimaryButton>
                     </div>
                   </div>

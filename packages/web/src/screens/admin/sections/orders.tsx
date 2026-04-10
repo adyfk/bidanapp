@@ -41,7 +41,7 @@ export function OrdersSection({
                     onClick={() => void onUpdateStatus(order.id, 'pending_fulfillment')}
                     type="button"
                   >
-                    Move to fulfillment
+                    Fulfill
                   </SecondaryButton>
                   <SecondaryButton
                     disabled={busy}
@@ -63,7 +63,7 @@ export function OrdersSection({
                     }
                     type="button"
                   >
-                    Mark paid
+                    Paid
                   </PrimaryButton>
                 </>
               }

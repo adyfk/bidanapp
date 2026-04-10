@@ -72,7 +72,7 @@ test('journey: customer order creation and manual payment simulation', async ({ 
         title: 'Local payment settles the latest order',
       },
       async () => {
-        await page.getByRole('button', { name: /Tandai sudah bayar|Mark as paid/i }).click();
+        await page.getByRole('button', { name: /^Bayar$|^Paid$/i }).click();
         await expect(page.getByText(/Pembayaran berhasil ditandai selesai|Payment marked as completed/i)).toBeVisible();
       },
     );
@@ -245,7 +245,7 @@ test('journey: customer support ticket can be created from the support center an
           .getByLabel(/Catatan ke customer/i)
           .fill('Tim support sedang memverifikasi detail laporan Anda.');
         await ticketCard.getByLabel(/Catatan internal/i).fill('Journey support sync pass.');
-        await ticketCard.getByRole('button', { name: /Simpan triage/i }).click();
+        await ticketCard.getByRole('button', { name: /^Simpan$/i }).click();
         await expect(adminPage.getByText(/triaged/i).first()).toBeVisible();
 
         await page.goto('/id/support');

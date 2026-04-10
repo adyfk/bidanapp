@@ -170,7 +170,7 @@ export function EntityCard({
       ) : null}
       {meta ? <div className="mt-4">{meta}</div> : null}
       {children ? <div className="mt-4">{children}</div> : null}
-      {actions ? <div className="mt-5 flex flex-wrap gap-3">{actions}</div> : null}
+      {actions ? <div className="mt-4 flex flex-wrap gap-2">{actions}</div> : null}
     </article>
   );
 }

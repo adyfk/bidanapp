@@ -3,130 +3,74 @@
 ## Run Meta
 
 - Tanggal validasi: `2026-04-10`
-- Run id: `2026-04-10T02-55-11-105Z`
+- Run id: `2026-04-10T10-34-53-387Z`
 - Command: `npm run e2e:journey`
-- Hasil: `18/18 use case passed`
-- Jumlah screenshot step: `56`
+- Hasil: `22/22 use case passed`
+- Jumlah screenshot step: `61`
 - Artefak indeks: `artifacts/journeys/latest/index.json`
 - Artefak report: `artifacts/playwright-report/latest/index.html`
+- Gallery visual: [`docs/ui-screenshot-gallery.md`](./ui-screenshot-gallery.md)
 
-## Seed Stress Notes
+## Contract Notes
 
-- Seed demo sekarang memakai nama customer dan professional yang lebih realistis, termasuk gelar, kota, headline, bio, dan education history yang panjang.
-- Order notes, support ticket details, public notes, internal notes, dan fulfillment notes juga diperpanjang agar UI diuji pada copy multi-baris yang benar-benar hidup.
-- Offering demo tetap kompatibel dengan regex E2E lama, tetapi deskripsi, metadata, dan status flow-nya sekarang lebih kaya.
+- `/{locale}` adalah satu-satunya canonical public/customer home.
+- Route home lama sudah dihapus dan tidak boleh merender home.
+- Untuk review cepat, buka gallery visual dulu agar tidak perlu membaca matrix panjang.
+- Matrix di bawah fokus ke surface Bidan (`/id...` dan localhost redirect Bidan); gallery visual juga memuat screenshot admin yang ikut cleanup density, wording, chip, dan action layout.
+- Seed tambahan untuk audit empty-state:
+  - empty customer: `+628111111005`
+  - empty professional: `+628111111006`
 
-## Coverage Summary
+## Screenshot Matrix
 
-- `admin`: `3` use case
-- `auth`: `5` use case
-- `customer`: `1` use case
-- `payments`: `2` use case
-- `professional`: `4` use case
-- `public`: `1` use case
-- `support`: `2` use case
-
-## Screenshot Checklist
-
-### Public
-
-- [x] Onboarding screen is ready — route `/id` — `artifacts/journeys/latest/public-visitor-browse/screenshots/01-onboarding-screen-is-ready.png`
-- [x] Visitor enters the public home feed — route `/id/home` — `artifacts/journeys/latest/public-visitor-browse/screenshots/02-visitor-enters-the-public-home-feed.png`
-- [x] Explore professionals is visible — route `/id/explore` — `artifacts/journeys/latest/public-visitor-browse/screenshots/03-explore-professionals-is-visible.png`
-- [x] Professional detail page opens — route `/id/p/[slug]` — `artifacts/journeys/latest/public-visitor-browse/screenshots/04-professional-detail-page-opens.png`
-- [x] Service catalog and detail page are reachable — route `/id/s/[slug]` — `artifacts/journeys/latest/public-visitor-browse/screenshots/05-service-catalog-and-detail-page-are-reachable.png`
-
-### Auth
-
-- [x] Login screen is ready — route `/id/login` — `artifacts/journeys/latest/customer-auth-sso/screenshots/01-login-screen-is-ready.png`
-- [x] Customer signs in from Bidan — route `/id/home` — `artifacts/journeys/latest/customer-auth-sso/screenshots/02-customer-signs-in-from-bidan.png`
-- [x] Native security screen resolves the signed-in account — route `/id/security` — `artifacts/journeys/latest/customer-auth-sso/screenshots/03-native-security-screen-resolves-the-signed-in-account.png`
-- [x] Device sessions show multiple entries — route `/id/sessions` — `artifacts/journeys/latest/customer-auth-sso/screenshots/04-device-sessions-show-multiple-entries.png`
-- [x] Customer logs out other devices — route `/id/sessions` — `artifacts/journeys/latest/customer-auth-sso/screenshots/05-customer-logs-out-other-devices.png`
-- [x] Recovery screen is ready — route `/id/forgot-password` — `artifacts/journeys/latest/customer-password-recovery/screenshots/01-recovery-screen-is-ready.png`
-- [x] OTP request starts the recovery challenge — route `/id/forgot-password` — `artifacts/journeys/latest/customer-password-recovery/screenshots/02-otp-request-starts-the-recovery-challenge.png`
-- [x] Register screen is ready — route `/id/register` — `artifacts/journeys/latest/customer-register-success/screenshots/01-register-screen-is-ready.png`
-- [x] Customer registers successfully — route `/id/home` — `artifacts/journeys/latest/customer-register-success/screenshots/02-customer-registers-successfully.png`
-- [x] Login screen is ready for guard validation — route `/id/login` — `artifacts/journeys/latest/customer-invalid-login/screenshots/01-login-screen-is-ready-for-guard-validation.png`
-- [x] Friendly error appears for invalid credentials — route `/id/login` — `artifacts/journeys/latest/customer-invalid-login/screenshots/02-friendly-error-appears-for-invalid-credentials.png`
-- [x] Localhost is redirected into the shared dev domain — route `http://localhost:3002/id/login` — `artifacts/journeys/latest/localhost-lvh-redirect/screenshots/01-localhost-is-redirected-into-the-shared-dev-domain.png`
-
-### Customer
-
-- [x] Authenticated customer home is visible — route `/id/home` — `artifacts/journeys/latest/customer-home-profile-notifications/screenshots/01-authenticated-customer-home-is-visible.png`
-- [x] Customer profile page is ready — route `/id/profile` — `artifacts/journeys/latest/customer-home-profile-notifications/screenshots/02-customer-profile-page-is-ready.png`
-- [x] Customer notifications feed is visible — route `/id/notifications` — `artifacts/journeys/latest/customer-home-profile-notifications/screenshots/03-customer-notifications-feed-is-visible.png`
-
-### Payments
-
-- [x] Refund desk is ready — route `/refunds` — `artifacts/journeys/latest/admin-refund-payout/screenshots/01-refund-desk-is-ready.png`
-- [x] Admin creates a new refund record — route `/refunds` — `artifacts/journeys/latest/admin-refund-payout/screenshots/02-admin-creates-a-new-refund-record.png`
-- [x] Payout desk is ready — route `/payouts` — `artifacts/journeys/latest/admin-refund-payout/screenshots/03-payout-desk-is-ready.png`
-- [x] Admin advances a seeded payout record — route `/payouts` — `artifacts/journeys/latest/admin-refund-payout/screenshots/04-admin-advances-a-seeded-payout-record.png`
-- [x] Order activity screen is ready — route `/id/orders` — `artifacts/journeys/latest/customer-order-payment/screenshots/01-order-activity-screen-is-ready.png`
-- [x] Customer creates a new quick order — route `/id/orders` — `artifacts/journeys/latest/customer-order-payment/screenshots/02-customer-creates-a-new-quick-order.png`
-- [x] Local payment settles the latest order — route `/id/orders` — `artifacts/journeys/latest/customer-order-payment/screenshots/03-local-payment-settles-the-latest-order.png`
-- [x] Customer opens the order detail screen — route `/id/orders/[orderId]` — `artifacts/journeys/latest/customer-order-payment/screenshots/04-customer-opens-the-order-detail-screen.png`
-- [x] Order-linked chat is usable from order detail — route `/id/orders/[orderId]` — `artifacts/journeys/latest/customer-order-payment/screenshots/05-order-linked-chat-is-usable-from-order-detail.png`
-- [x] Order detail can create a support ticket — route `/id/orders/[orderId]` — `artifacts/journeys/latest/customer-order-payment/screenshots/06-order-detail-can-create-a-support-ticket.png`
-
-### Support
-
-- [x] Support center is ready — route `/id/support` — `artifacts/journeys/latest/customer-support-ticket/screenshots/01-support-center-is-ready.png`
-- [x] Customer creates a new support ticket — route `/id/support` — `artifacts/journeys/latest/customer-support-ticket/screenshots/02-customer-creates-a-new-support-ticket.png`
-- [x] Support ticket appears in the customer queue — route `/id/support` — `artifacts/journeys/latest/customer-support-ticket/screenshots/03-support-ticket-appears-in-the-customer-queue.png`
-- [x] Admin triage updates the support ticket state — route `/id/support` — `artifacts/journeys/latest/customer-support-ticket/screenshots/04-admin-triage-updates-the-support-ticket-state.png`
-- [x] Admin sees the new customer ticket — route `/support` — `artifacts/journeys/latest/admin-support-triage/screenshots/01-admin-sees-the-new-customer-ticket.png`
-- [x] Admin triages the support ticket — route `/support` — `artifacts/journeys/latest/admin-support-triage/screenshots/02-admin-triages-the-support-ticket.png`
-
-### Professional
-
-- [x] Draft professional sees the editable application flow — route `/id/professionals/apply` — `artifacts/journeys/latest/professional-draft-apply-state/screenshots/01-draft-professional-sees-the-editable-application-flow.png`
-- [x] Professional apply screen is ready — route `/id/professionals/apply` — `artifacts/journeys/latest/professional-apply-review-state/screenshots/01-professional-apply-screen-is-ready.png`
-- [x] Submitted review state is visible — route `/id/professionals/apply` — `artifacts/journeys/latest/professional-apply-review-state/screenshots/02-submitted-review-state-is-visible.png`
-- [x] Submitted professional sees the publish gate — route `/id/professionals/dashboard/offerings` — `artifacts/journeys/latest/professional-submitted-offerings-gated/screenshots/01-submitted-professional-sees-the-publish-gate.png`
-- [x] Professional workspace overview is ready — route `/id/professionals/dashboard` — `artifacts/journeys/latest/professional-workspace-approved/screenshots/01-professional-workspace-overview-is-ready.png`
-- [x] Offering management section opens — route `/id/professionals/dashboard/offerings` — `artifacts/journeys/latest/professional-workspace-approved/screenshots/02-offering-management-section-opens.png`
-- [x] Approved professional publishes an offering — route `/id/professionals/dashboard/offerings` — `artifacts/journeys/latest/professional-workspace-approved/screenshots/03-approved-professional-publishes-an-offering.png`
-- [x] Professional workspace orders section is reachable — route `/id/professionals/dashboard/orders` — `artifacts/journeys/latest/professional-workspace-approved/screenshots/04-professional-workspace-orders-section-is-reachable.png`
-- [x] Professional workspace portfolio section is reachable — route `/id/professionals/dashboard/portfolio` — `artifacts/journeys/latest/professional-workspace-approved/screenshots/05-professional-workspace-portfolio-section-is-reachable.png`
-- [x] Professional workspace trust section is reachable — route `/id/professionals/dashboard/trust` — `artifacts/journeys/latest/professional-workspace-approved/screenshots/06-professional-workspace-trust-section-is-reachable.png`
-- [x] Professional workspace coverage section is reachable — route `/id/professionals/dashboard/coverage` — `artifacts/journeys/latest/professional-workspace-approved/screenshots/07-professional-workspace-coverage-section-is-reachable.png`
-- [x] Professional workspace availability section is reachable — route `/id/professionals/dashboard/availability` — `artifacts/journeys/latest/professional-workspace-approved/screenshots/08-professional-workspace-availability-section-is-reachable.png`
-- [x] Professional workspace notifications section is reachable — route `/id/professionals/dashboard/notifications` — `artifacts/journeys/latest/professional-workspace-approved/screenshots/09-professional-workspace-notifications-section-is-reachable.png`
-- [x] Professional workspace profile section is reachable — route `/id/professionals/dashboard/profile` — `artifacts/journeys/latest/professional-workspace-approved/screenshots/10-professional-workspace-profile-section-is-reachable.png`
-
-### Admin
-
-- [x] Admin login screen is ready — route `/login` — `artifacts/journeys/latest/admin-login-overview/screenshots/01-admin-login-screen-is-ready.png`
-- [x] Admin reaches the overview dashboard — route `/overview` — `artifacts/journeys/latest/admin-login-overview/screenshots/02-admin-reaches-the-overview-dashboard.png`
-- [x] Professional review queue is visible — route `/professionals` — `artifacts/journeys/latest/admin-review-queue/screenshots/01-professional-review-queue-is-visible.png`
-- [x] Customers desk is visible — route `/customers` — `artifacts/journeys/latest/admin-console-route-map/screenshots/01-customers-desk-is-visible.png`
-- [x] Orders desk is visible — route `/orders` — `artifacts/journeys/latest/admin-console-route-map/screenshots/02-orders-desk-is-visible.png`
-- [x] Studio snapshot is visible — route `/studio` — `artifacts/journeys/latest/admin-console-route-map/screenshots/03-studio-snapshot-is-visible.png`
-
-## UI Findings
-
-- `P1` Customer home, order flow, dan workspace professional sekarang sudah jauh lebih koheren secara warna dan hierarchy. Problem utama yang tersisa bukan lagi bentrok brand, tetapi density layar panjang yang masih melelahkan untuk discan cepat.
-- `P1` Notifications feed masih terlalu repetitif. Card hampir identik dari atas ke bawah, jadi prioritas order, support, dan reminder akun belum langsung terbaca meskipun copy-nya sudah lebih rapi.
-- `P1` Support center sudah lebih baik karena tiket aktif muncul lebih dulu, tetapi vertical rhythm-nya masih terlalu tinggi di mobile portrait. Hero, summary tiles, dan list card pertama masih menyisakan banyak ruang kosong sebelum user melihat detail tiket secara utuh.
-- `P1` Professional apply flow sudah lebih bersih dan realistis, tetapi masih sangat vertikal. Section identitas, dokumen, dan readiness bercampur dalam satu arus panjang sehingga proses review belum terasa seperti milestone yang jelas.
-- `P2` Customer profile modal sudah lebih tenang dan tombol logout tidak lagi terlalu agresif, tetapi hierarchy action di area bawah masih bisa dipadatkan agar kartu profesional dan utility action tidak terasa seperti stack terpisah yang sangat panjang.
-- `P2` Public home visitor lebih rapi dari sebelumnya, namun state non-login masih terasa datar dibanding authenticated customer home. Area atas belum cukup membangun trust melalui proof, urgency, atau social reassurance.
-- `P2` Long-data handling sudah membaik signifikan. Nama panjang, coverage area, subject support, dan offering title sudah wrap dengan aman, tetapi daftar yang sangat panjang masih butuh grouping dan sticky anchors.
-
-## Recommendations
-
-- Pertahankan arah visual `teal + slate + soft cyan` sebagai fondasi tetap untuk `bidan`; jangan kembali ke aksen magenta besar di CTA utama atau card umum.
-- Ubah notifications menjadi grouped timeline dengan heading seperti `Hari ini`, `Perlu aksi`, dan `Sudah selesai` agar user bisa scanning berdasarkan urgency, bukan membaca satu per satu.
-- Pertahankan pola support yang kini queue-first, lalu lanjutkan dengan kompresi tinggi section atas: kecilkan hero copy, rapatkan summary tiles, dan pertimbangkan form tiket baru sebagai sheet terpisah agar viewport pertama lebih informatif.
-- Pecah professional apply menjadi milestone yang eksplisit: `Identitas`, `Dokumen`, `Kesiapan layanan`, `Review notes`. Tambahkan progress rail atau sticky mini-summary agar form panjang terasa lebih terarah.
-- Terus jaga action sekunder seperti logout dan utility links tetap low-emphasis. Langkah berikutnya adalah memadatkan stack action di profile agar jalur `edit profile`, `support`, dan `professional path` terasa satu sistem, bukan tiga blok terpisah.
-- Tambahkan audit khusus tablet dan desktop untuk surface `bidan`, terutama workspace professional dan support queue, supaya density layout tidak hanya aman di mobile portrait.
-
-## Coverage Gaps
-
-- Belum ada screenshot khusus untuk empty state tanpa data pada customer baru, professional baru, dan admin tanpa queue.
-- Belum ada audit visual khusus tablet dan desktop untuk `bidan`; artefak saat ini dominan mobile portrait, sementara admin dominan desktop.
-- Belum ada journey untuk error state jaringan, upload gagal, atau validasi form field yang sangat panjang di professional workspace.
-- Services listing root belum dipisah menjadi screenshot tersendiri; saat ini coverage berhenti di service detail setelah navigasi dari katalog.
+| Surface | Route | Persona/Seed | Viewport | State | Screenshot | Status | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| professional | `/id/professionals/dashboard` | `+628111111002 / BidanDemo#2026` | `1280x720` | `professional-workspace-overview-is-ready` | `artifacts/journeys/latest/professional-workspace-approved/screenshots/01-professional-workspace-overview-is-ready.png` | passed | Workspace profesional memuat ringkasan seeded dan section console aktif. |
+| professional | `/id/professionals/dashboard/offerings` | `+628111111002 / BidanDemo#2026` | `1280x720` | `offering-management-section-opens` | `artifacts/journeys/latest/professional-workspace-approved/screenshots/02-offering-management-section-opens.png` | passed | Section offerings menampilkan form publish dan daftar layanan aktif. |
+| professional | `/id/professionals/dashboard/offerings` | `+628111111002 / BidanDemo#2026` | `1280x720` | `approved-professional-publishes-an-offering` | `artifacts/journeys/latest/professional-workspace-approved/screenshots/03-approved-professional-publishes-an-offering.png` | passed | Offering baru berhasil dipublish dan langsung muncul di daftar layanan aktif. |
+| professional | `/id/professionals/dashboard/orders` | `+628111111002 / BidanDemo#2026` | `1280x720` | `professional-workspace-orders` | `artifacts/journeys/latest/professional-workspace-approved/screenshots/04-professional-workspace-orders-section-is-reachable.png` | passed | Section orders menampilkan antrean permintaan pelanggan untuk profesional approved. |
+| professional | `/id/professionals/dashboard/portfolio` | `+628111111002 / BidanDemo#2026` | `1280x720` | `professional-workspace-portfolio` | `artifacts/journeys/latest/professional-workspace-approved/screenshots/05-professional-workspace-portfolio-section-is-reachable.png` | passed | Section portfolio memuat showcase seeded dan form pengelolaan aset profesional. |
+| professional | `/id/professionals/dashboard/trust` | `+628111111002 / BidanDemo#2026` | `1280x720` | `professional-workspace-trust` | `artifacts/journeys/latest/professional-workspace-approved/screenshots/06-professional-workspace-trust-section-is-reachable.png` | passed | Section trust memperlihatkan kredensial dan cerita profesional yang harus tetap terbaca. |
+| professional | `/id/professionals/dashboard/coverage` | `+628111111002 / BidanDemo#2026` | `1280x720` | `professional-workspace-coverage` | `artifacts/journeys/latest/professional-workspace-approved/screenshots/07-professional-workspace-coverage-section-is-reachable.png` | passed | Section coverage menampilkan area layanan seeded tanpa kehilangan keterbacaan. |
+| professional | `/id/professionals/dashboard/availability` | `+628111111002 / BidanDemo#2026` | `1280x720` | `professional-workspace-availability` | `artifacts/journeys/latest/professional-workspace-approved/screenshots/08-professional-workspace-availability-section-is-reachable.png` | passed | Section availability memuat jadwal praktik dan tetap stabil untuk data jam yang panjang. |
+| professional | `/id/professionals/dashboard/notifications` | `+628111111002 / BidanDemo#2026` | `1280x720` | `professional-workspace-notifications` | `artifacts/journeys/latest/professional-workspace-approved/screenshots/09-professional-workspace-notifications-section-is-reachable.png` | passed | Section notifications menampilkan preferensi channel secara jelas dan mudah dipindai. |
+| professional | `/id/professionals/dashboard/profile` | `+628111111002 / BidanDemo#2026` | `1280x720` | `professional-workspace-profile` | `artifacts/journeys/latest/professional-workspace-approved/screenshots/10-professional-workspace-profile-section-is-reachable.png` | passed | Section profile tetap terbaca untuk nama, slug, dan kota dengan panjang data realistis. |
+| customer | `/id` | `+628111111001 / BidanDemo#2026` | `1280x720` | `customer-home` | `artifacts/journeys/latest/customer-home-profile-notifications/screenshots/01-authenticated-customer-home-is-visible.png` | passed | Customer tiba di home feed yang memuat aktivitas, layanan populer, dan profesional tepercaya. |
+| customer | `/id/profile` | `+628111111001 / BidanDemo#2026` | `1280x720` | `customer-profile` | `artifacts/journeys/latest/customer-home-profile-notifications/screenshots/02-customer-profile-page-is-ready.png` | passed | Customer bisa membuka profil, melihat quick actions, lalu memunculkan sheet edit profil dari action card utama. |
+| customer | `/id/notifications` | `+628111111001 / BidanDemo#2026` | `1280x720` | `customer-notifications` | `artifacts/journeys/latest/customer-home-profile-notifications/screenshots/03-customer-notifications-feed-is-visible.png` | passed | Customer bisa melihat feed notifikasi yang relevan dengan order, support, atau review. |
+| auth | `/id/login` | `+628111111001 / wrong-password` | `1280x720` | `customer-login-screen` | `artifacts/journeys/latest/customer-invalid-login/screenshots/01-login-screen-is-ready-for-guard-validation.png` | passed | Form login siap dipakai untuk pengujian kredensial salah. |
+| auth | `/id/login` | `+628111111001 / wrong-password` | `1280x720` | `customer-login-error` | `artifacts/journeys/latest/customer-invalid-login/screenshots/02-friendly-error-appears-for-invalid-credentials.png` | passed | UI menolak login, tetap berada di layar login, dan menjelaskan bahwa nomor ponsel atau kata sandi tidak cocok. |
+| auth | `/id/login` | `+628111111001 / BidanDemo#2026` | `1280x720` | `login-screen-is-ready` | `artifacts/journeys/latest/customer-auth-sso/screenshots/01-login-screen-is-ready.png` | passed | Form login customer tampil di Bidan dengan CTA yang siap dipakai. |
+| auth | `/id` | `+628111111001 / BidanDemo#2026` | `1280x720` | `customer-signs-in-from-bidan` | `artifacts/journeys/latest/customer-auth-sso/screenshots/02-customer-signs-in-from-bidan.png` | passed | Customer berhasil masuk dan diarahkan ke halaman utama Bidan. |
+| auth | `/id/security` | `+628111111001 / BidanDemo#2026` | `1280x720` | `customer-security-screen` | `artifacts/journeys/latest/customer-auth-sso/screenshots/03-native-security-screen-resolves-the-signed-in-account.png` | passed | Pengaturan keamanan akun tampil langsung di Bidan tanpa pindah ke app lain. |
+| auth | `/id/sessions` | `+628111111001 / BidanDemo#2026` | `1280x720` | `customer-device-sessions-screen` | `artifacts/journeys/latest/customer-auth-sso/screenshots/04-device-sessions-show-multiple-entries.png` | passed | Bidan menampilkan daftar device aktif dan CTA untuk logout device lain. |
+| auth | `/id/sessions` | `+628111111001 / BidanDemo#2026` | `1280x720` | `customer-device-sessions-screen` | `artifacts/journeys/latest/customer-auth-sso/screenshots/05-customer-logs-out-other-devices.png` | passed | Semua device lain diputus dan session saat ini tetap aktif. |
+| auth | `/id/register` | `+6281299256687 / JourneyReg#2026` | `1280x720` | `customer-register-screen` | `artifacts/journeys/latest/customer-register-success/screenshots/01-register-screen-is-ready.png` | passed | Form register native Bidan tampil dan siap dipakai tanpa redirect ke surface lain. |
+| auth | `/id` | `+6281299256687 / JourneyReg#2026` | `1280x720` | `customer-home-screen` | `artifacts/journeys/latest/customer-register-success/screenshots/02-customer-registers-successfully.png` | passed | Customer berhasil membuat akun baru dan masuk ke halaman utama Bidan. |
+| payments | `/id/orders` | `+628111111001 / BidanDemo#2026` | `1280x720` | `order-activity-screen-is-ready` | `artifacts/journeys/latest/customer-order-payment/screenshots/01-order-activity-screen-is-ready.png` | passed | Daftar order dan quick order composer tampil dengan seeded offerings. |
+| payments | `/id/orders` | `+628111111001 / BidanDemo#2026` | `1280x720` | `customer-creates-a-new-quick-order` | `artifacts/journeys/latest/customer-order-payment/screenshots/02-customer-creates-a-new-quick-order.png` | passed | Order berhasil dibuat dan langkah pembayaran lokal langsung tersedia. |
+| payments | `/id/orders` | `+628111111001 / BidanDemo#2026` | `1280x720` | `local-payment-settles-the-latest-order` | `artifacts/journeys/latest/customer-order-payment/screenshots/03-local-payment-settles-the-latest-order.png` | passed | Pembayaran berpindah ke status paid dan feedback sukses tampil di layar. |
+| payments | `/id/orders/[orderId]` | `+628111111001 / BidanDemo#2026` | `1280x720` | `customer-opens-the-order-detail-screen` | `artifacts/journeys/latest/customer-order-payment/screenshots/04-customer-opens-the-order-detail-screen.png` | passed | Customer dapat masuk ke detail order untuk melihat payment state dan tindakan lanjutan. |
+| payments | `/id/orders/[orderId]` | `+628111111001 / BidanDemo#2026` | `1280x720` | `customer-order-chat` | `artifacts/journeys/latest/customer-order-payment/screenshots/05-order-linked-chat-is-usable-from-order-detail.png` | passed | Customer dapat membuka thread chat order dan mengirim pesan follow-up dari halaman detail. |
+| payments | `/id/orders/[orderId]` | `+628111111001 / BidanDemo#2026` | `1280x720` | `customer-order-support` | `artifacts/journeys/latest/customer-order-payment/screenshots/06-order-detail-can-create-a-support-ticket.png` | passed | Customer dapat membuat tiket support langsung dari halaman detail order ketika membutuhkan bantuan lanjutan. |
+| auth | `/id/forgot-password` | `+628111111001` | `1280x720` | `recovery-screen-is-ready` | `artifacts/journeys/latest/customer-password-recovery/screenshots/01-recovery-screen-is-ready.png` | passed | Form reset password tampil dengan input nomor ponsel dan CTA kirim OTP. |
+| auth | `/id/forgot-password` | `+628111111001` | `1280x720` | `otp-request-starts-the-recovery-challenge` | `artifacts/journeys/latest/customer-password-recovery/screenshots/02-otp-request-starts-the-recovery-challenge.png` | passed | UI berpindah ke state OTP dengan challenge id dan destinasi masked. |
+| support | `/id/support` | `+628111111001 / BidanDemo#2026` | `1280x720` | `support-center-is-ready` | `artifacts/journeys/latest/customer-support-ticket/screenshots/01-support-center-is-ready.png` | passed | Queue support, ringkasan tiket, dan composer sheet tersedia tanpa membuat layar awal kosong. |
+| support | `/id/support` | `+628111111001 / BidanDemo#2026` | `1280x720` | `customer-creates-a-new-support-ticket` | `artifacts/journeys/latest/customer-support-ticket/screenshots/02-customer-creates-a-new-support-ticket.png` | passed | Tiket baru berhasil dibuat dan konfirmasi sukses muncul di layar. |
+| support | `/id/support` | `+628111111001 / BidanDemo#2026` | `1280x720` | `support-ticket-appears-in-the-customer-queue` | `artifacts/journeys/latest/customer-support-ticket/screenshots/03-support-ticket-appears-in-the-customer-queue.png` | passed | Tiket yang baru dibuat langsung muncul di bagian tiket saya. |
+| support | `/id/support` | `+628111111001 / BidanDemo#2026` | `1280x720` | `customer-support-after-admin-triage` | `artifacts/journeys/latest/customer-support-ticket/screenshots/04-admin-triage-updates-the-support-ticket-state.png` | passed | Ticket yang baru dibuat customer diproses oleh admin dan berpindah ke state triaged. |
+| professional | `/id/professionals/apply` | `+628111111004 / BidanDemo#2026` | `1280x720` | `professional-apply-draft` | `artifacts/journeys/latest/professional-draft-apply-state/screenshots/01-draft-professional-sees-the-editable-application-flow.png` | passed | Professional draft masuk ke state onboarding yang masih bisa dilengkapi dan dikirim. |
+| customer | `/id/support` | `+628111111005 / BidanDemo#2026` | `1280x720` | `customer-empty-support` | `artifacts/journeys/latest/customer-empty-state-surfaces/screenshots/01-empty-customer-support-queue-is-controlled.png` | passed | Customer baru tidak melihat layar support yang kacau meski belum punya tiket sama sekali. |
+| customer | `/id/notifications` | `+628111111005 / BidanDemo#2026` | `1280x720` | `customer-empty-notifications` | `artifacts/journeys/latest/customer-empty-state-surfaces/screenshots/02-empty-customer-notifications-stay-elegant.png` | passed | Feed notifikasi tetap elegan dan jelas saat customer belum punya aktivitas tersimpan. |
+| professional | `/id/professionals/apply` | `+628111111006 / BidanDemo#2026` | `1280x720` | `professional-empty-apply` | `artifacts/journeys/latest/professional-empty-state-audit/screenshots/01-empty-professional-apply-state-is-readable.png` | passed | Professional baru bisa membaca progres onboarding dengan jelas sejak state paling kosong. |
+| professional | `/id/professionals/dashboard` | `+628111111006 / BidanDemo#2026` | `1280x720` | `professional-empty-workspace` | `artifacts/journeys/latest/professional-empty-state-audit/screenshots/02-empty-professional-workspace-stays-intentional.png` | passed | Workspace profesional baru tetap terasa intentional walau belum punya offering, coverage, atau order. |
+| professional | `/id/professionals/apply` | `+628111111006 / BidanDemo#2026` | `1280x720` | `professional-apply-validation` | `artifacts/journeys/latest/professional-apply-validation-state/screenshots/01-incomplete-professional-application-shows-validation-feedback.png` | passed | Professional baru mendapat error validasi yang jelas ketika field wajib belum dilengkapi, dengan progress rail tetap terlihat. |
+| auth | `http://localhost:3002/id/login` | `Local browser on localhost` | `1280x720` | `localhost-redirect-guard` | `artifacts/journeys/latest/localhost-lvh-redirect/screenshots/01-localhost-is-redirected-into-the-shared-dev-domain.png` | passed | Halaman login lokal tidak tinggal di localhost dan otomatis berpindah ke domain .lvh.me yang benar. |
+| professional | `/id/professionals/dashboard` | `+628111111002 / BidanDemo#2026` | `1280x960` | `professional-desktop-shell` | `artifacts/journeys/latest/professional-desktop-shell-smoke/screenshots/01-desktop-mobile-shell-remains-intentional.png` | passed | Shell mobile tetap intentional saat centered di layar desktop lebar. |
+| professional | `/id/professionals/apply` | `+628111111003 / BidanDemo#2026` | `1280x720` | `professional-apply-screen-is-ready` | `artifacts/journeys/latest/professional-apply-review-state/screenshots/01-professional-apply-screen-is-ready.png` | passed | Layar apply memuat status aplikasi dan state review professional yang sudah submit. |
+| professional | `/id/professionals/apply` | `+628111111003 / BidanDemo#2026` | `1280x720` | `submitted-review-state-is-visible` | `artifacts/journeys/latest/professional-apply-review-state/screenshots/02-submitted-review-state-is-visible.png` | passed | Status submitted atau pending_review tampil jelas tanpa perlu menebak state backend. |
+| professional | `/id/professionals/dashboard/offerings` | `+628111111003 / BidanDemo#2026` | `1280x720` | `professional-offerings-gated` | `artifacts/journeys/latest/professional-submitted-offerings-gated/screenshots/01-submitted-professional-sees-the-publish-gate.png` | passed | Section layanan menjelaskan bahwa publish offering masih terkunci sampai profil disetujui. |
+| public | `/id` | `Visitor without login` | `1280x720` | `public-home-root` | `artifacts/journeys/latest/public-visitor-browse/screenshots/01-public-home-root-is-ready.png` | passed | Visitor masuk langsung ke home publik canonical. |
+| public | `/id/explore` | `Visitor without login` | `1280x720` | `public-explore` | `artifacts/journeys/latest/public-visitor-browse/screenshots/02-explore-professionals-is-visible.png` | passed | Visitor bisa menjelajahi profesional yang sudah approved di halaman explore. |
+| public | `/id/p/[slug]` | `Visitor without login` | `1280x720` | `public-professional-detail` | `artifacts/journeys/latest/public-visitor-browse/screenshots/03-professional-detail-page-opens.png` | passed | Visitor dapat membuka detail profesional publik dan melihat service list terkait. |
+| public | `/id/s/[slug]` | `Visitor without login` | `1280x720` | `public-service-detail` | `artifacts/journeys/latest/public-visitor-browse/screenshots/04-service-catalog-and-detail-page-are-reachable.png` | passed | Visitor bisa berpindah dari katalog layanan ke halaman detail layanan publik. |

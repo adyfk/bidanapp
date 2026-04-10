@@ -23,6 +23,6 @@ test('customer can create an order and simulate manual payment', async ({ page }
 
   await expect(page.getByText(/Pembayaran siap dilanjutkan|Payment is ready to continue/i).first()).toBeVisible();
 
-  await page.getByRole('button', { name: /Tandai sudah bayar|Mark as paid/i }).click();
+  await page.getByRole('button', { name: /^Bayar$|^Paid$/i }).click();
   await expect(page.getByText(/Pembayaran berhasil ditandai selesai|Payment marked as completed/i)).toBeVisible();
 });

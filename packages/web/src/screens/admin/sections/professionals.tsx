@@ -48,7 +48,7 @@ export function ProfessionalsSection({
                     onClick={() => void onReview(application.applicationId, 'changes_requested')}
                     type="button"
                   >
-                    Request changes
+                    Revise
                   </SecondaryButton>
                   <SecondaryButton
                     disabled={busy}

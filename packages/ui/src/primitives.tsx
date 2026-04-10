@@ -16,13 +16,13 @@ export function PrimaryButton({ className, ...props }: ButtonHTMLAttributes<HTML
     <button
       {...props}
       className={cx(
-        'inline-flex min-h-12 items-center justify-center rounded-full border border-transparent px-5 py-3 text-[13px] font-bold transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60',
+        'inline-flex min-h-11 items-center justify-center rounded-[18px] border border-transparent px-4 py-3 text-center text-[13px] font-bold leading-tight transition-colors duration-200 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-60',
         className,
       )}
       style={{
         background:
           'linear-gradient(180deg, var(--ui-primary) 0%, color-mix(in srgb, var(--ui-primary) 66%, var(--ui-secondary)) 100%)',
-        boxShadow: '0 20px 32px -22px rgba(18,59,74,0.34)',
+        boxShadow: '0 20px 32px -22px rgba(145,64,96,0.28)',
         color: '#ffffff',
         ...focusRingStyle,
       }}
@@ -35,14 +35,15 @@ export function SecondaryButton({ className, ...props }: ButtonHTMLAttributes<HT
     <button
       {...props}
       className={cx(
-        'inline-flex min-h-12 items-center justify-center rounded-full border px-5 py-3 text-[13px] font-bold transition-all duration-200 hover:bg-slate-50 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-60',
+        'inline-flex min-h-11 items-center justify-center rounded-[18px] border px-4 py-3 text-center text-[13px] font-bold leading-tight transition-colors duration-200 hover:bg-rose-50/70 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-60',
         className,
       )}
       style={{
-        backgroundColor: '#ffffff',
+        background:
+          'linear-gradient(180deg, rgba(255,255,255,0.98) 0%, color-mix(in srgb, var(--ui-surface-muted) 56%, white) 100%)',
         borderColor: 'var(--ui-border)',
-        boxShadow: '0 10px 26px -22px rgba(15,23,42,0.24)',
-        color: 'var(--ui-text-muted)',
+        boxShadow: '0 14px 30px -24px rgba(88,49,66,0.16)',
+        color: 'var(--ui-text-strong)',
         ...focusRingStyle,
       }}
     />
@@ -54,7 +55,7 @@ export function GhostButton({ className, ...props }: ButtonHTMLAttributes<HTMLBu
     <button
       {...props}
       className={cx(
-        'inline-flex min-h-11 items-center justify-center rounded-[var(--ui-radius-pill)] border border-transparent px-4 py-2.5 text-sm font-semibold transition duration-200 hover:translate-y-[-1px] focus-visible:outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-60',
+        'inline-flex min-h-10 items-center justify-center rounded-[16px] border border-transparent px-3.5 py-2.5 text-sm font-semibold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-60',
         className,
       )}
       style={{
@@ -95,7 +96,7 @@ export function StatusPill({ children, tone = 'neutral' }: { children: ReactNode
   return (
     <span
       className={cx(
-        'inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-semibold',
+        'inline-flex max-w-full items-center gap-1.5 overflow-hidden truncate whitespace-nowrap rounded-[12px] border px-2.5 py-1 text-[10.5px] font-semibold leading-tight',
         tone === 'accent' ? 'uppercase tracking-[0.12em]' : '',
       )}
       style={toneStyle(tone)}
@@ -142,6 +143,7 @@ export function TextField({
           className,
         )}
         style={{
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.55)',
           ...focusRingStyle,
         }}
       />
@@ -187,6 +189,7 @@ export function TextAreaField({
           className,
         )}
         style={{
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.55)',
           ...focusRingStyle,
         }}
       />
@@ -214,7 +217,7 @@ export function CheckboxField({
     <label
       className="flex items-start gap-3 rounded-[var(--ui-radius-input)] border px-4 py-3"
       style={{
-        backgroundColor: 'var(--ui-surface-muted)',
+        background: 'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 72%, white) 100%)',
         borderColor: 'var(--ui-border)',
       }}
     >
@@ -244,7 +247,7 @@ export function EmptyState({ title, description, action }: { action?: ReactNode;
     <div
       className="rounded-[28px] border border-dashed px-5 py-8 text-center shadow-sm"
       style={{
-        backgroundColor: '#ffffff',
+        background: 'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 44%, white) 100%)',
         borderColor: 'var(--ui-border)',
       }}
     >
@@ -265,7 +268,7 @@ export function MessageBanner({ children, tone = 'neutral' }: { children: ReactN
       className="rounded-[20px] border px-4 py-3 text-[13px] font-medium leading-6"
       style={{
         ...toneStyle(tone),
-        boxShadow: '0 8px 24px -20px rgba(15,23,42,0.18)',
+        boxShadow: '0 10px 24px -20px rgba(88,49,66,0.14)',
       }}
     >
       {children}

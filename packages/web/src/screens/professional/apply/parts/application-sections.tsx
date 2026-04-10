@@ -6,6 +6,7 @@ import {
   DocumentList,
   MarketplaceAccessHero,
   MarketplaceAccessOptionCard,
+  MarketplaceFeaturePill,
   MessageBanner,
   PrimaryButton,
   SecondaryButton,
@@ -16,6 +17,13 @@ import { isEnglishLocale } from '../../../../lib/marketplace-copy';
 import { applyFieldClassName, FormField } from './form-field';
 import { PreviewAvatar } from './profile-preview';
 import { ProfessionalSchemaField } from './schema-field';
+
+function splitSchemaFields(fields: ProfessionalRegistrationField[]) {
+  return {
+    documentFields: fields.filter((field) => field.type === 'document'),
+    readinessFields: fields.filter((field) => field.type !== 'document'),
+  };
+}
 
 export function NotReadyStateCard({ locale }: { locale: string }) {
   return (
@@ -102,7 +110,13 @@ export function ApplicationStatusCard({
   reviewNotes: string;
 }) {
   return (
-    <section className="rounded-[28px] border border-gray-100 bg-white p-5 shadow-sm">
+    <section
+      className="rounded-[28px] border p-5 shadow-[0_20px_44px_-32px_rgba(88,49,66,0.16)]"
+      style={{
+        background: 'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 42%, white) 100%)',
+        borderColor: 'var(--ui-border)',
+      }}
+    >
       <div className="flex items-center gap-4">
         <PreviewAvatar label={displayName} />
         <div className="min-w-0 flex-1">
@@ -113,7 +127,10 @@ export function ApplicationStatusCard({
             >
               {isEnglishLocale(locale) ? 'Application status' : 'Status aplikasi'}
             </span>
-            <span className="rounded-full bg-gray-100 px-3 py-1 text-[11px] font-semibold text-gray-500">
+            <span
+              className="rounded-full px-3 py-1 text-[11px] font-semibold"
+              style={{ backgroundColor: 'var(--ui-surface-muted)', color: 'var(--ui-primary)' }}
+            >
               {localizedStatus}
             </span>
           </div>
@@ -127,7 +144,7 @@ export function ApplicationStatusCard({
         </div>
       </div>
 
-      <div className="mt-5 grid grid-cols-2 gap-3">
+      <div className="mt-5 grid grid-cols-3 gap-3">
         <div className="rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-4">
           <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Review</p>
           <p className="mt-2 text-[16px] font-bold text-slate-900">{localizedReviewStatus}</p>
@@ -137,6 +154,14 @@ export function ApplicationStatusCard({
             {isEnglishLocale(locale) ? 'City' : 'Kota'}
           </p>
           <p className="mt-2 text-[16px] font-bold text-slate-900">{applicationFormCity || '-'}</p>
+        </div>
+        <div className="rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+            {isEnglishLocale(locale) ? 'Next focus' : 'Fokus berikutnya'}
+          </p>
+          <p className="mt-2 text-[16px] font-bold text-slate-900">
+            {reviewNotes ? (isEnglishLocale(locale) ? 'Revise notes' : 'Cek catatan') : localizedStatus}
+          </p>
         </div>
       </div>
 
@@ -168,7 +193,7 @@ export function ApplicationStatusCard({
                 'linear-gradient(180deg, var(--ui-primary) 0%, color-mix(in srgb, var(--ui-primary) 66%, var(--ui-secondary)) 100%)',
             }}
           >
-            {isEnglishLocale(locale) ? 'Open my profile' : 'Buka profil saya'}
+            {isEnglishLocale(locale) ? 'Profile' : 'Profil'}
             <ArrowRight className="h-4 w-4" />
           </button>
         </a>
@@ -178,7 +203,7 @@ export function ApplicationStatusCard({
             className="flex w-full items-center justify-center gap-2 rounded-full bg-gray-100 py-4 text-[14px] font-bold text-gray-700 transition-colors hover:bg-gray-200"
           >
             <ShieldCheck className="h-4 w-4" />
-            {isEnglishLocale(locale) ? 'Open account center' : 'Buka pusat akun'}
+            {isEnglishLocale(locale) ? 'Account' : 'Akun'}
           </button>
         </a>
       </div>
@@ -222,8 +247,21 @@ export function ApplicationFormSection({
   schemaFields: ProfessionalRegistrationField[];
   uploadingFieldKey: string;
 }) {
+  const { documentFields, readinessFields } = splitSchemaFields(schemaFields);
+  const messageTone = /berhasil|saved|success|uploaded/i.test(message)
+    ? 'success'
+    : /gagal|failed|required|missing|invalid|wajib/i.test(message)
+      ? 'danger'
+      : 'info';
+
   return (
-    <section className="rounded-[28px] border border-gray-100 bg-white p-5 shadow-sm">
+    <section
+      className="rounded-[28px] border p-5 shadow-[0_20px_44px_-32px_rgba(88,49,66,0.16)]"
+      style={{
+        background: 'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 42%, white) 100%)',
+        borderColor: 'var(--ui-border)',
+      }}
+    >
       <div className="flex items-center gap-3">
         <div
           className="flex h-11 w-11 items-center justify-center rounded-full"
@@ -243,58 +281,133 @@ export function ApplicationFormSection({
         </div>
       </div>
 
-      <div className="mt-5 grid gap-4">
-        <FormField label={isEnglishLocale(locale) ? 'Professional name' : 'Nama profesional'}>
-          <input
-            className={applyFieldClassName}
-            value={applicationForm.displayName}
-            onChange={(event) => onDisplayNameChange(event.target.value)}
-          />
-        </FormField>
-
-        <FormField label={isEnglishLocale(locale) ? 'City' : 'Kota'}>
-          <input
-            className={applyFieldClassName}
-            value={applicationForm.city}
-            onChange={(event) => onCityChange(event.target.value)}
-          />
-        </FormField>
-
-        <FormField
-          label={isEnglishLocale(locale) ? 'Public slug' : 'Slug publik'}
-          helperText={
-            isEnglishLocale(locale)
-              ? 'Optional. Leave it empty if you want us to generate it from your profile name.'
-              : 'Opsional. Kosongkan jika Anda ingin kami membuatnya dari nama profil Anda.'
-          }
+      <div className="mt-5 space-y-4">
+        <div
+          className="rounded-[24px] border p-4"
+          style={{
+            background:
+              'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 48%, white) 100%)',
+            borderColor: 'var(--ui-border)',
+          }}
         >
-          <input
-            className={applyFieldClassName}
-            placeholder="alya-rahmawati"
-            value={applicationForm.slug}
-            onChange={(event) => onSlugChange(event.target.value)}
-          />
-        </FormField>
-      </div>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-[15px] font-bold text-slate-900">Identitas</p>
+              <p className="mt-1 text-[12px] leading-5 text-slate-500">
+                Nama, kota, dan slug publik jadi fondasi sebelum pelanggan melihat halaman Anda.
+              </p>
+            </div>
+            <MarketplaceFeaturePill tone="soft">Step 1</MarketplaceFeaturePill>
+          </div>
+          <div className="mt-4 grid gap-4">
+            <FormField label={isEnglishLocale(locale) ? 'Professional name' : 'Nama profesional'}>
+              <input
+                className={applyFieldClassName}
+                value={applicationForm.displayName}
+                onChange={(event) => onDisplayNameChange(event.target.value)}
+              />
+            </FormField>
 
-      <div className="mt-5 grid gap-4">
-        {schemaFields.map((field) => (
-          <ProfessionalSchemaField
-            key={field.key}
-            field={field}
-            locale={locale}
-            onBooleanChange={(checked) => onAttributeBooleanChange(field.key, checked)}
-            onTextChange={(value) => onAttributeTextChange(field.key, value)}
-            onUpload={(file) => onUpload(field.key, file)}
-            uploadingFieldKey={uploadingFieldKey}
-            value={applicationForm.attributes[field.key]}
-          />
-        ))}
+            <FormField label={isEnglishLocale(locale) ? 'City' : 'Kota'}>
+              <input
+                className={applyFieldClassName}
+                value={applicationForm.city}
+                onChange={(event) => onCityChange(event.target.value)}
+              />
+            </FormField>
+
+            <FormField
+              label={isEnglishLocale(locale) ? 'Public slug' : 'Slug publik'}
+              helperText={
+                isEnglishLocale(locale)
+                  ? 'Optional. Leave it empty if you want us to generate it from your profile name.'
+                  : 'Opsional. Kosongkan jika Anda ingin kami membuatnya dari nama profil Anda.'
+              }
+            >
+              <input
+                className={applyFieldClassName}
+                placeholder="alya-rahmawati"
+                value={applicationForm.slug}
+                onChange={(event) => onSlugChange(event.target.value)}
+              />
+            </FormField>
+          </div>
+        </div>
+
+        {documentFields.length ? (
+          <div
+            className="rounded-[24px] border p-4"
+            style={{
+              background:
+                'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 48%, white) 100%)',
+              borderColor: 'var(--ui-border)',
+            }}
+          >
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-[15px] font-bold text-slate-900">Dokumen</p>
+                <p className="mt-1 text-[12px] leading-5 text-slate-500">
+                  Upload bukti inti lebih dulu supaya reviewer bisa memverifikasi legalitas dan kesiapan praktik Anda.
+                </p>
+              </div>
+              <MarketplaceFeaturePill tone="soft">Step 2</MarketplaceFeaturePill>
+            </div>
+            <div className="mt-4 grid gap-4">
+              {documentFields.map((field) => (
+                <ProfessionalSchemaField
+                  key={field.key}
+                  field={field}
+                  locale={locale}
+                  onBooleanChange={(checked) => onAttributeBooleanChange(field.key, checked)}
+                  onTextChange={(value) => onAttributeTextChange(field.key, value)}
+                  onUpload={(file) => onUpload(field.key, file)}
+                  uploadingFieldKey={uploadingFieldKey}
+                  value={applicationForm.attributes[field.key]}
+                />
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {readinessFields.length ? (
+          <div
+            className="rounded-[24px] border p-4"
+            style={{
+              background:
+                'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 48%, white) 100%)',
+              borderColor: 'var(--ui-border)',
+            }}
+          >
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-[15px] font-bold text-slate-900">Kesiapan layanan</p>
+                <p className="mt-1 text-[12px] leading-5 text-slate-500">
+                  Isi headline, pengalaman, atau detail pendukung lain agar halaman publik terasa meyakinkan sejak awal.
+                </p>
+              </div>
+              <MarketplaceFeaturePill tone="soft">Step 3</MarketplaceFeaturePill>
+            </div>
+            <div className="mt-4 grid gap-4">
+              {readinessFields.map((field) => (
+                <ProfessionalSchemaField
+                  key={field.key}
+                  field={field}
+                  locale={locale}
+                  onBooleanChange={(checked) => onAttributeBooleanChange(field.key, checked)}
+                  onTextChange={(value) => onAttributeTextChange(field.key, value)}
+                  onUpload={(file) => onUpload(field.key, file)}
+                  uploadingFieldKey={uploadingFieldKey}
+                  value={applicationForm.attributes[field.key]}
+                />
+              ))}
+            </div>
+          </div>
+        ) : null}
       </div>
 
       {message ? (
         <div className="mt-5">
-          <MessageBanner tone={/berhasil|success/i.test(message) ? 'success' : 'info'}>{message}</MessageBanner>
+          <MessageBanner tone={messageTone}>{message}</MessageBanner>
         </div>
       ) : null}
 
@@ -309,7 +422,7 @@ export function ApplicationFormSection({
               : 'Kirim aplikasi'}
         </PrimaryButton>
         <SecondaryButton onClick={onProfileClick} type="button">
-          {isEnglishLocale(locale) ? 'Open my profile' : 'Buka profil saya'}
+          {isEnglishLocale(locale) ? 'Profile' : 'Profil'}
         </SecondaryButton>
       </div>
     </section>
@@ -328,7 +441,13 @@ export function ReviewAttachmentsSection({
   session?: ViewerSession | null;
 }) {
   return (
-    <section className="rounded-[28px] border border-gray-100 bg-white p-5 shadow-sm">
+    <section
+      className="rounded-[28px] border p-5 shadow-[0_20px_44px_-32px_rgba(88,49,66,0.16)]"
+      style={{
+        background: 'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 42%, white) 100%)',
+        borderColor: 'var(--ui-border)',
+      }}
+    >
       <div className="flex items-center gap-3">
         <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gray-100 text-gray-700">
           <FileText className="h-5 w-5" />
@@ -387,7 +506,13 @@ export function ProfileMaintenanceCard({
   onProfileClick: () => void;
 }) {
   return (
-    <section className="rounded-[26px] border border-dashed border-gray-200 bg-white px-5 py-4">
+    <section
+      className="rounded-[26px] border border-dashed px-5 py-4"
+      style={{
+        background: 'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 30%, white) 100%)',
+        borderColor: 'var(--ui-border)',
+      }}
+    >
       <div className="flex items-start gap-3">
         <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gray-100 text-gray-700">
           <MapPin className="h-5 w-5" />

@@ -1,7 +1,6 @@
 export {
   PlatformExplorePage,
   PlatformHomePage,
-  PlatformMarketplaceHomePage,
   PlatformOfferingDetailPage,
   PlatformProfessionalDetailPage,
   PlatformServicesPage,

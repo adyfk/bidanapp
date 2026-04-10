@@ -61,6 +61,7 @@
     "infra:down": "docker compose -f docker-compose.dev.yml down",
     "platform:scaffold": "node ./scripts/platform/scaffold.cjs",
     "journey:clean": "node ./scripts/journey/clean.cjs",
+    "journey:gallery": "node ./scripts/journey/generate-screenshot-gallery.cjs",
     "journey:open": "node ./scripts/journey/open.cjs",
     "start:admin": "npm run start --workspace @marketplace/admin",
     "start:bidan": "npm run start --workspace @marketplace/bidan",

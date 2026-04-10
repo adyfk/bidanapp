@@ -168,7 +168,7 @@ export function PathSeparationCard({
                 'linear-gradient(180deg, var(--ui-primary) 0%, color-mix(in srgb, var(--ui-primary) 66%, var(--ui-secondary)) 100%)',
             }}
           >
-            {isEnglishLocale(locale) ? 'Open customer home' : 'Buka beranda customer'}
+            {isEnglishLocale(locale) ? 'Home' : 'Beranda'}
           </button>
         </a>
         <a href={currentPath}>

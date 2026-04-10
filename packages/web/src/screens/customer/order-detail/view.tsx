@@ -426,7 +426,7 @@ export function CustomerOrderDetailPage({
                   <div className="flex flex-wrap gap-3">
                     {order.paymentStatus !== 'paid' ? (
                       <PrimaryButton disabled={busy} onClick={handleCreateOrSimulatePayment} type="button">
-                        {busy ? 'Memproses...' : en ? 'Mark as paid' : 'Tandai sudah bayar'}
+                        {busy ? (en ? 'Saving...' : 'Proses...') : en ? 'Paid' : 'Bayar'}
                       </PrimaryButton>
                     ) : null}
                     <SecondaryButton
@@ -435,7 +435,7 @@ export function CustomerOrderDetailPage({
                       }}
                       type="button"
                     >
-                      {en ? 'Open support' : 'Buka support'}
+                      {en ? 'Support' : 'Support'}
                     </SecondaryButton>
                   </div>
                 </div>

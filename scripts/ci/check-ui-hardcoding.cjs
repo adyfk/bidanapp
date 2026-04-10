@@ -20,7 +20,6 @@ const blockedPatterns = [
 const fileExtensions = new Set(['.ts', '.tsx', '.js', '.jsx']);
 const allowListedFiles = new Set([
   'packages/web/src/components/AdminLandingPage.tsx',
-  'packages/web/src/components/MarketplacePublicRestored.tsx',
   'packages/web/src/components/CustomerPages.tsx',
   'packages/web/src/components/OrdersPage.tsx',
   'packages/web/src/components/ProfessionalApplyPage.tsx',
