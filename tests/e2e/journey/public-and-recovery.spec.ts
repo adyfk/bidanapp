@@ -27,8 +27,8 @@ test('journey: visitor can browse public Bidan surfaces from onboarding to detai
       {
         actionKind: 'navigate',
         actionLabel: 'Buka root onboarding Bidan',
-        assertions: ['Onboarding access-first tampil.', 'CTA visitor/customer/professional terlihat.'],
-        expectedResult: 'Visitor melihat layar onboarding dengan tiga jalur utama Bidan.',
+        assertions: ['Splash onboarding tampil.', 'Status redirect dan CTA manual ke home terlihat.'],
+        expectedResult: 'Visitor melihat intro singkat sebelum diarahkan ke home publik Bidan.',
         routeId: '/id',
         screenId: 'bidan-onboarding',
         title: 'Onboarding screen is ready',
@@ -36,7 +36,7 @@ test('journey: visitor can browse public Bidan surfaces from onboarding to detai
       async () => {
         await page.goto('/id');
         await expect(page.getByText(/BidanCare/)).toBeVisible();
-        await expect(page.getByText(/Continue as visitor|Lanjut sebagai visitor/i)).toBeVisible();
+        await expect(page.getByRole('link', { name: /Enter now|Masuk sekarang/i })).toBeVisible();
       },
     );
 
@@ -53,7 +53,7 @@ test('journey: visitor can browse public Bidan surfaces from onboarding to detai
         title: 'Visitor enters the public home feed',
       },
       async () => {
-        await page.getByRole('link', { name: /Continue as visitor|Lanjut sebagai visitor/i }).click();
+        await page.getByRole('link', { name: /Enter now|Masuk sekarang/i }).click();
         await page.waitForURL(/\/id\/home/);
         await expect(page.getByRole('heading', { name: /Aktivitas|Activity/i })).toBeVisible();
       },

@@ -1,15 +1,8 @@
 'use client';
 
-import type { ViewerDeviceSession } from '@marketplace/marketplace-core';
-import type { ServicePlatformId } from '@marketplace/platform-config';
-import {
-  MarketplaceEmptyCard,
-  MarketplaceListCard,
-  MessageBanner,
-  PrimaryButton,
-  SecondaryButton,
-  StatusPill,
-} from '@marketplace/ui';
+import type { ViewerDeviceSession } from '@marketplace/marketplace-core/viewer-auth';
+import { MarketplaceEmptyCard, MarketplaceListCard } from '@marketplace/ui/marketplace-lite';
+import { MessageBanner, PrimaryButton, SecondaryButton, StatusPill } from '@marketplace/ui/primitives';
 import { formatDateTime } from '../../../../lib/marketplace-copy';
 import { createPlatformLoginPath } from '../../../../lib/platform';
 
@@ -21,7 +14,6 @@ export function MarketplaceDeviceSessionList({
   isAuthenticated,
   items,
   locale,
-  platformId,
   onLogoutOthers,
   onRevoke,
 }: {
@@ -32,7 +24,6 @@ export function MarketplaceDeviceSessionList({
   isAuthenticated: boolean;
   items: ViewerDeviceSession[];
   locale: string;
-  platformId?: ServicePlatformId;
   onLogoutOthers: () => void;
   onRevoke: (sessionId: string) => void;
 }) {

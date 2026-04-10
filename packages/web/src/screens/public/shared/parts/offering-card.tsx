@@ -1,7 +1,7 @@
 'use client';
 
-import type { DirectoryOffering } from '@marketplace/marketplace-core';
-import { StatusPill } from '@marketplace/ui';
+import type { DirectoryOffering } from '@marketplace/marketplace-core/directory';
+import { StatusPill } from '@marketplace/ui/primitives';
 import { ChevronRight, Clock3, Tag } from 'lucide-react';
 import { deliveryModeLabel, formatCurrency, offeringTypeLabel } from '../../../../lib/marketplace-copy';
 import { InitialPortrait } from './portrait';

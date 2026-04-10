@@ -1,5 +1,6 @@
-import { themeStyleVariables } from '@marketplace/ui';
-import { appFontClassName, resolvePlatformContext } from '@marketplace/web';
+import { themeStyleVariables } from '@marketplace/ui/foundations';
+import { appFontClassName } from '@marketplace/web/fonts';
+import { resolvePlatformContext } from '@marketplace/web/server';
 import './globals.css';
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

@@ -1,5 +1,5 @@
 import type { ComponentProps } from 'react';
-import { ViewerAuthPage } from '../shared/view';
+import { ViewerAuthPage } from '../shared/viewer-auth-page';
 
 export type MarketplaceRegisterScreenProps = Omit<ComponentProps<typeof ViewerAuthPage>, 'mode'>;
 

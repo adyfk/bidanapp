@@ -9,6 +9,38 @@
     ".": {
       "types": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./client": {
+      "types": "./src/client.ts",
+      "default": "./src/client.ts"
+    },
+    "./directory": {
+      "types": "./src/directory.ts",
+      "default": "./src/directory.ts"
+    },
+    "./formatters": {
+      "types": "./src/formatters.ts",
+      "default": "./src/formatters.ts"
+    },
+    "./notifications": {
+      "types": "./src/notifications.ts",
+      "default": "./src/notifications.ts"
+    },
+    "./orders": {
+      "types": "./src/orders.ts",
+      "default": "./src/orders.ts"
+    },
+    "./professional": {
+      "types": "./src/professional.ts",
+      "default": "./src/professional.ts"
+    },
+    "./support": {
+      "types": "./src/support.ts",
+      "default": "./src/support.ts"
+    },
+    "./viewer-auth": {
+      "types": "./src/viewer-auth.ts",
+      "default": "./src/viewer-auth.ts"
     }
   },
   "dependencies": {

@@ -1,4 +1,4 @@
-import type { NotificationItem } from '@marketplace/marketplace-core';
+import type { NotificationItem } from '@marketplace/marketplace-core/notifications';
 
 export function notificationSections(items: NotificationItem[]) {
   const todayKey = new Date().toDateString();

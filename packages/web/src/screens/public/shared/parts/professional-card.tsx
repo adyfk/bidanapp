@@ -1,7 +1,7 @@
 'use client';
 
-import type { DirectoryProfessional } from '@marketplace/marketplace-core';
-import { StatusPill } from '@marketplace/ui';
+import type { DirectoryProfessional } from '@marketplace/marketplace-core/directory';
+import { StatusPill } from '@marketplace/ui/primitives';
 import { ChevronRight, MapPin, Star } from 'lucide-react';
 import { formatCurrency, isEnglishLocale } from '../../../../lib/marketplace-copy';
 import { compactNumberLabel, InitialPortrait } from './portrait';

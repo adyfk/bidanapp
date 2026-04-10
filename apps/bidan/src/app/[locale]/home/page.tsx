@@ -1,4 +1,4 @@
-import { PlatformMarketplaceHomePage } from '@marketplace/web';
+import { PlatformMarketplaceHomePage } from '@marketplace/web/public/marketplace-home-page';
 
 export default async function BidanMarketplaceHomePageRoute(props: { params: Promise<{ locale: string }> }) {
   const { locale } = await props.params;

@@ -10,6 +10,30 @@
       "types": "./src/index.tsx",
       "default": "./src/index.tsx"
     },
+    "./foundations": {
+      "types": "./src/foundations.ts",
+      "default": "./src/foundations.ts"
+    },
+    "./marketplace": {
+      "types": "./src/marketplace.tsx",
+      "default": "./src/marketplace.tsx"
+    },
+    "./marketplace-lite": {
+      "types": "./src/marketplace-lite.tsx",
+      "default": "./src/marketplace-lite.tsx"
+    },
+    "./motion": {
+      "types": "./src/motion.tsx",
+      "default": "./src/motion.tsx"
+    },
+    "./patterns": {
+      "types": "./src/patterns.tsx",
+      "default": "./src/patterns.tsx"
+    },
+    "./primitives": {
+      "types": "./src/primitives.tsx",
+      "default": "./src/primitives.tsx"
+    },
     "./system.css": "./src/system.css"
   },
   "sideEffects": [

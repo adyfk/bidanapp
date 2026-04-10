@@ -1,6 +1,6 @@
 'use client';
 
-import { MarketplaceAccessHero } from '@marketplace/ui';
+import { MarketplaceAccessHero } from '@marketplace/ui/marketplace-lite';
 import type { ReactNode } from 'react';
 
 export function MarketplaceAuthHero({

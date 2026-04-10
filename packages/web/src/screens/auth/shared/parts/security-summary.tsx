@@ -1,6 +1,6 @@
 'use client';
 
-import type { ViewerSession } from '@marketplace/marketplace-core';
+import type { ViewerSession } from '@marketplace/marketplace-core/viewer-auth';
 import type { ServicePlatformId } from '@marketplace/platform-config';
 import {
   MarketplaceAccessHero,
@@ -8,8 +8,8 @@ import {
   MarketplaceListCard,
   MarketplaceSectionHeader,
   MarketplaceSurfaceCard,
-  PrimaryButton,
-} from '@marketplace/ui';
+} from '@marketplace/ui/marketplace-lite';
+import { PrimaryButton } from '@marketplace/ui/primitives';
 import { KeyRound, Smartphone } from 'lucide-react';
 import {
   createPlatformForgotPasswordPath,
@@ -69,54 +69,52 @@ export function MarketplaceSecuritySummary({
           title={en ? 'You are not signed in' : 'Anda belum login'}
         />
       ) : (
-        <>
-          <MarketplaceSurfaceCard tone="white">
-            <MarketplaceSectionHeader
-              title={en ? 'Quick actions' : 'Aksi cepat'}
-              description={
-                en ? 'Open sessions or reset password from here.' : 'Buka daftar session atau reset password dari sini.'
-              }
-            />
-            <div className="space-y-3">
-              <a href={sessionsHref}>
-                <MarketplaceListCard
-                  image={
-                    <div
-                      className="flex h-12 w-12 items-center justify-center rounded-2xl"
-                      style={{ backgroundColor: '#fff1f7', color: 'var(--ui-primary)' }}
-                    >
-                      <Smartphone className="h-5 w-5" />
-                    </div>
-                  }
-                  title={en ? 'Manage device sessions' : 'Kelola session perangkat'}
-                  description={
-                    en
-                      ? 'Review devices that still have access to your account.'
-                      : 'Tinjau perangkat yang masih punya akses ke akun Anda.'
-                  }
-                />
-              </a>
-              <a href={forgotPasswordHref}>
-                <MarketplaceListCard
-                  image={
-                    <div
-                      className="flex h-12 w-12 items-center justify-center rounded-2xl"
-                      style={{ backgroundColor: '#fff1f7', color: 'var(--ui-primary)' }}
-                    >
-                      <KeyRound className="h-5 w-5" />
-                    </div>
-                  }
-                  title={en ? 'Reset password' : 'Reset password'}
-                  description={
-                    en
-                      ? 'Send OTP to your phone number, then create a new password.'
-                      : 'Kirim OTP ke nomor Anda, lalu buat password baru.'
-                  }
-                />
-              </a>
-            </div>
-          </MarketplaceSurfaceCard>
-        </>
+        <MarketplaceSurfaceCard tone="white">
+          <MarketplaceSectionHeader
+            title={en ? 'Quick actions' : 'Aksi cepat'}
+            description={
+              en ? 'Open sessions or reset password from here.' : 'Buka daftar session atau reset password dari sini.'
+            }
+          />
+          <div className="space-y-3">
+            <a href={sessionsHref}>
+              <MarketplaceListCard
+                image={
+                  <div
+                    className="flex h-12 w-12 items-center justify-center rounded-2xl"
+                    style={{ backgroundColor: '#fff1f7', color: 'var(--ui-primary)' }}
+                  >
+                    <Smartphone className="h-5 w-5" />
+                  </div>
+                }
+                title={en ? 'Manage device sessions' : 'Kelola session perangkat'}
+                description={
+                  en
+                    ? 'Review devices that still have access to your account.'
+                    : 'Tinjau perangkat yang masih punya akses ke akun Anda.'
+                }
+              />
+            </a>
+            <a href={forgotPasswordHref}>
+              <MarketplaceListCard
+                image={
+                  <div
+                    className="flex h-12 w-12 items-center justify-center rounded-2xl"
+                    style={{ backgroundColor: '#fff1f7', color: 'var(--ui-primary)' }}
+                  >
+                    <KeyRound className="h-5 w-5" />
+                  </div>
+                }
+                title={en ? 'Reset password' : 'Reset password'}
+                description={
+                  en
+                    ? 'Send OTP to your phone number, then create a new password.'
+                    : 'Kirim OTP ke nomor Anda, lalu buat password baru.'
+                }
+              />
+            </a>
+          </div>
+        </MarketplaceSurfaceCard>
       )}
     </>
   );

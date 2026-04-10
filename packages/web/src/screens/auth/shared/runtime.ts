@@ -1,6 +1,6 @@
 'use client';
 
-import { createMarketplaceApiClient } from '@marketplace/marketplace-core';
+import { createMarketplaceApiClient } from '@marketplace/marketplace-core/client';
 import { getServicePlatformConfig, type ServicePlatformId } from '@marketplace/platform-config';
 import { getApiBaseUrl } from '../../../lib/env';
 

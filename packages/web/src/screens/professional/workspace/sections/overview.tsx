@@ -1,7 +1,8 @@
 'use client';
 
 import type { ProfessionalWorkspaceSnapshot } from '@marketplace/marketplace-core';
-import { DocumentList, EmptyState } from '@marketplace/ui';
+import { DocumentList } from '@marketplace/ui/patterns';
+import { EmptyState } from '@marketplace/ui/primitives';
 import { Bell, Compass, Layers3, MapPin, Star, UserRound, Wallet } from 'lucide-react';
 import { getApiOrigin } from '../../../../lib/env';
 import { createLocalizedPath } from '../../../../lib/platform';

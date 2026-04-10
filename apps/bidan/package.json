@@ -5,6 +5,7 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev -p 3002",
+    "dev:webpack": "next dev --webpack -p 3002",
     "lint": "biome ci .",
     "start": "next start -p 3002",
     "test": "node --test",

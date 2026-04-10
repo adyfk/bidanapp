@@ -10,10 +10,8 @@ import {
   MarketplaceSettingsRow,
   MarketplaceSupportEntryCard,
   MarketplaceSupportSheet,
-  PrimaryButton,
-  StatusPill,
-  TextField,
-} from '@marketplace/ui';
+} from '@marketplace/ui/marketplace-lite';
+import { PrimaryButton, StatusPill, TextField } from '@marketplace/ui/primitives';
 import { LayoutDashboard, LifeBuoy, MapPin, UserRound } from 'lucide-react';
 import { type Dispatch, type SetStateAction, useState } from 'react';
 import { createLocalizedPath } from '../../../../lib/platform';
@@ -107,14 +105,14 @@ export function ProfileSection({
           <MarketplaceSettingsRow
             description="Perbarui nama tampil, kota, dan slug publik Anda."
             icon={<UserRound className="h-4 w-4" />}
-            iconClassName="bg-pink-50 text-pink-500"
+            iconClassName="bg-sky-50 text-sky-600"
             onClick={() => setActiveSheet('account')}
             title="Akun publik"
           />
           <MarketplaceSettingsRow
             description={responseTimeGoal || 'Tambahkan target respon agar calon pelanggan tahu ritme layanan Anda.'}
             icon={<MapPin className="h-4 w-4" />}
-            iconClassName="bg-blue-50 text-blue-500"
+            iconClassName="bg-teal-50 text-teal-700"
             title="Status review"
             trailing={
               <StatusPill tone="accent">
@@ -127,7 +125,7 @@ export function ProfileSection({
               form.slug ? `/${locale}/p/${form.slug}` : 'Buat slug agar halaman profesional mudah dibagikan.'
             }
             icon={<LayoutDashboard className="h-4 w-4" />}
-            iconClassName="bg-violet-50 text-violet-500"
+            iconClassName="bg-slate-100 text-slate-600"
             isLast
             title="Tautan halaman"
             trailing={

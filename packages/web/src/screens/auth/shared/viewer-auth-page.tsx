@@ -1,14 +1,9 @@
 'use client';
 
-import type { ViewerSession } from '@marketplace/marketplace-core';
+import type { ViewerSession } from '@marketplace/marketplace-core/viewer-auth';
 import { getPlatformCopy, type ServicePlatformId } from '@marketplace/platform-config';
-import {
-  MarketplaceAccessTabs,
-  MarketplaceSectionHeader,
-  MessageBanner,
-  PrimaryButton,
-  SecondaryButton,
-} from '@marketplace/ui';
+import { MarketplaceAccessTabs, MarketplaceSectionHeader } from '@marketplace/ui/marketplace-lite';
+import { MessageBanner, PrimaryButton, SecondaryButton } from '@marketplace/ui/primitives';
 import { LogIn, ShieldCheck, Smartphone, UserPlus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import {
@@ -56,14 +51,6 @@ export function ViewerAuthPage({
   const platform = authContext(platformId, isHub);
   const platformCopy = platform ? getPlatformCopy(platform, locale) : null;
   const en = isEnglishLocale(locale);
-  const authModePath = mode === 'register' ? '/register' : mode === 'forgot-password' ? '/forgot-password' : '/login';
-  const currentPath = isHub
-    ? createLocalizedPath(locale, authModePath)
-    : mode === 'register'
-      ? createPlatformRegisterPath(locale, defaultNextPath).split('?')[0]
-      : mode === 'forgot-password'
-        ? createPlatformForgotPasswordPath(locale, defaultNextPath).split('?')[0]
-        : createPlatformLoginPath(locale, defaultNextPath).split('?')[0];
 
   const [session, setSession] = useState<ViewerSession | null>(initialSession ?? null);
   const [feedback, setFeedback] = useState('');

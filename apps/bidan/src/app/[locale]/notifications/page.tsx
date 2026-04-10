@@ -1,11 +1,7 @@
 import { getServicePlatformOrigin } from '@marketplace/platform-config';
-import {
-  CustomerNotificationsPage,
-  createLocalizedPath,
-  createPlatformAppUrl,
-  createPlatformAuthUrl,
-  fetchViewerSessionServer,
-} from '@marketplace/web';
+import { CustomerNotificationsPage } from '@marketplace/web/customer/notifications-page';
+import { createLocalizedPath, createPlatformAppUrl, createPlatformAuthUrl } from '@marketplace/web/platform';
+import { fetchViewerSessionServer } from '@marketplace/web/server';
 
 export default async function BidanNotificationsPage(props: { params: Promise<{ locale: string }> }) {
   const [{ locale }, session] = await Promise.all([props.params, fetchViewerSessionServer()]);

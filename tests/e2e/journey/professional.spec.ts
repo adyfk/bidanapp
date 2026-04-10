@@ -145,6 +145,8 @@ test('journey: submitted professional stays gated on the offerings workspace', a
 });
 
 test('journey: approved professional can operate the workspace and publish an offering', async ({ page }, testInfo) => {
+  test.setTimeout(90_000);
+
   const journey = await beginJourney(testInfo, {
     category: 'professional',
     description:
@@ -211,44 +213,84 @@ test('journey: approved professional can operate the workspace and publish an of
       },
     );
 
-    await captureJourneyStep(
-      journey,
-      page,
+    const workspaceSections = [
       {
-        actionKind: 'navigate',
-        actionLabel: 'Buka seluruh section dashboard profesional',
-        assertions: [
-          'Section orders tampil.',
-          'Section portfolio tampil.',
-          'Section trust tampil.',
-          'Section coverage tampil.',
-          'Section availability tampil.',
-          'Section notifications tampil.',
-          'Section profile tampil.',
-        ],
-        expectedResult:
-          'Professional approved dapat berpindah ke seluruh route workspace utama tanpa kehilangan context.',
-        routeId: '/id/professionals/dashboard/*',
-        screenId: 'professional-workspace-sections',
-        title: 'Professional workspace sections are reachable',
+        actionLabel: 'Buka section orders dashboard profesional',
+        expectedResult: 'Section orders menampilkan antrean permintaan pelanggan untuk profesional approved.',
+        path: '/id/professionals/dashboard/orders',
+        screenId: 'professional-workspace-orders',
+        title: 'Professional workspace orders section is reachable',
+        verify: async () => expect(page.getByText(/Permintaan pelanggan/i)).toBeVisible(),
       },
-      async () => {
-        await page.goto('/id/professionals/dashboard/orders');
-        await expect(page.getByText(/Permintaan pelanggan/i)).toBeVisible();
-        await page.goto('/id/professionals/dashboard/portfolio');
-        await expect(page.getByRole('heading', { name: 'Portofolio', exact: true })).toBeVisible();
-        await page.goto('/id/professionals/dashboard/trust');
-        await expect(page.getByRole('heading', { name: 'Kredensial', exact: true })).toBeVisible();
-        await page.goto('/id/professionals/dashboard/coverage');
-        await expect(page.getByRole('heading', { name: 'Jangkauan layanan', exact: true })).toBeVisible();
-        await page.goto('/id/professionals/dashboard/availability');
-        await expect(page.getByRole('heading', { name: 'Jam ketersediaan', exact: true })).toBeVisible();
-        await page.goto('/id/professionals/dashboard/notifications');
-        await expect(page.getByText(/Preferensi notifikasi/i)).toBeVisible();
-        await page.goto('/id/professionals/dashboard/profile');
-        await expect(page.getByRole('heading', { name: 'Profil publik', exact: true })).toBeVisible();
+      {
+        actionLabel: 'Buka section portfolio dashboard profesional',
+        expectedResult: 'Section portfolio memuat showcase seeded dan form pengelolaan aset profesional.',
+        path: '/id/professionals/dashboard/portfolio',
+        screenId: 'professional-workspace-portfolio',
+        title: 'Professional workspace portfolio section is reachable',
+        verify: async () => expect(page.getByRole('heading', { name: 'Portofolio', exact: true })).toBeVisible(),
       },
-    );
+      {
+        actionLabel: 'Buka section trust dashboard profesional',
+        expectedResult: 'Section trust memperlihatkan kredensial dan cerita profesional yang harus tetap terbaca.',
+        path: '/id/professionals/dashboard/trust',
+        screenId: 'professional-workspace-trust',
+        title: 'Professional workspace trust section is reachable',
+        verify: async () => expect(page.getByRole('heading', { name: 'Kredensial', exact: true })).toBeVisible(),
+      },
+      {
+        actionLabel: 'Buka section coverage dashboard profesional',
+        expectedResult: 'Section coverage menampilkan area layanan seeded tanpa kehilangan keterbacaan.',
+        path: '/id/professionals/dashboard/coverage',
+        screenId: 'professional-workspace-coverage',
+        title: 'Professional workspace coverage section is reachable',
+        verify: async () => expect(page.getByRole('heading', { name: 'Jangkauan layanan', exact: true })).toBeVisible(),
+      },
+      {
+        actionLabel: 'Buka section availability dashboard profesional',
+        expectedResult: 'Section availability memuat jadwal praktik dan tetap stabil untuk data jam yang panjang.',
+        path: '/id/professionals/dashboard/availability',
+        screenId: 'professional-workspace-availability',
+        title: 'Professional workspace availability section is reachable',
+        verify: async () => expect(page.getByRole('heading', { name: 'Jam ketersediaan', exact: true })).toBeVisible(),
+      },
+      {
+        actionLabel: 'Buka section notifications dashboard profesional',
+        expectedResult: 'Section notifications menampilkan preferensi channel secara jelas dan mudah dipindai.',
+        path: '/id/professionals/dashboard/notifications',
+        screenId: 'professional-workspace-notifications',
+        title: 'Professional workspace notifications section is reachable',
+        verify: async () => expect(page.getByText(/Preferensi notifikasi/i)).toBeVisible(),
+      },
+      {
+        actionLabel: 'Buka section profile dashboard profesional',
+        expectedResult: 'Section profile tetap terbaca untuk nama, slug, dan kota dengan panjang data realistis.',
+        path: '/id/professionals/dashboard/profile',
+        screenId: 'professional-workspace-profile',
+        title: 'Professional workspace profile section is reachable',
+        verify: async () => expect(page.getByRole('heading', { name: 'Profil publik', exact: true })).toBeVisible(),
+      },
+    ] as const;
+
+    for (const sectionStep of workspaceSections) {
+      await captureJourneyStep(
+        journey,
+        page,
+        {
+          actionKind: 'navigate',
+          actionLabel: sectionStep.actionLabel,
+          assertions: [sectionStep.expectedResult],
+          expectedResult: sectionStep.expectedResult,
+          routeId: sectionStep.path,
+          screenId: sectionStep.screenId,
+          title: sectionStep.title,
+        },
+        async () => {
+          await page.goto(sectionStep.path, { waitUntil: 'domcontentloaded' });
+          await sectionStep.verify();
+        },
+      );
+    }
   } catch (error) {
     status = 'failed';
     throw error;

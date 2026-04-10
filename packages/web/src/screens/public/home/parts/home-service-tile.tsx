@@ -1,7 +1,7 @@
 'use client';
 
-import type { DirectoryOffering } from '@marketplace/marketplace-core';
-import { StatusPill } from '@marketplace/ui';
+import type { DirectoryOffering } from '@marketplace/marketplace-core/directory';
+import { StatusPill } from '@marketplace/ui/primitives';
 import { deliveryModeLabel, formatCurrency } from '../../../../lib/marketplace-copy';
 import { InitialPortrait } from '../../shared/parts/portrait';
 

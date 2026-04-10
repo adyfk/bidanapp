@@ -1,4 +1,5 @@
-import { createLocalizedPath, ViewerAuthPage } from '@marketplace/web';
+import { ViewerAuthPage } from '@marketplace/web/auth/viewer-auth-page';
+import { createLocalizedPath } from '@marketplace/web/platform';
 
 export default async function BidanForgotPasswordPage(props: {
   params: Promise<{ locale: string }>;

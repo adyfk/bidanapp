@@ -143,8 +143,9 @@ body {
   ],
   [
     path.join(appDir, 'src/app/layout.tsx'),
-    `import { themeStyleVariables } from '@marketplace/ui';
-import { appFontClassName, resolvePlatformContext } from '@marketplace/web';
+    `import { themeStyleVariables } from '@marketplace/ui/foundations';
+import { appFontClassName } from '@marketplace/web/fonts';
+import { resolvePlatformContext } from '@marketplace/web/server';
 import './globals.css';
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
@@ -190,7 +191,8 @@ export const config = {
   ],
   [
     path.join(appDir, 'src/app/[locale]/layout.tsx'),
-    `import { createPlatformMetadata, resolvePlatformContext } from '@marketplace/web';
+    `import { createPlatformMetadata } from '@marketplace/web/platform';
+import { resolvePlatformContext } from '@marketplace/web/server';
 
 export async function generateMetadata(props: {
   params: Promise<{ locale: string }>;
@@ -206,7 +208,7 @@ export default async function PlatformLocaleLayout({ children }: { children: Rea
   ],
   [
     path.join(appDir, 'src/app/[locale]/page.tsx'),
-    `import { PlatformHomePage } from '@marketplace/web';
+    `import { PlatformHomePage } from '@marketplace/web/public/home-page';
 
 export default async function LocalizedHomePage(props: {
   params: Promise<{ locale: string }>;
@@ -218,7 +220,7 @@ export default async function LocalizedHomePage(props: {
   ],
   [
     path.join(appDir, 'src/app/[locale]/home/page.tsx'),
-    `import { PlatformMarketplaceHomePage } from '@marketplace/web';
+    `import { PlatformMarketplaceHomePage } from '@marketplace/web/public/marketplace-home-page';
 
 export default async function MarketplaceHomePageRoute(props: {
   params: Promise<{ locale: string }>;
@@ -230,7 +232,7 @@ export default async function MarketplaceHomePageRoute(props: {
   ],
   [
     path.join(appDir, 'src/app/[locale]/explore/page.tsx'),
-    `import { PlatformExplorePage } from '@marketplace/web';
+    `import { PlatformExplorePage } from '@marketplace/web/public/explore-page';
 
 export default async function ExplorePageRoute(props: {
   params: Promise<{ locale: string }>;
@@ -242,7 +244,7 @@ export default async function ExplorePageRoute(props: {
   ],
   [
     path.join(appDir, 'src/app/[locale]/services/page.tsx'),
-    `import { PlatformServicesPage } from '@marketplace/web';
+    `import { PlatformServicesPage } from '@marketplace/web/public/services-page';
 
 export default async function ServicesPageRoute(props: {
   params: Promise<{ locale: string }>;
@@ -254,7 +256,7 @@ export default async function ServicesPageRoute(props: {
   ],
   [
     path.join(appDir, 'src/app/[locale]/p/[slug]/page.tsx'),
-    `import { PlatformProfessionalDetailPage } from '@marketplace/web';
+    `import { PlatformProfessionalDetailPage } from '@marketplace/web/public/professional-detail-page';
 
 export default async function ProfessionalDetailPageRoute(props: {
   params: Promise<{ locale: string; slug: string }>;
@@ -266,7 +268,7 @@ export default async function ProfessionalDetailPageRoute(props: {
   ],
   [
     path.join(appDir, 'src/app/[locale]/s/[slug]/page.tsx'),
-    `import { PlatformOfferingDetailPage } from '@marketplace/web';
+    `import { PlatformOfferingDetailPage } from '@marketplace/web/public/offering-detail-page';
 
 export default async function OfferingDetailPageRoute(props: {
   params: Promise<{ locale: string; slug: string }>;
@@ -278,7 +280,9 @@ export default async function OfferingDetailPageRoute(props: {
   ],
   [
     path.join(appDir, 'src/app/[locale]/login/page.tsx'),
-    `import { createLocalizedPath, ViewerAuthPage, fetchViewerSessionServer } from '@marketplace/web';
+    `import { ViewerAuthPage } from '@marketplace/web/auth/viewer-auth-page';
+import { createLocalizedPath } from '@marketplace/web/platform';
+import { fetchViewerSessionServer } from '@marketplace/web/server';
 
 export default async function LoginPage(props: {
   params: Promise<{ locale: string }>;
@@ -304,7 +308,9 @@ export default async function LoginPage(props: {
   ],
   [
     path.join(appDir, 'src/app/[locale]/register/page.tsx'),
-    `import { createLocalizedPath, ViewerAuthPage, fetchViewerSessionServer } from '@marketplace/web';
+    `import { ViewerAuthPage } from '@marketplace/web/auth/viewer-auth-page';
+import { createLocalizedPath } from '@marketplace/web/platform';
+import { fetchViewerSessionServer } from '@marketplace/web/server';
 
 export default async function RegisterPage(props: {
   params: Promise<{ locale: string }>;
@@ -330,7 +336,9 @@ export default async function RegisterPage(props: {
   ],
   [
     path.join(appDir, 'src/app/[locale]/forgot-password/page.tsx'),
-    `import { createLocalizedPath, ViewerAuthPage, fetchViewerSessionServer } from '@marketplace/web';
+    `import { ViewerAuthPage } from '@marketplace/web/auth/viewer-auth-page';
+import { createLocalizedPath } from '@marketplace/web/platform';
+import { fetchViewerSessionServer } from '@marketplace/web/server';
 
 export default async function ForgotPasswordPage(props: {
   params: Promise<{ locale: string }>;
@@ -357,7 +365,9 @@ export default async function ForgotPasswordPage(props: {
   [
     path.join(appDir, 'src/app/[locale]/orders/page.tsx'),
     `import { getServicePlatformOrigin } from '@marketplace/platform-config';
-import { createLocalizedPath, createPlatformAppUrl, createPlatformAuthUrl, fetchViewerSessionServer, OrdersPage } from '@marketplace/web';
+import { OrdersPage } from '@marketplace/web/customer/orders-page';
+import { createLocalizedPath, createPlatformAppUrl, createPlatformAuthUrl } from '@marketplace/web/platform';
+import { fetchViewerSessionServer } from '@marketplace/web/server';
 
 export default async function OrdersPageRoute(props: {
   params: Promise<{ locale: string }>;
@@ -373,7 +383,9 @@ export default async function OrdersPageRoute(props: {
   [
     path.join(appDir, 'src/app/[locale]/orders/[orderId]/page.tsx'),
     `import { getServicePlatformOrigin } from '@marketplace/platform-config';
-import { createLocalizedPath, createPlatformAppUrl, createPlatformAuthUrl, CustomerOrderDetailPage, fetchViewerSessionServer } from '@marketplace/web';
+import { CustomerOrderDetailPage } from '@marketplace/web/customer/order-detail-page';
+import { createLocalizedPath, createPlatformAppUrl, createPlatformAuthUrl } from '@marketplace/web/platform';
+import { fetchViewerSessionServer } from '@marketplace/web/server';
 
 export default async function OrderDetailPageRoute(props: {
   params: Promise<{ locale: string; orderId: string }>;
@@ -388,7 +400,9 @@ export default async function OrderDetailPageRoute(props: {
   [
     path.join(appDir, 'src/app/[locale]/profile/page.tsx'),
     `import { getServicePlatformOrigin } from '@marketplace/platform-config';
-import { createLocalizedPath, createPlatformAppUrl, createPlatformAuthUrl, CustomerProfilePage, fetchViewerSessionServer } from '@marketplace/web';
+import { CustomerProfilePage } from '@marketplace/web/customer/profile-page';
+import { createLocalizedPath, createPlatformAppUrl, createPlatformAuthUrl } from '@marketplace/web/platform';
+import { fetchViewerSessionServer } from '@marketplace/web/server';
 
 export default async function ProfilePageRoute(props: {
   params: Promise<{ locale: string }>;
@@ -403,7 +417,9 @@ export default async function ProfilePageRoute(props: {
   [
     path.join(appDir, 'src/app/[locale]/notifications/page.tsx'),
     `import { getServicePlatformOrigin } from '@marketplace/platform-config';
-import { createLocalizedPath, createPlatformAppUrl, createPlatformAuthUrl, CustomerNotificationsPage, fetchViewerSessionServer } from '@marketplace/web';
+import { CustomerNotificationsPage } from '@marketplace/web/customer/notifications-page';
+import { createLocalizedPath, createPlatformAppUrl, createPlatformAuthUrl } from '@marketplace/web/platform';
+import { fetchViewerSessionServer } from '@marketplace/web/server';
 
 export default async function NotificationsPageRoute(props: {
   params: Promise<{ locale: string }>;
@@ -418,7 +434,9 @@ export default async function NotificationsPageRoute(props: {
   [
     path.join(appDir, 'src/app/[locale]/support/page.tsx'),
     `import { getServicePlatformOrigin } from '@marketplace/platform-config';
-import { createLocalizedPath, createPlatformAppUrl, createPlatformAuthUrl, CustomerSupportPage, fetchViewerSessionServer } from '@marketplace/web';
+import { CustomerSupportPage } from '@marketplace/web/customer/support-page';
+import { createLocalizedPath, createPlatformAppUrl, createPlatformAuthUrl } from '@marketplace/web/platform';
+import { fetchViewerSessionServer } from '@marketplace/web/server';
 
 export default async function SupportPageRoute(props: {
   params: Promise<{ locale: string }>;
@@ -433,7 +451,9 @@ export default async function SupportPageRoute(props: {
   [
     path.join(appDir, 'src/app/[locale]/professionals/apply/page.tsx'),
     `import { getServicePlatformOrigin } from '@marketplace/platform-config';
-import { createLocalizedPath, createPlatformAppUrl, createPlatformAuthUrl, fetchViewerSessionServer, ProfessionalApplyPage } from '@marketplace/web';
+import { createLocalizedPath, createPlatformAppUrl, createPlatformAuthUrl } from '@marketplace/web/platform';
+import { ProfessionalApplyPage } from '@marketplace/web/professional/apply-page';
+import { fetchViewerSessionServer } from '@marketplace/web/server';
 
 export default async function ProfessionalApplyPageRoute(props: {
   params: Promise<{ locale: string }>;
@@ -448,7 +468,9 @@ export default async function ProfessionalApplyPageRoute(props: {
   [
     path.join(appDir, 'src/app/[locale]/professionals/dashboard/page.tsx'),
     `import { getServicePlatformOrigin } from '@marketplace/platform-config';
-import { createLocalizedPath, createPlatformAppUrl, createPlatformAuthUrl, fetchViewerSessionServer, ProfessionalWorkspacePage } from '@marketplace/web';
+import { createLocalizedPath, createPlatformAppUrl, createPlatformAuthUrl } from '@marketplace/web/platform';
+import { ProfessionalWorkspacePage } from '@marketplace/web/professional/workspace-page';
+import { fetchViewerSessionServer } from '@marketplace/web/server';
 
 export default async function ProfessionalDashboardPageRoute(props: {
   params: Promise<{ locale: string }>;
@@ -463,7 +485,9 @@ export default async function ProfessionalDashboardPageRoute(props: {
   [
     path.join(appDir, 'src/app/[locale]/professionals/dashboard/orders/page.tsx'),
     `import { getServicePlatformOrigin } from '@marketplace/platform-config';
-import { createLocalizedPath, createPlatformAppUrl, createPlatformAuthUrl, fetchViewerSessionServer, ProfessionalWorkspacePage } from '@marketplace/web';
+import { createLocalizedPath, createPlatformAppUrl, createPlatformAuthUrl } from '@marketplace/web/platform';
+import { ProfessionalWorkspacePage } from '@marketplace/web/professional/workspace-page';
+import { fetchViewerSessionServer } from '@marketplace/web/server';
 
 export default async function ProfessionalDashboardOrdersPageRoute(props: {
   params: Promise<{ locale: string }>;
@@ -478,22 +502,26 @@ export default async function ProfessionalDashboardOrdersPageRoute(props: {
   [
     path.join(appDir, 'src/app/[locale]/professionals/dashboard/offerings/page.tsx'),
     `import { getServicePlatformOrigin } from '@marketplace/platform-config';
-import { createLocalizedPath, createPlatformAppUrl, createPlatformAuthUrl, ProfessionalOfferingsPage } from '@marketplace/web';
+import { createLocalizedPath, createPlatformAppUrl, createPlatformAuthUrl } from '@marketplace/web/platform';
+import { ProfessionalWorkspacePage } from '@marketplace/web/professional/workspace-page';
+import { fetchViewerSessionServer } from '@marketplace/web/server';
 
 export default async function ProfessionalDashboardOfferingsPageRoute(props: {
   params: Promise<{ locale: string }>;
 }) {
-  const { locale } = await props.params;
+  const [{ locale }, session] = await Promise.all([props.params, fetchViewerSessionServer()]);
   const nextPath = createPlatformAppUrl(createLocalizedPath(locale, '/professionals/dashboard/offerings'), getServicePlatformOrigin('${slug}' as never));
 
-  return <ProfessionalOfferingsPage authHref={createPlatformAuthUrl(nextPath, locale)} locale={locale} platformId={'${slug}' as never} />;
+  return <ProfessionalWorkspacePage authHref={createPlatformAuthUrl(nextPath, locale)} initialSession={session} locale={locale} platformId={'${slug}' as never} section="offerings" />;
 }
 `,
   ],
   [
     path.join(appDir, 'src/app/[locale]/professionals/dashboard/portfolio/page.tsx'),
     `import { getServicePlatformOrigin } from '@marketplace/platform-config';
-import { createLocalizedPath, createPlatformAppUrl, createPlatformAuthUrl, fetchViewerSessionServer, ProfessionalWorkspacePage } from '@marketplace/web';
+import { createLocalizedPath, createPlatformAppUrl, createPlatformAuthUrl } from '@marketplace/web/platform';
+import { ProfessionalWorkspacePage } from '@marketplace/web/professional/workspace-page';
+import { fetchViewerSessionServer } from '@marketplace/web/server';
 
 export default async function ProfessionalDashboardPortfolioPageRoute(props: {
   params: Promise<{ locale: string }>;
@@ -508,7 +536,9 @@ export default async function ProfessionalDashboardPortfolioPageRoute(props: {
   [
     path.join(appDir, 'src/app/[locale]/professionals/dashboard/trust/page.tsx'),
     `import { getServicePlatformOrigin } from '@marketplace/platform-config';
-import { createLocalizedPath, createPlatformAppUrl, createPlatformAuthUrl, fetchViewerSessionServer, ProfessionalWorkspacePage } from '@marketplace/web';
+import { createLocalizedPath, createPlatformAppUrl, createPlatformAuthUrl } from '@marketplace/web/platform';
+import { ProfessionalWorkspacePage } from '@marketplace/web/professional/workspace-page';
+import { fetchViewerSessionServer } from '@marketplace/web/server';
 
 export default async function ProfessionalDashboardTrustPageRoute(props: {
   params: Promise<{ locale: string }>;
@@ -523,7 +553,9 @@ export default async function ProfessionalDashboardTrustPageRoute(props: {
   [
     path.join(appDir, 'src/app/[locale]/professionals/dashboard/coverage/page.tsx'),
     `import { getServicePlatformOrigin } from '@marketplace/platform-config';
-import { createLocalizedPath, createPlatformAppUrl, createPlatformAuthUrl, fetchViewerSessionServer, ProfessionalWorkspacePage } from '@marketplace/web';
+import { createLocalizedPath, createPlatformAppUrl, createPlatformAuthUrl } from '@marketplace/web/platform';
+import { ProfessionalWorkspacePage } from '@marketplace/web/professional/workspace-page';
+import { fetchViewerSessionServer } from '@marketplace/web/server';
 
 export default async function ProfessionalDashboardCoveragePageRoute(props: {
   params: Promise<{ locale: string }>;
@@ -538,7 +570,9 @@ export default async function ProfessionalDashboardCoveragePageRoute(props: {
   [
     path.join(appDir, 'src/app/[locale]/professionals/dashboard/availability/page.tsx'),
     `import { getServicePlatformOrigin } from '@marketplace/platform-config';
-import { createLocalizedPath, createPlatformAppUrl, createPlatformAuthUrl, fetchViewerSessionServer, ProfessionalWorkspacePage } from '@marketplace/web';
+import { createLocalizedPath, createPlatformAppUrl, createPlatformAuthUrl } from '@marketplace/web/platform';
+import { ProfessionalWorkspacePage } from '@marketplace/web/professional/workspace-page';
+import { fetchViewerSessionServer } from '@marketplace/web/server';
 
 export default async function ProfessionalDashboardAvailabilityPageRoute(props: {
   params: Promise<{ locale: string }>;
@@ -553,7 +587,9 @@ export default async function ProfessionalDashboardAvailabilityPageRoute(props: 
   [
     path.join(appDir, 'src/app/[locale]/professionals/dashboard/notifications/page.tsx'),
     `import { getServicePlatformOrigin } from '@marketplace/platform-config';
-import { createLocalizedPath, createPlatformAppUrl, createPlatformAuthUrl, fetchViewerSessionServer, ProfessionalWorkspacePage } from '@marketplace/web';
+import { createLocalizedPath, createPlatformAppUrl, createPlatformAuthUrl } from '@marketplace/web/platform';
+import { ProfessionalWorkspacePage } from '@marketplace/web/professional/workspace-page';
+import { fetchViewerSessionServer } from '@marketplace/web/server';
 
 export default async function ProfessionalDashboardNotificationsPageRoute(props: {
   params: Promise<{ locale: string }>;
@@ -568,7 +604,9 @@ export default async function ProfessionalDashboardNotificationsPageRoute(props:
   [
     path.join(appDir, 'src/app/[locale]/professionals/dashboard/profile/page.tsx'),
     `import { getServicePlatformOrigin } from '@marketplace/platform-config';
-import { createLocalizedPath, createPlatformAppUrl, createPlatformAuthUrl, fetchViewerSessionServer, ProfessionalWorkspacePage } from '@marketplace/web';
+import { createLocalizedPath, createPlatformAppUrl, createPlatformAuthUrl } from '@marketplace/web/platform';
+import { ProfessionalWorkspacePage } from '@marketplace/web/professional/workspace-page';
+import { fetchViewerSessionServer } from '@marketplace/web/server';
 
 export default async function ProfessionalDashboardProfilePageRoute(props: {
   params: Promise<{ locale: string }>;

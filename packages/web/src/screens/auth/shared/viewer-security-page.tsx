@@ -1,8 +1,8 @@
 'use client';
 
-import type { ViewerSession } from '@marketplace/marketplace-core';
+import type { ViewerSession } from '@marketplace/marketplace-core/viewer-auth';
 import type { ServicePlatformId } from '@marketplace/platform-config';
-import { MessageBanner } from '@marketplace/ui';
+import { MessageBanner } from '@marketplace/ui/primitives';
 import { useEffect, useState } from 'react';
 import { isEnglishLocale } from '../../../lib/marketplace-copy';
 import { createLocalizedPath } from '../../../lib/platform';

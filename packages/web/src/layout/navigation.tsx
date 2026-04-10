@@ -3,11 +3,11 @@ import {
   type MarketplaceNavItemConfig,
   type ServicePlatformConfig,
 } from '@marketplace/platform-config';
-import type { MarketplaceNavItem } from '@marketplace/ui';
+import type { MarketplaceNavItem } from '@marketplace/ui/marketplace-lite';
 import { Calendar, Compass, Search, Sparkles } from 'lucide-react';
 import type { ReactNode } from 'react';
 
-export function createLocaleSwitcherItems(currentPath: string, locale: string) {
+export function createLocaleSwitcherItems(currentPath: string, _locale: string) {
   const basePath = currentPath.replace(/^\/(id|en)/, '') || '';
   return [
     { href: `/id${basePath || ''}`, label: 'ID', value: 'id' },

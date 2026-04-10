@@ -10,11 +10,11 @@ import {
   MarketplaceSearchField,
   MarketplaceSectionHeader,
   MarketplaceSurfaceCard,
-} from '@marketplace/ui';
+} from '@marketplace/ui/marketplace-lite';
 import { ChevronLeft, Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { createPrimaryMarketplaceNav } from '../../../layout/navigation';
-import { isEnglishLocale, offeringTypeLabel } from '../../../lib/marketplace-copy';
+import { isEnglishLocale } from '../../../lib/marketplace-copy';
 import { ServiceCatalogCard } from './parts/service-catalog-card';
 
 export function MarketplaceServicesView({
@@ -53,8 +53,8 @@ export function MarketplaceServicesView({
 
   return (
     <MarketplaceMobileShell activeNavId="services" navItems={createPrimaryMarketplaceNav(platform, locale)}>
-      <div className="flex min-h-full flex-col bg-[#fff8fb] pb-24">
-        <div className="sticky top-0 z-20 flex items-center justify-between bg-white px-4 pb-4 pt-14 shadow-sm">
+      <div className="flex min-h-full flex-col bg-[var(--ui-background)] pb-24">
+        <div className="sticky top-0 z-20 flex items-center justify-between border-b bg-white/96 px-4 pb-4 pt-14 backdrop-blur">
           <MarketplaceHeaderIconButton href={`/${locale}/home`}>
             <ChevronLeft className="h-5 w-5" />
           </MarketplaceHeaderIconButton>

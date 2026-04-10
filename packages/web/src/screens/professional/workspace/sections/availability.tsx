@@ -1,6 +1,7 @@
 'use client';
 
-import { CheckboxField, EditableItemCard, PrimaryButton, SecondaryButton, TextField } from '@marketplace/ui';
+import { EditableItemCard } from '@marketplace/ui/patterns';
+import { CheckboxField, PrimaryButton, SecondaryButton, TextField } from '@marketplace/ui/primitives';
 import type { Dispatch, SetStateAction } from 'react';
 import { WorkspaceSurfaceCard } from '../parts/surface-card';
 import type { AvailabilityRuleForm } from '../types';

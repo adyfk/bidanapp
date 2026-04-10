@@ -9,10 +9,8 @@ import {
   MarketplaceStatTile,
   MarketplaceStickyActionBar,
   MarketplaceSurfaceCard,
-  PrimaryButton,
-  SecondaryButton,
-  StatusPill,
-} from '@marketplace/ui';
+} from '@marketplace/ui/marketplace-lite';
+import { PrimaryButton, SecondaryButton, StatusPill } from '@marketplace/ui/primitives';
 import { ChevronLeft, Clock3, Heart, MapPin, Share2, ShieldCheck, Tag } from 'lucide-react';
 import { deliveryModeLabel, formatCurrency, isEnglishLocale, offeringTypeLabel } from '../../../lib/marketplace-copy';
 import { OfferingCard } from '../shared/parts/offering-card';
@@ -32,7 +30,7 @@ export function MarketplaceOfferingDetailView({
 
   return (
     <MarketplaceMobileShell showNav={false}>
-      <div className="min-h-full bg-[linear-gradient(180deg,#FFF7FB_0%,#FFFFFF_24%,#F9FAFB_100%)] pb-36">
+      <div className="min-h-full bg-[linear-gradient(180deg,#F4F8FB_0%,#FFFFFF_24%,#F8FAFC_100%)] pb-36">
         <section className="relative h-64 w-full overflow-hidden bg-gray-200">
           <div
             className="absolute inset-0"

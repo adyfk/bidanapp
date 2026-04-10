@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckboxField, PrimaryButton } from '@marketplace/ui';
+import { CheckboxField, PrimaryButton } from '@marketplace/ui/primitives';
 import type { Dispatch, SetStateAction } from 'react';
 import { WorkspaceSurfaceCard } from '../parts/surface-card';
 

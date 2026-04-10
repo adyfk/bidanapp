@@ -39,6 +39,14 @@ const importBoundaryChecks = [
     appliesTo: (relativePath) => relativePath.startsWith('apps/'),
     patterns: [
       {
+        pattern: /from ['"]@marketplace\/ui['"]/g,
+        message: 'apps must import scoped @marketplace/ui subpath entrypoints instead of the root barrel',
+      },
+      {
+        pattern: /from ['"]@marketplace\/web['"]/g,
+        message: 'apps must import scoped @marketplace/web subpath entrypoints instead of the root barrel',
+      },
+      {
         pattern: /from ['"]@marketplace\/sdk['"]/g,
         message: 'apps must not import @marketplace/sdk directly',
       },

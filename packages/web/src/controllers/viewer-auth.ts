@@ -4,7 +4,7 @@ import {
   validateRecoveryFinish,
   validateRecoveryStart,
   validateRegister,
-} from '@marketplace/marketplace-core';
+} from '@marketplace/marketplace-core/viewer-auth';
 import { computeLocalHostRedirect } from '../lib/local-host-redirect';
 
 export function redirectToTarget(target?: string) {

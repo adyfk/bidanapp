@@ -1,12 +1,12 @@
-import { Inter } from 'next/font/google';
+import { Figtree, Noto_Sans } from 'next/font/google';
 
-const displayFont = Inter({
+const displayFont = Figtree({
   subsets: ['latin'],
   variable: '--font-display',
   weight: ['400', '500', '600', '700'],
 });
 
-const bodyFont = Inter({
+const bodyFont = Noto_Sans({
   subsets: ['latin'],
   variable: '--font-body',
   weight: ['400', '500', '600', '700'],

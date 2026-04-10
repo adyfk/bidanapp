@@ -10,9 +10,93 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./admin/landing-page": {
+      "types": "./src/admin/landing-page.ts",
+      "default": "./src/admin/landing-page.ts"
+    },
+    "./auth/viewer-auth-page": {
+      "types": "./src/screens/auth/shared/viewer-auth-page.tsx",
+      "default": "./src/screens/auth/shared/viewer-auth-page.tsx"
+    },
+    "./auth/viewer-security-page": {
+      "types": "./src/screens/auth/shared/viewer-security-page.tsx",
+      "default": "./src/screens/auth/shared/viewer-security-page.tsx"
+    },
+    "./auth/viewer-sessions-page": {
+      "types": "./src/screens/auth/shared/viewer-sessions-page.tsx",
+      "default": "./src/screens/auth/shared/viewer-sessions-page.tsx"
+    },
+    "./customer/notifications-page": {
+      "types": "./src/screens/customer/notifications/view.tsx",
+      "default": "./src/screens/customer/notifications/view.tsx"
+    },
+    "./customer/order-detail-page": {
+      "types": "./src/screens/customer/order-detail/view.tsx",
+      "default": "./src/screens/customer/order-detail/view.tsx"
+    },
+    "./customer/orders-page": {
+      "types": "./src/screens/customer/orders-list/view.tsx",
+      "default": "./src/screens/customer/orders-list/view.tsx"
+    },
+    "./customer/profile-page": {
+      "types": "./src/screens/customer/profile/view.tsx",
+      "default": "./src/screens/customer/profile/view.tsx"
+    },
+    "./customer/support-page": {
+      "types": "./src/screens/customer/support/view.tsx",
+      "default": "./src/screens/customer/support/view.tsx"
+    },
+    "./fonts": {
+      "types": "./src/lib/fonts.ts",
+      "default": "./src/lib/fonts.ts"
+    },
     "./local-host-redirect": {
       "types": "./src/lib/local-host-redirect.ts",
       "default": "./src/lib/local-host-redirect.ts"
+    },
+    "./platform": {
+      "types": "./src/lib/platform.ts",
+      "default": "./src/lib/platform.ts"
+    },
+    "./professional/apply-page": {
+      "types": "./src/screens/professional/apply/view.tsx",
+      "default": "./src/screens/professional/apply/view.tsx"
+    },
+    "./professional/offerings-page": {
+      "types": "./src/screens/professional/offerings/view.tsx",
+      "default": "./src/screens/professional/offerings/view.tsx"
+    },
+    "./professional/workspace-page": {
+      "types": "./src/screens/professional/workspace/view.tsx",
+      "default": "./src/screens/professional/workspace/view.tsx"
+    },
+    "./public/explore-page": {
+      "types": "./src/route-adapters/public/explore-page.tsx",
+      "default": "./src/route-adapters/public/explore-page.tsx"
+    },
+    "./public/home-page": {
+      "types": "./src/route-adapters/public/home-page.tsx",
+      "default": "./src/route-adapters/public/home-page.tsx"
+    },
+    "./public/marketplace-home-page": {
+      "types": "./src/route-adapters/public/marketplace-home-page.tsx",
+      "default": "./src/route-adapters/public/marketplace-home-page.tsx"
+    },
+    "./public/offering-detail-page": {
+      "types": "./src/route-adapters/public/offering-detail-page.tsx",
+      "default": "./src/route-adapters/public/offering-detail-page.tsx"
+    },
+    "./public/professional-detail-page": {
+      "types": "./src/route-adapters/public/professional-detail-page.tsx",
+      "default": "./src/route-adapters/public/professional-detail-page.tsx"
+    },
+    "./public/services-page": {
+      "types": "./src/route-adapters/public/services-page.tsx",
+      "default": "./src/route-adapters/public/services-page.tsx"
+    },
+    "./server": {
+      "types": "./src/server/index.ts",
+      "default": "./src/server/index.ts"
     }
   },
   "dependencies": {

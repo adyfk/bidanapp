@@ -10,7 +10,7 @@ import {
   MarketplaceSearchField,
   MarketplaceSectionHeader,
   MarketplaceSurfaceCard,
-} from '@marketplace/ui';
+} from '@marketplace/ui/marketplace-lite';
 import { Bell, MapPin, Search, SlidersHorizontal, UserRound } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { createPrimaryMarketplaceNav } from '../../../layout/navigation';
@@ -61,8 +61,8 @@ export function MarketplaceExploreView({
 
   return (
     <MarketplaceMobileShell activeNavId="explore" navItems={createPrimaryMarketplaceNav(platform, locale)}>
-      <div className="flex min-h-full flex-col bg-[#fff8fb] pb-24">
-        <div className="sticky top-0 z-20 px-6 pb-4 pt-14" style={{ backgroundColor: '#fff8fb' }}>
+      <div className="flex min-h-full flex-col bg-[var(--ui-background)] pb-24">
+        <div className="sticky top-0 z-20 px-6 pb-4 pt-14" style={{ backgroundColor: 'var(--ui-background)' }}>
           <h1 className="mb-1 text-[22px] font-bold text-gray-900">{presentation.exploreTitle}</h1>
           <button
             className="flex items-center gap-1.5 text-sm font-medium transition-opacity hover:opacity-80"
@@ -86,7 +86,7 @@ export function MarketplaceExploreView({
             </div>
             <button
               className="relative flex h-12 w-12 items-center justify-center rounded-full border bg-white shadow-sm"
-              style={{ borderColor: '#f0f1f4' }}
+              style={{ borderColor: 'var(--ui-border)' }}
               type="button"
             >
               <SlidersHorizontal className="h-5 w-5 text-gray-600" />

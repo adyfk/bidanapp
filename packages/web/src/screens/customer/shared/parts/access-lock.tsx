@@ -1,6 +1,7 @@
 'use client';
 
-import { MarketplaceSurfaceCard, PrimaryButton } from '@marketplace/ui';
+import { MarketplaceSurfaceCard } from '@marketplace/ui/marketplace-lite';
+import { PrimaryButton } from '@marketplace/ui/primitives';
 import type { ReactNode } from 'react';
 
 export function CustomerAccessLock({

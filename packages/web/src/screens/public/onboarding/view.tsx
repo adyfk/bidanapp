@@ -1,192 +1,246 @@
 'use client';
 
-import type { ViewerSession } from '@marketplace/marketplace-core';
-import type { ServicePlatformId } from '@marketplace/platform-config';
-import {
-  MarketplaceAccessOptionCard,
-  MarketplaceGlassPanel,
-  MarketplaceGradientStage,
-  MarketplaceLocalePills,
-  MarketplaceMobileShell,
-  MarketplaceSurfaceCard,
-  MarketplaceTopPill,
-} from '@marketplace/ui';
-import { ArrowRight, BriefcaseMedical, Sparkles, UserRound } from 'lucide-react';
+import { MarketplaceFadeIn, MarketplaceLocalePills, MarketplaceMobileShell, MotionAnchor } from '@marketplace/ui';
+import { useReducedMotion } from 'framer-motion';
+import { ArrowRight, Clock3, Sparkles } from 'lucide-react';
+import { type MouseEvent, useEffect, useRef, useState } from 'react';
 import { createLocaleSwitcherItems } from '../../../layout/navigation';
 import { isEnglishLocale } from '../../../lib/marketplace-copy';
 
-const heroImageUrl = 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=1000&auto=format&fit=crop';
+const DEFAULT_REDIRECT_DELAY_MS = 2400;
+const REDUCED_MOTION_REDIRECT_DELAY_MS = 1500;
+const DEFAULT_PROGRESS_TICK_MS = 80;
+const REDUCED_MOTION_PROGRESS_TICK_MS = 160;
 
 export function MarketplaceOnboardingView({
-  locale,
   currentPath,
-  loginHref,
-  platformId,
+  locale,
   platformName,
-  professionalHref,
-  registerHref,
-  session,
   visitorHref,
 }: {
   currentPath: string;
   locale: string;
-  loginHref: string;
-  platformId: ServicePlatformId;
   platformName: string;
-  professionalHref: string;
-  registerHref: string;
-  session?: ViewerSession | null;
   visitorHref: string;
 }) {
+  const en = isEnglishLocale(locale);
+  const prefersReducedMotion = useReducedMotion();
+  const redirectDelayMs = prefersReducedMotion ? REDUCED_MOTION_REDIRECT_DELAY_MS : DEFAULT_REDIRECT_DELAY_MS;
+  const redirectedRef = useRef(false);
+  const hiddenStartedAtRef = useRef<number | null>(null);
+  const pausedMsRef = useRef(0);
   const copy = {
-    accessBadge: isEnglishLocale(locale) ? 'Access path' : 'Pilih akses',
-    accessPrompt: isEnglishLocale(locale)
-      ? 'Choose the path that fits what you want to do today.'
-      : 'Pilih jalur yang paling sesuai dengan tujuan Anda hari ini.',
-    customerDescription: isEnglishLocale(locale)
-      ? 'Save orders, reminders, and follow-up in one account.'
-      : 'Simpan order, pengingat, dan tindak lanjut keluarga dalam satu akun.',
-    customerTitle: isEnglishLocale(locale) ? 'Sign in / register customer' : 'Masuk / daftar customer',
-    getStarted: isEnglishLocale(locale) ? 'Get started' : 'Mulai',
-    heroHint: isEnglishLocale(locale) ? 'Choose the path that fits best.' : 'Pilih jalur yang paling sesuai.',
-    modeCount: isEnglishLocale(locale) ? '3 paths' : '3 jalur',
-    professionalDescription: isEnglishLocale(locale)
-      ? 'Open the professional path to manage services, documents, and your work schedule.'
-      : 'Buka jalur profesional untuk mengelola layanan, dokumen, dan jadwal kerja Anda.',
-    professionalTitle: isEnglishLocale(locale) ? 'Open professional path' : 'Buka jalur profesional',
-    tagline: isEnglishLocale(locale)
-      ? 'Find trusted care professionals for mothers and babies.'
-      : 'Temukan profesional tepercaya untuk kebutuhan ibu dan bayi.',
-    visitorDescription: isEnglishLocale(locale)
-      ? 'Explore services and professionals without signing in.'
-      : 'Jelajahi layanan dan profesional tanpa harus masuk.',
-    visitorTitle: isEnglishLocale(locale) ? 'Continue as visitor' : 'Lanjut sebagai visitor',
+    brandLabel: en ? 'Trusted maternal care' : 'Layanan bidan tepercaya',
+    description: en
+      ? 'Trusted midwives for mothers, babies, and every follow-up.'
+      : 'Bidan tepercaya untuk ibu, bayi, dan setiap tindak lanjut.',
+    heroEyebrow: en ? 'Care that feels calmer' : 'Langkah awal yang lebih tenang',
+    manualAction: en ? 'Enter now' : 'Masuk sekarang',
+    manualHint: en ? 'Skip the splash and continue directly.' : 'Lewati splash dan lanjut langsung.',
+    progressCaption: en ? 'Opening your home' : 'Membuka beranda Anda',
+    progressHint: en ? 'You will be redirected automatically.' : 'Anda akan diarahkan otomatis.',
+    progressLabel: en ? 'Automatic redirect progress' : 'Progres pengalihan otomatis',
+    redirectNow: en ? 'Opening home now.' : 'Membuka home sekarang.',
+    redirectStatus: en ? 'Preparing your home.' : 'Sedang menyiapkan home Anda.',
+    footerNote: en ? 'A short intro before the main home opens.' : 'Intro singkat sebelum home utama terbuka.',
   };
+  const [statusMessage, setStatusMessage] = useState(copy.redirectStatus);
+  const [remainingMs, setRemainingMs] = useState(redirectDelayMs);
 
-  const membership = session?.platformMemberships?.find((item) => item.platformId === platformId);
-  const resolvedProfessionalHref =
-    membership?.reviewStatus === 'approved' ? `/${locale}/professionals/dashboard` : professionalHref;
+  const remainingSeconds = Math.max(1, Math.ceil(remainingMs / 1000));
+  const progressValue = Math.min(
+    100,
+    Math.max(0, Math.round(((redirectDelayMs - remainingMs) / redirectDelayMs) * 100)),
+  );
+  const remainingLabel = en ? `Automatic in ${remainingSeconds}s` : `Otomatis dalam ${remainingSeconds} detik`;
+
+  useEffect(() => {
+    setRemainingMs(redirectDelayMs);
+  }, [redirectDelayMs]);
+
+  useEffect(() => {
+    pausedMsRef.current = 0;
+    hiddenStartedAtRef.current = document.hidden ? Date.now() : null;
+    const startedAt = Date.now();
+    const finishRedirect = () => {
+      if (redirectedRef.current) {
+        return;
+      }
+      redirectedRef.current = true;
+      setStatusMessage(copy.redirectNow);
+      window.location.replace(visitorHref);
+    };
+    const updateRemaining = () => {
+      if (redirectedRef.current || document.hidden) {
+        return;
+      }
+      const now = Date.now();
+      if (hiddenStartedAtRef.current !== null) {
+        pausedMsRef.current += now - hiddenStartedAtRef.current;
+        hiddenStartedAtRef.current = null;
+      }
+      const elapsed = now - startedAt - pausedMsRef.current;
+      const next = Math.max(0, redirectDelayMs - elapsed);
+      setRemainingMs(next);
+      if (next === 0) {
+        finishRedirect();
+      }
+    };
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        hiddenStartedAtRef.current = Date.now();
+        return;
+      }
+      updateRemaining();
+    };
+    const interval = window.setInterval(
+      updateRemaining,
+      prefersReducedMotion ? REDUCED_MOTION_PROGRESS_TICK_MS : DEFAULT_PROGRESS_TICK_MS,
+    );
+
+    updateRemaining();
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [copy.redirectNow, prefersReducedMotion, redirectDelayMs, visitorHref]);
+
+  const handleNavigateHome = (event?: MouseEvent<HTMLAnchorElement>) => {
+    event?.preventDefault();
+    if (redirectedRef.current) {
+      return;
+    }
+    redirectedRef.current = true;
+    setStatusMessage(copy.redirectNow);
+    window.location.replace(visitorHref);
+  };
 
   return (
     <MarketplaceMobileShell showNav={false}>
-      <MarketplaceGradientStage>
-        <div className="relative flex items-center justify-between px-5 pt-5">
-          <MarketplaceTopPill>{copy.getStarted}</MarketplaceTopPill>
-          <MarketplaceLocalePills activeValue={locale} items={createLocaleSwitcherItems(currentPath, locale)} />
+      <section
+        className="relative flex min-h-[100dvh] flex-col overflow-hidden"
+        style={{
+          background:
+            'radial-gradient(circle at top, rgba(219,234,254,0.98) 0%, rgba(239,246,255,0.96) 34%, rgba(248,250,252,0.98) 68%, #ffffff 100%)',
+        }}
+      >
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -left-12 top-16 h-44 w-44 rounded-full bg-[#dbeafe] blur-3xl" />
+          <div className="absolute -right-16 top-28 h-52 w-52 rounded-full bg-[#e0f2fe] blur-3xl" />
+          <div className="absolute inset-x-10 bottom-16 h-28 rounded-full bg-[#f0f9ff] blur-3xl" />
         </div>
 
-        <div className="px-5 pt-7 text-center" style={{ color: '#ffffff' }}>
-          <h1 className="text-[42px] font-bold leading-[0.95] tracking-[-0.04em]">{platformName}</h1>
-          <p
-            className="mx-auto mt-4 max-w-[22rem] text-[15px] font-medium leading-6"
-            style={{ color: 'rgba(255,255,255,0.82)' }}
-          >
-            {copy.tagline}
-          </p>
-        </div>
-
-        <div className="flex flex-1 flex-col px-5 pb-8 pt-6">
-          <MarketplaceGlassPanel>
-            <div className="flex items-start justify-between gap-3">
-              <MarketplaceTopPill>{copy.getStarted}</MarketplaceTopPill>
-              <MarketplaceTopPill tone="soft">{copy.modeCount}</MarketplaceTopPill>
+        <div className="relative z-10 flex min-h-[100dvh] flex-col px-5 pb-6 pt-5">
+          <div className="flex items-center justify-between gap-3">
+            <div
+              className="rounded-full border bg-white/88 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] shadow-[0_12px_28px_-24px_rgba(15,23,42,0.24)] backdrop-blur-md"
+              style={{ borderColor: 'var(--ui-border)', color: 'var(--ui-primary)' }}
+            >
+              {copy.brandLabel}
             </div>
+            <MarketplaceLocalePills activeValue={locale} items={createLocaleSwitcherItems(currentPath, locale)} />
+          </div>
 
-            <div className="mt-5 grid grid-cols-[minmax(0,1fr)_132px] items-end gap-4">
-              <div className="min-w-0 pb-1 text-left">
-                <h2
-                  className="max-w-[11rem] text-[28px] font-bold leading-[1.06] tracking-[-0.03em]"
-                  style={{ color: '#ffffff' }}
-                >
-                  {copy.heroHint}
-                </h2>
-                <p className="mt-3 max-w-[15rem] text-[13px] leading-6" style={{ color: 'rgba(255,255,255,0.78)' }}>
-                  {copy.accessPrompt}
-                </p>
-                <div
-                  className="mt-4 inline-flex items-center gap-2 rounded-full px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] backdrop-blur-sm"
-                  style={{ backgroundColor: 'rgba(0,0,0,0.12)', color: 'rgba(255,255,255,0.72)' }}
-                >
-                  <span className="h-2 w-2 rounded-full" style={{ backgroundColor: 'rgba(255,255,255,0.72)' }} />
-                  {copy.accessBadge}
-                </div>
-              </div>
-
+          <div className="flex flex-1 items-center justify-center pb-4 pt-2">
+            <MarketplaceFadeIn className="w-full">
               <div
-                className="relative h-[224px] overflow-hidden rounded-[28px] border shadow-[0_20px_54px_-34px_rgba(17,24,39,0.58)]"
-                style={{
-                  background: 'radial-gradient(circle at top,#ffffff 0%,#fad1e4 42%,#ee4f9d 100%)',
-                  borderColor: 'rgba(255,255,255,0.18)',
-                }}
+                className="mx-auto w-full max-w-[360px] rounded-[36px] border bg-white/94 p-6 shadow-[0_34px_70px_-44px_rgba(15,23,42,0.24)] backdrop-blur-xl"
+                style={{ borderColor: 'var(--ui-border)' }}
               >
                 <div
-                  className="absolute inset-0"
+                  className="mx-auto flex h-20 w-20 items-center justify-center rounded-[28px] border text-[var(--ui-primary)] shadow-[0_18px_34px_-24px_rgba(3,105,161,0.2)]"
                   style={{
+                    borderColor: 'var(--ui-border)',
                     background:
-                      'linear-gradient(180deg,rgba(255,255,255,0.24) 0%,rgba(255,255,255,0.02) 38%,rgba(253,242,248,0.65) 100%)',
+                      'linear-gradient(145deg, #ffffff 0%, color-mix(in srgb, var(--ui-surface-muted) 74%, white) 100%)',
                   }}
-                />
-                <img
-                  alt={`${platformName} hero`}
-                  className="absolute inset-x-0 bottom-0 top-3 h-[212px] w-full object-cover object-top"
-                  src={heroImageUrl}
-                />
-                <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#fdebf5] via-[#fdebf5]/56 to-transparent" />
+                >
+                  <Sparkles className="h-9 w-9" />
+                </div>
+
+                <div className="mt-6 text-center">
+                  <div
+                    className="text-[12px] font-semibold uppercase tracking-[0.24em]"
+                    style={{ color: 'var(--ui-primary)' }}
+                  >
+                    {copy.heroEyebrow}
+                  </div>
+                  <h1 className="mt-3 text-[46px] font-black leading-[0.94] tracking-[-0.06em] text-slate-950">
+                    {platformName}
+                  </h1>
+                  <p className="mx-auto mt-4 max-w-[18rem] text-[16px] leading-relaxed text-slate-600">
+                    {copy.description}
+                  </p>
+                </div>
+
+                <div
+                  className="mt-6 rounded-[28px] border p-4"
+                  style={{ backgroundColor: 'var(--ui-surface-muted)', borderColor: 'var(--ui-border)' }}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="text-[15px] font-semibold text-slate-900">{copy.progressCaption}</div>
+                      <div className="mt-1 text-[13px] leading-5 text-slate-600">{copy.progressHint}</div>
+                    </div>
+                    <div
+                      className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-[12px] font-semibold shadow-[0_10px_20px_-18px_rgba(15,23,42,0.22)]"
+                      style={{ color: 'var(--ui-primary)' }}
+                    >
+                      <Clock3 className="h-4 w-4" />
+                      <span>{remainingSeconds}s</span>
+                    </div>
+                  </div>
+
+                  <div
+                    aria-label={copy.progressLabel}
+                    aria-valuemax={100}
+                    aria-valuemin={0}
+                    aria-valuenow={progressValue}
+                    aria-valuetext={remainingLabel}
+                    className="mt-4"
+                    role="progressbar"
+                  >
+                    <div className="h-2 overflow-hidden rounded-full bg-slate-200">
+                      <div
+                        className="h-full rounded-full"
+                        style={{
+                          background: 'linear-gradient(90deg, var(--ui-secondary) 0%, var(--ui-primary) 100%)',
+                          transform: `scaleX(${Math.max(0.04, progressValue / 100)})`,
+                          transformOrigin: 'left',
+                          transition: prefersReducedMotion ? 'none' : 'transform 120ms linear',
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-3 text-[12px] text-slate-600">{remainingLabel}</div>
+                </div>
+
+                <MotionAnchor
+                  className="mt-5 inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[var(--ui-primary)] px-4 py-3 text-[14px] font-semibold text-white shadow-[0_20px_30px_-22px_rgba(3,105,161,0.38)]"
+                  href={visitorHref}
+                  onClick={handleNavigateHome}
+                >
+                  <span>{copy.manualAction}</span>
+                  <ArrowRight className="h-4 w-4" />
+                </MotionAnchor>
+
+                <p className="mt-3 text-center text-[12px] leading-5 text-slate-600">{copy.manualHint}</p>
               </div>
-            </div>
-          </MarketplaceGlassPanel>
+            </MarketplaceFadeIn>
+          </div>
 
-          <MarketplaceSurfaceCard
-            className="mt-5 rounded-[32px] border-white/55 px-4 py-4 text-left backdrop-blur-xl"
-            tone="ghost"
-          >
-            <div className="mb-4 flex items-center justify-between gap-3 px-1">
-              <div>
-                <p className="text-[14px] font-bold text-gray-900">{copy.getStarted}</p>
-                <p className="text-[12px] text-gray-500">{copy.accessPrompt}</p>
-              </div>
-              <div
-                className="rounded-full px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em]"
-                style={{ backgroundColor: '#fff1f7', color: 'var(--ui-primary)' }}
-              >
-                {copy.accessBadge}
-              </div>
-            </div>
+          <MarketplaceFadeIn>
+            <p className="text-center text-[12px] leading-5 text-slate-500">{copy.footerNote}</p>
+          </MarketplaceFadeIn>
 
-            <div className="space-y-3">
-              <a href={visitorHref}>
-                <MarketplaceAccessOptionCard
-                  arrow={<ArrowRight className="h-4 w-4" />}
-                  description={copy.visitorDescription}
-                  icon={<Sparkles className="h-5 w-5" />}
-                  title={copy.visitorTitle}
-                  tone="dark"
-                />
-              </a>
-
-              <a href={loginHref}>
-                <MarketplaceAccessOptionCard
-                  arrow={<ArrowRight className="h-4 w-4" />}
-                  description={copy.customerDescription}
-                  icon={<UserRound className="h-5 w-5" />}
-                  title={copy.customerTitle}
-                  tone="accent"
-                />
-              </a>
-
-              <a href={resolvedProfessionalHref}>
-                <MarketplaceAccessOptionCard
-                  arrow={<ArrowRight className="h-4 w-4" />}
-                  description={copy.professionalDescription}
-                  icon={<BriefcaseMedical className="h-5 w-5" />}
-                  title={copy.professionalTitle}
-                  tone="light"
-                />
-              </a>
-            </div>
-          </MarketplaceSurfaceCard>
+          <div aria-live="polite" className="sr-only">
+            {statusMessage}
+          </div>
         </div>
-      </MarketplaceGradientStage>
+      </section>
     </MarketplaceMobileShell>
   );
 }

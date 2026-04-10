@@ -1,6 +1,7 @@
 'use client';
 
-import type { DirectoryOffering, DirectoryProfessional, ViewerSession } from '@marketplace/marketplace-core';
+import type { DirectoryOffering, DirectoryProfessional } from '@marketplace/marketplace-core/directory';
+import type { ViewerSession } from '@marketplace/marketplace-core/viewer-auth';
 import type { ServicePlatformConfig } from '@marketplace/platform-config';
 import {
   MarketplaceCategoryTile,
@@ -8,9 +9,8 @@ import {
   MarketplaceSearchField,
   MarketplaceSectionHeader,
   MarketplaceSurfaceCard,
-  PrimaryButton,
-  SecondaryButton,
-} from '@marketplace/ui';
+} from '@marketplace/ui/marketplace-lite';
+import { PrimaryButton, SecondaryButton } from '@marketplace/ui/primitives';
 import { ArrowRight, Bell, Calendar, MapPin, Search, ShieldCheck } from 'lucide-react';
 import { createPrimaryMarketplaceNav } from '../../../layout/navigation';
 import { isEnglishLocale } from '../../../lib/marketplace-copy';
@@ -52,10 +52,10 @@ export function MarketplaceHomeView({
 
   return (
     <MarketplaceMobileShell activeNavId="home" navItems={createPrimaryMarketplaceNav(platform, locale)}>
-      <div className="flex min-h-full flex-col bg-[#fff8fb] pb-24">
+      <div className="flex min-h-full flex-col pb-24" style={{ backgroundColor: 'var(--ui-background)' }}>
         <div
           className="sticky top-0 z-20 px-6 pb-6 pt-14 backdrop-blur-sm"
-          style={{ backgroundColor: 'rgba(255,248,251,0.96)' }}
+          style={{ backgroundColor: 'color-mix(in srgb, var(--ui-background) 94%, white)' }}
         >
           <div className="flex items-center justify-between">
             <a
@@ -99,7 +99,7 @@ export function MarketplaceHomeView({
               <MarketplaceSurfaceCard tone="white" className="p-6">
                 <div
                   className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl"
-                  style={{ backgroundColor: '#fff1f7', color: 'var(--ui-primary)' }}
+                  style={{ backgroundColor: 'var(--ui-surface-muted)', color: 'var(--ui-primary)' }}
                 >
                   <Calendar className="h-5 w-5" />
                 </div>
@@ -120,10 +120,10 @@ export function MarketplaceHomeView({
               </MarketplaceSurfaceCard>
             ) : (
               <div
-                className="rounded-[28px] p-5 text-white shadow-[0_10px_30px_rgba(233,30,140,0.25)]"
+                className="rounded-[28px] p-5 text-white"
                 style={{
-                  background:
-                    'linear-gradient(135deg, var(--ui-primary) 0%, color-mix(in srgb, var(--ui-secondary) 70%, #7c1d53) 100%)',
+                  background: 'var(--ui-hero-gradient)',
+                  boxShadow: 'var(--ui-shadow-hero)',
                 }}
               >
                 <div className="mb-4 flex items-start justify-between gap-3">
@@ -146,8 +146,8 @@ export function MarketplaceHomeView({
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                       <div
-                        className="flex h-10 w-10 items-center justify-center rounded-full bg-[#fff1f7] text-[14px] font-bold"
-                        style={{ color: 'var(--ui-primary)' }}
+                        className="flex h-10 w-10 items-center justify-center rounded-full text-[14px] font-bold"
+                        style={{ backgroundColor: 'var(--ui-surface-muted)', color: 'var(--ui-primary)' }}
                       >
                         {profileInitial(session)}
                       </div>

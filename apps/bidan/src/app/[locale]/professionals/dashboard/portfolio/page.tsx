@@ -1,11 +1,7 @@
 import { getServicePlatformOrigin } from '@marketplace/platform-config';
-import {
-  createLocalizedPath,
-  createPlatformAppUrl,
-  createPlatformAuthUrl,
-  fetchViewerSessionServer,
-  ProfessionalWorkspacePage,
-} from '@marketplace/web';
+import { createLocalizedPath, createPlatformAppUrl, createPlatformAuthUrl } from '@marketplace/web/platform';
+import { ProfessionalWorkspacePage } from '@marketplace/web/professional/workspace-page';
+import { fetchViewerSessionServer } from '@marketplace/web/server';
 
 export default async function BidanProfessionalDashboardPortfolioPage(props: { params: Promise<{ locale: string }> }) {
   const [{ locale }, session] = await Promise.all([props.params, fetchViewerSessionServer()]);

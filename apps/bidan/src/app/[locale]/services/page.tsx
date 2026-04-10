@@ -1,4 +1,4 @@
-import { PlatformServicesPage } from '@marketplace/web';
+import { PlatformServicesPage } from '@marketplace/web/public/services-page';
 
 export default async function BidanServicesPage(props: { params: Promise<{ locale: string }> }) {
   const { locale } = await props.params;

@@ -1,6 +1,6 @@
 'use client';
 
-import { MarketplaceHeaderIconButton, MarketplaceMobileShell } from '@marketplace/ui';
+import { MarketplaceHeaderIconButton, MarketplaceMobileShell } from '@marketplace/ui/marketplace-lite';
 import { ChevronLeft } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { createLocalizedPath } from '../../../../lib/platform';
@@ -16,8 +16,14 @@ export function MarketplaceAuthShell({
 }) {
   return (
     <MarketplaceMobileShell showNav={false}>
-      <div className="flex h-full flex-col overflow-y-auto bg-[#fff8fb] pb-10 custom-scrollbar">
-        <div className="sticky top-0 z-20 flex items-center justify-between border-b border-rose-100/80 bg-white/90 px-4 pb-4 pt-14 backdrop-blur-sm">
+      <div
+        className="flex h-full flex-col overflow-y-auto pb-10 custom-scrollbar"
+        style={{ backgroundColor: 'var(--ui-background)' }}
+      >
+        <div
+          className="sticky top-0 z-20 flex items-center justify-between border-b bg-white/92 px-4 pb-4 pt-14 backdrop-blur-sm"
+          style={{ borderColor: 'var(--ui-border)' }}
+        >
           <div className="w-10">
             {backHref ? (
               <MarketplaceHeaderIconButton href={backHref}>

@@ -53,7 +53,7 @@ const allReservedServices = [
     label: 'Bidan',
     port: 3002,
     cwd: path.join(repoRoot, 'apps/bidan'),
-    script: 'dev:bidan',
+    script: process.env.NEXT_WEBPACK === '1' ? 'dev:bidan:webpack' : 'dev:bidan',
     readyChecks: [
       {
         label: 'bidan root redirect',
@@ -70,7 +70,7 @@ const allReservedServices = [
     label: 'Admin',
     port: 3005,
     cwd: path.join(repoRoot, 'apps/admin'),
-    script: 'dev:admin',
+    script: process.env.NEXT_WEBPACK === '1' ? 'dev:admin:webpack' : 'dev:admin',
     readyChecks: [
       {
         label: 'admin root redirect',

@@ -1,6 +1,6 @@
 import { getMasterBrandTheme } from '@marketplace/platform-config';
-import { themeStyleVariables } from '@marketplace/ui';
-import { appFontClassName } from '@marketplace/web';
+import { themeStyleVariables } from '@marketplace/ui/foundations';
+import { appFontClassName } from '@marketplace/web/fonts';
 import type { Metadata } from 'next';
 import './globals.css';
 

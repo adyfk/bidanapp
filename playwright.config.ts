@@ -29,7 +29,7 @@ export default defineConfig({
     video: journeyMode ? 'on' : 'off',
   },
   webServer: {
-    command: 'npm run dev:setup && npm run dev',
+    command: 'npm run dev:setup && npm run dev:e2e',
     reuseExistingServer: !process.env.CI,
     timeout: 300_000,
     url: 'http://bidan.lvh.me:3002/id',

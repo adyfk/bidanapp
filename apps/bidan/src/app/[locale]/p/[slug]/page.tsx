@@ -1,4 +1,4 @@
-import { PlatformProfessionalDetailPage } from '@marketplace/web';
+import { PlatformProfessionalDetailPage } from '@marketplace/web/public/professional-detail-page';
 
 export default async function BidanProfessionalDetailAppPage(props: {
   params: Promise<{ locale: string; slug: string }>;

@@ -1,12 +1,10 @@
 'use client';
 
-import {
-  createDirectoryController,
-  createNotificationFeedController,
-  createOrderFlowController,
-  createSupportFlowController,
-  createViewerAuthController,
-} from '@marketplace/marketplace-core';
+import { createDirectoryController } from '@marketplace/marketplace-core/directory';
+import { createNotificationFeedController } from '@marketplace/marketplace-core/notifications';
+import { createOrderFlowController } from '@marketplace/marketplace-core/orders';
+import { createSupportFlowController } from '@marketplace/marketplace-core/support';
+import { createViewerAuthController } from '@marketplace/marketplace-core/viewer-auth';
 import { useMemo } from 'react';
 
 export function useCustomerMarketplaceController() {

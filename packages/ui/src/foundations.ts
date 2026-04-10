@@ -61,7 +61,7 @@ export const MASTER_DESIGN_TOKENS: DesignTokens = {
   radiusCard: '28px',
   radiusInput: '18px',
   radiusPill: '999px',
-  shadowHero: '0 24px 60px -32px rgba(190,24,93,0.55)',
+  shadowHero: '0 28px 72px -40px rgba(3, 105, 161, 0.24)',
   shadowPanel: '0 22px 50px -38px rgba(15,23,42,0.28)',
   shadowCard: '0 18px 42px -36px rgba(15,23,42,0.24)',
   shadowSoft: '0 14px 40px -28px rgba(15,23,42,0.18)',

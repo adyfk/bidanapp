@@ -1,6 +1,6 @@
 'use client';
 
-import { MarketplaceSurfaceCard } from '@marketplace/ui';
+import { MarketplaceSurfaceCard } from '@marketplace/ui/marketplace-lite';
 import type { ReactNode } from 'react';
 
 export function WorkspaceMetricCard({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {

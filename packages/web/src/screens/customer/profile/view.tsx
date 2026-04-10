@@ -14,15 +14,17 @@ import {
   MarketplaceSettingsRow,
   MarketplaceSupportEntryCard,
   MarketplaceSupportSheet,
+} from '@marketplace/ui/marketplace-lite';
+import {
   MessageBanner,
   PrimaryButton,
   SecondaryButton,
   StatusPill,
   TextAreaField,
   TextField,
-} from '@marketplace/ui';
+} from '@marketplace/ui/primitives';
 import { BookHeart, BriefcaseMedical, KeyRound, LifeBuoy, LogOut, MapPin, User } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { createPrimaryMarketplaceNav } from '../../../layout/navigation';
 import { getApiBaseUrl } from '../../../lib/env';
 import { supportStatusLabel } from '../../../lib/marketplace-copy';
@@ -56,7 +58,7 @@ export function CustomerProfilePage({
   const [activeSheet, setActiveSheet] = useState<'account' | 'security' | null>(null);
   const [supportOpen, setSupportOpen] = useState(false);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     try {
       const payload = await customerController.viewerAuth.fetchSession(client);
       setSession(payload);
@@ -74,11 +76,11 @@ export function CustomerProfilePage({
     } catch (error) {
       setFeedback(error instanceof Error ? error.message : 'Gagal memuat profil.');
     }
-  };
+  }, [customerController, platformId]);
 
   useEffect(() => {
     void load();
-  }, [customerController.support, customerController.viewerAuth, platformId]);
+  }, [load]);
 
   const handleSave = async () => {
     try {
@@ -123,7 +125,7 @@ export function CustomerProfilePage({
       navItems={createPrimaryMarketplaceNav(platform, locale)}
       showNav={Boolean(session?.isAuthenticated)}
     >
-      <div className="min-h-full bg-[#f9fafb] pb-24">
+      <div className="min-h-full bg-[var(--ui-background)] pb-24">
         <MarketplaceStickyPageHeader backHref={createLocalizedPath(locale, '/home')} title="Profil" />
 
         <div className="space-y-6 px-5 py-6">
@@ -180,14 +182,14 @@ export function CustomerProfilePage({
                 <MarketplaceSettingsRow
                   description="Perbarui nama tampil dan kota agar profil tetap rapi."
                   icon={<User className="h-4 w-4" />}
-                  iconClassName="bg-pink-50 text-pink-500"
+                  iconClassName="bg-sky-50 text-sky-600"
                   onClick={() => setActiveSheet('account')}
                   title="Akun"
                 />
                 <MarketplaceSettingsRow
                   description="Kelola password dan perangkat yang sedang aktif."
                   icon={<KeyRound className="h-4 w-4" />}
-                  iconClassName="bg-violet-50 text-violet-500"
+                  iconClassName="bg-teal-50 text-teal-700"
                   onClick={() => setActiveSheet('security')}
                   title="Keamanan"
                 />

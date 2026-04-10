@@ -1,7 +1,8 @@
 'use client';
 
-import type { NotificationItem, ViewerSession } from '@marketplace/marketplace-core';
-import { createMarketplaceApiClient } from '@marketplace/marketplace-core';
+import { createMarketplaceApiClient } from '@marketplace/marketplace-core/client';
+import type { NotificationItem } from '@marketplace/marketplace-core/notifications';
+import type { ViewerSession } from '@marketplace/marketplace-core/viewer-auth';
 import type { ServicePlatformId } from '@marketplace/platform-config';
 import { getServicePlatformConfig } from '@marketplace/platform-config';
 import {
@@ -10,8 +11,8 @@ import {
   MarketplaceMobileShell,
   MarketplaceNotificationGroup,
   MarketplaceStatusFilters,
-  MessageBanner,
-} from '@marketplace/ui';
+} from '@marketplace/ui/marketplace-lite';
+import { MessageBanner } from '@marketplace/ui/primitives';
 import { Bell, CalendarClock, CreditCard, LifeBuoy, MessageCircleMore, ShieldCheck } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { createPrimaryMarketplaceNav } from '../../../layout/navigation';
@@ -149,7 +150,7 @@ export function CustomerNotificationsPage({
       navItems={createPrimaryMarketplaceNav(getServicePlatformConfig(platformId), locale)}
       showNav={Boolean(session?.isAuthenticated)}
     >
-      <div className="min-h-full bg-[#f9fafb] pb-24">
+      <div className="min-h-full pb-24" style={{ backgroundColor: 'var(--ui-background)' }}>
         <MarketplaceStickyPageHeader backHref={createLocalizedPath(locale, '/home')} title="Notifikasi" />
 
         <div className="space-y-5 px-5 py-5">
@@ -163,9 +164,10 @@ export function CustomerNotificationsPage({
           ) : (
             <>
               <section
-                className="overflow-hidden rounded-[30px] p-5 text-white shadow-[0_24px_60px_-32px_rgba(190,24,93,0.55)]"
+                className="overflow-hidden rounded-[30px] p-5 text-white"
                 style={{
-                  background: 'linear-gradient(145deg, var(--ui-primary) 0%, var(--ui-secondary) 100%)',
+                  background: 'var(--ui-hero-gradient)',
+                  boxShadow: 'var(--ui-shadow-hero)',
                 }}
               >
                 <div className="flex items-start justify-between gap-4">

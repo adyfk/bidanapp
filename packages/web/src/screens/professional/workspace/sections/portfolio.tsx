@@ -1,6 +1,7 @@
 'use client';
 
-import { EditableItemCard, PrimaryButton, SecondaryButton, TextAreaField, TextField } from '@marketplace/ui';
+import { EditableItemCard } from '@marketplace/ui/patterns';
+import { PrimaryButton, SecondaryButton, TextAreaField, TextField } from '@marketplace/ui/primitives';
 import type { Dispatch, SetStateAction } from 'react';
 import { WorkspaceSurfaceCard } from '../parts/surface-card';
 import type { GalleryAssetForm, PortfolioEntryForm } from '../types';

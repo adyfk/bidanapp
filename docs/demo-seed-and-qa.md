@@ -29,7 +29,18 @@ Browser E2E:
 ```bash
 npm run e2e
 npm run e2e:smoke
+npm run e2e:journey
 ```
+
+Journey artefacts:
+
+- `artifacts/journeys/latest/index.json`
+- `artifacts/journeys/latest/**/screenshots/*.png`
+- `artifacts/playwright-report/latest/index.html`
+
+Catatan:
+
+- Playwright web server memakai jalur `npm run dev:e2e` yang memaksa frontend Next berjalan di mode webpack agar route modular yang berat lebih stabil saat journey dijalankan.
 
 ## Seeded Credentials
 
@@ -68,6 +79,7 @@ Professional:
 - draft application
 - uploaded documents nyata
 - portfolio, credentials, stories, coverage, availability, notification preferences
+- nama, headline, bio, education history, dan notes yang lebih panjang untuk stress test UI realistis
 
 Commerce:
 
@@ -83,6 +95,7 @@ Conversation and support:
 - pre-order conversation thread
 - order-linked thread
 - support tickets `new`, `triaged`, `resolved`
+- order notes, support subject/detail, fulfillment notes, dan public/admin notes dengan copy multi-baris yang lebih realistis
 
 ## Minimum QA Scenarios
 
@@ -124,3 +137,9 @@ Admin:
 - customer login dari `bidan`
 - account security native di `bidan`
 - create order dan simulasi payment lokal
+
+`npm run e2e:journey` memverifikasi:
+
+- journey public, auth, customer, support, payments, professional, dan admin
+- screenshot full-page per langkah journey untuk audit UI
+- artefak report HTML yang siap dipakai untuk checklist manual dan handoff review

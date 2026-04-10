@@ -1,5 +1,5 @@
 import type { ComponentProps } from 'react';
-import { ViewerSecurityPage } from '../shared/view';
+import { ViewerSecurityPage } from '../shared/viewer-security-page';
 
 export type MarketplaceSecurityScreenProps = ComponentProps<typeof ViewerSecurityPage>;
 

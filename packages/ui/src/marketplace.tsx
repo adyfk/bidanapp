@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react';
+import { type CSSProperties, type ReactNode, useId } from 'react';
 import { cx } from './foundations';
 import {
   MarketplaceActivePill,
@@ -214,8 +214,9 @@ export function MarketplaceSurfaceCard({
   const toneStyle: CSSProperties =
     tone === 'blush'
       ? {
-          background: 'linear-gradient(180deg,#FFF7FB 0%,#FFFFFF 100%)',
-          borderColor: 'rgba(252,231,243,0.8)',
+          background:
+            'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 72%, white) 100%)',
+          borderColor: 'var(--ui-border)',
           boxShadow: '0 18px 40px -28px rgba(17,24,39,0.18)',
         }
       : tone === 'dark'
@@ -502,9 +503,12 @@ export function MarketplaceCategoryTile({
 }) {
   return (
     <MotionAnchor
-      className="block min-w-[152px] rounded-[24px] border bg-[linear-gradient(180deg,#FFF7FB_0%,#FFFFFF_100%)] px-4 py-4 shadow-[0_18px_36px_-30px_rgba(15,23,42,0.18)] transition-all hover:shadow-[0_22px_40px_-30px_rgba(15,23,42,0.24)] active:scale-[0.98]"
+      className="block min-w-[152px] rounded-[24px] border px-4 py-4 shadow-[0_18px_36px_-30px_rgba(15,23,42,0.18)] transition-all hover:shadow-[0_22px_40px_-30px_rgba(15,23,42,0.24)] active:scale-[0.98]"
       href={href}
-      style={{ borderColor: 'rgba(252,231,243,0.9)' }}
+      style={{
+        background: 'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 58%, white) 100%)',
+        borderColor: 'var(--ui-border)',
+      }}
     >
       <div className="text-[12px] font-semibold uppercase tracking-[0.16em]" style={{ color: 'var(--ui-primary)' }}>
         {label}
@@ -631,10 +635,10 @@ export function MarketplaceFilterChip({
       style={
         active
           ? {
-              backgroundColor: '#fff1f7',
-              borderColor: '#fbcfe8',
+              backgroundColor: 'var(--ui-surface-muted)',
+              borderColor: 'var(--ui-border-strong)',
               color: 'var(--ui-primary)',
-              boxShadow: '0 14px 30px -24px rgba(233,30,140,0.28)',
+              boxShadow: '0 14px 30px -24px rgba(3,105,161,0.18)',
             }
           : {
               backgroundColor: '#ffffff',
@@ -742,7 +746,7 @@ export function MarketplaceAccessOptionCard({
 
   const iconStyle: CSSProperties =
     tone === 'light'
-      ? { backgroundColor: '#fff1f7', color: 'var(--ui-primary)' }
+      ? { backgroundColor: 'var(--ui-surface-muted)', color: 'var(--ui-primary)' }
       : { backgroundColor: 'rgba(255,255,255,0.14)', color: '#ffffff' };
 
   const arrowStyle: CSSProperties =
@@ -884,7 +888,7 @@ export function MarketplaceQuickActionCard({
     <>
       <div
         className="flex h-12 w-12 items-center justify-center rounded-[18px]"
-        style={{ backgroundColor: '#fff1f7', color: 'var(--ui-primary)' }}
+        style={{ backgroundColor: 'var(--ui-surface-muted)', color: 'var(--ui-primary)' }}
       >
         {icon}
       </div>
@@ -898,9 +902,13 @@ export function MarketplaceQuickActionCard({
   if (onClick) {
     return (
       <MotionButton
-        className="flex min-h-[172px] w-full flex-col rounded-[28px] border bg-[linear-gradient(180deg,#FFFFFF_0%,#F8FAFC_100%)] p-5 text-left shadow-[0_14px_40px_-28px_rgba(15,23,42,0.18)]"
+        className="flex min-h-[172px] w-full flex-col rounded-[28px] border p-5 text-left shadow-[0_14px_40px_-28px_rgba(15,23,42,0.18)]"
+        style={{
+          background:
+            'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 42%, white) 100%)',
+          borderColor: 'rgba(226,232,240,0.8)',
+        }}
         onClick={onClick}
-        style={{ borderColor: 'rgba(226,232,240,0.8)' }}
         type="button"
       >
         {content}
@@ -910,8 +918,11 @@ export function MarketplaceQuickActionCard({
 
   return (
     <MarketplaceAnimatedCard
-      className="flex min-h-[172px] w-full flex-col rounded-[28px] border bg-[linear-gradient(180deg,#FFFFFF_0%,#F8FAFC_100%)] p-5 text-left shadow-[0_14px_40px_-28px_rgba(15,23,42,0.18)]"
-      style={{ borderColor: 'rgba(226,232,240,0.8)' }}
+      className="flex min-h-[172px] w-full flex-col rounded-[28px] border p-5 text-left shadow-[0_14px_40px_-28px_rgba(15,23,42,0.18)]"
+      style={{
+        background: 'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 42%, white) 100%)',
+        borderColor: 'rgba(226,232,240,0.8)',
+      }}
     >
       {content}
     </MarketplaceAnimatedCard>
@@ -942,7 +953,14 @@ export function MarketplaceIdentityCard({
   const resolvedChip =
     chip ||
     (chipLabel ? (
-      <div className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-pink-100 bg-pink-50/80 px-3 py-1.5 text-[11px] font-semibold text-pink-600">
+      <div
+        className="inline-flex max-w-full items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-semibold"
+        style={{
+          backgroundColor: 'var(--ui-surface-muted)',
+          borderColor: 'var(--ui-border)',
+          color: 'var(--ui-primary)',
+        }}
+      >
         {chipIcon}
         <span className="truncate">{chipLabel}</span>
       </div>
@@ -964,13 +982,17 @@ export function MarketplaceIdentityCard({
   return (
     <MarketplaceFadeIn>
       <section
-        className="overflow-hidden rounded-[30px] border border-slate-200/80 bg-[linear-gradient(180deg,#FFFFFF_0%,#F8FAFC_100%)] p-5 shadow-[0_22px_50px_-38px_rgba(15,23,42,0.28)]"
+        className="overflow-hidden rounded-[30px] border border-slate-200/80 p-5 shadow-[0_22px_50px_-38px_rgba(15,23,42,0.28)]"
         style={{
-          background: 'linear-gradient(180deg,#FFFFFF 0%,#F8FAFC 100%)',
+          background:
+            'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 48%, white) 100%)',
         }}
       >
         <div className="flex items-start gap-4">
-          <div className="flex h-[72px] w-[72px] flex-shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-slate-100 text-[18px] font-bold text-pink-600 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.4)]">
+          <div
+            className="flex h-[72px] w-[72px] flex-shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-white text-[18px] font-bold shadow-[0_12px_24px_-18px_rgba(15,23,42,0.4)]"
+            style={{ backgroundColor: 'var(--ui-surface-muted)', color: 'var(--ui-primary)' }}
+          >
             {avatar || (typeof title === 'string' ? title.charAt(0).toUpperCase() || 'B' : 'B')}
           </div>
           <div className="min-w-0 flex-1">
@@ -1000,7 +1022,7 @@ export function MarketplaceSupportEntryCard({
   tone = 'amber',
 }: {
   actionLabel?: ReactNode;
-  badges?: ReactNode[];
+  badges?: string[];
   description: ReactNode;
   icon: ReactNode;
   onClick?: () => void;
@@ -1021,8 +1043,9 @@ export function MarketplaceSupportEntryCard({
               borderColor: 'rgba(254,215,170,0.8)',
             }
           : {
-              background: 'linear-gradient(180deg,#FFF7FB 0%,#FFFFFF 100%)',
-              borderColor: 'rgba(252,231,243,0.8)',
+              background:
+                'linear-gradient(180deg, #FFFFFF 0%, color-mix(in srgb, var(--ui-surface-muted) 72%, white) 100%)',
+              borderColor: 'var(--ui-border)',
               boxShadow: '0 18px 40px -28px rgba(17,24,39,0.18)',
             }
       }
@@ -1052,10 +1075,10 @@ export function MarketplaceSupportEntryCard({
       </div>
       {badges?.length ? (
         <div className="mt-4 flex flex-wrap gap-2">
-          {badges.map((badge, index) => (
+          {badges.map((badge) => (
             <span
               className="rounded-full border border-white/80 bg-white/90 px-3 py-1.5 text-[11px] font-semibold text-slate-700 shadow-[0_10px_20px_-20px_rgba(15,23,42,0.4)]"
-              key={index}
+              key={badge}
             >
               {badge}
             </span>
@@ -1097,11 +1120,8 @@ export function MarketplaceSettingsRow({
     <>
       <div className="flex min-w-0 items-center gap-4 text-slate-700">
         <div
-          className={cx(
-            'flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-[#fff1f7]',
-            iconClassName,
-          )}
-          style={iconClassName ? undefined : { color: 'var(--ui-primary)' }}
+          className={cx('flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full', iconClassName)}
+          style={iconClassName ? undefined : { backgroundColor: 'var(--ui-surface-muted)', color: 'var(--ui-primary)' }}
         >
           {icon}
         </div>
@@ -1178,7 +1198,7 @@ export function MarketplaceHeroBanner({
   return (
     <MarketplaceFadeIn>
       <section
-        className="overflow-hidden rounded-[30px] p-5 shadow-[0_24px_60px_-32px_rgba(190,24,93,0.55)]"
+        className="overflow-hidden rounded-[30px] p-5 shadow-[var(--ui-shadow-hero)]"
         style={{
           background: 'linear-gradient(145deg, var(--ui-primary) 0%, var(--ui-secondary) 100%)',
         }}
@@ -1230,25 +1250,35 @@ export function MarketplaceModalSheet({
   onClose: () => void;
   title: ReactNode;
 }) {
+  const titleId = useId();
+  const descriptionId = useId();
+
   if (!isOpen) {
     return null;
   }
 
   return (
-    <div
-      className="fixed inset-0 z-[70] flex items-end justify-center bg-slate-950/35 px-4 pb-0 pt-10 backdrop-blur-[1px]"
-      onClick={onClose}
-    >
+    <div className="fixed inset-0 z-[70] flex items-end justify-center bg-slate-950/35 px-4 pb-0 pt-10 backdrop-blur-[1px]">
+      <button aria-label="Tutup modal" className="absolute inset-0" onClick={onClose} type="button" />
       <div
-        className="w-full max-w-[400px] overflow-hidden rounded-t-[32px] border border-slate-200 bg-white shadow-[0_-28px_60px_-34px_rgba(15,23,42,0.42)]"
-        onClick={(event) => event.stopPropagation()}
+        aria-describedby={description ? descriptionId : undefined}
+        aria-labelledby={titleId}
+        aria-modal="true"
+        className="relative w-full max-w-[400px] overflow-hidden rounded-t-[32px] border border-slate-200 bg-white shadow-[0_-28px_60px_-34px_rgba(15,23,42,0.42)]"
+        role="dialog"
       >
         <div className="sticky top-0 z-10 border-b border-slate-100 bg-white/96 px-5 pb-4 pt-4 backdrop-blur">
           <div className="mx-auto h-1.5 w-14 rounded-full bg-slate-200" />
           <div className="mt-4 flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <div className="text-[18px] font-bold text-slate-900">{title}</div>
-              {description ? <div className="mt-1 text-[13px] leading-6 text-slate-500">{description}</div> : null}
+              <div className="text-[18px] font-bold text-slate-900" id={titleId}>
+                {title}
+              </div>
+              {description ? (
+                <div className="mt-1 text-[13px] leading-6 text-slate-500" id={descriptionId}>
+                  {description}
+                </div>
+              ) : null}
             </div>
             <MotionButton
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500"
@@ -1363,7 +1393,7 @@ export function MarketplaceChatThread({
                 <div
                   className={cx(
                     'mt-2 flex items-center justify-end gap-1 text-[10px]',
-                    message.outgoing ? 'text-pink-100' : 'text-gray-400',
+                    message.outgoing ? 'text-sky-100' : 'text-gray-400',
                   )}
                 >
                   <span>{message.timestamp}</span>
@@ -1415,7 +1445,7 @@ export function MarketplaceChatComposer({
       }}
     >
       {leadingAccessory ? <div className="shrink-0">{leadingAccessory}</div> : null}
-      <div className="flex flex-1 items-end rounded-[24px] border border-gray-100 bg-gray-50 px-3 py-1.5 transition-all focus-within:border-pink-200 focus-within:bg-white focus-within:ring-2 focus-within:ring-pink-500/10">
+      <div className="flex flex-1 items-end rounded-[24px] border border-gray-100 bg-gray-50 px-3 py-1.5 transition-all focus-within:bg-white focus-within:ring-2">
         {inputLeadingAccessory ? <div className="shrink-0">{inputLeadingAccessory}</div> : null}
         <textarea
           className="max-h-32 w-full resize-none border-none bg-transparent px-1 py-2 text-[15px] leading-relaxed text-gray-800 outline-none placeholder:text-gray-400"

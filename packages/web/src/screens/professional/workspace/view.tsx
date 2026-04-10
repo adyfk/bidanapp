@@ -1,11 +1,10 @@
 'use client';
 
+import { createMarketplaceApiClient } from '@marketplace/marketplace-core/client';
 import {
-  createMarketplaceApiClient,
   createProfessionalPlatformOffering,
   fetchProfessionalWorkspaceOrders,
   fetchProfessionalWorkspaceSnapshot,
-  fetchViewerAuthSession,
   type ProfessionalWorkspaceSnapshot,
   replaceProfessionalWorkspaceAvailability,
   replaceProfessionalWorkspaceCoverage,
@@ -13,22 +12,20 @@ import {
   replaceProfessionalWorkspaceTrust,
   updateProfessionalWorkspaceNotifications,
   upsertProfessionalWorkspaceProfile,
-  type ViewerSession,
-} from '@marketplace/marketplace-core';
+} from '@marketplace/marketplace-core/professional';
+import { fetchViewerAuthSession, type ViewerSession } from '@marketplace/marketplace-core/viewer-auth';
 import { getServicePlatformConfig, type ServicePlatformId } from '@marketplace/platform-config';
 import {
-  EmptyState,
   MarketplaceEmptyCard,
   MarketplaceHeaderIconButton,
   MarketplaceIdentityCard,
   MarketplaceSurfaceCard,
   MarketplaceTopPill,
-  MessageBanner,
-  PrimaryButton,
-  SecondaryButton,
-} from '@marketplace/ui';
+} from '@marketplace/ui/marketplace-lite';
+import { EmptyState, MessageBanner } from '@marketplace/ui/primitives';
 import { ArrowRight, Bell, BriefcaseMedical, Compass, Layers3, MapPin, Star, UserRound, Wallet } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import dynamic from 'next/dynamic';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getApiBaseUrl } from '../../../lib/env';
 import { createLocalizedPath } from '../../../lib/platform';
 import { type ProfessionalDashboardSection, professionalConsoleSections } from '../../../screen-config/sections';
@@ -36,15 +33,7 @@ import { WorkspaceActionButton } from './parts/action-button';
 import { WorkspaceInfoChip } from './parts/info-chip';
 import { WorkspaceMetricCard } from './parts/metric-card';
 import { ProfessionalTabGrid } from './parts/tab-grid';
-import { AvailabilitySection } from './sections/availability';
-import { CoverageSection } from './sections/coverage';
-import { NotificationSection } from './sections/notifications';
-import { OfferingsSection } from './sections/offerings';
-import { OrdersSection } from './sections/orders';
 import { OverviewSection } from './sections/overview';
-import { PortfolioSection } from './sections/portfolio';
-import { ProfileSection } from './sections/profile';
-import { TrustSection } from './sections/trust';
 import type {
   AvailabilityRuleForm,
   CoverageAreaForm,
@@ -57,6 +46,39 @@ import { formatWorkspaceCurrency } from './utils';
 
 const apiBaseUrl = getApiBaseUrl();
 const client = createMarketplaceApiClient(apiBaseUrl);
+
+function WorkspaceSectionLoading() {
+  return (
+    <MarketplaceSurfaceCard>
+      <p className="text-sm leading-6 text-gray-500">Menyiapkan section dashboard...</p>
+    </MarketplaceSurfaceCard>
+  );
+}
+
+const AvailabilitySection = dynamic(() => import('./sections/availability').then((mod) => mod.AvailabilitySection), {
+  loading: WorkspaceSectionLoading,
+});
+const CoverageSection = dynamic(() => import('./sections/coverage').then((mod) => mod.CoverageSection), {
+  loading: WorkspaceSectionLoading,
+});
+const NotificationSection = dynamic(() => import('./sections/notifications').then((mod) => mod.NotificationSection), {
+  loading: WorkspaceSectionLoading,
+});
+const OfferingsSection = dynamic(() => import('./sections/offerings').then((mod) => mod.OfferingsSection), {
+  loading: WorkspaceSectionLoading,
+});
+const OrdersSection = dynamic(() => import('./sections/orders').then((mod) => mod.OrdersSection), {
+  loading: WorkspaceSectionLoading,
+});
+const PortfolioSection = dynamic(() => import('./sections/portfolio').then((mod) => mod.PortfolioSection), {
+  loading: WorkspaceSectionLoading,
+});
+const ProfileSection = dynamic(() => import('./sections/profile').then((mod) => mod.ProfileSection), {
+  loading: WorkspaceSectionLoading,
+});
+const TrustSection = dynamic(() => import('./sections/trust').then((mod) => mod.TrustSection), {
+  loading: WorkspaceSectionLoading,
+});
 
 export function ProfessionalWorkspacePage({
   authHref,
@@ -108,7 +130,7 @@ export function ProfessionalWorkspacePage({
 
   const isApproved = snapshot?.application?.status === 'approved' && snapshot?.profile?.reviewStatus === 'approved';
 
-  const load = async () => {
+  const load = useCallback(async () => {
     try {
       setLoading(true);
       setFeedback('');
@@ -199,11 +221,11 @@ export function ProfessionalWorkspacePage({
     } finally {
       setLoading(false);
     }
-  };
+  }, [platformId]);
 
   useEffect(() => {
     void load();
-  }, [platformId]);
+  }, [load]);
 
   const saveProfile = async () => {
     try {
@@ -417,12 +439,18 @@ export function ProfessionalWorkspacePage({
     : createLocalizedPath(locale, '/profile');
 
   return (
-    <div className="min-h-screen bg-[#fff8fb]">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--ui-background)' }}>
       <div className="mx-auto flex min-h-screen justify-center">
         <div className="relative flex min-h-[100dvh] w-full max-w-md flex-col overflow-hidden bg-white shadow-[0_18px_50px_-26px_rgba(15,23,42,0.28)]">
           {!session?.isAuthenticated ? (
-            <div className="flex min-h-full flex-col overflow-y-auto bg-[#fff8fb] pb-10 custom-scrollbar">
-              <div className="sticky top-0 z-20 flex items-center justify-between border-b border-rose-100/80 bg-white/90 px-4 pb-4 pt-14 backdrop-blur-sm">
+            <div
+              className="flex min-h-full flex-col overflow-y-auto pb-10 custom-scrollbar"
+              style={{ backgroundColor: 'var(--ui-background)' }}
+            >
+              <div
+                className="sticky top-0 z-20 flex items-center justify-between border-b bg-white/92 px-4 pb-4 pt-14 backdrop-blur-sm"
+                style={{ borderColor: 'var(--ui-border)' }}
+              >
                 <MarketplaceHeaderIconButton href={createLocalizedPath(locale, '/')}>
                   <span aria-hidden="true">‹</span>
                 </MarketplaceHeaderIconButton>
@@ -431,7 +459,14 @@ export function ProfessionalWorkspacePage({
               </div>
 
               <div className="space-y-5 px-5 py-6">
-                <section className="overflow-hidden rounded-[30px] border border-pink-100/80 bg-[linear-gradient(140deg,#F7259B_0%,#E11D87_52%,#7C154C_100%)] p-6 text-white shadow-[0_24px_60px_-32px_rgba(190,24,93,0.55)]">
+                <section
+                  className="overflow-hidden rounded-[30px] border p-6 text-white"
+                  style={{
+                    background: 'var(--ui-hero-gradient)',
+                    borderColor: 'color-mix(in srgb, var(--ui-primary) 18%, white)',
+                    boxShadow: 'var(--ui-shadow-hero)',
+                  }}
+                >
                   <div className="flex items-center gap-4">
                     <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full border-2 border-white/70 bg-white/12 text-white shadow-sm">
                       <BriefcaseMedical className="h-7 w-7" />
@@ -485,7 +520,7 @@ export function ProfessionalWorkspacePage({
                     <a href={loginHref}>
                       <button
                         type="button"
-                        className="flex w-full items-center justify-center gap-2 rounded-full py-4 text-[14px] font-bold text-white shadow-lg shadow-pink-500/20 transition-transform active:scale-[0.99]"
+                        className="flex w-full items-center justify-center gap-2 rounded-full py-4 text-[14px] font-bold text-white transition-transform active:scale-[0.99]"
                         style={{ backgroundColor: 'var(--ui-primary)' }}
                       >
                         Masuk sebagai profesional
@@ -510,7 +545,10 @@ export function ProfessionalWorkspacePage({
               </div>
             </div>
           ) : loading ? (
-            <div className="flex min-h-full flex-col bg-[linear-gradient(180deg,#FFF8FC_0%,#FCFCFD_26%,#F8FAFC_100%)] px-5 pb-10 pt-6">
+            <div
+              className="flex min-h-full flex-col px-5 pb-10 pt-6"
+              style={{ backgroundColor: 'var(--ui-background)' }}
+            >
               <MarketplaceIdentityCard
                 chip={<MarketplaceTopPill tone="soft">Dashboard profesional</MarketplaceTopPill>}
                 subtitle="Sebentar ya, kami sedang menyiapkan profil dan aktivitas profesional Anda."
@@ -523,7 +561,10 @@ export function ProfessionalWorkspacePage({
               </MarketplaceSurfaceCard>
             </div>
           ) : !snapshot ? (
-            <div className="flex min-h-full flex-col bg-[linear-gradient(180deg,#FFF8FC_0%,#FCFCFD_26%,#F8FAFC_100%)] px-5 pb-10 pt-6">
+            <div
+              className="flex min-h-full flex-col px-5 pb-10 pt-6"
+              style={{ backgroundColor: 'var(--ui-background)' }}
+            >
               <MarketplaceIdentityCard
                 chip={<MarketplaceTopPill tone="soft">Dashboard profesional</MarketplaceTopPill>}
                 subtitle="Akun ini belum memiliki profil profesional yang siap digunakan."
@@ -537,12 +578,22 @@ export function ProfessionalWorkspacePage({
               </MarketplaceSurfaceCard>
             </div>
           ) : (
-            <div className="flex h-full flex-col overflow-y-auto bg-[linear-gradient(180deg,#FFF8FC_0%,#FCFCFD_26%,#F8FAFC_100%)] pb-10 custom-scrollbar">
-              <div className="sticky top-0 z-20 bg-[linear-gradient(180deg,#FFF8FC_0%,rgba(255,248,252,0.96)_72%,rgba(255,248,252,0)_100%)] px-5 pb-5 pt-12 backdrop-blur-sm">
+            <div
+              className="flex h-full flex-col overflow-y-auto pb-10 custom-scrollbar"
+              style={{ backgroundColor: 'var(--ui-background)' }}
+            >
+              <div
+                className="sticky top-0 z-20 px-5 pb-5 pt-12 backdrop-blur-sm"
+                style={{
+                  background:
+                    'linear-gradient(180deg, color-mix(in srgb, var(--ui-background) 96%, white) 0%, rgba(244,248,251,0.88) 72%, rgba(244,248,251,0) 100%)',
+                }}
+              >
                 <div className="flex items-center justify-between rounded-[28px] border border-white/80 bg-white/72 px-4 py-3 shadow-[0_22px_48px_-36px_rgba(15,23,42,0.22)] backdrop-blur-md">
                   <a
-                    className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-pink-50 text-[13px] font-bold text-pink-600 shadow-sm transition-opacity hover:opacity-80"
+                    className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border-2 border-white text-[13px] font-bold shadow-sm transition-opacity hover:opacity-80"
                     href={createLocalizedPath(locale, '/profile')}
+                    style={{ backgroundColor: 'var(--ui-surface-muted)', color: 'var(--ui-primary)' }}
                   >
                     {(snapshot.profile?.displayName || session.customerProfile?.displayName || 'B')
                       .charAt(0)
@@ -553,7 +604,7 @@ export function ProfessionalWorkspacePage({
                       DASHBOARD PROFESIONAL
                     </span>
                     <div className="mt-1 flex max-w-full items-center text-[14px] font-bold text-gray-900">
-                      <MapPin className="mr-1 h-4 w-4 flex-shrink-0 text-pink-500" />
+                      <MapPin className="mr-1 h-4 w-4 flex-shrink-0" style={{ color: 'var(--ui-primary)' }} />
                       <span className="truncate">{locationLabel}</span>
                     </div>
                   </div>

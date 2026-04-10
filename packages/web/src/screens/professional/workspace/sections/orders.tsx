@@ -1,7 +1,8 @@
 'use client';
 
 import type { ProfessionalWorkspaceSnapshot } from '@marketplace/marketplace-core';
-import { EmptyState, EntityCard, StatusPill } from '@marketplace/ui';
+import { EntityCard } from '@marketplace/ui/patterns';
+import { EmptyState, StatusPill } from '@marketplace/ui/primitives';
 import { WorkspaceSurfaceCard } from '../parts/surface-card';
 import { formatWorkspaceCurrency } from '../utils';
 

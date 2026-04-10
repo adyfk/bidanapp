@@ -1,9 +1,9 @@
 'use client';
 
-import type { ViewerDeviceSession, ViewerSession } from '@marketplace/marketplace-core';
+import type { ViewerDeviceSession, ViewerSession } from '@marketplace/marketplace-core/viewer-auth';
 import type { ServicePlatformId } from '@marketplace/platform-config';
-import { MarketplaceHeroBanner, MarketplaceTopPill } from '@marketplace/ui';
-import { useEffect, useState } from 'react';
+import { MarketplaceHeroBanner, MarketplaceTopPill } from '@marketplace/ui/marketplace-lite';
+import { useCallback, useEffect, useState } from 'react';
 import { redirectToTarget } from '../../../controllers/viewer-auth';
 import { isEnglishLocale } from '../../../lib/marketplace-copy';
 import { createPlatformLoginPath, createViewerSecurityHref } from '../../../lib/platform';
@@ -29,20 +29,20 @@ export function ViewerSessionsPage({
   const [busySessionId, setBusySessionId] = useState('');
   const [busyLogoutAll, setBusyLogoutAll] = useState(false);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     const [sessionPayload, sessionsPayload] = await Promise.all([
       viewerAuth.fetchSession(viewerAuthClient),
       viewerAuth.fetchSessions(viewerAuthClient),
     ]);
     setSession(sessionPayload);
     setItems(sessionsPayload.items || []);
-  };
+  }, [viewerAuth]);
 
   useEffect(() => {
     void load().catch((error) => {
       setFeedback(error instanceof Error ? error.message : 'Gagal memuat daftar session.');
     });
-  }, [viewerAuth]);
+  }, [load]);
 
   const handleRevoke = async (sessionId: string) => {
     try {
@@ -98,7 +98,6 @@ export function ViewerSessionsPage({
         isAuthenticated={Boolean(session?.isAuthenticated)}
         items={items}
         locale={locale}
-        platformId={platformId}
         onLogoutOthers={() => void handleLogoutOthers()}
         onRevoke={(sessionId) => void handleRevoke(sessionId)}
       />

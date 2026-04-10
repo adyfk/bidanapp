@@ -9,10 +9,8 @@ import {
   MarketplaceStatTile,
   MarketplaceStickyActionBar,
   MarketplaceSurfaceCard,
-  PrimaryButton,
-  SecondaryButton,
-  StatusPill,
-} from '@marketplace/ui';
+} from '@marketplace/ui/marketplace-lite';
+import { PrimaryButton, SecondaryButton, StatusPill } from '@marketplace/ui/primitives';
 import {
   BadgeCheck,
   BookHeart,
@@ -156,13 +154,14 @@ function SelectableOfferingCard({
       style={
         active
           ? {
-              background: 'linear-gradient(180deg,#FFF7FB 0%,#FFFFFF 100%)',
-              borderColor: 'rgba(244,114,182,0.36)',
-              boxShadow: '0 18px 36px -30px rgba(233,30,140,0.16)',
+              background:
+                'linear-gradient(180deg, color-mix(in srgb, var(--ui-surface-muted) 72%, white) 0%, #FFFFFF 100%)',
+              borderColor: 'var(--ui-border-strong)',
+              boxShadow: '0 18px 36px -30px rgba(3,105,161,0.16)',
             }
           : {
               backgroundColor: '#ffffff',
-              borderColor: '#f0f1f4',
+              borderColor: 'var(--ui-border)',
             }
       }
       type="button"
@@ -264,21 +263,24 @@ export function MarketplaceProfessionalDetailView({
 
   return (
     <MarketplaceMobileShell showNav={false}>
-      <div className="relative min-h-full overflow-y-auto bg-[linear-gradient(180deg,#FFF7FB_0%,#FFFFFF_20%,#F9FAFB_100%)] pb-40">
+      <div className="relative min-h-full overflow-y-auto bg-[linear-gradient(180deg,#F4F8FB_0%,#FFFFFF_20%,#F8FAFC_100%)] pb-40">
         <div className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[520px] overflow-hidden">
           <div
             className="absolute -left-20 top-6 h-48 w-48 rounded-full blur-3xl"
-            style={{ backgroundColor: 'rgba(233, 30, 140, 0.16)' }}
+            style={{ backgroundColor: 'rgba(59,130,246,0.14)' }}
           />
           <div
             className="absolute -right-12 top-24 h-40 w-40 rounded-full blur-3xl"
-            style={{ backgroundColor: 'rgba(249, 115, 22, 0.14)' }}
+            style={{ backgroundColor: 'rgba(14,165,233,0.14)' }}
           />
         </div>
 
-        <div className="absolute inset-x-0 top-0 h-[390px] overflow-hidden rounded-b-[42px] bg-[linear-gradient(180deg,#5B1135_0%,#E91E8C_42%,#FFF1F7_100%)]">
+        <div
+          className="absolute inset-x-0 top-0 h-[390px] overflow-hidden rounded-b-[42px]"
+          style={{ background: 'var(--ui-hero-gradient)' }}
+        >
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.26)_0%,rgba(255,255,255,0)_42%)]" />
-          <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-b from-transparent to-[#FFF7FB]" />
+          <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-b from-transparent to-[#F4F8FB]" />
         </div>
 
         <div className="relative z-10 px-6 pb-4 pt-10">
@@ -300,7 +302,7 @@ export function MarketplaceProfessionalDetailView({
           <div className="rounded-[32px] bg-white/94 p-5 shadow-[0_22px_52px_rgba(17,24,39,0.12)] backdrop-blur-sm">
             <div className="mb-6 flex gap-4">
               <div className="flex-shrink-0">
-                <div className="rounded-full bg-gradient-to-br from-pink-500 via-orange-400 to-yellow-300 p-[2px]">
+                <div className="rounded-full bg-gradient-to-br from-sky-600 via-sky-500 to-cyan-300 p-[2px]">
                   <div className="overflow-hidden rounded-full border-2 border-white bg-white">
                     <InitialPortrait label={detail.professional.displayName} size="hero" />
                   </div>
@@ -322,7 +324,7 @@ export function MarketplaceProfessionalDetailView({
                   {isLactationCertified ? (
                     <span
                       className="rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide"
-                      style={{ backgroundColor: '#fff1f7', color: 'var(--ui-primary)' }}
+                      style={{ backgroundColor: 'var(--ui-surface-muted)', color: 'var(--ui-primary)' }}
                     >
                       {en ? 'Lactation certified' : 'Sertifikasi laktasi'}
                     </span>
@@ -378,11 +380,11 @@ export function MarketplaceProfessionalDetailView({
               {trustItems.map((item) => (
                 <div
                   key={item.label}
-                  className="flex items-start gap-3 rounded-[20px] bg-[#FCFCFC] px-4 py-3 shadow-[0_14px_28px_-24px_rgba(17,24,39,0.35)]"
+                  className="flex items-start gap-3 rounded-[20px] bg-[var(--ui-surface-muted)] px-4 py-3 shadow-[0_14px_28px_-24px_rgba(17,24,39,0.24)]"
                 >
                   <span
                     className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full"
-                    style={{ backgroundColor: '#fff1f7', color: 'var(--ui-primary)' }}
+                    style={{ backgroundColor: '#ffffff', color: 'var(--ui-primary)' }}
                   >
                     {item.icon}
                   </span>
@@ -414,14 +416,14 @@ export function MarketplaceProfessionalDetailView({
               }
             />
             <div className="space-y-4">
-              <div className="rounded-[24px] bg-[#FCFCFC] p-4 shadow-[0_16px_30px_-24px_rgba(17,24,39,0.3)]">
+              <div className="rounded-[24px] bg-[var(--ui-surface-muted)] p-4 shadow-[0_16px_30px_-24px_rgba(17,24,39,0.22)]">
                 <div className="text-[15px] font-bold text-gray-900">
                   {en ? 'About the practice' : 'Tentang praktek'}
                 </div>
                 <p className="mt-2 text-[13px] leading-relaxed text-gray-500">{bio}</p>
               </div>
               {educationHistory ? (
-                <div className="rounded-[24px] bg-[#FCFCFC] p-4 shadow-[0_16px_30px_-24px_rgba(17,24,39,0.3)]">
+                <div className="rounded-[24px] bg-[var(--ui-surface-muted)] p-4 shadow-[0_16px_30px_-24px_rgba(17,24,39,0.22)]">
                   <div className="text-[15px] font-bold text-gray-900">
                     {en ? 'Education and training' : 'Pendidikan dan pelatihan'}
                   </div>
@@ -458,9 +460,9 @@ export function MarketplaceProfessionalDetailView({
                 {(detail.portfolio ?? []).map((entry) => (
                   <article
                     key={entry.id}
-                    className="overflow-hidden rounded-[24px] bg-white shadow-[0_18px_34px_-24px_rgba(17,24,39,0.32)]"
+                    className="overflow-hidden rounded-[24px] bg-white shadow-[0_18px_34px_-24px_rgba(17,24,39,0.24)]"
                   >
-                    <div className="relative h-[180px] bg-[linear-gradient(135deg,#FDE7F3_0%,#FFF8FB_55%,#FFFFFF_100%)]">
+                    <div className="relative h-[180px] bg-[linear-gradient(135deg,#E6F4FB_0%,#F8FCFE_55%,#FFFFFF_100%)]">
                       {entry.assetUrl ? (
                         <img
                           alt={entry.title}
@@ -490,7 +492,7 @@ export function MarketplaceProfessionalDetailView({
                     {(detail.gallery ?? []).slice(0, 3).map((item, index) => (
                       <div
                         key={item.id}
-                        className={`relative overflow-hidden rounded-[24px] bg-[#FCFCFC] ${index === 0 ? 'col-span-2 h-[200px]' : 'h-[132px]'}`}
+                        className={`relative overflow-hidden rounded-[24px] bg-[var(--ui-surface-muted)] ${index === 0 ? 'col-span-2 h-[200px]' : 'h-[132px]'}`}
                       >
                         {item.assetUrl ? (
                           <img
@@ -510,10 +512,10 @@ export function MarketplaceProfessionalDetailView({
                 {(detail.stories ?? []).map((story, index) => (
                   <article
                     key={story.id}
-                    className="overflow-hidden rounded-[24px] bg-white shadow-[0_18px_34px_-24px_rgba(17,24,39,0.32)]"
+                    className="overflow-hidden rounded-[24px] bg-white shadow-[0_18px_34px_-24px_rgba(17,24,39,0.24)]"
                   >
-                    <div className="relative h-[180px] bg-[linear-gradient(135deg,#FDE7F3_0%,#FFF8FB_55%,#FFFFFF_100%)]">
-                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(233,30,140,0.16)_0%,rgba(255,255,255,0)_45%)]" />
+                    <div className="relative h-[180px] bg-[linear-gradient(135deg,#E6F4FB_0%,#F8FCFE_55%,#FFFFFF_100%)]">
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(14,165,233,0.16)_0%,rgba(255,255,255,0)_45%)]" />
                       <div className="absolute inset-x-0 bottom-0 p-4">
                         <div className="flex flex-wrap items-center gap-2">
                           <span
@@ -548,7 +550,7 @@ export function MarketplaceProfessionalDetailView({
               }
             />
             <div className="grid gap-3 md:grid-cols-2">
-              <div className="rounded-[24px] bg-[#FCFCFC] p-4 shadow-[0_16px_28px_-24px_rgba(17,24,39,0.34)]">
+              <div className="rounded-[24px] bg-[var(--ui-surface-muted)] p-4 shadow-[0_16px_28px_-24px_rgba(17,24,39,0.24)]">
                 <div className="mb-3 flex items-center gap-2 text-[13px] font-bold text-gray-900">
                   <ShieldCheck className="h-4 w-4" style={{ color: 'var(--ui-primary)' }} />
                   {en ? 'Credentials' : 'Kredensial'}
@@ -560,13 +562,14 @@ export function MarketplaceProfessionalDetailView({
                         key={`${credential.issuer}-${credential.credentialCode}`}
                         className="rounded-[18px] border px-3 py-3"
                         style={{
-                          borderColor: '#f4d8e6',
-                          background: 'linear-gradient(180deg,#FFF7FB 0%,#FFFFFF 100%)',
+                          borderColor: 'var(--ui-border)',
+                          background:
+                            'linear-gradient(180deg, color-mix(in srgb, var(--ui-surface-muted) 58%, white) 0%, #FFFFFF 100%)',
                         }}
                       >
                         <div className="text-[14px] font-bold text-gray-900">{credential.label}</div>
                         <div className="mt-1 text-[12px] text-gray-500">{credential.issuer}</div>
-                        <div className="mt-1 text-[11px] font-semibold text-pink-600">{credential.credentialCode}</div>
+                        <div className="mt-1 text-[11px] font-semibold text-sky-700">{credential.credentialCode}</div>
                       </div>
                     ))
                   ) : (
@@ -580,7 +583,7 @@ export function MarketplaceProfessionalDetailView({
                 </div>
               </div>
 
-              <div className="rounded-[24px] bg-[#FCFCFC] p-4 shadow-[0_16px_28px_-24px_rgba(17,24,39,0.34)]">
+              <div className="rounded-[24px] bg-[var(--ui-surface-muted)] p-4 shadow-[0_16px_28px_-24px_rgba(17,24,39,0.24)]">
                 <div className="mb-3 flex items-center gap-2 text-[13px] font-bold text-gray-900">
                   <MapPin className="h-4 w-4" style={{ color: 'var(--ui-primary)' }} />
                   {en ? 'Coverage and practice' : 'Cakupan dan praktek'}
@@ -657,7 +660,14 @@ export function MarketplaceProfessionalDetailView({
               ))}
             </div>
             {selectedOffering ? (
-              <div className="mt-5 rounded-[24px] border border-pink-100/80 bg-[linear-gradient(180deg,#FFF7FB_0%,#FFFFFF_100%)] p-4">
+              <div
+                className="mt-5 rounded-[24px] border p-4"
+                style={{
+                  borderColor: 'var(--ui-border)',
+                  background:
+                    'linear-gradient(180deg, color-mix(in srgb, var(--ui-surface-muted) 60%, white) 0%, #FFFFFF 100%)',
+                }}
+              >
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <div className="flex flex-wrap items-center gap-2">

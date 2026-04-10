@@ -1,6 +1,6 @@
 'use client';
 
-import { PrimaryButton, TextField } from '@marketplace/ui';
+import { PrimaryButton, TextField } from '@marketplace/ui/primitives';
 import type { FormEvent } from 'react';
 
 export function MarketplaceRegisterForm({

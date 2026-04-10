@@ -1,6 +1,6 @@
 'use client';
 
-import { MessageBanner, PrimaryButton, SecondaryButton, TextField } from '@marketplace/ui';
+import { MessageBanner, PrimaryButton, SecondaryButton, TextField } from '@marketplace/ui/primitives';
 import type { FormEvent } from 'react';
 
 export function MarketplaceRecoveryForm({

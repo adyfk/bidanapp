@@ -1,6 +1,6 @@
 'use client';
 
-import { MarketplaceSectionHeader, MarketplaceSurfaceCard } from '@marketplace/ui';
+import { MarketplaceSectionHeader, MarketplaceSurfaceCard } from '@marketplace/ui/marketplace-lite';
 import type { ReactNode } from 'react';
 
 export function WorkspaceSurfaceCard({

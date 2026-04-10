@@ -1,7 +1,7 @@
 'use client';
 
-import type { ViewerSession } from '@marketplace/marketplace-core';
-import { PrimaryButton, SecondaryButton } from '@marketplace/ui';
+import type { ViewerSession } from '@marketplace/marketplace-core/viewer-auth';
+import { PrimaryButton, SecondaryButton } from '@marketplace/ui/primitives';
 import { useEffect, useState } from 'react';
 import { redirectToTarget } from '../../../../controllers/viewer-auth';
 import { firstName } from '../../../../lib/marketplace-copy';
