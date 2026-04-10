@@ -20,7 +20,7 @@ import { MarketplaceMobileShell } from '@marketplace/ui';
 import { useEffect, useMemo, useState } from 'react';
 import { createLocaleSwitcherItems } from '../../../layout/navigation';
 import { getApiBaseUrl, getApiOrigin } from '../../../lib/env';
-import { isEnglishLocale } from '../../../lib/marketplace-copy';
+import { isEnglishLocale, reviewStatusLabel } from '../../../lib/marketplace-copy';
 import { createLocalizedPath } from '../../../lib/platform';
 import { ProfessionalAccessSkeleton } from './parts/access-skeleton';
 import {
@@ -215,8 +215,8 @@ export function ProfessionalApplyPage({
   const currentStatus = workspace?.application?.status || 'draft';
   const isAuthenticated = Boolean(session?.isAuthenticated);
   const reviewStatus = workspace?.profile?.reviewStatus || 'draft';
-  const localizedStatus = currentStatus.replaceAll('_', ' ');
-  const localizedReviewStatus = reviewStatus.replaceAll('_', ' ');
+  const localizedStatus = reviewStatusLabel(currentStatus, locale);
+  const localizedReviewStatus = reviewStatusLabel(reviewStatus, locale);
   const documentFields = schemaFields.filter((field) => field.type === 'document');
   const documentCompletion = documentFields.filter((field) =>
     Boolean(stringifyApplyValue(applicationForm.attributes[field.key])),

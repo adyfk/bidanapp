@@ -10,9 +10,10 @@ import {
   MarketplaceStickyActionBar,
   MarketplaceSurfaceCard,
 } from '@marketplace/ui/marketplace-lite';
-import { PrimaryButton, SecondaryButton, StatusPill } from '@marketplace/ui/primitives';
+import { PrimaryButton, SecondaryButton, StatusChipGroup } from '@marketplace/ui/primitives';
 import { ChevronLeft, Clock3, Heart, MapPin, Share2, ShieldCheck, Tag } from 'lucide-react';
 import { deliveryModeLabel, formatCurrency, isEnglishLocale, offeringTypeLabel } from '../../../lib/marketplace-copy';
+import { DeliveryModeChip, OfferingTypeChip } from '../../../lib/status-visuals';
 import { OfferingCard } from '../shared/parts/offering-card';
 import { InitialPortrait } from '../shared/parts/portrait';
 
@@ -91,10 +92,10 @@ export function MarketplaceOfferingDetailView({
             />
             <div className="space-y-4">
               <div className="rounded-[24px] bg-[#FCFCFC] p-4 shadow-[0_16px_28px_-24px_rgba(17,24,39,0.34)]">
-                <div className="flex flex-wrap items-center gap-2">
-                  <StatusPill tone="accent">{offeringTypeLabel(detail.offering.offeringType, locale)}</StatusPill>
-                  <StatusPill tone="neutral">{deliveryModeLabel(detail.offering.deliveryMode, locale)}</StatusPill>
-                </div>
+                <StatusChipGroup>
+                  <OfferingTypeChip compact locale={locale} value={detail.offering.offeringType} />
+                  <DeliveryModeChip compact locale={locale} value={detail.offering.deliveryMode} />
+                </StatusChipGroup>
                 <p className="mt-3 text-[13px] leading-6 text-slate-500">{detail.offering.description}</p>
               </div>
 

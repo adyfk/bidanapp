@@ -10,7 +10,7 @@ import {
   MarketplaceStickyActionBar,
   MarketplaceSurfaceCard,
 } from '@marketplace/ui/marketplace-lite';
-import { PrimaryButton, SecondaryButton, StatusPill } from '@marketplace/ui/primitives';
+import { PrimaryButton, SecondaryButton, StatusChip, StatusChipGroup } from '@marketplace/ui/primitives';
 import {
   BadgeCheck,
   BookHeart,
@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { deliveryModeLabel, formatCurrency, isEnglishLocale, offeringTypeLabel } from '../../../lib/marketplace-copy';
+import { DeliveryModeChip, OfferingTypeChip } from '../../../lib/status-visuals';
 import { OfferingCard } from '../shared/parts/offering-card';
 import { InitialPortrait } from '../shared/parts/portrait';
 
@@ -168,10 +169,10 @@ function SelectableOfferingCard({
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <StatusPill tone="accent">{offeringTypeLabel(offering.offeringType, locale)}</StatusPill>
-            <StatusPill tone="neutral">{deliveryModeLabel(offering.deliveryMode, locale)}</StatusPill>
-          </div>
+          <StatusChipGroup>
+            <OfferingTypeChip compact locale={locale} value={offering.offeringType} />
+            <DeliveryModeChip compact locale={locale} value={offering.deliveryMode} />
+          </StatusChipGroup>
           <div className="mt-3 text-[15px] font-bold text-gray-900">{offering.title}</div>
           <div className="mt-1 text-[12px] font-medium text-gray-500">{offering.professionalDisplayName}</div>
           <p className="mt-3 line-clamp-2 text-[13px] leading-6 text-gray-500">{offering.description}</p>
@@ -430,19 +431,32 @@ export function MarketplaceProfessionalDetailView({
                   <p className="mt-2 text-[13px] leading-relaxed text-gray-500">{educationHistory}</p>
                 </div>
               ) : null}
-              <div className="flex flex-wrap gap-2">
-                <StatusPill tone="accent">{practiceLocation}</StatusPill>
+              <StatusChipGroup>
+                <StatusChip
+                  compact
+                  icon={<MapPin className="h-full w-full" />}
+                  label={practiceLocation}
+                  tone="accent"
+                />
                 {specialties.slice(0, 4).map((specialty) => (
-                  <StatusPill key={specialty} tone="neutral">
-                    {specialty}
-                  </StatusPill>
+                  <StatusChip
+                    compact
+                    icon={<Sparkles className="h-full w-full" />}
+                    key={specialty}
+                    label={specialty}
+                    tone="neutral"
+                  />
                 ))}
                 {coverageAreas.slice(0, 3).map((area) => (
-                  <StatusPill key={area} tone="neutral">
-                    {area}
-                  </StatusPill>
+                  <StatusChip
+                    compact
+                    icon={<MapPin className="h-full w-full" />}
+                    key={area}
+                    label={area}
+                    tone="neutral"
+                  />
                 ))}
-              </div>
+              </StatusChipGroup>
             </div>
           </MarketplaceSurfaceCard>
 
@@ -599,12 +613,16 @@ export function MarketplaceProfessionalDetailView({
                     <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
                       {en ? 'Coverage areas' : 'Area layanan'}
                     </div>
-                    <div className="mt-2 flex flex-wrap gap-2">
+                    <StatusChipGroup className="mt-2">
                       {coverageAreas.length ? (
                         coverageAreas.map((area) => (
-                          <StatusPill key={area} tone="neutral">
-                            {area}
-                          </StatusPill>
+                          <StatusChip
+                            compact
+                            icon={<MapPin className="h-full w-full" />}
+                            key={area}
+                            label={area}
+                            tone="neutral"
+                          />
                         ))
                       ) : (
                         <span className="text-[13px] text-slate-500">
@@ -613,7 +631,7 @@ export function MarketplaceProfessionalDetailView({
                             : 'Area layanan akan tampil setelah profil selesai diatur.'}
                         </span>
                       )}
-                    </div>
+                    </StatusChipGroup>
                   </div>
                   {detail.availability?.slots?.length ? (
                     <div className="rounded-[18px] border border-slate-200 bg-white px-3 py-3">
@@ -670,10 +688,10 @@ export function MarketplaceProfessionalDetailView({
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <StatusPill tone="accent">{offeringTypeLabel(selectedOffering.offeringType, locale)}</StatusPill>
-                      <StatusPill tone="neutral">{deliveryModeLabel(selectedOffering.deliveryMode, locale)}</StatusPill>
-                    </div>
+                    <StatusChipGroup>
+                      <OfferingTypeChip compact locale={locale} value={selectedOffering.offeringType} />
+                      <DeliveryModeChip compact locale={locale} value={selectedOffering.deliveryMode} />
+                    </StatusChipGroup>
                     <div className="mt-3 text-[15px] font-bold text-slate-900">{selectedOffering.title}</div>
                     <p className="mt-2 text-[13px] leading-6 text-slate-500">{selectedOffering.description}</p>
                   </div>

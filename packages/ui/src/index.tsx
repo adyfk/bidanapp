@@ -89,6 +89,8 @@ export {
   PrimaryButton,
   SecondaryButton,
   SectionHeading,
+  StatusChip,
+  StatusChipGroup,
   StatusPill,
   TextAreaField,
   TextField,

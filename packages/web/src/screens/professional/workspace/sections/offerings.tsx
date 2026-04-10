@@ -2,8 +2,9 @@
 
 import type { ProfessionalWorkspaceSnapshot } from '@marketplace/marketplace-core';
 import { EntityCard } from '@marketplace/ui/patterns';
-import { EmptyState, PrimaryButton, StatusPill, TextAreaField, TextField } from '@marketplace/ui/primitives';
+import { EmptyState, PrimaryButton, StatusChipGroup, TextAreaField, TextField } from '@marketplace/ui/primitives';
 import type { Dispatch, SetStateAction } from 'react';
+import { DeliveryModeChip, OfferingStatusChip, OfferingTypeChip } from '../../../../lib/status-visuals';
 import { WorkspaceSurfaceCard } from '../parts/surface-card';
 import { formatWorkspaceCurrency } from '../utils';
 
@@ -118,8 +119,14 @@ export function OfferingsSection({
             {(snapshot.offerings ?? []).map((offering) => (
               <EntityCard
                 key={offering.id}
-                badge={<StatusPill tone="accent">{offering.status}</StatusPill>}
-                description={`${offering.offeringType} • ${offering.deliveryMode}`}
+                badge={
+                  <StatusChipGroup>
+                    <OfferingStatusChip compact value={offering.status} />
+                    <OfferingTypeChip compact value={offering.offeringType} />
+                    <DeliveryModeChip compact value={offering.deliveryMode} />
+                  </StatusChipGroup>
+                }
+                description={`/${offering.slug}`}
                 meta={
                   <div className="space-y-2">
                     <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-3 py-3 text-[12px] text-slate-500">

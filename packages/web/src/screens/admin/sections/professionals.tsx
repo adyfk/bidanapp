@@ -8,12 +8,13 @@ import {
   JsonPreviewBlock,
   PrimaryButton,
   SecondaryButton,
-  StatusPill,
+  StatusChipGroup,
   SurfaceCard,
   TextAreaField,
 } from '@marketplace/ui';
 import type { Dispatch, SetStateAction } from 'react';
 import { getApiOrigin } from '../../../lib/env';
+import { ReviewStatusChip } from '../../../lib/status-visuals';
 
 export function ProfessionalsSection({
   applications,
@@ -38,8 +39,13 @@ export function ProfessionalsSection({
           {applications.map((application) => (
             <EntityCard
               key={application.applicationId}
-              badge={<StatusPill tone="accent">{application.applicationStatus}</StatusPill>}
-              subtitle={`Review: ${application.reviewStatus || 'draft'} • Slug: ${application.slug || '-'}`}
+              badge={
+                <StatusChipGroup>
+                  <ReviewStatusChip compact value={application.applicationStatus} />
+                  <ReviewStatusChip compact value={application.reviewStatus || 'draft'} />
+                </StatusChipGroup>
+              }
+              subtitle={`Slug: ${application.slug || '-'}`}
               title={application.displayName || application.userId}
               actions={
                 <>

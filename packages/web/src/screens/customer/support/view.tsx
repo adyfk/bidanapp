@@ -15,7 +15,6 @@ import {
   MarketplaceSupportSheet,
   MessageBanner,
   PrimaryButton,
-  StatusPill,
   TextAreaField,
   TextField,
 } from '@marketplace/ui';
@@ -23,8 +22,8 @@ import { LifeBuoy } from 'lucide-react';
 import { useEffect, useEffectEvent, useMemo, useState } from 'react';
 import { createPrimaryMarketplaceNav } from '../../../layout/navigation';
 import { getApiBaseUrl } from '../../../lib/env';
-import { supportStatusLabel } from '../../../lib/marketplace-copy';
 import { createLocalizedPath } from '../../../lib/platform';
+import { SupportStatusChip } from '../../../lib/status-visuals';
 import { CustomerAccessLock } from '../shared/parts/access-lock';
 import { MarketplaceStickyPageHeader } from '../shared/parts/page-header';
 import { useCustomerMarketplaceController } from '../shared/use-customer-marketplace-controller';
@@ -34,6 +33,7 @@ const client = createMarketplaceApiClient(apiBaseUrl);
 
 const quickSubjects = ['Kendala pembayaran', 'Jadwal layanan', 'Perlu refund', 'Masalah akun'];
 type TicketFilter = 'all' | 'open' | 'resolved';
+const openSupportStatuses = new Set(['new', 'triaged', 'reviewing']);
 
 function humanizeSupportEvent(value: string) {
   return value.replaceAll('_', ' ').replace(/\b\w/g, (char) => char.toUpperCase());
@@ -97,7 +97,7 @@ export function CustomerSupportPage({
   };
 
   const counts = {
-    open: tickets.filter((ticket) => ticket.status === 'new' || ticket.status === 'triaged').length,
+    open: tickets.filter((ticket) => openSupportStatuses.has(ticket.status)).length,
     resolved: tickets.filter((ticket) => ticket.status === 'resolved').length,
     triaged: tickets.filter((ticket) => ticket.status === 'triaged').length,
   };
@@ -106,7 +106,7 @@ export function CustomerSupportPage({
       return tickets.filter((ticket) => ticket.status === 'resolved');
     }
     if (activeFilter === 'open') {
-      return tickets.filter((ticket) => ticket.status === 'new' || ticket.status === 'triaged');
+      return tickets.filter((ticket) => openSupportStatuses.has(ticket.status));
     }
     return tickets;
   }, [activeFilter, tickets]);
@@ -201,7 +201,7 @@ export function CustomerSupportPage({
                     {filteredTickets.map((ticket) => (
                       <MarketplaceListCard
                         key={ticket.id}
-                        badge={<StatusPill tone="accent">{supportStatusLabel(ticket.status, locale)}</StatusPill>}
+                        badge={<SupportStatusChip compact locale={locale} value={ticket.status} />}
                         description={<span className="break-words [overflow-wrap:anywhere]">{ticket.details}</span>}
                         subtitle={`${ticket.priority} • ${ticket.id}`}
                         title={<span className="break-words [overflow-wrap:anywhere]">{ticket.subject}</span>}

@@ -104,7 +104,7 @@ export function MarketplaceHomeView({
           </a>
         </div>
 
-        <div className="-mx-5 mt-4 flex gap-2 overflow-x-auto px-5 pb-1">
+        <div className="mt-4 flex gap-2 overflow-x-auto px-5 pb-1 [scroll-padding-inline:1.25rem]">
           {trustPills.map((pill) => (
             <MarketplaceFeaturePill key={pill} tone="soft">
               <Sparkles className="h-3.5 w-3.5" />

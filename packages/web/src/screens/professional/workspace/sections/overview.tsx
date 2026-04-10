@@ -5,6 +5,7 @@ import { DocumentList } from '@marketplace/ui/patterns';
 import { EmptyState } from '@marketplace/ui/primitives';
 import { Bell, Compass, Layers3, MapPin, Sparkles, Star, UserRound, Wallet } from 'lucide-react';
 import { getApiOrigin } from '../../../../lib/env';
+import { reviewStatusLabel } from '../../../../lib/marketplace-copy';
 import { createLocalizedPath } from '../../../../lib/platform';
 import { WorkspaceActionButton } from '../parts/action-button';
 import { WorkspaceMetricCard } from '../parts/metric-card';
@@ -40,12 +41,12 @@ export function OverviewSection({ locale, snapshot }: { locale: string; snapshot
           <WorkspaceMetricCard
             icon={<Star className="h-4 w-4" />}
             label="Review"
-            value={snapshot.profile?.reviewStatus || 'draft'}
+            value={reviewStatusLabel(snapshot.profile?.reviewStatus || 'draft')}
           />
           <WorkspaceMetricCard
             icon={<Wallet className="h-4 w-4" />}
             label="Application"
-            value={snapshot.application?.status || 'draft'}
+            value={reviewStatusLabel(snapshot.application?.status || 'draft')}
           />
         </div>
         <div className="mt-5 grid gap-3">

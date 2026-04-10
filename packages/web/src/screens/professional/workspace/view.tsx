@@ -29,6 +29,7 @@ import dynamic from 'next/dynamic';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getApiBaseUrl } from '../../../lib/env';
 import { createLocalizedPath } from '../../../lib/platform';
+import { ReviewStatusChip } from '../../../lib/status-visuals';
 import { type ProfessionalDashboardSection, professionalConsoleSections } from '../../../screen-config/sections';
 import { WorkspaceActionButton } from './parts/action-button';
 import { ProfessionalTabGrid } from './parts/tab-grid';
@@ -651,9 +652,7 @@ export function ProfessionalWorkspacePage({
                       <span className="rounded-full border border-white/18 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/90">
                         {currentSection.label}
                       </span>
-                      <span className="rounded-full border border-white/18 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white/82">
-                        {snapshot.profile?.reviewStatus || 'draft'}
-                      </span>
+                      <ReviewStatusChip compact value={snapshot.profile?.reviewStatus || 'draft'} />
                     </div>
                     <h1 className="mt-4 text-[24px] font-bold leading-tight text-white">
                       {snapshot.profile?.displayName || session.customerProfile?.displayName || 'Dashboard profesional'}

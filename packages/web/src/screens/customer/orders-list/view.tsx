@@ -20,6 +20,8 @@ import {
   MessageBanner,
   PrimaryButton,
   SecondaryButton,
+  StatusChip,
+  StatusChipGroup,
   TextAreaField,
   TextField,
 } from '@marketplace/ui';
@@ -27,14 +29,9 @@ import { Bell, Calendar, ChevronRight, Clock3, CreditCard, Search, Tag } from 'l
 import { useEffect, useEffectEvent, useMemo, useState } from 'react';
 import { createPrimaryMarketplaceNav } from '../../../layout/navigation';
 import { getApiBaseUrl } from '../../../lib/env';
-import {
-  deliveryModeLabel,
-  formatCurrency,
-  isEnglishLocale,
-  orderStatusLabel,
-  paymentStatusLabel,
-} from '../../../lib/marketplace-copy';
+import { deliveryModeLabel, formatCurrency, isEnglishLocale, orderStatusLabel } from '../../../lib/marketplace-copy';
 import { createLocalizedPath } from '../../../lib/platform';
+import { DeliveryModeChip, OrderStatusChip, PaymentStatusChip } from '../../../lib/status-visuals';
 import { useCustomerMarketplaceController } from '../shared/use-customer-marketplace-controller';
 
 const apiBaseUrl = getApiBaseUrl();
@@ -158,20 +155,10 @@ function ActivityOrderCard({
       >
         <div className="flex items-start gap-3">
           <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <span
-                className="rounded-full px-2.5 py-1 text-[10px] font-semibold"
-                style={{
-                  backgroundColor: 'var(--ui-surface-muted)',
-                  color: 'var(--ui-primary)',
-                }}
-              >
-                {paymentStatusLabel(order.paymentStatus, locale)}
-              </span>
-              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-600">
-                {orderStatusLabel(order.status, locale)}
-              </span>
-            </div>
+            <StatusChipGroup>
+              <PaymentStatusChip compact locale={locale} value={order.paymentStatus} />
+              <OrderStatusChip compact locale={locale} value={order.status} />
+            </StatusChipGroup>
 
             <h3 className="mt-3 text-[16px] font-bold leading-snug break-words text-gray-900 [overflow-wrap:anywhere]">
               {order.offeringTitle}
@@ -180,18 +167,12 @@ function ActivityOrderCard({
               {offering?.professionalDisplayName || (en ? 'Assigned professional' : 'Profesional terkait')}
             </p>
 
-            <div className="mt-3 flex flex-wrap gap-2">
-              {offering ? (
-                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-600">
-                  {deliveryModeLabel(offering.deliveryMode, locale)}
-                </span>
-              ) : null}
+            <StatusChipGroup className="mt-3">
+              {offering ? <DeliveryModeChip compact locale={locale} value={offering.deliveryMode} /> : null}
               {schedule ? (
-                <span className="rounded-full bg-pink-50 px-2.5 py-1 text-[10px] font-semibold text-pink-700">
-                  {schedule}
-                </span>
+                <StatusChip compact icon={<Calendar className="h-full w-full" />} label={schedule} tone="accent" />
               ) : null}
-            </div>
+            </StatusChipGroup>
 
             <div className="mt-4 grid gap-2 sm:grid-cols-2">
               <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-3 py-3 text-[12px] text-slate-500">

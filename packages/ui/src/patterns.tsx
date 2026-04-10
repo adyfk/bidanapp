@@ -147,8 +147,8 @@ export function EntityCard({
         borderColor: 'var(--ui-border)',
       }}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0 flex-1 basis-[14rem]">
           <p
             className="break-words text-[16px] font-bold tracking-[-0.03em] [overflow-wrap:anywhere]"
             style={{ color: 'var(--ui-text-strong)' }}
@@ -161,7 +161,7 @@ export function EntityCard({
             </div>
           ) : null}
         </div>
-        {badge ? <div className="shrink-0">{badge}</div> : null}
+        {badge ? <div className="flex max-w-full flex-shrink flex-wrap justify-start">{badge}</div> : null}
       </div>
       {description ? (
         <div className="mt-3 text-[13px] leading-6" style={{ color: 'var(--ui-text-muted)' }}>

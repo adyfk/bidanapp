@@ -5,13 +5,13 @@ import {
   EmptyState,
   EntityCard,
   PrimaryButton,
-  StatusPill,
   SurfaceCard,
   TextAreaField,
   TextField,
   TimelineBlock,
 } from '@marketplace/ui';
 import type { Dispatch, SetStateAction } from 'react';
+import { SupportStatusChip } from '../../../lib/status-visuals';
 
 export function SupportSection({
   busy,
@@ -45,9 +45,9 @@ export function SupportSection({
             return (
               <EntityCard
                 key={ticket.id}
-                badge={<StatusPill tone="neutral">{ticket.id}</StatusPill>}
+                badge={<SupportStatusChip compact value={ticket.status} />}
                 description={ticket.details}
-                subtitle={`${ticket.status} • ${ticket.priority} • Reporter ${ticket.reporterUserId}`}
+                subtitle={`${ticket.priority} • Reporter ${ticket.reporterUserId} • ${ticket.id}`}
                 title={ticket.subject}
               >
                 <p className="text-xs" style={{ color: 'var(--ui-text-subtle)' }}>

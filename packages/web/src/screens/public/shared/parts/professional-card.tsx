@@ -1,8 +1,8 @@
 'use client';
 
 import type { DirectoryProfessional } from '@marketplace/marketplace-core/directory';
-import { StatusPill } from '@marketplace/ui/primitives';
-import { ChevronRight, MapPin, Star } from 'lucide-react';
+import { StatusChip, StatusChipGroup } from '@marketplace/ui';
+import { ChevronRight, MapPin, PackageCheck, Star, Tag } from 'lucide-react';
 import { formatCurrency, isEnglishLocale } from '../../../../lib/marketplace-copy';
 import { compactNumberLabel, InitialPortrait } from './portrait';
 
@@ -47,12 +47,20 @@ export function ProfessionalCard({ locale, professional }: { locale: string; pro
             {coverageLabel}
           </p>
 
-          <div className="mt-3 flex flex-wrap gap-2">
-            <StatusPill tone="accent">
-              {compactNumberLabel(professional.offeringCount, locale, 'layanan', 'service')}
-            </StatusPill>
-            <StatusPill tone="neutral">{formatCurrency(professional.startingPrice, locale)}</StatusPill>
-          </div>
+          <StatusChipGroup className="mt-3">
+            <StatusChip
+              compact
+              icon={<PackageCheck className="h-full w-full" />}
+              label={compactNumberLabel(professional.offeringCount, locale, 'layanan', 'service')}
+              tone="accent"
+            />
+            <StatusChip
+              compact
+              icon={<Tag className="h-full w-full" />}
+              label={formatCurrency(professional.startingPrice, locale)}
+              tone="neutral"
+            />
+          </StatusChipGroup>
 
           <div className="mt-4 flex flex-wrap items-center gap-3 text-[12px] font-medium text-gray-500">
             <span className="inline-flex items-center gap-1.5">

@@ -2,7 +2,8 @@
 
 import type { ProfessionalWorkspaceSnapshot } from '@marketplace/marketplace-core';
 import { EntityCard } from '@marketplace/ui/patterns';
-import { EmptyState, StatusPill } from '@marketplace/ui/primitives';
+import { EmptyState, StatusChipGroup } from '@marketplace/ui/primitives';
+import { OrderStatusChip, PaymentStatusChip } from '../../../../lib/status-visuals';
 import { WorkspaceSurfaceCard } from '../parts/surface-card';
 import { formatWorkspaceCurrency } from '../utils';
 
@@ -17,8 +18,13 @@ export function OrdersSection({ snapshot }: { snapshot: ProfessionalWorkspaceSna
           {(snapshot.recentOrders ?? []).map((order) => (
             <EntityCard
               key={order.id}
-              badge={<StatusPill tone="neutral">{order.status}</StatusPill>}
-              description={`${order.orderType} • ${order.paymentStatus}`}
+              badge={
+                <StatusChipGroup>
+                  <OrderStatusChip compact value={order.status} />
+                  <PaymentStatusChip compact value={order.paymentStatus} />
+                </StatusChipGroup>
+              }
+              description={order.orderType.replaceAll('_', ' ')}
               meta={
                 <div className="grid gap-2 sm:grid-cols-2">
                   <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-3 py-3 text-[12px] text-slate-500">
@@ -33,9 +39,10 @@ export function OrdersSection({ snapshot }: { snapshot: ProfessionalWorkspaceSna
                   </div>
                   <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-3 py-3 text-[12px] leading-5 text-slate-500 sm:col-span-2">
                     Ringkasan status
-                    <div className="mt-1 break-words text-[13px] font-semibold text-slate-900 [overflow-wrap:anywhere]">
-                      {`${order.orderType} • ${order.paymentStatus} • ${order.status}`}
-                    </div>
+                    <StatusChipGroup className="mt-2">
+                      <OrderStatusChip compact value={order.status} />
+                      <PaymentStatusChip compact value={order.paymentStatus} />
+                    </StatusChipGroup>
                   </div>
                 </div>
               }

@@ -23,13 +23,16 @@ import {
   MessageBanner,
   PrimaryButton,
   SecondaryButton,
+  StatusChip,
+  StatusChipGroup,
   TextAreaField,
 } from '@marketplace/ui';
-import { BookHeart, ImageIcon, MoreVertical, Phone, Plus, Send, Smile } from 'lucide-react';
+import { BookHeart, CalendarDays, ImageIcon, MoreVertical, Phone, Plus, Send, Smile } from 'lucide-react';
 import { useEffect, useEffectEvent, useMemo, useState } from 'react';
 import { getApiBaseUrl } from '../../../lib/env';
 import { formatCurrency, isEnglishLocale, orderStatusLabel, paymentStatusLabel } from '../../../lib/marketplace-copy';
 import { createLocalizedPath } from '../../../lib/platform';
+import { OrderStatusChip, PaymentStatusChip } from '../../../lib/status-visuals';
 import { CustomerAccessLock } from '../shared/parts/access-lock';
 import { useCustomerMarketplaceController } from '../shared/use-customer-marketplace-controller';
 
@@ -244,27 +247,15 @@ export function CustomerOrderDetailPage({
             {order.offeringTitle}
           </p>
         </div>
-        <span
-          className="rounded-full px-3 py-1.5 text-[11px] font-semibold"
-          style={{ backgroundColor: 'var(--ui-surface-muted)', color: 'var(--ui-primary)' }}
-        >
-          {orderStatusLabel(order.status, locale)}
-        </span>
+        <OrderStatusChip locale={locale} value={order.status} />
       </div>
 
-      <div className="mt-3 flex flex-wrap gap-2">
-        <span className="rounded-full bg-slate-900 px-3 py-1.5 text-[10px] font-semibold text-white">
-          {paymentStatusLabel(order.paymentStatus, locale)}
-        </span>
+      <StatusChipGroup className="mt-3">
+        <PaymentStatusChip compact locale={locale} value={order.paymentStatus} />
         {orderSchedule ? (
-          <span
-            className="rounded-full px-3 py-1.5 text-[10px] font-semibold"
-            style={{ backgroundColor: 'var(--ui-surface-muted)', color: 'var(--ui-primary)' }}
-          >
-            {orderSchedule}
-          </span>
+          <StatusChip compact icon={<CalendarDays className="h-full w-full" />} label={orderSchedule} tone="accent" />
         ) : null}
-      </div>
+      </StatusChipGroup>
 
       <p className="mt-3 text-[13px] leading-relaxed text-slate-600">
         {orderNotes ||

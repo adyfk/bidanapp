@@ -1,9 +1,10 @@
 'use client';
 
 import type { DirectoryOffering } from '@marketplace/marketplace-core';
-import { StatusPill } from '@marketplace/ui/primitives';
-import { ChevronRight, Clock, Tag } from 'lucide-react';
+import { StatusChip, StatusChipGroup } from '@marketplace/ui';
+import { ChevronRight, Clock, Tag, UserRound } from 'lucide-react';
 import { deliveryModeLabel, formatCurrency, offeringTypeLabel } from '../../../../lib/marketplace-copy';
+import { DeliveryModeChip, OfferingTypeChip } from '../../../../lib/status-visuals';
 import { InitialPortrait } from '../../shared/parts/portrait';
 
 export function ServiceCatalogCard({ locale, offering }: { locale: string; offering: DirectoryOffering }) {
@@ -40,10 +41,16 @@ export function ServiceCatalogCard({ locale, offering }: { locale: string; offer
         {offering.description}
       </p>
 
-      <div className="mt-4 flex flex-wrap gap-2">
-        <StatusPill tone="neutral">{deliveryModeLabel(offering.deliveryMode, locale)}</StatusPill>
-        <StatusPill tone="neutral">{offering.professionalDisplayName}</StatusPill>
-      </div>
+      <StatusChipGroup className="mt-4">
+        <OfferingTypeChip compact locale={locale} value={offering.offeringType} />
+        <DeliveryModeChip compact locale={locale} value={offering.deliveryMode} />
+        <StatusChip
+          compact
+          icon={<UserRound className="h-full w-full" />}
+          label={offering.professionalDisplayName}
+          tone="neutral"
+        />
+      </StatusChipGroup>
 
       <div className="mt-4 flex items-center gap-4 border-t border-gray-50 pt-3 text-[13px] font-medium text-gray-600">
         <div className="flex items-center gap-1.5">

@@ -11,10 +11,11 @@ import {
   MarketplaceSupportEntryCard,
   MarketplaceSupportSheet,
 } from '@marketplace/ui/marketplace-lite';
-import { PrimaryButton, StatusPill, TextField } from '@marketplace/ui/primitives';
+import { PrimaryButton, TextField } from '@marketplace/ui/primitives';
 import { LayoutDashboard, LifeBuoy, MapPin, UserRound } from 'lucide-react';
 import { type Dispatch, type SetStateAction, useState } from 'react';
 import { createLocalizedPath } from '../../../../lib/platform';
+import { ReviewStatusChip } from '../../../../lib/status-visuals';
 import { WorkspaceSurfaceCard } from '../parts/surface-card';
 
 function readAttribute(attributes: Record<string, unknown> | undefined, key: string) {
@@ -115,9 +116,7 @@ export function ProfileSection({
             iconClassName="bg-teal-50 text-teal-700"
             title="Status review"
             trailing={
-              <StatusPill tone="accent">
-                {snapshot.profile?.reviewStatus || snapshot.application?.status || 'draft'}
-              </StatusPill>
+              <ReviewStatusChip compact value={snapshot.profile?.reviewStatus || snapshot.application?.status} />
             }
           />
           <MarketplaceSettingsRow

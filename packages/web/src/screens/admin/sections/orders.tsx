@@ -1,7 +1,8 @@
 'use client';
 
 import type { AdminOpsOrder } from '@marketplace/marketplace-core';
-import { EmptyState, EntityCard, PrimaryButton, SecondaryButton, SurfaceCard } from '@marketplace/ui';
+import { EmptyState, EntityCard, PrimaryButton, SecondaryButton, StatusChipGroup, SurfaceCard } from '@marketplace/ui';
+import { OrderStatusChip, PaymentStatusChip } from '../../../lib/status-visuals';
 import { formatAdminCurrency } from '../utils';
 
 export function OrdersSection({
@@ -23,8 +24,14 @@ export function OrdersSection({
           {orders.map((order) => (
             <EntityCard
               key={order.id}
+              badge={
+                <StatusChipGroup>
+                  <OrderStatusChip compact value={order.status} />
+                  <PaymentStatusChip compact value={order.paymentStatus} />
+                </StatusChipGroup>
+              }
               description={`Customer: ${order.customerUserId} • Professional: ${order.professionalUserId}`}
-              subtitle={`${order.orderType} • ${order.status} • ${order.paymentStatus}`}
+              subtitle={order.orderType.replaceAll('_', ' ')}
               title={order.offeringTitle}
               meta={
                 <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-3 py-3 text-[12px] text-slate-500">

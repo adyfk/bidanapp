@@ -1,9 +1,10 @@
 'use client';
 
 import type { DirectoryOffering } from '@marketplace/marketplace-core/directory';
-import { StatusPill } from '@marketplace/ui/primitives';
+import { StatusChipGroup } from '@marketplace/ui';
 import { ChevronRight, Clock3, Tag } from 'lucide-react';
-import { deliveryModeLabel, formatCurrency, offeringTypeLabel } from '../../../../lib/marketplace-copy';
+import { deliveryModeLabel, formatCurrency } from '../../../../lib/marketplace-copy';
+import { DeliveryModeChip, OfferingTypeChip } from '../../../../lib/status-visuals';
 import { InitialPortrait } from './portrait';
 
 export function OfferingCard({ locale, offering }: { locale: string; offering: DirectoryOffering }) {
@@ -39,10 +40,10 @@ export function OfferingCard({ locale, offering }: { locale: string; offering: D
         {offering.description}
       </p>
 
-      <div className="mt-4 flex flex-wrap gap-2">
-        <StatusPill tone="accent">{offeringTypeLabel(offering.offeringType, locale)}</StatusPill>
-        <StatusPill tone="neutral">{modeLabel}</StatusPill>
-      </div>
+      <StatusChipGroup className="mt-4">
+        <OfferingTypeChip compact locale={locale} value={offering.offeringType} />
+        <DeliveryModeChip compact locale={locale} value={offering.deliveryMode} />
+      </StatusChipGroup>
 
       <div className="mt-4 flex items-center justify-between gap-4 border-t border-gray-50 pt-3 text-[13px] font-medium text-gray-600">
         <div className="inline-flex items-center gap-1.5">

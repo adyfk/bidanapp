@@ -6,11 +6,12 @@ import {
   EntityCard,
   PrimaryButton,
   SecondaryButton,
-  StatusPill,
+  StatusChipGroup,
   SurfaceCard,
   TextField,
 } from '@marketplace/ui';
 import type { Dispatch, SetStateAction } from 'react';
+import { PayoutStatusChip, ReviewStatusChip } from '../../../lib/status-visuals';
 import { formatAdminCurrency } from '../utils';
 
 export function PayoutsSection({
@@ -45,7 +46,13 @@ export function PayoutsSection({
                 .map((application) => (
                   <EntityCard
                     key={`payout-source-${application.applicationId}`}
-                    description={`${application.applicationStatus} • ${application.reviewStatus || 'draft'}`}
+                    badge={
+                      <StatusChipGroup>
+                        <ReviewStatusChip compact value={application.applicationStatus} />
+                        <ReviewStatusChip compact value={application.reviewStatus || 'draft'} />
+                      </StatusChipGroup>
+                    }
+                    description={application.profileId || application.userId}
                     title={application.displayName || application.userId}
                     actions={
                       <SecondaryButton
@@ -100,9 +107,9 @@ export function PayoutsSection({
             {payouts.map((payout) => (
               <EntityCard
                 key={payout.id}
-                badge={<StatusPill tone="neutral">{payout.status}</StatusPill>}
+                badge={<PayoutStatusChip compact value={payout.status} />}
                 description={payout.providerReference || 'Belum ada referensi pencairan'}
-                subtitle={`${payout.status} • ${formatAdminCurrency(payout.amount, payout.currency)} • ${payout.provider}`}
+                subtitle={`${formatAdminCurrency(payout.amount, payout.currency)} • ${payout.provider}`}
                 title={payout.professionalProfileId}
                 actions={
                   <>

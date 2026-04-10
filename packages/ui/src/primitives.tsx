@@ -93,16 +93,49 @@ export function SectionHeading({
 }
 
 export function StatusPill({ children, tone = 'neutral' }: { children: ReactNode; tone?: StatusTone }) {
+  return <StatusChip label={children} strong={tone === 'accent'} tone={tone} />;
+}
+
+export function StatusChip({
+  ariaLabel,
+  className,
+  compact = false,
+  icon,
+  label,
+  strong = false,
+  tone = 'neutral',
+}: {
+  ariaLabel?: string;
+  className?: string;
+  compact?: boolean;
+  icon?: ReactNode;
+  label: ReactNode;
+  strong?: boolean;
+  tone?: StatusTone;
+}) {
   return (
     <span
       className={cx(
-        'inline-flex max-w-full items-center gap-1.5 overflow-hidden truncate whitespace-nowrap rounded-[12px] border px-2.5 py-1 text-[10.5px] font-semibold leading-tight',
-        tone === 'accent' ? 'uppercase tracking-[0.12em]' : '',
+        'inline-flex max-w-full min-w-0 items-center gap-1.5 overflow-hidden whitespace-nowrap rounded-[12px] border font-semibold leading-tight',
+        compact ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-[10.5px]',
+        strong ? 'uppercase tracking-[0.12em]' : '',
+        className,
       )}
+      data-ui="status-chip"
       style={toneStyle(tone)}
+      title={ariaLabel}
     >
-      {children}
+      {icon ? <span className="flex h-3.5 w-3.5 flex-shrink-0 items-center justify-center">{icon}</span> : null}
+      <span className="min-w-0 truncate">{label}</span>
     </span>
+  );
+}
+
+export function StatusChipGroup({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <div className={cx('flex min-w-0 flex-wrap items-center gap-2', className)} data-ui="status-chip-group">
+      {children}
+    </div>
   );
 }
 

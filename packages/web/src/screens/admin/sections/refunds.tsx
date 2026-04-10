@@ -6,12 +6,13 @@ import {
   EntityCard,
   PrimaryButton,
   SecondaryButton,
-  StatusPill,
+  StatusChipGroup,
   SurfaceCard,
   TextAreaField,
   TextField,
 } from '@marketplace/ui';
 import type { Dispatch, SetStateAction } from 'react';
+import { OrderStatusChip, PaymentStatusChip, RefundStatusChip } from '../../../lib/status-visuals';
 import { formatAdminCurrency } from '../utils';
 
 export function RefundsSection({
@@ -43,7 +44,13 @@ export function RefundsSection({
               {orders.slice(0, 4).map((order) => (
                 <EntityCard
                   key={`refund-source-${order.id}`}
-                  description={`${order.status} • ${order.paymentStatus}`}
+                  badge={
+                    <StatusChipGroup>
+                      <OrderStatusChip compact value={order.status} />
+                      <PaymentStatusChip compact value={order.paymentStatus} />
+                    </StatusChipGroup>
+                  }
+                  description={formatAdminCurrency(order.totalAmount, order.currency)}
                   title={order.offeringTitle}
                   actions={
                     <SecondaryButton
@@ -100,9 +107,9 @@ export function RefundsSection({
             {refunds.map((refund) => (
               <EntityCard
                 key={refund.id}
-                badge={<StatusPill tone="neutral">{refund.status}</StatusPill>}
+                badge={<RefundStatusChip compact value={refund.status} />}
                 description={refund.reason || 'Tanpa alasan khusus.'}
-                subtitle={`${refund.status} • ${formatAdminCurrency(refund.amount, refund.currency)} • ${refund.updatedAt}`}
+                subtitle={`${formatAdminCurrency(refund.amount, refund.currency)} • ${refund.updatedAt}`}
                 title={refund.orderId}
                 actions={
                   <>

@@ -17,20 +17,13 @@ import {
   MarketplaceSupportEntryCard,
   MarketplaceSupportSheet,
 } from '@marketplace/ui/marketplace-lite';
-import {
-  MessageBanner,
-  PrimaryButton,
-  SecondaryButton,
-  StatusPill,
-  TextAreaField,
-  TextField,
-} from '@marketplace/ui/primitives';
+import { MessageBanner, PrimaryButton, SecondaryButton, TextAreaField, TextField } from '@marketplace/ui/primitives';
 import { Bell, BookHeart, BriefcaseMedical, Compass, KeyRound, LifeBuoy, LogOut, MapPin, User } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { createPrimaryMarketplaceNav } from '../../../layout/navigation';
 import { getApiBaseUrl } from '../../../lib/env';
-import { supportStatusLabel } from '../../../lib/marketplace-copy';
 import { createLocalizedPath, createPlatformSecurityPath, createPlatformSessionsPath } from '../../../lib/platform';
+import { SupportStatusChip } from '../../../lib/status-visuals';
 import { CustomerAccessLock } from '../shared/parts/access-lock';
 import { MarketplaceStickyPageHeader } from '../shared/parts/page-header';
 import { useCustomerMarketplaceController } from '../shared/use-customer-marketplace-controller';
@@ -239,7 +232,7 @@ export function CustomerProfilePage({
                       .map((ticket) => (
                         <MarketplaceListCard
                           key={ticket.id}
-                          badge={<StatusPill tone="accent">{supportStatusLabel(ticket.status, locale)}</StatusPill>}
+                          badge={<SupportStatusChip compact locale={locale} value={ticket.status} />}
                           description={ticket.details}
                           subtitle={`${ticket.priority} • ${ticket.id}`}
                           title={ticket.subject}
@@ -395,7 +388,7 @@ export function CustomerProfilePage({
                   .map((ticket) => (
                     <MarketplaceListCard
                       key={ticket.id}
-                      badge={<StatusPill tone="accent">{supportStatusLabel(ticket.status, locale)}</StatusPill>}
+                      badge={<SupportStatusChip compact locale={locale} value={ticket.status} />}
                       description={ticket.details}
                       subtitle={ticket.priority}
                       title={ticket.subject}

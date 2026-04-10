@@ -58,6 +58,10 @@ export function paymentStatusLabel(status: string | undefined, locale?: string |
       return en ? 'Payment failed' : 'Pembayaran gagal';
     case 'refunded':
       return en ? 'Refunded' : 'Sudah direfund';
+    case 'cancelled':
+      return en ? 'Payment cancelled' : 'Pembayaran dibatalkan';
+    case 'expired':
+      return en ? 'Payment expired' : 'Pembayaran kedaluwarsa';
     default:
       return status || (en ? 'Unknown payment' : 'Status pembayaran belum diketahui');
   }
@@ -70,12 +74,83 @@ export function supportStatusLabel(status: string | undefined, locale?: string |
       return en ? 'New' : 'Baru';
     case 'triaged':
       return en ? 'In review' : 'Sedang ditinjau';
+    case 'reviewing':
+      return en ? 'Being handled' : 'Sedang ditangani';
     case 'resolved':
       return en ? 'Resolved' : 'Selesai';
+    case 'refunded':
+      return en ? 'Refund handled' : 'Refund ditangani';
     case 'closed':
       return en ? 'Closed' : 'Ditutup';
     default:
       return status || (en ? 'Unknown ticket' : 'Status tiket belum diketahui');
+  }
+}
+
+export function offeringStatusLabel(status: string | undefined, locale?: string | null) {
+  const en = isEnglishLocale(locale);
+  switch (status) {
+    case 'draft':
+      return en ? 'Draft' : 'Draf';
+    case 'published':
+      return en ? 'Published' : 'Terbit';
+    case 'archived':
+      return en ? 'Archived' : 'Diarsipkan';
+    default:
+      return status?.replaceAll('_', ' ') || (en ? 'Unknown service' : 'Status layanan belum diketahui');
+  }
+}
+
+export function reviewStatusLabel(status: string | undefined, locale?: string | null) {
+  const en = isEnglishLocale(locale);
+  switch (status) {
+    case 'draft':
+      return en ? 'Draft' : 'Draf';
+    case 'submitted':
+    case 'pending_review':
+      return en ? 'Awaiting review' : 'Menunggu review';
+    case 'changes_requested':
+      return en ? 'Needs revision' : 'Perlu revisi';
+    case 'approved':
+      return en ? 'Approved' : 'Disetujui';
+    case 'rejected':
+      return en ? 'Rejected' : 'Ditolak';
+    case 'paused':
+      return en ? 'Paused' : 'Dijeda';
+    default:
+      return status?.replaceAll('_', ' ') || (en ? 'Unknown review' : 'Status review belum diketahui');
+  }
+}
+
+export function refundStatusLabel(status: string | undefined, locale?: string | null) {
+  const en = isEnglishLocale(locale);
+  switch (status) {
+    case 'pending':
+      return en ? 'Refund pending' : 'Refund menunggu';
+    case 'approved':
+      return en ? 'Refund approved' : 'Refund disetujui';
+    case 'processed':
+      return en ? 'Refund processed' : 'Refund diproses';
+    case 'failed':
+      return en ? 'Refund failed' : 'Refund gagal';
+    default:
+      return status?.replaceAll('_', ' ') || (en ? 'Unknown refund' : 'Status refund belum diketahui');
+  }
+}
+
+export function payoutStatusLabel(status: string | undefined, locale?: string | null) {
+  const en = isEnglishLocale(locale);
+  switch (status) {
+    case 'pending':
+      return en ? 'Payout pending' : 'Payout menunggu';
+    case 'processing':
+      return en ? 'Payout processing' : 'Payout diproses';
+    case 'paid':
+      return en ? 'Paid out' : 'Sudah dicairkan';
+    case 'failed':
+      return en ? 'Payout failed' : 'Payout gagal';
+    default:
+      return status?.replaceAll('_', ' ') || (en ? 'Unknown payout' : 'Status payout belum diketahui');
   }
 }
 
